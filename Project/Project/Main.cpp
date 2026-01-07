@@ -56,7 +56,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 		AESysFrameEnd();
 
 	}
-	//Testing Hello
+	//Testing Hello Ad
 
 	// free the system
 	AESysExit();
