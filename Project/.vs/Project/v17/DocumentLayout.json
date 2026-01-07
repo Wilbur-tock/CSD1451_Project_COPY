@@ -1,9 +1,9 @@
 {
   "Version": 1,
-  "WorkspaceRootPath": "C:\\Users\\dayri\\OneDrive\\Documents\\SIT\\Year 1 Tri 2\\CSD1451 Software Engineering Project 2\\Project\\",
+  "WorkspaceRootPath": "C:\\Users\\impas\\Documents\\GitHub\\CSD1451_Project\\Project\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{78BE0B2C-54CE-4509-AAF3-35ADF3B9ACC5}|Project\\Project.vcxproj|C:\\Users\\dayri\\OneDrive\\Documents\\SIT\\Year 1 Tri 2\\CSD1451 Software Engineering Project 2\\Project\\Project\\Main.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "AbsoluteMoniker": "D:0:0:{78BE0B2C-54CE-4509-AAF3-35ADF3B9ACC5}|Project\\Project.vcxproj|C:\\Users\\impas\\Documents\\GitHub\\CSD1451_Project\\Project\\Project\\Main.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
       "RelativeMoniker": "D:0:0:{78BE0B2C-54CE-4509-AAF3-35ADF3B9ACC5}|Project\\Project.vcxproj|solutionrelative:Project\\Main.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
     }
   ],
@@ -14,17 +14,21 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 0,
+          "SelectedChildIndex": 1,
           "Children": [
+            {
+              "$type": "Bookmark",
+              "Name": "ST:128:0:{116d2292-e37d-41cd-a077-ebacac4c8cc4}"
+            },
             {
               "$type": "Document",
               "DocumentIndex": 0,
               "Title": "Main.cpp",
-              "DocumentMoniker": "C:\\Users\\dayri\\OneDrive\\Documents\\SIT\\Year 1 Tri 2\\CSD1451 Software Engineering Project 2\\Project\\Project\\Main.cpp",
+              "DocumentMoniker": "C:\\Users\\impas\\Documents\\GitHub\\CSD1451_Project\\Project\\Project\\Main.cpp",
               "RelativeDocumentMoniker": "Project\\Main.cpp",
-              "ToolTip": "C:\\Users\\dayri\\OneDrive\\Documents\\SIT\\Year 1 Tri 2\\CSD1451 Software Engineering Project 2\\Project\\Project\\Main.cpp",
+              "ToolTip": "C:\\Users\\impas\\Documents\\GitHub\\CSD1451_Project\\Project\\Project\\Main.cpp",
               "RelativeToolTip": "Project\\Main.cpp",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABQAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
               "WhenOpened": "2026-01-05T01:49:48.369Z",
               "EditorCaption": ""
