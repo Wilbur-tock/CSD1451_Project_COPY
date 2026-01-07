@@ -16,6 +16,4 @@
 bin
 Debug
 Release
-.vs/
-*.VC.db
-*.VC.opendb
+Project/.vs/Project/v17/Browse.VC.db
