@@ -57,7 +57,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
 	}
 
-
+	//Testing
 	// free the system
 	AESysExit();
 }
