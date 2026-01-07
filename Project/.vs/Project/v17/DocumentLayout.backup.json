@@ -1,0 +1,53 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "C:\\Users\\dayri\\OneDrive\\Documents\\SIT\\Year 1 Tri 2\\CSD1451 Software Engineering Project 2\\Project\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{78BE0B2C-54CE-4509-AAF3-35ADF3B9ACC5}|Project\\Project.vcxproj|C:\\Users\\dayri\\OneDrive\\Documents\\SIT\\Year 1 Tri 2\\CSD1451 Software Engineering Project 2\\Project\\Project\\Main.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{78BE0B2C-54CE-4509-AAF3-35ADF3B9ACC5}|Project\\Project.vcxproj|solutionrelative:Project\\Main.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\dayri\\AppData\\Local\\Temp\\e78bd455-967f-4cb2-89bf-e08d0419f8d2_snippets.zip.8d2\\playing_audio.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 1,
+          "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "playing_audio.cpp",
+              "DocumentMoniker": "C:\\Users\\dayri\\AppData\\Local\\Temp\\e78bd455-967f-4cb2-89bf-e08d0419f8d2_snippets.zip.8d2\\playing_audio.cpp",
+              "RelativeDocumentMoniker": "..\\..\\..\\..\\..\\..\\AppData\\Local\\Temp\\e78bd455-967f-4cb2-89bf-e08d0419f8d2_snippets.zip.8d2\\playing_audio.cpp",
+              "ToolTip": "C:\\Users\\dayri\\AppData\\Local\\Temp\\e78bd455-967f-4cb2-89bf-e08d0419f8d2_snippets.zip.8d2\\playing_audio.cpp [Read Only]",
+              "RelativeToolTip": "..\\..\\..\\..\\..\\..\\AppData\\Local\\Temp\\e78bd455-967f-4cb2-89bf-e08d0419f8d2_snippets.zip.8d2\\playing_audio.cpp [Read Only]",
+              "ViewState": "AgIAABUAAAAAAAAAAAAAADQAAAAJAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
+              "WhenOpened": "2026-01-05T01:52:14.562Z",
+              "EditorCaption": " [Read Only]"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "Main.cpp",
+              "DocumentMoniker": "C:\\Users\\dayri\\OneDrive\\Documents\\SIT\\Year 1 Tri 2\\CSD1451 Software Engineering Project 2\\Project\\Project\\Main.cpp",
+              "RelativeDocumentMoniker": "Project\\Main.cpp",
+              "ToolTip": "C:\\Users\\dayri\\OneDrive\\Documents\\SIT\\Year 1 Tri 2\\CSD1451 Software Engineering Project 2\\Project\\Project\\Main.cpp",
+              "RelativeToolTip": "Project\\Main.cpp",
+              "ViewState": "AgIAACcAAAAAAAAAAAAAwDMAAAAnAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
+              "WhenOpened": "2026-01-05T01:49:48.369Z",
+              "EditorCaption": ""
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
