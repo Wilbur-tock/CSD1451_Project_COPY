@@ -16,4 +16,6 @@
 bin
 Debug
 Release
-Group Project/Template/main.c
+.vs/
+*.VC.db
+*.VC.opendb
