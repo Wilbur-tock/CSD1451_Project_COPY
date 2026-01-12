@@ -13,8 +13,8 @@
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
-    <ProjectGuid>{78be0b2c-54ce-4509-aaf3-35adf3b9acc5}</ProjectGuid>
-    <RootNamespace>Project</RootNamespace>
+    <ProjectGuid>{f61dd1bc-5419-4a5a-89a0-817b6f0fbc2b}</ProjectGuid>
+    <RootNamespace>AEngine</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -44,16 +44,16 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(SolutionDir)Extern\AlphaEngine\include</IncludePath>
-    <LibraryPath>$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(SolutionDir)Extern\AlphaEngine\lib</LibraryPath>
     <OutDir>$(SolutionDir)bin\$(Configuration)-$(Platform)\</OutDir>
     <IntDir>$(SolutionDir).tmp\$(Configuration)-$(Platform)\</IntDir>
+    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(SolutionDir)Extern\AlphaEngine\include</IncludePath>
+    <LibraryPath>$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(SolutionDir)Extern\AlphaEngine\lib</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(SolutionDir)Extern\AlphaEngine\include</IncludePath>
-    <LibraryPath>$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(SolutionDir)Extern\AlphaEngine\lib</LibraryPath>
     <OutDir>$(SolutionDir)bin\$(Configuration)-$(Platform)\</OutDir>
     <IntDir>$(SolutionDir).tmp\$(Configuration)-$(Platform)\</IntDir>
+    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(SolutionDir)Extern\AlphaEngine\include</IncludePath>
+    <LibraryPath>$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(SolutionDir)Extern\AlphaEngine\lib</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -68,7 +68,7 @@
       <AdditionalDependencies>Alpha_EngineD.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>xcopy "$(SolutionDir)Assets\" "$(OutDir)Assets\" /s /r /y /
+      <Command>xcopy "$(SolutionDir)Assets\" "$(OutDir)Assets\" /s /r /y /q
 xcopy "$(SolutionDir)Extern\AlphaEngine\lib\freetype.dll" "$(OutDir)" /s /r /y /q
 xcopy "$(SolutionDir)Extern\AlphaEngine\lib\Alpha_EngineD.dll" "$(OutDir)" /s /r /y /q
 xcopy "$(SolutionDir)Extern\AlphaEngine\lib\fmodL.dll" "$(OutDir)" /s /r /y /q</Command>
@@ -86,7 +86,7 @@ xcopy "$(SolutionDir)Extern\AlphaEngine\lib\fmodL.dll" "$(OutDir)" /s /r /y /q</
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>Alpha_EngineD.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>Alpha_Engine.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
       <Command>xcopy "$(SolutionDir)Assets\" "$(OutDir)Assets\" /s /r /y /q
