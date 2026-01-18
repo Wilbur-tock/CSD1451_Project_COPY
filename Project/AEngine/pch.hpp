@@ -5,9 +5,12 @@
 
 #include <iostream>
 #include <fstream>
+#include <vector>
 
 #include "AEEngine.h"
 #include "Config.hpp"
 #include "AssetsManager.hpp"
+#include "GameStateManager.hpp"
+#include "GraphicsManager.hpp"
 
 #endif //PCH_HPP

@@ -1,7 +1,6 @@
 #include "pch.hpp"
 
 #include "MapManager.hpp"
-#include "GraphicsManager.hpp"
 
 namespace MapManager {
 
@@ -29,7 +28,7 @@ namespace MapManager {
 		LoadMapData("Assets/Map/level1.txt");
 	}
 
-	void RenderMap(AEGfxTexture* tileTexture, Tile const mapLayout[Config::mapHeight][Config::mapWidth]) {
+	void RenderMap(AEGfxTexture* tileTexture, Tile const map[Config::mapHeight][Config::mapWidth]) {
 		// Calculate how many tiles fit on screen
 		int width = Config::mapWidth;
 		int height = Config::mapHeight;
@@ -48,9 +47,9 @@ namespace MapManager {
 				AEMtx33 transform = GraphicsManager::CreateTransformMatrix(posX, posY, 0.0f, tileSize / 2.0f, tileSize / 2.0f);
 
 				// TEMPORARY TO BE CHANGED TO TEXTURE ASSET LATER
-				float red = 0, g = 0, b = 0;
+				float red = 0.9, g = 0.9, b = 0.9;
 
-				if (mapLayout[y][x].type == 1) {
+				if (map[y][x].type == 1) {
 					red = 1, g = 0, b = 0;
 					//std::cout << "Changed Grid:" << y << " " << x << std::endl;
 				}

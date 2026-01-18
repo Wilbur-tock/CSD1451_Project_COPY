@@ -1,13 +1,15 @@
 #include "pch.hpp"
 
-#include "GameStateManager.hpp"
-#include "GraphicsManager.hpp"
 #include "MapManager.hpp"
 #include "MapEditor.hpp"
+#include "CannonManager.hpp"
 
 namespace GameStateManager {
 
 	AEGfxTexture* texture;
+
+	AEVec2 v2{ -700,-325 };
+	CannonManager::Cannon cannon(v2, 50);
 
 	void Load() {
 		GraphicsManager::GenerateMesh();
@@ -31,6 +33,8 @@ namespace GameStateManager {
 		if(mapEditorOn) MapEditor::MapEditor();
 
 		MapManager::RenderMap(texture, MapManager::mapLayout);
+
+		cannon.Update();
 	}
 
 	void Draw() {
