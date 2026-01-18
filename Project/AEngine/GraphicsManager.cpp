@@ -1,8 +1,9 @@
-#include <iostream>
-#include "AEEngine.h"
-#include "GraphicsManager.hpp"
+#include "pch.hpp"
 
 namespace GraphicsManager {
+
+	AEGfxVertexList* pMeshMiddle = nullptr, *pMeshCorner = nullptr;
+
 	void GenerateMesh() {
 		AEGfxMeshStart();
 
@@ -48,7 +49,7 @@ namespace GraphicsManager {
 		return matResult;
 	}
 
-	void DrawSprite(AEGfxVertexList* pMesh, AEGfxTexture* pTex, AEMtx33 transform, float r, float g, float b, float a) {
+	void DrawTexture(AEGfxVertexList* pMesh, AEGfxTexture* pTex, AEMtx33 transform, float r, float g, float b, float a) {
 		// Set the texture and render mode
 		AEGfxSetRenderMode(AE_GFX_RM_TEXTURE);
 
@@ -66,5 +67,13 @@ namespace GraphicsManager {
 
 		// Draw the mesh
 		AEGfxMeshDraw(pMesh, AE_GFX_MDM_TRIANGLES);
+	}
+
+	void DrawGameObject(AEGfxTexture* pTex, AEMtx33 transform, float r, float g, float b, float a) {
+		DrawTexture(pMeshMiddle, pTex, transform, r, g, b, a);
+	}
+
+	void DrawUI(AEGfxTexture* pTex, AEMtx33 transform, float r, float g, float b, float a) {
+		DrawTexture(pMeshCorner, pTex, transform, r, g, b, a);
 	}
 }

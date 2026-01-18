@@ -21,17 +21,16 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
 	int gGameRunning = 1;
 
-	// Initialization of your own variables go here
-	GameStateManager::Load();
-
 	// Using custom window procedure
 	AESysInit(hInstance, nCmdShow, 1600, 900, 1, 60, false, NULL);
 
 	// Changing the window title
-	AESysSetWindowTitle("My New Demo!");
+	AESysSetWindowTitle("Game Name");
 
 	// reset the system modules
 	AESysReset();
+
+	GameStateManager::Load();
 
 	// Game Loop
 	while (gGameRunning)
