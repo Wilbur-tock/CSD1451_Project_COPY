@@ -5,7 +5,29 @@
 
 namespace MapManager {
 
-	Tile tileMapLayout[Config::mapHeight][Config::mapWidth];
+	Tile mapLayout[Config::mapHeight][Config::mapWidth];
+
+	void LoadMapData(const char* fileName) {
+		std::ifstream ifs{fileName};
+		if (!ifs) {
+			std::cerr << "Error: Could not open map data file at " << fileName << std::endl;
+			return;
+		}
+
+		for (int y = 0; y < Config::mapHeight; ++y) {
+			for (int x = 0; x < Config::mapWidth; ++x) {
+				int type = 0;
+				ifs >> type;
+				mapLayout[y][x].type = static_cast<TileType>(type);
+			}
+		}
+
+		ifs.close();
+	}
+
+	void LoadAllMapData() {
+		LoadMapData("Assets/Map/level1.txt");
+	}
 
 	void RenderMap(AEGfxTexture* tileTexture, Tile const mapLayout[Config::mapHeight][Config::mapWidth]) {
 		// Calculate how many tiles fit on screen
@@ -26,10 +48,10 @@ namespace MapManager {
 				AEMtx33 transform = GraphicsManager::CreateTransformMatrix(posX, posY, 0.0f, tileSize / 2.0f, tileSize / 2.0f);
 
 				// TEMPORARY TO BE CHANGED TO TEXTURE ASSET LATER
-				float red = 1.0f, g = 0, b = 0;
+				float red = 0, g = 0, b = 0;
 
 				if (mapLayout[y][x].type == 1) {
-					red = 0, g = 1, b = 0;
+					red = 1, g = 0, b = 0;
 					//std::cout << "Changed Grid:" << y << " " << x << std::endl;
 				}
 

@@ -12,11 +12,12 @@ namespace GameStateManager {
 	void Load() {
 		GraphicsManager::GenerateMesh();
 
-		texture = AEGfxTextureLoad("Assets/square.png");
+		texture = AssetsManager::GetTexture("Assets/square.png");
+
+		MapManager::LoadAllMapData();
 	}
 
 	void Intialize() {
-
 	}
 
 	bool mapEditorOn = false;
@@ -28,6 +29,8 @@ namespace GameStateManager {
 		}
 
 		if(mapEditorOn) MapEditor::MapEditor();
+
+		MapManager::RenderMap(texture, MapManager::mapLayout);
 	}
 
 	void Draw() {

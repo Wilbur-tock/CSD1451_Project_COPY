@@ -8,5 +8,6 @@
 
 #include "AEEngine.h"
 #include "Config.hpp"
+#include "AssetsManager.hpp"
 
 #endif //PCH_HPP

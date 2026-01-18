@@ -15,7 +15,9 @@ namespace MapManager {
 		int size = 32;
 	};
 
-	extern Tile tileMapLayout[Config::mapHeight][Config::mapWidth];
+	extern Tile mapLayout[Config::mapHeight][Config::mapWidth];
+
+	void LoadAllMapData();
 
 	/* Rendering of the map layout */
 	void RenderMap(AEGfxTexture* tileTexture, Tile const mapLayout[Config::mapHeight][Config::mapWidth]);
