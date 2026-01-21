@@ -4,6 +4,18 @@
 #include "pch.hpp"
 
 namespace GameStateManager {
+
+	typedef void (*FP)(void);
+
+	extern FP fpLoad, fpInitalize, fpUpdate, fpDraw, fpUnload, fpExit;
+	extern int current, previous, next;
+
+	enum GS_LIST {
+		GS_Main_Menu,
+		GS_Level_1,
+		GS_Level_2,
+	};
+
 	void Load();
 
 	void Intialize();

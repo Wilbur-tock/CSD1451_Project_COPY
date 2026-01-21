@@ -12,20 +12,19 @@ namespace CannonManager {
 		GraphicsManager::DrawGameObject(tex, mat, 0.5f, 0.5f, 0, 1);
 	}
 
-	void Projectile::MoveProjectile(float speed, float dt) {
+	void Projectile::MoveProjectile(float dt) {
 		velocity.y -= gravity * dt;
 
 		pos.x += velocity.x * dt;
 		pos.y += velocity.y * dt;
 	}
 
-	void Projectile::DestroyProjectile() {
-		isActive = false;
-	}
-
-	Cannon::Cannon() : pos{ 0.0f,0.0f }, cannonAngle{ 0.0f }, bullets{ NULL }, projectileAmount{ 0 }, projectileSpeed{ power } {}
-	Cannon::Cannon(AEVec2 _pos, int _projectileAmount) : pos(_pos), projectileAmount(_projectileAmount), cannonAngle{ 0.0f }, projectileSpeed{ power } {
-		bullets.resize(projectileAmount);
+	Cannon::Cannon() : pos{ 0.0f,0.0f }, cannonAngle{ 0.0f }, ammo{ NULL }, ammoLimit{ 0 }, shotPower{ power } {}
+	Cannon::Cannon(AEVec2 _pos, int _projectileAmount) : pos(_pos), ammoLimit(_projectileAmount), cannonAngle{ 0.0f }, shotPower{ power } {
+		ammo.clear();
+		ammo.resize(ammoLimit);
+		activeAmmo.clear();
+		ammoCount = 0;
 	}
 
 	void Cannon::Update() {
@@ -64,14 +63,14 @@ namespace CannonManager {
 				isPowerIncrease = true;
 			}
 
-			UI();
-			std::cout << power << std::endl;
+			UIChargeShotBar();
+			//std::cout << power << std::endl;
 		}
 
 		// Shoot when the button is RELEASED
 		if (AEInputCheckReleased(VK_LBUTTON)) {
-			projectileSpeed = power;
-			ShootProjectile(dt); // Pass the built-up power
+			shotPower = power;
+			ShootProjectile(); // Pass the built-up power
 			power = minPower; // Reset for next shot
 		}
 	}
@@ -83,47 +82,68 @@ namespace CannonManager {
 		GraphicsManager::DrawGameObject(tex, mat, 1, 0, 0, 1);
 	}
 
-	void Cannon::ShootProjectile(float dt) {
+	void Cannon::ShootProjectile() {
 		// Assign values to an projectile
-		bullets[projectileUsed].isActive = true;
+		ammo[ammoCount].isActive = true;
+		ammo[ammoCount].id = ammoCount;
 
 		// Add offset to ensure that the projectile spawn at the barrel instead of the middle of the cannon
-		bullets[projectileUsed].pos.x = pos.x + cos(cannonAngle) * cannonSize.x;
-		bullets[projectileUsed].pos.y = pos.y + sin(cannonAngle) * cannonSize.x;
+		ammo[ammoCount].pos.x = pos.x + cos(cannonAngle) * cannonSize.x;
+		ammo[ammoCount].pos.y = pos.y + sin(cannonAngle) * cannonSize.x;
 
 		// Calculate velocity here once only to ensure that gravity has an effect
-		bullets[projectileUsed].velocity.x = cos(cannonAngle) * projectileSpeed;
-		bullets[projectileUsed].velocity.y = sin(cannonAngle) * projectileSpeed;
-		bullets[projectileUsed].timer = projectileLifespan;
+		ammo[ammoCount].velocity.x = cos(cannonAngle) * shotPower;
+		ammo[ammoCount].velocity.y = sin(cannonAngle) * shotPower;
+		ammo[ammoCount].timer = projectileLifespan;
 
-		// Add to the vector
-		activeProjectile.push_back(bullets[projectileUsed]);
-		projectileUsed++;
+		// Add to the vector lisst
+		activeAmmo.push_back(ammo[ammoCount]);
 
-		std::cout << "Projectile Fired!";
+		// Once it reach the ammo limit reset the ammo count
+		if (++ammoCount >= ammoLimit) {
+			ammoCount = 0;
+		}
+
+		std::cout << "Projectile Fired!" << " " << ammoCount << std::endl;
 	}
 
 	void Cannon::ProjectileUpdate(float dt) {
-		for (Projectile& bullet : activeProjectile) {
+		for (Projectile& bullet : activeAmmo) {
 			if (bullet.isActive == true) {
 				bullet.Render();
-				bullet.MoveProjectile(projectileSpeed, dt);
+				bullet.MoveProjectile(dt);
 				bullet.timer -= 1 * dt;
 
 				// Destroy the projectile once it has reach its lifespan or something else
-				if (bullet.timer <= 0.0f) bullet.DestroyProjectile();
-				std::cout << bullet.timer << std::endl;
+				if (bullet.timer <= 0.0f) {
+					DestroyProjectile(bullet);
+				}
+				//std::cout << bullet.timer << std::endl;
+			}
+		}
+
+		//std::cout << activeProjectile.size() << std::endl;
+	}
+
+	void Cannon::DestroyProjectile(Projectile &projectile) {
+		projectile.isActive = false;
+		// Find the index containing the projectile and erase from the active ammo vector
+		for (int i = 0; i < activeAmmo.size(); i++) {
+			if (activeAmmo[i].id == projectile.id) {
+				activeAmmo.erase(activeAmmo.begin() + i);
+
+				std::cout << "Removing " << i << " " << "Count " << activeAmmo.size() << std::endl;
 			}
 		}
 	}
 
-	void Cannon::UI() {
+	void Cannon::UIChargeShotBar() {
 		AEGfxTexture* tex = AssetsManager::GetTexture("Assets/square.png");
 
 		float x = pos.x - (cannonSize.x*1.75f), y = pos.y;
 		float w = 20, h = 75, gap = 5;
 
-		//Background Bar
+		// Background Border Bar
 		AEMtx33 mat = GraphicsManager::CreateTransformMatrix(x, y, 0, w, -h);
 		GraphicsManager::DrawUI(tex, mat, 0, 0, 0, 1);
 
@@ -131,13 +151,15 @@ namespace CannonManager {
 
 		x += gap, y += gap;
 
+		// Lighter background bar
 		AEMtx33 mat2 = GraphicsManager::CreateTransformMatrix(x, y, 0, w,-h);
-		GraphicsManager::DrawUI(tex, mat2, 0, 0.2, 0, 1);
+		GraphicsManager::DrawUI(tex, mat2, 0, 0.2f, 0, 1);
 
 		float percentage = (power / maxPower);
 		float newH = h*percentage;
 
+		// Bar
 		AEMtx33 mat3 = GraphicsManager::CreateTransformMatrix(x, y, 0, w, -newH);
-		GraphicsManager::DrawUI(tex, mat3, 0, 0.8, 0, 1);
+		GraphicsManager::DrawUI(tex, mat3, 0, 0.8f, 0, 1);
 	}
 }

@@ -6,6 +6,10 @@
 
 namespace GameStateManager {
 
+	FP fpLoad, fpInitalize, fpUpdate, fpDraw, fpUnload, fpExit;
+	int current = 0, previous = 0, next = 0;
+
+	// Temporary
 	AEGfxTexture* texture;
 
 	AEVec2 v2{ -700,-325 };
@@ -25,6 +29,14 @@ namespace GameStateManager {
 	bool mapEditorOn = false;
 
 	void Update() {
+		switch (current) {
+		case GS_Main_Menu:
+			break;
+		case GS_Level_1:
+			break;
+		case GS_Level_2:
+			break;
+		}
 
 		if (AEInputCheckTriggered(AEVK_P)) {
 			mapEditorOn = !mapEditorOn;

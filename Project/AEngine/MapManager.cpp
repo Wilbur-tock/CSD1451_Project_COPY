@@ -47,7 +47,7 @@ namespace MapManager {
 				AEMtx33 transform = GraphicsManager::CreateTransformMatrix(posX, posY, 0.0f, tileSize / 2.0f, tileSize / 2.0f);
 
 				// TEMPORARY TO BE CHANGED TO TEXTURE ASSET LATER
-				float red = 0.9, g = 0.9, b = 0.9;
+				float red = 0.9f, g = 0.9f, b = 0.9f;
 
 				if (map[y][x].type == 1) {
 					red = 1, g = 0, b = 0;
