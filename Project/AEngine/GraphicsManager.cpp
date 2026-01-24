@@ -1,4 +1,4 @@
-#include "pch.hpp"
+#include "GraphicsManager.hpp"
 
 namespace GraphicsManager {
 
@@ -55,7 +55,7 @@ namespace GraphicsManager {
 		return matResult;
 	}
 
-	void DrawTexture(AEGfxVertexList* pMesh, AEGfxTexture* pTex, AEMtx33 transform, float r, float g, float b, float a) {
+	void DrawTexture(AEGfxVertexList* pMesh, AEGfxTexture* pTex, AEMtx33 transform, Color color) {
 		// Set the texture and render mode
 		AEGfxSetRenderMode(AE_GFX_RM_TEXTURE);
 
@@ -63,7 +63,7 @@ namespace GraphicsManager {
 		AEGfxSetTransparency(1.0f);
 
 		// Change the colour of the sprite
-		AEGfxSetColorToMultiply(r, g, b, a);
+		AEGfxSetColorToMultiply(color.GetRed(), color.GetGreen(), color.GetBlue(), color.GetAlpha());
 		AEGfxSetColorToAdd(0.0f, 0.0f, 0.0f, 0.0f);
 
 		AEGfxTextureSet(pTex, 0, 0);
@@ -75,24 +75,15 @@ namespace GraphicsManager {
 		AEGfxMeshDraw(pMesh, AE_GFX_MDM_TRIANGLES);
 	}
 
-	void DrawGameObject(AEGfxTexture* pTex, AEMtx33 transform, float r, float g, float b, float a) {
-		DrawTexture(pMeshMiddle, pTex, transform, r, g, b, a);
+	void DrawGameObject(AEGfxTexture* pTex, AEMtx33 transform, Color color) {
+		DrawTexture(pMeshMiddle, pTex, transform, color);
 	}
 
-	void DrawUI(AEGfxTexture* pTex, AEMtx33 transform, float r, float g, float b, float a) {
-		DrawTexture(pMeshCorner, pTex, transform, r, g, b, a);
+	void DrawUI(AEGfxTexture* pTex, AEMtx33 transform, Color color) {
+		DrawTexture(pMeshCorner, pTex, transform, color);
 	}
 
-	void DrawUIFollowCam(AEGfxTexture* pTex, AEMtx33 transform, float r, float g, float b, float a) {
-		f32 camX = 0, camY = 0;
-		AEGfxGetCamPosition(&camX, &camY);
-		transform.m[0][2] += floorf(camX);
-		transform.m[1][2] += floorf(camY);
-		
-		DrawTexture(pMeshCorner, pTex, transform, r, g, b, a);
-	}
-
-	void DrawTextUI(std::string text, f32 x, f32 y, float r, float g, float b, float a, float textScale) {
+	void DrawTextUI(std::string text, f32 x, f32 y, Color color, float textScale) {
 		f32 currentY = y;
 
 		// Get line height and print size with a default text
@@ -120,9 +111,13 @@ namespace GraphicsManager {
 				char const* pText = line.c_str();
 				f32 w, h;
 				AEGfxGetPrintSize(textFont, pText, textScale, &w, &h);
-				AEGfxPrint(textFont, pText, x, currentY - h, textScale, r, g, b, a);
+				AEGfxPrint(textFont, pText, x, currentY - h, textScale, color.GetRed(), color.GetGreen(), color.GetBlue(), color.GetAlpha());
 				currentY -= lineHeight * 1.5f; // Move down for next line
 			}
 		}
 	}
+
+	//void DrawButton(std::string text, float x, float y, Color c, float width, float height) {
+	//	//DrawTextUI(text, x,y,)
+	//}
 }

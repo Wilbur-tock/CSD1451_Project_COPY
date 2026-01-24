@@ -74,9 +74,9 @@ namespace MapEditor {
 		MapManager::RenderMap(newMap);
 
 		// Print out the information on how to use the editor
-		std::string helpStr = "'S' to save file | 'P' to close map editor\nLeft Mouse - Place tile\nRight Mouse - Erase Tile\n1 - Barrier, 2 - Block, 3 - Cannon, 4 - Minion, 5 - Boss";
+		std::string helpStr = "'S' to save file | 'Q' to close map editor\nLeft Mouse - Place tile\nRight Mouse - Erase Tile\n1 - Barrier, 2 - Block, 3 - Cannon, 4 - Minion, 5 - Boss";
 		helpStr += "\nDrawing Tile " + std::to_string(drawingBlockType);
-		GraphicsManager::DrawTextUI(helpStr,-1.0f,0.95f,0,0,0, 1.0f, 0.8f);
+		GraphicsManager::DrawTextUI(helpStr,-1.0f,0.95f,Color{0,0,0, 1.0f}, 0.8f);
 
 		// Save file onto the the bin folder
 		if (AEInputCheckTriggered(AEVK_S)) {

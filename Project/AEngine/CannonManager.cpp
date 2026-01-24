@@ -1,5 +1,8 @@
 #include "pch.hpp"
+
 #include "CannonManager.hpp"
+#include "GraphicsManager.hpp"
+#include "AssetsManager.hpp"
 
 namespace CannonManager {
 	Projectile::Projectile() : timer{ 0.0f }, pos{ 0.0f, 0.0f }, velocity{ 0.0f,0.0f } {} // Default intializer
@@ -9,7 +12,7 @@ namespace CannonManager {
 		AEGfxTexture* tex = AssetsManager::GetTexture("Assets/square.png");
 		AEMtx33 mat = GraphicsManager::CreateTransformMatrix(pos.x, pos.y, 0, projectileSize, projectileSize);
 		//std::cout << cannonAngle << std::endl;
-		GraphicsManager::DrawGameObject(tex, mat, 0.5f, 0.5f, 0, 1);
+		GraphicsManager::DrawGameObject(tex, mat, Color{ 0.5f, 0.5f, 0, 1 });
 	}
 
 	void Projectile::MoveProjectile(float dt) {
@@ -79,7 +82,7 @@ namespace CannonManager {
 		AEGfxTexture* tex = AssetsManager::GetTexture("Assets/square.png");
 		AEMtx33 mat = GraphicsManager::CreateTransformMatrix(pos.x, pos.y, cannonAngle, cannonSize.x, cannonSize.y);
 		//std::cout << cannonAngle << std::endl;
-		GraphicsManager::DrawGameObject(tex, mat, 1, 0, 0, 1);
+		GraphicsManager::DrawGameObject(tex, mat, Color{ 1, 0, 0, 1 });
 	}
 
 	void Cannon::ShootProjectile() {
@@ -145,7 +148,7 @@ namespace CannonManager {
 
 		// Background Border Bar
 		AEMtx33 mat = GraphicsManager::CreateTransformMatrix(x, y, 0, w, -h);
-		GraphicsManager::DrawUI(tex, mat, 0, 0, 0, 1);
+		GraphicsManager::DrawUI(tex, mat, Color{ 0, 0, 0, 1 });
 
 		w = w - (gap * 2), h = h - (gap * 2);
 
@@ -153,13 +156,13 @@ namespace CannonManager {
 
 		// Lighter background bar
 		AEMtx33 mat2 = GraphicsManager::CreateTransformMatrix(x, y, 0, w,-h);
-		GraphicsManager::DrawUI(tex, mat2, 0, 0.2f, 0, 1);
+		GraphicsManager::DrawUI(tex, mat2, Color{ 0, 0.2f, 0, 1 });
 
 		float percentage = (power / maxPower);
 		float newH = h*percentage;
 
 		// Bar
 		AEMtx33 mat3 = GraphicsManager::CreateTransformMatrix(x, y, 0, w, -newH);
-		GraphicsManager::DrawUI(tex, mat3, 0, 0.8f, 0, 1);
+		GraphicsManager::DrawUI(tex, mat3, Color{ 0, 0.8f, 0, 1 });
 	}
 }

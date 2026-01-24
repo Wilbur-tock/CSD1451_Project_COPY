@@ -20,7 +20,6 @@ namespace Level1 {
 			for (const MapManager::Tile &tile : row) {
 				if (tile.type == MapManager::Tile_Cannon) {
 					levelData.cannon.pos = tile.pos;
-					std::cout << levelData.cannon.pos.x << std::endl;
 					foundCannonPos = true;
 					break;
 				}

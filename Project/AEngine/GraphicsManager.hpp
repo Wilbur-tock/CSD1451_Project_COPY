@@ -20,22 +20,19 @@ namespace GraphicsManager {
 	/* Use either pMeshMiddle or pMeshCorner based on which rectMode to use center or corner rectMode, texture to render (image/sprite),
 	3x3 matrix created using CreateTransformMatrix
 	r,g,b,a - colour of the text values of 0.0f - 1.0f */
-	void DrawTexture(AEGfxVertexList* pMesh, AEGfxTexture* pTex, AEMtx33 transform, float r, float g, float b, float a = 1.f);
+	void DrawTexture(AEGfxVertexList* pMesh, AEGfxTexture* pTex, AEMtx33 transform, Color color);
 
 	/* Draw game object on the map using pMeshMiddle rect mode middle */
-	void DrawGameObject(AEGfxTexture* pTex, AEMtx33 transform, float r, float g, float b, float a = 1.f);
+	void DrawGameObject(AEGfxTexture* pTex, AEMtx33 transform, Color color);
 
 	/* Draw UI texture using pMeshCorner rect mode corner */
-	void DrawUI(AEGfxTexture* pTex, AEMtx33 transform, float r, float g, float b, float a = 1.f);
-
-	/* Draw UI texture using pMeshCorner rect mode corner with its position following the camera */
-	void DrawUIFollowCam(AEGfxTexture* pTex, AEMtx33 transform, float r, float g, float b, float a = 1.f);
+	void DrawUI(AEGfxTexture* pTex, AEMtx33 transform, Color color);
 
 	/*	Draw text UI using noramlized coordinates 
 		x,y, use range from -1.0f to 1.0f
 		textSize, use range from -1.0 to 1.0f
 	*/
-	void DrawTextUI(std::string text, f32 x, f32 y, float r, float g, float b, float a = 1.f, float textScale = Config::FONT_SCALE);
+	void DrawTextUI(std::string text, f32 x, f32 y, Color color, float textScale);
 }
 
 #endif // !GRAPHICSMANAGER_HPP

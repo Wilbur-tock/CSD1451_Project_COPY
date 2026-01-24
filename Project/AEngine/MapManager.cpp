@@ -1,6 +1,8 @@
 #include "pch.hpp"
 
 #include "MapManager.hpp"
+#include "GraphicsManager.hpp"
+#include "AssetsManager.hpp"
 
 namespace MapManager {
 	std::vector<std::vector<Tile>> mapLayout(Config::MAP_HEIGHT, std::vector<Tile>(Config::MAP_WIDTH));
@@ -70,41 +72,8 @@ namespace MapManager {
 					red = 1, g = 1, b = 0;
 				}
 
-				GraphicsManager::DrawGameObject(texture, transform, red, g, b);
+				GraphicsManager::DrawGameObject(texture, transform, Color{ red, g, b });
 			}
 		}
-
-		//for (int y = 0; y < height; ++y) {
-		//	for (int x = 0; x < width; ++x) {
-		//		//float posX = startX + (x * tileSize);
-		//		//float posY = startY - (y * tileSize);
-		//
-		//		AEMtx33 transform = GraphicsManager::CreateTransformMatrix(map[y][x].pos.x, map[y][x].pos, 0.0f, tileSize / 2.0f, tileSize / 2.0f);
-		//
-		//		TileType type = map[y][x].type;
-		//		AEGfxTexture* texture = AssetsManager::GetTexture("Assets/square.png");
-		//
-		//		// TEMPORARY TO BE CHANGED TO TEXTURE ASSET LATER
-		//		float red = 0.9f, g = 0.9f, b = 0.9f;
-		//
-		//		if (type == Tile_Barrier) { // Barrier block
-		//			red = 0, g = 1, b = 0;
-		//		}
-		//		else if (type == Tile_Block) {
-		//			red = 1, g = 0, b= 0;
-		//		}
-		//		else if (type == Tile_Cannon) {
-		//			red = 0, g = 0, b = 0;
-		//		}
-		//		else if (type == Tile_Enemy_Minion) {
-		//			red = 0, g = 0, b = 1;
-		//		}
-		//		else if (type == Tile_Enemy_Boss) {
-		//			red = 1, g = 1, b = 0;
-		//		}
-		//
-		//		GraphicsManager::DrawGameObject(texture, transform, red, g, b);
-		//	}
-		//}
 	}
 }

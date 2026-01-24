@@ -4,9 +4,11 @@
 #include "MapEditor.hpp"
 #include "CannonManager.hpp"
 #include "Level1.hpp"
+#include "GraphicsManager.hpp"
+#include "GameStateManager.hpp"
+#include "AssetsManager.hpp"
 
 namespace GameStateManager {
-
 	FP fpLoad, fpInitalize, fpUpdate, fpDraw, fpFree, fpUnload;
 	int current = 0, previous = 0, next = 0;
 
@@ -70,7 +72,7 @@ namespace GameStateManager {
 			fpUpdate();
 		}
 
-		if (AEInputCheckTriggered(AEVK_P)) {
+		if (AEInputCheckTriggered(AEVK_Q)) {
 			mapEditorOn = !mapEditorOn;
 		}
 
