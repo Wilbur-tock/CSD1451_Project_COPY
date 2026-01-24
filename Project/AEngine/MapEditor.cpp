@@ -9,9 +9,10 @@ using namespace MapManager;
 namespace MapEditor {
 	TileType drawingBlockType = Tile_Barrier;
 	bool isDrawingNewMap = true;
-	Tile newMap[Config::MAP_HEIGHT][Config::MAP_WIDTH];
 
-	void ResetMapLayout(Tile map[Config::MAP_HEIGHT][Config::MAP_WIDTH]) {
+	std::vector<std::vector<Tile>> newMap(Config::MAP_HEIGHT, std::vector<Tile>(Config::MAP_WIDTH));
+
+	void ResetMapLayout(std::vector<std::vector<Tile>> &map) {
 		for (int y = 0; y < Config::MAP_HEIGHT; ++y) {
 			for (int x = 0; x < Config::MAP_WIDTH; ++x) {
 				map[y][x].type = x == Config::MIN_GRID_X || x == Config::MAX_GRID_X || y == Config::MIN_GRID_Y || y == Config::MAX_GRID_Y ? Tile_Barrier : Tile_Air;
@@ -33,11 +34,20 @@ namespace MapEditor {
 			isDrawingNewMap = false;
 		}
 
-		if (AEInputCheckTriggered(AEVK_0)) {
+		if (AEInputCheckTriggered(AEVK_1)) {
 			drawingBlockType = Tile_Barrier;
 		}
-		else if (AEInputCheckTriggered(AEVK_1)) {
-			drawingBlockType = Tile_Air; // TEMP CHANGED LATER WHEN MORE BLOCKS TYPE ARE INTRODUCED
+		else if (AEInputCheckTriggered(AEVK_2)) {
+			drawingBlockType = Tile_Block;
+		}
+		else if (AEInputCheckTriggered(AEVK_3)) {
+			drawingBlockType = Tile_Cannon;
+		}
+		else if (AEInputCheckTriggered(AEVK_4)) {
+			drawingBlockType = Tile_Enemy_Minion;
+		}
+		else if (AEInputCheckTriggered(AEVK_5)) {
+			drawingBlockType = Tile_Enemy_Boss;
 		}
 
 		s32 mouseX, mouseY;
@@ -68,15 +78,13 @@ namespace MapEditor {
 			}
 		}
 
-		//TEMPORARY TEXTURE ONLY
-		AEGfxTexture* texture = AEGfxTextureLoad("Assets/square.png");
-
 		// Render the map
-		MapManager::RenderMap(texture, newMap);
+		MapManager::RenderMap(newMap);
 
 		// Print out the information on how to use the editor
-		std::string helpStr = "'S' to save file, Left Mouse Click - Place tile, Right Mouse Click - Erase Tile\n 1 - Barrier, 2 - Block";
-		GraphicsManager::DrawTextUI(helpStr,-1.f,-0.9f,0,0,0, 1.0f, 0.8f);
+		std::string helpStr = "'S' to save file | 'P' to close map editor\nLeft Mouse - Place tile\nRight Mouse - Erase Tile\n1 - Barrier, 2 - Block, 3 - Cannon, 4 - Minion, 5 - Boss";
+		helpStr += "\nDrawing Tile " + std::to_string(drawingBlockType);
+		GraphicsManager::DrawTextUI(helpStr,-1.0f,0.95f,0,0,0, 1.0f, 0.8f);
 
 		// Save file onto the the bin folder
 		if (AEInputCheckTriggered(AEVK_S)) {

@@ -8,6 +8,9 @@ namespace MapManager {
 		Tile_Air,
 		Tile_Barrier,
 		Tile_Block,
+		Tile_Cannon,
+		Tile_Enemy_Minion,
+		Tile_Enemy_Boss,
 	};
 
 	class Tile {
@@ -16,12 +19,13 @@ namespace MapManager {
 		int size = 32;
 	};
 
-	extern Tile mapLayout[Config::MAP_HEIGHT][Config::MAP_WIDTH];
+	extern std::vector<std::vector<Tile>> mapLayout;
 
-	void LoadAllMapData();
+	/* Load map data and update the reference to a 2D vector */
+	void LoadMapData(const char* fileName, std::vector<std::vector<Tile>>& map);
 
 	/* Rendering of the map layout */
-	void RenderMap(AEGfxTexture* tileTexture, Tile const mapLayout[Config::MAP_HEIGHT][Config::MAP_WIDTH]);
+	void RenderMap(const std::vector<std::vector<Tile>>& map);
 }
 
 #endif // !MapManager_HPP

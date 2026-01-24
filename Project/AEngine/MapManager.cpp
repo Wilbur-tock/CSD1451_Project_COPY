@@ -3,10 +3,9 @@
 #include "MapManager.hpp"
 
 namespace MapManager {
+	std::vector<std::vector<Tile>> mapLayout(Config::MAP_HEIGHT, std::vector<Tile>(Config::MAP_WIDTH));
 
-	Tile mapLayout[Config::MAP_HEIGHT][Config::MAP_WIDTH];
-
-	void LoadMapData(const char* fileName) {
+	 void LoadMapData(const char* fileName, std::vector<std::vector<Tile>> &map) {
 		std::ifstream ifs{fileName};
 		if (!ifs) {
 			std::cerr << "Error: Could not open map data file at " << fileName << std::endl;
@@ -17,18 +16,14 @@ namespace MapManager {
 			for (int x = 0; x < Config::MAP_WIDTH; ++x) {
 				int type = 0;
 				ifs >> type;
-				mapLayout[y][x].type = static_cast<TileType>(type);
+				map[y][x].type = static_cast<TileType>(type);
 			}
 		}
 
 		ifs.close();
 	}
 
-	void LoadAllMapData() {
-		LoadMapData("Assets/Map/level1.txt");
-	}
-
-	void RenderMap(AEGfxTexture* tileTexture, Tile const map[Config::MAP_HEIGHT][Config::MAP_WIDTH]) {
+	void RenderMap(const std::vector<std::vector<Tile>>& map) {
 		// Calculate how many tiles fit on screen
 		int width = Config::MAP_WIDTH;
 		int height = Config::MAP_HEIGHT;
@@ -48,18 +43,28 @@ namespace MapManager {
 				AEMtx33 transform = GraphicsManager::CreateTransformMatrix(posX, posY, 0.0f, tileSize / 2.0f, tileSize / 2.0f);
 
 				TileType type = map[y][x].type;
+				AEGfxTexture* texture = AssetsManager::GetTexture("Assets/square.png");
 
 				// TEMPORARY TO BE CHANGED TO TEXTURE ASSET LATER
 				float red = 0.9f, g = 0.9f, b = 0.9f;
 
 				if (type == Tile_Barrier) { // Barrier block
-					g = 1;
+					red = 0, g = 1, b = 0;
 				}
 				else if (type == Tile_Block) {
-					red = 1;
+					red = 1, g = 0, b= 0;
+				}
+				else if (type == Tile_Cannon) {
+					red = 0, g = 0, b = 0;
+				}
+				else if (type == Tile_Enemy_Minion) {
+					red = 0, g = 0, b = 1;
+				}
+				else if (type == Tile_Enemy_Boss) {
+					red = 1, g = 1, b = 0;
 				}
 
-				GraphicsManager::DrawGameObject(tileTexture, transform, red, g, b);
+				GraphicsManager::DrawGameObject(texture, transform, red, g, b);
 			}
 		}
 	}

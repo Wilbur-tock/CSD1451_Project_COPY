@@ -7,13 +7,17 @@ namespace GameStateManager {
 
 	using FP = void(*)(void);
 
-	extern FP fpLoad, fpInitalize, fpUpdate, fpDraw, fpUnload, fpExit;
+	extern FP fpLoad, fpInitalize, fpUpdate, fpDraw, fpFree, fpUnload;
 	extern int current, previous, next;
 
-	enum GS_LIST {
+	enum GSList {
 		GS_Main_Menu,
+		GS_Map_Editor,
 		GS_Level_1,
 		GS_Level_2,
+		GS_Restart,
+		GS_QUIT,
+		GS_Exit
 	};
 
 	void Load();

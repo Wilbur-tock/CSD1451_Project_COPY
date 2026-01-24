@@ -3,10 +3,11 @@
 #include "MapManager.hpp"
 #include "MapEditor.hpp"
 #include "CannonManager.hpp"
+#include "Level1.hpp"
 
 namespace GameStateManager {
 
-	FP fpLoad, fpInitalize, fpUpdate, fpDraw, fpUnload, fpExit;
+	FP fpLoad, fpInitalize, fpUpdate, fpDraw, fpFree, fpUnload;
 	int current = 0, previous = 0, next = 0;
 
 	// Temporary
@@ -18,22 +19,55 @@ namespace GameStateManager {
 	void Load() {
 		GraphicsManager::Load();
 
+		current = 0;
+		previous = next = GS_Level_1;
+
 		texture = AssetsManager::GetTexture("Assets/square.png");
 
-		MapManager::LoadAllMapData();
+		Level1::Load();
 	}
 
-	bool mapEditorOn = false;
+	bool mapEditorOn = true;
 
-	f32 x = 0, y = 0;
+	f32 x = 0, y = 0; //temp
+
 	void Update() {
+		// Update Game state
 		switch (current) {
 		case GS_Main_Menu:
 			break;
+		case GS_Map_Editor:
+			fpLoad = nullptr;
+			fpInitalize = nullptr;
+			fpUpdate = MapEditor::MapEditor;
+			fpDraw = nullptr;
+			fpFree = nullptr;
+			fpUnload = nullptr;
+			break;
 		case GS_Level_1:
+			fpLoad = Level1::Load;
+			fpInitalize = Level1::Initialize;
+			fpUpdate = Level1::Update;
+			fpDraw = nullptr;
+			fpFree = nullptr;
+			fpUnload = nullptr;
 			break;
 		case GS_Level_2:
 			break;
+		}
+
+		// Update to new state
+		if (next != current) {
+			previous = current;
+			current = next;
+
+			if (fpInitalize != nullptr) {
+				fpInitalize();
+			}
+		}
+
+		if (fpUpdate != nullptr) {
+			fpUpdate();
 		}
 
 		if (AEInputCheckTriggered(AEVK_P)) {
@@ -41,12 +75,10 @@ namespace GameStateManager {
 		}
 
 		if (mapEditorOn) {
-			MapEditor::MapEditor();
+			next = GS_Map_Editor;
 		}
 		else {
-			MapManager::RenderMap(texture, MapManager::mapLayout);
-
-			cannon.Update();
+			next = GS_Level_1;
 		}
 
 		// Temporary
