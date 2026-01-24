@@ -12,20 +12,12 @@ namespace MapEditor {
 
 	std::vector<std::vector<Tile>> newMap(Config::MAP_HEIGHT, std::vector<Tile>(Config::MAP_WIDTH));
 
-	void ResetMapLayout(std::vector<std::vector<Tile>> &map) {
-		for (int y = 0; y < Config::MAP_HEIGHT; ++y) {
-			for (int x = 0; x < Config::MAP_WIDTH; ++x) {
-				map[y][x].type = x == Config::MIN_GRID_X || x == Config::MAX_GRID_X || y == Config::MIN_GRID_Y || y == Config::MAX_GRID_Y ? Tile_Barrier : Tile_Air;
-			}
-		}
-	}
-
 	void InitMapEditor() {
 		// Reset settings
 		drawingBlockType = Tile_Barrier;
 
 		// Reset map
-		ResetMapLayout(newMap);
+		MapManager::LoadMapData("Assets/Map/default.txt", newMap);
 	}
 
 	void MapEditor() {

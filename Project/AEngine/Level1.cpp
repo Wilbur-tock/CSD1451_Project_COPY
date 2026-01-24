@@ -14,12 +14,24 @@ namespace Level1 {
 	}
 
 	void Initialize() {
-		levelData.cannon.pos.x = -700;
-		levelData.cannon.pos.y = -250;
+		bool foundCannonPos = false;
+		// Set cannon position
+		for (const std::vector<MapManager::Tile> &row : levelData.levelMap) {
+			for (const MapManager::Tile &tile : row) {
+				if (tile.type == MapManager::Tile_Cannon) {
+					levelData.cannon.pos = tile.pos;
+					std::cout << levelData.cannon.pos.x << std::endl;
+					foundCannonPos = true;
+					break;
+				}
+			}
+
+			if (foundCannonPos) break;
+		}
 	}
 
 	void Update() {
-		MapManager::RenderMap(MapManager::mapLayout);
+		MapManager::RenderMap(levelData.levelMap);
 		levelData.cannon.Update();
 	}
 
