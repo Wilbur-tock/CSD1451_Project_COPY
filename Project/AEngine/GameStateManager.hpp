@@ -5,7 +5,7 @@
 
 namespace GameStateManager {
 
-	typedef void (*FP)(void);
+	using FP = void(*)(void);
 
 	extern FP fpLoad, fpInitalize, fpUpdate, fpDraw, fpUnload, fpExit;
 	extern int current, previous, next;
@@ -18,13 +18,7 @@ namespace GameStateManager {
 
 	void Load();
 
-	void Intialize();
-
 	void Update();
-
-	void Draw();
-
-	void Unload();
 
 	void Exit();
 }

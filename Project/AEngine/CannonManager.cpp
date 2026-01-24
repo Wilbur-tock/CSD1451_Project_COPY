@@ -32,8 +32,8 @@ namespace CannonManager {
 		s32 mouseX, mouseY;
 		AEInputGetCursorPosition(&mouseX, &mouseY);
 
-		float worldMouseX = (float)mouseX - (Config::screenWidth / 2.0f);
-		float worldMouseY = (Config::screenHeight / 2.0f) - (float)mouseY;
+		float worldMouseX = (float)mouseX - (Config::SCREEN_WIDTH / 2.0f);
+		float worldMouseY = (Config::SCREEN_HEIGHT / 2.0f) - (float)mouseY;
 
 		// Calculate angle toward mouse
 		cannonAngle = atan2(worldMouseY - pos.y, worldMouseX - pos.x);

@@ -16,18 +16,16 @@ namespace GameStateManager {
 	CannonManager::Cannon cannon(v2, 50);
 
 	void Load() {
-		GraphicsManager::GenerateMesh();
+		GraphicsManager::Load();
 
 		texture = AssetsManager::GetTexture("Assets/square.png");
 
 		MapManager::LoadAllMapData();
 	}
 
-	void Intialize() {
-	}
-
 	bool mapEditorOn = false;
 
+	f32 x = 0, y = 0;
 	void Update() {
 		switch (current) {
 		case GS_Main_Menu:
@@ -42,19 +40,27 @@ namespace GameStateManager {
 			mapEditorOn = !mapEditorOn;
 		}
 
-		if(mapEditorOn) MapEditor::MapEditor();
+		if (mapEditorOn) {
+			MapEditor::MapEditor();
+		}
+		else {
+			MapManager::RenderMap(texture, MapManager::mapLayout);
 
-		MapManager::RenderMap(texture, MapManager::mapLayout);
+			cannon.Update();
+		}
 
-		cannon.Update();
-	}
+		// Temporary
+		float spd = 1500.0f * static_cast<float>(AEFrameRateControllerGetFrameTime());
+		if (AEInputCheckCurr(AEVK_A)) x -= spd;
+		if (AEInputCheckCurr(AEVK_D)) x += spd;
 
-	void Draw() {
+		float minX = Config::WORLD_MIN_X + (Config::SCREEN_WIDTH / 2.0f);
+		float maxX = Config::WORLD_MAX_X - (Config::SCREEN_WIDTH / 2.0f);
 
-	}
+		if (x < minX) x = minX;
+		if (x > maxX) x = maxX;
 
-	void Unload() {
-
+		AEGfxSetCamPosition(floorf(x), floorf(y));
 	}
 
 	void Exit() {

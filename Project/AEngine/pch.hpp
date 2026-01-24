@@ -9,6 +9,7 @@
 
 #include "AEEngine.h"
 #include "Config.hpp"
+#include "DebugPrint.hpp"
 #include "AssetsManager.hpp"
 #include "GameStateManager.hpp"
 #include "GraphicsManager.hpp"

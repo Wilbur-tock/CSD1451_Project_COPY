@@ -62,6 +62,7 @@
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeaderFile>pch.hpp</PrecompiledHeaderFile>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -99,6 +100,7 @@ xcopy "$(SolutionDir)Extern\AlphaEngine\lib\fmod.dll" "$(OutDir)" /s /r /y /q</C
   <ItemGroup>
     <ClCompile Include="AssetsManager.cpp" />
     <ClCompile Include="CannonManager.cpp" />
+    <ClCompile Include="DebugPrint.cpp" />
     <ClCompile Include="GameStateManager.cpp" />
     <ClCompile Include="GraphicsManager.cpp" />
     <ClCompile Include="Main.cpp" />
@@ -110,6 +112,7 @@ xcopy "$(SolutionDir)Extern\AlphaEngine\lib\fmod.dll" "$(OutDir)" /s /r /y /q</C
     <ClInclude Include="AssetsManager.hpp" />
     <ClInclude Include="CannonManager.hpp" />
     <ClInclude Include="Config.hpp" />
+    <ClInclude Include="DebugPrint.hpp" />
     <ClInclude Include="GameStateManager.hpp" />
     <ClInclude Include="GraphicsManager.hpp" />
     <ClInclude Include="MapEditor.hpp" />

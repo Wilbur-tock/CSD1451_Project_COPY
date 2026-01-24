@@ -6,6 +6,7 @@
 namespace MapManager {
 	enum TileType {
 		Tile_Air,
+		Tile_Barrier,
 		Tile_Block,
 	};
 
@@ -15,12 +16,12 @@ namespace MapManager {
 		int size = 32;
 	};
 
-	extern Tile mapLayout[Config::mapHeight][Config::mapWidth];
+	extern Tile mapLayout[Config::MAP_HEIGHT][Config::MAP_WIDTH];
 
 	void LoadAllMapData();
 
 	/* Rendering of the map layout */
-	void RenderMap(AEGfxTexture* tileTexture, Tile const mapLayout[Config::mapHeight][Config::mapWidth]);
+	void RenderMap(AEGfxTexture* tileTexture, Tile const mapLayout[Config::MAP_HEIGHT][Config::MAP_WIDTH]);
 }
 
 #endif // !MapManager_HPP
