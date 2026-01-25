@@ -10,6 +10,7 @@ namespace Utils {
 		y += mouseY;
 	}
 
+	// values range from x = 0 to max map width, y = 0 to max map height 
 	void GetWorldPos(float& x, float& y) {
 		f32 camX, camY;
 		AEGfxGetCamPosition(&camX, &camY);
