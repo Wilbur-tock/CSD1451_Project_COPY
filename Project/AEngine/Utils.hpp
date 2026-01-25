@@ -30,13 +30,17 @@ public:
 	FP onClick;
 
 	Button() = default;
-	Button(std::string _text, AEVec2 _pos, float _width, float _height, Color _color, AEGfxTexture* _texture);
+	Button(std::string _text, AEVec2 _pos, float _width, float _height, Color _color, AEGfxTexture* _texture, 
+		float _textOffsetX = 0.f, float _textOffsetY = 0.f, FP _onClick = nullptr);
 };
 
 namespace Utils {
 	// Get world mouse position instead of the screen position due to camera movement
 	void GetWorldMousePos(float& x, float& y);
 	void GetWorldPos(float& x, float& y);
+
+	std::string FormatFloat(float value, int precision);
+	void Limit(int& val, int min, int max);
 }
 
 #endif // !UTILS_HPP

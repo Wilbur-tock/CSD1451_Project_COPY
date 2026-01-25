@@ -7,6 +7,8 @@
 #include <fstream>
 #include <vector>
 #include <string>
+#include <iomanip>
+#include <sstream>
 
 #include "AEEngine.h"
 #include "Config.hpp"

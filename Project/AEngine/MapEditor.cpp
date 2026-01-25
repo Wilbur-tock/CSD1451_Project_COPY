@@ -12,12 +12,30 @@ namespace MapEditor {
 
 	std::vector<std::vector<Tile>> newMap(Config::MAP_HEIGHT, std::vector<Tile>(Config::MAP_WIDTH));
 
+	static void NewDefaultMap() {
+		const char* filePath = "Assets/Map/default.txt";
+		std::ofstream output{ filePath };
+
+		if (!output.is_open()) {
+			std::cerr << "Error: Could not open file at " << filePath << std::endl;
+			return;
+		}
+
+		for (int y = 0; y < Config::MAP_HEIGHT; ++y) {
+			for (int x = 0; x < Config::MAP_WIDTH; ++x) {
+				output << 0 << " ";
+			}
+			output << std::endl;
+		}
+
+		output.close();
+	}
+
 	void InitMapEditor() {
 		// Reset settings
 		drawingBlockType = Tile_Barrier;
-
 		// Reset map
-		MapManager::LoadMapData("Assets/Map/default.txt", newMap);
+		MapManager::LoadMapData("Assets/Map/default.txt", newMap, true);
 	}
 
 	void MapEditor() {
@@ -48,6 +66,13 @@ namespace MapEditor {
 		int gridX = static_cast<int>(worldMouseX / Config::TILE_SIZE);
 		int gridY = static_cast<int>(worldMouseY / Config::TILE_SIZE);
 
+		// Formula for calculating gridX = worldMouseX (cam x + screenwidth(1600) + mouse x) / tileSize (32)
+		// Formula for calculating gridY = worldMouseX (cam x - (screenheight / 2.0f) (450) + mouse y) / tileSize (32)
+
+		// This is to ensure that the grid index does not go out of range
+		Utils::Limit(gridX, Config::MIN_GRID_X, Config::MAX_GRID_X);
+		Utils::Limit(gridY, Config::MIN_GRID_Y, Config::MAX_GRID_Y);
+
 		//std::cout << "Mouse: (" << mouseX << ", " << mouseY << ") ";
 		//std::cout << "World: (" << worldMouseX << ", " << worldMouseY << ") ";
 		//std::cout << "Grid: (" << gridX << ", " << gridY << ")" << std::endl;
@@ -69,11 +94,26 @@ namespace MapEditor {
 		// Print out the information on how to use the editor
 		std::string helpStr = "'S' to save file | 'Q' to close map editor\nLeft Mouse - Place tile\nRight Mouse - Erase Tile\n1 - Barrier, 2 - Block, 3 - Cannon, 4 - Minion, 5 - Boss";
 		helpStr += "\nDrawing Tile " + std::to_string(drawingBlockType);
-		GraphicsManager::DrawTextUI(helpStr,-1.0f,0.95f,Color{0,0,0, 1.0f}, 0.8f);
+		GraphicsManager::DrawTextUI(helpStr,-1.0f,.99f,Color{0,0,1, 1.0f}, 0.8f);
 
-		// Save file onto the the bin folder
+		// Print out debugger information about the map editor
+		std::string debugStr = "Grid Index and Position:\nGrid X: " + std::to_string(gridX) + " Grid Y: " + std::to_string(gridY);
+		debugStr += "\nX:" + Utils::FormatFloat(newMap[gridY][gridX].pos.x,2) + " Y: " + Utils::FormatFloat(newMap[gridY][gridX].pos.y, 2);
+
+		f32 x, y;
+		AEGfxGetCamPosition(&x, &y);
+
+		s32 mouseX, mouseY;
+		AEInputGetCursorPosition(&mouseX, &mouseY);
+		debugStr += "\nCamera Position\nX:" + Utils::FormatFloat(x,2) + " Y: " + Utils::FormatFloat(y,2);
+		debugStr += "\nScreen and World Mouse position\nX: " + Utils::FormatFloat(mouseX, 2) + " Y: " + Utils::FormatFloat(mouseY, 2);
+		float mX = 0, mY = 0;
+		Utils::GetWorldMousePos(mX, mY);
+		debugStr += "\nX: " + Utils::FormatFloat(mX, 2) + " Y: " + Utils::FormatFloat(mY, 2);
+		GraphicsManager::DrawTextUI(debugStr, 0.5f, .99f, Color{ 0,0,1, 1.0f }, 0.8f);
+
+		// Save file
 		if (AEInputCheckTriggered(AEVK_S)) {
-			//SaveMapFile("Assets/Map/map.txt");
 			SaveMapFile("../../Assets/Map/drawnMap.txt"); // MIGHT HAVE SOME ERROR WHEN BUILDING DUE TO FILE PATH
 			isDrawingNewMap = true;
 		}
@@ -95,6 +135,5 @@ namespace MapEditor {
 		}
 
 		output.close();
-		//std::cout << "File Created at: " << filePath << std::endl;
 	}
 }

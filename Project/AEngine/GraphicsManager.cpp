@@ -130,9 +130,6 @@ namespace GraphicsManager {
 	}
 
 	void DrawButton(Button btn, Color textColor, float textScale) {
-		float mouseX = 0, mouseY = 0;
-		Utils::GetWorldMousePos(mouseX, mouseY);
-
 		bool isHovered = CollisionManager::IsPointInRect(btn.pos.x, btn.pos.y, btn.width, btn.height);
 		Color btnColor = btn.color;
 		if (isHovered) {

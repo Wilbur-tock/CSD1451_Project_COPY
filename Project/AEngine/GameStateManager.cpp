@@ -87,12 +87,20 @@ namespace GameStateManager {
 		float spd = 1500.0f * static_cast<float>(AEFrameRateControllerGetFrameTime());
 		if (AEInputCheckCurr(AEVK_A)) x -= spd;
 		if (AEInputCheckCurr(AEVK_D)) x += spd;
+		if (AEInputCheckCurr(AEVK_S)) y -= spd;
+		if (AEInputCheckCurr(AEVK_W)) y += spd;
 
-		float minX = Config::WORLD_MIN_X + (Config::SCREEN_WIDTH / 2.0f);
-		float maxX = Config::WORLD_MAX_X - (Config::SCREEN_WIDTH / 2.0f);
+		float halfW = Config::SCREEN_WIDTH / 2.0f, halfH = Config::SCREEN_HEIGHT / 2.0f;
+
+		float minX = Config::WORLD_MIN_X + halfW;
+		float maxX = Config::WORLD_MAX_X - halfW;
+		float minY = Config::WORLD_MIN_Y + halfH;
+		float maxY = Config::WORLD_MAX_Y - halfH;
 
 		if (x < minX) x = minX;
 		if (x > maxX) x = maxX;
+		if (y < minY) y = minY;
+		if (y > maxY) y = maxY;
 
 		AEGfxSetCamPosition(floorf(x), floorf(y));
 

@@ -30,7 +30,7 @@ namespace GraphicsManager {
 	/* Draw UI texture using pMeshCorner rect mode corner */
 	void DrawUI(AEGfxTexture* pTex, AEMtx33 transform, Color color);
 
-	void DrawUIFollowCam(AEGfxTexture* pTex, AEMtx33 transform, float r, float g, float b, float a);
+	void DrawUIFollowCam(AEGfxTexture* pTex, AEMtx33 transform, Color color);
 
 	/*	Draw text UI using noramlized coordinates 
 		x,y, use range from -1.0f to 1.0f
@@ -38,6 +38,7 @@ namespace GraphicsManager {
 	*/
 	void DrawTextUI(std::string text, f32 x, f32 y, Color color, float textScale = Config::FONT_SCALE);
 
+	/* Button class, use textOffset to position the text inside the button (use range 0.0 to 1.0f) */
 	void DrawButton(Button btn, Color textColor = Color{0,0,0}, float textScale = Config::FONT_SCALE);
 }
 
