@@ -4,9 +4,6 @@
 #include "pch.hpp"
 
 namespace GameStateManager {
-
-	using FP = void(*)(void);
-
 	extern FP fpLoad, fpInitalize, fpUpdate, fpDraw, fpFree, fpUnload;
 	extern int current, previous, next;
 

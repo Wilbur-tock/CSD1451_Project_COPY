@@ -15,7 +15,7 @@ namespace CannonManager {
 		AEVec2 pos, velocity;
 		bool isActive = false;
 
-		Projectile();
+		Projectile(); // Default intializer
 		Projectile(AEVec2 _pos, AEVec2 _velocity);
 
 		void Render();
@@ -29,7 +29,7 @@ namespace CannonManager {
 		AEVec2 cannonSize{ 30,10 };
 
 		// Power charging system (how far the cannon shoots the projectile)
-		float power = 100, minPower = 100, maxPower = 1500, chargeRate = 500;
+		float power = 100, minPower = 100, maxPower = 2000, chargeRate = 500;
 		bool isPowerIncrease = true;
 
 	public:

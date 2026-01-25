@@ -1,4 +1,6 @@
 #include "GraphicsManager.hpp"
+#include "CollisionManager.hpp"
+#include "AssetsManager.hpp"
 
 namespace GraphicsManager {
 
@@ -83,6 +85,16 @@ namespace GraphicsManager {
 		DrawTexture(pMeshCorner, pTex, transform, color);
 	}
 
+	void DrawUIFollowCam(AEGfxTexture* pTex, AEMtx33 transform, Color color) {
+		// Adjust the x and y position of the UI object to adjust based on the camera movement
+		f32 camX = 0, camY = 0;
+		AEGfxGetCamPosition(&camX, &camY);
+		transform.m[0][2] += floorf(camX);
+		transform.m[1][2] += floorf(camY);
+
+		DrawTexture(pMeshCorner, pTex, transform, color);
+	}
+
 	void DrawTextUI(std::string text, f32 x, f32 y, Color color, float textScale) {
 		f32 currentY = y;
 
@@ -117,7 +129,21 @@ namespace GraphicsManager {
 		}
 	}
 
-	//void DrawButton(std::string text, float x, float y, Color c, float width, float height) {
-	//	//DrawTextUI(text, x,y,)
-	//}
+	void DrawButton(Button btn, Color textColor, float textScale) {
+		float mouseX = 0, mouseY = 0;
+		Utils::GetWorldMousePos(mouseX, mouseY);
+
+		bool isHovered = CollisionManager::IsPointInRect(btn.pos.x, btn.pos.y, btn.width, btn.height);
+		Color btnColor = btn.color;
+		if (isHovered) {
+			btnColor = Color{ btn.color.GetRed(), btn.color.GetGreen(), btn.color.GetAlpha() - 0.1f}; // Assign hovered color
+			if (AEInputCheckTriggered(AEVK_LBUTTON)) {
+			}
+		}
+		
+		// Draw button object
+		DrawUIFollowCam(AssetsManager::GetTexture("Assets/square.png"), CreateTransformMatrix(btn.pos.x, btn.pos.y, 0, 100,100), btnColor);
+		// Draw text
+		DrawTextUI(btn.text, btn.textOffsetX, btn.textOffsetY, textColor, textScale);
+	}
 }

@@ -5,13 +5,12 @@
 #include "AssetsManager.hpp"
 
 namespace CannonManager {
-	Projectile::Projectile() : timer{ 0.0f }, pos{ 0.0f, 0.0f }, velocity{ 0.0f,0.0f } {} // Default intializer
+	Projectile::Projectile() : timer{ 0.0f }, pos{ 0.0f, 0.0f }, velocity{ 0.0f,0.0f } {}
 	Projectile::Projectile(AEVec2 _pos, AEVec2 _velocity) : timer{ 0.0f }, pos(_pos), velocity(_velocity) {}
 
 	void Projectile::Render() {
-		AEGfxTexture* tex = AssetsManager::GetTexture("Assets/square.png");
+		AEGfxTexture* tex = AssetsManager::GetTexture("Assets/circle.png");
 		AEMtx33 mat = GraphicsManager::CreateTransformMatrix(pos.x, pos.y, 0, projectileSize, projectileSize);
-		//std::cout << cannonAngle << std::endl;
 		GraphicsManager::DrawGameObject(tex, mat, Color{ 0.5f, 0.5f, 0, 1 });
 	}
 
@@ -79,10 +78,9 @@ namespace CannonManager {
 	}
 
 	void Cannon::Render() {
-		AEGfxTexture* tex = AssetsManager::GetTexture("Assets/square.png");
+		AEGfxTexture* tex = AssetsManager::GetTexture("Assets/test.png");
 		AEMtx33 mat = GraphicsManager::CreateTransformMatrix(pos.x, pos.y, cannonAngle, cannonSize.x, cannonSize.y);
-		//std::cout << cannonAngle << std::endl;
-		GraphicsManager::DrawGameObject(tex, mat, Color{ 1, 0, 0, 1 });
+		GraphicsManager::DrawGameObject(tex, mat, Color{ 1, 1, 1, 1 });
 	}
 
 	void Cannon::ShootProjectile() {
@@ -121,11 +119,8 @@ namespace CannonManager {
 				if (bullet.timer <= 0.0f) {
 					DestroyProjectile(bullet);
 				}
-				//std::cout << bullet.timer << std::endl;
 			}
 		}
-
-		//std::cout << activeProjectile.size() << std::endl;
 	}
 
 	void Cannon::DestroyProjectile(Projectile &projectile) {

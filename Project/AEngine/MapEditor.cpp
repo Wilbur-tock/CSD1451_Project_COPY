@@ -42,15 +42,8 @@ namespace MapEditor {
 			drawingBlockType = Tile_Enemy_Boss;
 		}
 
-		s32 mouseX, mouseY;
-		AEInputGetCursorPosition(&mouseX, &mouseY);
-
-		f32 camX, camY;
-		AEGfxGetCamPosition(&camX, &camY);
-
-		// Adding the offset from camera moving and add the screenWidth if the mapWidth is larger than the screenWidth
-		float worldMouseX = camX + mouseX + Config::SCREEN_WIDTH;
-		float worldMouseY = camY + mouseY; // If screen height is the same as screen height no offset is needed
+		float worldMouseX = 0, worldMouseY = 0;
+		Utils::GetWorldMousePos(worldMouseX, worldMouseY);
 
 		int gridX = static_cast<int>(worldMouseX / Config::TILE_SIZE);
 		int gridY = static_cast<int>(worldMouseY / Config::TILE_SIZE);

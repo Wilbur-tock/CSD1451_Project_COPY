@@ -95,6 +95,9 @@ namespace GameStateManager {
 		if (x > maxX) x = maxX;
 
 		AEGfxSetCamPosition(floorf(x), floorf(y));
+
+		//Button btn = Button{ "Button", {0,0}, 100,100, Color{0,1,0}, texture };
+		//GraphicsManager::DrawButton(btn);
 	}
 
 	void Exit() {
