@@ -3,8 +3,10 @@
 
 #include "pch.hpp"
 
+#include "Utils.hpp"
+
 namespace GameStateManager {
-	extern FP fpLoad, fpInitalize, fpUpdate, fpDraw, fpFree, fpUnload;
+	extern Utils::FuncPtr fpLoad, fpInitalize, fpUpdate, fpDraw, fpFree, fpUnload;
 	extern int current, previous, next;
 
 	enum GSList {

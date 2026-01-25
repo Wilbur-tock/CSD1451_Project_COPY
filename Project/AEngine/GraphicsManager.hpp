@@ -3,6 +3,9 @@
 
 #include "pch.hpp"
 
+#include "Color.hpp"
+#include "Button.hpp"
+
 namespace GraphicsManager {
 
 	extern AEGfxVertexList *pMeshMiddle, *pMeshCorner;

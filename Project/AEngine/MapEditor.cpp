@@ -12,24 +12,24 @@ namespace MapEditor {
 
 	std::vector<std::vector<Tile>> newMap(Config::MAP_HEIGHT, std::vector<Tile>(Config::MAP_WIDTH));
 
-	static void NewDefaultMap() {
-		const char* filePath = "Assets/Map/default.txt";
-		std::ofstream output{ filePath };
-
-		if (!output.is_open()) {
-			std::cerr << "Error: Could not open file at " << filePath << std::endl;
-			return;
-		}
-
-		for (int y = 0; y < Config::MAP_HEIGHT; ++y) {
-			for (int x = 0; x < Config::MAP_WIDTH; ++x) {
-				output << 0 << " ";
-			}
-			output << std::endl;
-		}
-
-		output.close();
-	}
+	//static void NewDefaultMap() {
+	//	const char* filePath = "Assets/Map/default.txt";
+	//	std::ofstream output{ filePath };
+	//
+	//	if (!output.is_open()) {
+	//		std::cerr << "Error: Could not open file at " << filePath << std::endl;
+	//		return;
+	//	}
+	//
+	//	for (int y = 0; y < Config::MAP_HEIGHT; ++y) {
+	//		for (int x = 0; x < Config::MAP_WIDTH; ++x) {
+	//			output << 0 << " ";
+	//		}
+	//		output << std::endl;
+	//	}
+	//
+	//	output.close();
+	//}
 
 	void InitMapEditor() {
 		// Reset settings
@@ -67,7 +67,7 @@ namespace MapEditor {
 		int gridY = static_cast<int>(worldMouseY / Config::TILE_SIZE);
 
 		// Formula for calculating gridX = worldMouseX (cam x + screenwidth(1600) + mouse x) / tileSize (32)
-		// Formula for calculating gridY = worldMouseX (cam x - (screenheight / 2.0f) (450) + mouse y) / tileSize (32)
+		// Formula for calculating gridY = worldMouseY (cam Y - (screenheight / 2.0f) (450) + mouse y) / tileSize (32)
 
 		// This is to ensure that the grid index does not go out of range
 		Utils::Limit(gridX, Config::MIN_GRID_X, Config::MAX_GRID_X);
@@ -92,7 +92,7 @@ namespace MapEditor {
 		MapManager::RenderMap(newMap);
 
 		// Print out the information on how to use the editor
-		std::string helpStr = "'S' to save file | 'Q' to close map editor\nLeft Mouse - Place tile\nRight Mouse - Erase Tile\n1 - Barrier, 2 - Block, 3 - Cannon, 4 - Minion, 5 - Boss";
+		std::string helpStr = "'E' to save file | 'Q' to close map editor\nLeft Mouse - Place tile\nRight Mouse - Erase Tile\n1 - Barrier, 2 - Block, 3 - Cannon, 4 - Minion, 5 - Boss";
 		helpStr += "\nDrawing Tile " + std::to_string(drawingBlockType);
 		GraphicsManager::DrawTextUI(helpStr,-1.0f,.99f,Color{0,0,1, 1.0f}, 0.8f);
 
@@ -113,7 +113,7 @@ namespace MapEditor {
 		GraphicsManager::DrawTextUI(debugStr, 0.5f, .99f, Color{ 0,0,1, 1.0f }, 0.8f);
 
 		// Save file
-		if (AEInputCheckTriggered(AEVK_S)) {
+		if (AEInputCheckTriggered(AEVK_E)) {
 			SaveMapFile("../../Assets/Map/drawnMap.txt"); // MIGHT HAVE SOME ERROR WHEN BUILDING DUE TO FILE PATH
 			isDrawingNewMap = true;
 		}

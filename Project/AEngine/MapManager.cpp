@@ -3,6 +3,7 @@
 #include "MapManager.hpp"
 #include "GraphicsManager.hpp"
 #include "AssetsManager.hpp"
+#include "Color.hpp"
 
 namespace MapManager {
 	std::vector<std::vector<Tile>> mapLayout(Config::MAP_HEIGHT, std::vector<Tile>(Config::MAP_WIDTH));

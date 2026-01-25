@@ -3,6 +3,7 @@
 #include "CannonManager.hpp"
 #include "GraphicsManager.hpp"
 #include "AssetsManager.hpp"
+#include "Color.hpp"
 
 namespace CannonManager {
 	Projectile::Projectile() : timer{ 0.0f }, pos{ 0.0f, 0.0f }, velocity{ 0.0f,0.0f } {}
@@ -31,11 +32,13 @@ namespace CannonManager {
 
 	void Cannon::Update() {
 		// Calculate cannon angle
-		s32 mouseX, mouseY;
-		AEInputGetCursorPosition(&mouseX, &mouseY);
-
-		float worldMouseX = (float)mouseX - (Config::SCREEN_WIDTH / 2.0f);
-		float worldMouseY = (Config::SCREEN_HEIGHT / 2.0f) - (float)mouseY;
+		//s32 mouseX, mouseY;
+		//AEInputGetCursorPosition(&mouseX, &mouseY);
+		//
+		//float worldMouseX = (float)mouseX - (Config::SCREEN_WIDTH / 2.0f);
+		//float worldMouseY = (Config::SCREEN_HEIGHT / 2.0f) - (float)mouseY;
+		float worldMouseX = 0, worldMouseY = 0;
+		Utils::GetWorldMousePos(worldMouseX, worldMouseY);
 
 		// Calculate angle toward mouse
 		cannonAngle = atan2(worldMouseY - pos.y, worldMouseX - pos.x);
@@ -43,6 +46,10 @@ namespace CannonManager {
 		// Add limits so it can only turn facing upwards or downwards limits
 		cannonAngle = cannonAngle < -1.5 ? -1.5f : cannonAngle;
 		cannonAngle = cannonAngle > 1.5 ? 1.5f : cannonAngle;
+
+		std::string str = "Cannon Angle: " + Utils::FormatFloat(cannonAngle, 2);
+		str += "\nMouse World Pos:\nX: " + Utils::FormatFloat(worldMouseX, 2) + " Y: " + Utils::FormatFloat(worldMouseY, 2);
+		GraphicsManager::DrawTextUI(str, -1, 0.99, Color{ 0,0,1 });
 
 		Render();
 

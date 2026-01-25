@@ -3,13 +3,13 @@
 #include "MapManager.hpp"
 #include "MapEditor.hpp"
 #include "CannonManager.hpp"
-#include "Level1.hpp"
 #include "GraphicsManager.hpp"
 #include "GameStateManager.hpp"
 #include "AssetsManager.hpp"
+#include "Level1.hpp"
 
 namespace GameStateManager {
-	FP fpLoad, fpInitalize, fpUpdate, fpDraw, fpFree, fpUnload;
+	Utils::FuncPtr fpLoad, fpInitalize, fpUpdate, fpDraw, fpFree, fpUnload;
 	int current = 0, previous = 0, next = 0;
 
 	// Temporary
@@ -104,6 +104,8 @@ namespace GameStateManager {
 
 		AEGfxSetCamPosition(floorf(x), floorf(y));
 
+
+		//GraphicsManager::DrawGameObject(texture, GraphicsManager::CreateTransformMatrix(0, 0, 0,32,32), Color{ 0,0,0 });
 		//Button btn = Button{ "Button", {0,0}, 100,100, Color{0,1,0}, texture };
 		//GraphicsManager::DrawButton(btn);
 	}
