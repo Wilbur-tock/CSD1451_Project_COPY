@@ -61,8 +61,10 @@ namespace CannonManager {
 			+ "\nWorld Pos X: " + Utils::FormatFloat(cX, 2) + " Y: " + Utils::FormatFloat(cY, 2)
 			+ "\nAngle: " + Utils::FormatFloat(cannonAngle * (180.0f / 3.14159265359), 2)
 			+ "\nMouse\nScreen Pos X: " + Utils::FormatFloat(mouseX, 2) + " Y: " + Utils::FormatFloat(mouseY, 2)
-			+ "\nWorld Pos X: " + Utils::FormatFloat(worldMouseX, 2) + " Y: " + Utils::FormatFloat(worldMouseY, 2) + " (without camera offset)"
-			+ "\nWorld Mouse Pos X: " + Utils::FormatFloat(mX, 2) + " Y: " + Utils::FormatFloat(mY, 2);
+			+ "\nWorld Pos (-" + Utils::FormatFloat(Config::WORLD_MAX_X, 2) + " to " + Utils::FormatFloat(Config::WORLD_MAX_X, 2) + ")"
+			+ "\nX: " + Utils::FormatFloat(worldMouseX, 2) + " Y : " + Utils::FormatFloat(worldMouseY, 2)
+			+ "\nWorld Pos (0.00" + " to " + Utils::FormatFloat(Config::WORLD_MAX_X*2, 2) + ")"
+			+ "\nX: " + Utils::FormatFloat(mX, 2) + " Y: " + Utils::FormatFloat(mY, 2);
 
 		//str += "\nMouse World Pos:\nX: " + Utils::FormatFloat(worldMouseXs, 2) + " Y: " + Utils::FormatFloat(worldMouseYs, 2) + "\n CannonA: " + Utils::FormatFloat(cannonA, 2);
 		GraphicsManager::DrawTextUI(str, -1, 0.99, Color{ 0,0,1 }, 0.8f);

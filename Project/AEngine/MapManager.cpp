@@ -6,7 +6,7 @@
 #include "Color.hpp"
 
 namespace MapManager {
-	std::vector<std::vector<Tile>> mapLayout(Config::MAP_HEIGHT, std::vector<Tile>(Config::MAP_WIDTH));
+	std::vector<std::vector<Tile>> mapLayout(Config::GRID_HEIGHT, std::vector<Tile>(Config::GRID_WIDTH));
 
 	 void LoadMapData(const char* fileName, std::vector<std::vector<Tile>> &map, bool setBarrier) {
 		std::ifstream ifs{fileName};
@@ -16,8 +16,8 @@ namespace MapManager {
 		}
 
 		// Calculate how many tiles fit on screen
-		int width = Config::MAP_WIDTH;
-		int height = Config::MAP_HEIGHT;
+		int width = Config::GRID_WIDTH;
+		int height = Config::GRID_HEIGHT;
 		float tileSize = static_cast<float>(Config::TILE_SIZE);
 
 		// Offset to start from the top left corner
@@ -25,8 +25,8 @@ namespace MapManager {
 		float startY = ((height * tileSize) / 2.0f) - (tileSize / 2.0f);
 
 		// Initialize each Tile class data in the 2D vector
-		for (int y = 0; y < Config::MAP_HEIGHT; ++y) {
-			for (int x = 0; x < Config::MAP_WIDTH; ++x) {
+		for (int y = 0; y < Config::GRID_HEIGHT; ++y) {
+			for (int x = 0; x < Config::GRID_WIDTH; ++x) {
 				// Set type
 				int type = 0;
 				ifs >> type;

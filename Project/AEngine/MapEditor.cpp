@@ -10,7 +10,7 @@ namespace MapEditor {
 	TileType drawingBlockType = Tile_Barrier;
 	bool isDrawingNewMap = true;
 
-	std::vector<std::vector<Tile>> newMap(Config::MAP_HEIGHT, std::vector<Tile>(Config::MAP_WIDTH));
+	std::vector<std::vector<Tile>> newMap(Config::GRID_HEIGHT, std::vector<Tile>(Config::GRID_WIDTH));
 
 	//static void NewDefaultMap() {
 	//	const char* filePath = "Assets/Map/default.txt";
@@ -77,7 +77,7 @@ namespace MapEditor {
 		//std::cout << "World: (" << worldMouseX << ", " << worldMouseY << ") ";
 		//std::cout << "Grid: (" << gridX << ", " << gridY << ")" << std::endl;
 
-		if (gridX >= 0 && gridX < Config::MAP_WIDTH && gridY >= 0 && gridY < Config::MAP_HEIGHT) {
+		if (gridX >= 0 && gridX < Config::GRID_WIDTH && gridY >= 0 && gridY < Config::GRID_HEIGHT) {
 			if (gridX != Config::MIN_GRID_X && gridX != Config::MAX_GRID_X && gridY != Config::MIN_GRID_Y && gridY != Config::MAX_GRID_Y) {
 				if (AEInputCheckCurr(AEVK_LBUTTON)) {
 					newMap[gridY][gridX].type = drawingBlockType;
@@ -126,8 +126,8 @@ namespace MapEditor {
 			return;
 		}
 
-		for (int y = 0; y < Config::MAP_HEIGHT; ++y) {
-			for (int x = 0; x < Config::MAP_WIDTH; ++x) {
+		for (int y = 0; y < Config::GRID_HEIGHT; ++y) {
+			for (int x = 0; x < Config::GRID_WIDTH; ++x) {
 				output << newMap[y][x].type << " ";
 			}
 			output << std::endl;
