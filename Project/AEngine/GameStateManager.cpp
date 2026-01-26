@@ -1,5 +1,4 @@
 #include "pch.hpp"
-
 #include "MapManager.hpp"
 #include "MapEditor.hpp"
 #include "CannonManager.hpp"
@@ -7,31 +6,39 @@
 #include "GameStateManager.hpp"
 #include "AssetsManager.hpp"
 #include "Level1.hpp"
+#include "CameraManager.hpp"
 
 namespace GameStateManager {
 	Utils::FuncPtr fpLoad, fpInitalize, fpUpdate, fpDraw, fpFree, fpUnload;
 	int current = 0, previous = 0, next = 0;
-
 	// Temporary
 	AEGfxTexture* texture;
-
 	AEVec2 v2{ -700,-325 };
 	CannonManager::Cannon cannon(v2, 50);
 
 	void Load() {
 		GraphicsManager::Load();
-
 		current = 0;
 		previous = next = GS_Level_1;
-
 		texture = AssetsManager::GetTexture("Assets/square.png");
-
 		Level1::Load();
+
+		// Initialize camera controller
+		CameraController::Init();
+		CameraController::SetMoveSpeed(1500.0f);
+
+		// Set world boundaries
+		float halfW = Config::SCREEN_WIDTH / 2.0f;
+		float halfH = Config::SCREEN_HEIGHT / 2.0f;
+		CameraController::SetBounds(
+			Config::WORLD_MIN_X + halfW,
+			Config::WORLD_MAX_X - halfW,
+			Config::WORLD_MIN_Y + halfH,
+			Config::WORLD_MAX_Y - halfH
+		);
 	}
 
 	bool mapEditorOn = true;
-
-	f32 x = 0, y = 0; //temp
 
 	void Update() {
 		// Update Game state
@@ -62,7 +69,6 @@ namespace GameStateManager {
 		if (next != current) {
 			previous = current;
 			current = next;
-
 			if (fpInitalize != nullptr) {
 				fpInitalize();
 			}
@@ -83,34 +89,10 @@ namespace GameStateManager {
 			next = GS_Level_1;
 		}
 
-		// Temporary
-		float spd = 1500.0f * static_cast<float>(AEFrameRateControllerGetFrameTime());
-		if (AEInputCheckCurr(AEVK_A)) x -= spd;
-		if (AEInputCheckCurr(AEVK_D)) x += spd;
-		if (AEInputCheckCurr(AEVK_S)) y -= spd;
-		if (AEInputCheckCurr(AEVK_W)) y += spd;
-
-		float halfW = Config::SCREEN_WIDTH / 2.0f, halfH = Config::SCREEN_HEIGHT / 2.0f;
-
-		float minX = Config::WORLD_MIN_X + halfW;
-		float maxX = Config::WORLD_MAX_X - halfW;
-		float minY = Config::WORLD_MIN_Y + halfH;
-		float maxY = Config::WORLD_MAX_Y - halfH;
-
-		if (x < minX) x = minX;
-		if (x > maxX) x = maxX;
-		if (y < minY) y = minY;
-		if (y > maxY) y = maxY;
-
-		AEGfxSetCamPosition(floorf(x), floorf(y));
-
-
-		//GraphicsManager::DrawGameObject(texture, GraphicsManager::CreateTransformMatrix(0, 0, 0,32,32), Color{ 0,0,0 });
-		//Button btn = Button{ "Button", {0,0}, 100,100, Color{0,1,0}, texture };
-		//GraphicsManager::DrawButton(btn);
+		// Update camera (handles movement, clamping, flooring, and setting position)
+		CameraController::Update(static_cast<float>(AEFrameRateControllerGetFrameTime()));
 	}
 
 	void Exit() {
-
 	}
 }
