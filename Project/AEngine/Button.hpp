@@ -18,7 +18,7 @@ public:
 
 	Button() = default;
 	Button(std::string _text, AEVec2 _pos, float _width, float _height, Color _color, AEGfxTexture* _texture,
-		float _textOffsetX = 0.f, float _textOffsetY = 0.f, Utils::FuncPtr _onClick = nullptr);
+		Utils::RectMode _rectMode, Utils::FuncPtr _onClick = nullptr);
 };
 
 #endif // !BUTTON_HPP

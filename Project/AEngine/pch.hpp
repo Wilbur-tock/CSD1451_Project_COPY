@@ -11,6 +11,7 @@
 #include <sstream>
 #include <algorithm>
 #include <map>
+#include <functional>
 
 #include "AEEngine.h"
 #include "Config.hpp"

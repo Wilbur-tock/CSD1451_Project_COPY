@@ -97,9 +97,6 @@ namespace GameStateManager {
             next = GS_Level_1;
         }
 
-        // Update camera (handles movement, clamping, flooring, and setting position)
-        camera.Update(static_cast<float>(AEFrameRateControllerGetFrameTime()));
-
         if (AEInputCheckTriggered(AEVK_P)) {
             Utils::isDebuggerOn = !Utils::isDebuggerOn;
         }
@@ -111,6 +108,12 @@ namespace GameStateManager {
 
             GraphicsManager::DrawTextUI(str, -1.f, -0.9f, Utils::debuggerInfo.first, Utils::debuggerInfo.second);
         }
+
+        // Origin
+        //GraphicsManager::DrawGameObject(texture, GraphicsManager::CreateTransformMatrix(0, 0,0,16,16), Color{ 0,0,0 });
+
+        // Update camera (handles movement, clamping, flooring, and setting position)
+        camera.Update(static_cast<float>(AEFrameRateControllerGetFrameTime()));
     }
 
     void Exit() {

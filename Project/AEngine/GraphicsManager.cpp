@@ -4,15 +4,23 @@
 
 namespace GraphicsManager {
 
+	enum CoordinateType { WORLD, SCREEN };
+
 	AEGfxVertexList* pMeshMiddle = nullptr, *pMeshCorner = nullptr;
 	s8 textFont;
 
-	void Load() {
-		textFont = AEGfxCreateFont("Assets/liberation-mono.ttf", Config::FONT_SIZE);
-		GenerateMesh();
-	}
 
-	void GenerateMesh() {
+	// Use either WORLD or SCREEN based on which rectMode to use center or corner rectMode, texture to render (image/sprite),
+	// 3x3 matrix created using CreateTransformMatrix
+	// r,g,b,a - colour of the text values of 0.0f - 1.0f 
+	static void DrawTexture(CoordinateType renderMode, AEGfxTexture* pTex, AEMtx33 transform, Color color);
+
+	// Generate the mesh to draw on e.g.paper to draw on. There are TWO mesh, 
+	// pMeshMiddle (RectMode Center) for game objects to draw on,
+	// pMeshCorner (RectMode Corner) for UI to draw on 
+	static void GenerateMesh();
+
+	static void GenerateMesh() {
 		AEGfxMeshStart();
 
 		float meshSize = 1.0f;
@@ -42,6 +50,11 @@ namespace GraphicsManager {
 		pMeshCorner = AEGfxMeshEnd();
 	}
 
+	void Load() {
+		textFont = AEGfxCreateFont("Assets/liberation-mono.ttf", Config::FONT_SIZE);
+		GenerateMesh();
+	}
+
 	AEMtx33 CreateTransformMatrix(float x, float y, float rot, float scaleX, float scaleY) {
 		AEMtx33 matScale, matRot, matTrans, matResult;
 
@@ -57,8 +70,16 @@ namespace GraphicsManager {
 		return matResult;
 	}
 
-	void DrawTexture(AEGfxVertexList* pMesh, AEGfxTexture* pTex, AEMtx33 transform, Color color) {
+	static void DrawTexture(CoordinateType mode, AEGfxTexture* pTex, AEMtx33 transform, Color color) {
 		// Set the texture and render mode
+		AEGfxVertexList* mesh = pMeshMiddle;
+		if (mode == WORLD) {
+			mesh = pMeshMiddle;
+		}
+		else if (mode == SCREEN) {
+			mesh = pMeshCorner;
+		}
+
 		AEGfxSetRenderMode(AE_GFX_RM_TEXTURE);
 
 		AEGfxSetBlendMode(AE_GFX_BM_BLEND);
@@ -74,15 +95,15 @@ namespace GraphicsManager {
 		AEGfxSetTransform(transform.m);
 
 		// Draw the mesh
-		AEGfxMeshDraw(pMesh, AE_GFX_MDM_TRIANGLES);
+		AEGfxMeshDraw(mesh, AE_GFX_MDM_TRIANGLES);
 	}
 
 	void DrawGameObject(AEGfxTexture* pTex, AEMtx33 transform, Color color) {
-		DrawTexture(pMeshMiddle, pTex, transform, color);
+		DrawTexture(WORLD, pTex, transform, color);
 	}
 
 	void DrawUI(AEGfxTexture* pTex, AEMtx33 transform, Color color) {
-		DrawTexture(pMeshCorner, pTex, transform, color);
+		DrawTexture(SCREEN, pTex, transform, color);
 	}
 
 	void DrawUIFollowCam(AEGfxTexture* pTex, AEMtx33 transform, Color color) {
@@ -92,7 +113,7 @@ namespace GraphicsManager {
 		transform.m[0][2] += floorf(camX);
 		transform.m[1][2] += floorf(camY);
 
-		DrawTexture(pMeshCorner, pTex, transform, color);
+		DrawUI(pTex, transform, color);
 	}
 
 	void DrawTextUI(std::string text, f32 x, f32 y, Color color, float textScale) {
@@ -133,17 +154,20 @@ namespace GraphicsManager {
 		bool isHovered = CollisionManager::IsPointInRect(btn.pos.x, btn.pos.y, btn.width, btn.height);
 		Color btnColor = btn.color;
 		if (isHovered) {
-			btnColor = Color{ btn.color.GetRed(), btn.color.GetGreen(), btn.color.GetAlpha() - 0.1f}; // Assign hovered color
+			btnColor = Color{ btn.color.GetRed(), btn.color.GetGreen(), btn.color.GetBlue(), btn.color.GetAlpha() * 0.5f}; // Assign hovered color
 			if (AEInputCheckTriggered(AEVK_LBUTTON)) {
+				btn.onClick;
 			}
 		}
 		
 		// Draw button object
-		DrawUIFollowCam(AssetsManager::GetTexture("Assets/square.png"), CreateTransformMatrix(btn.pos.x, btn.pos.y, 0, 100,100), btnColor);
-
+		DrawUIFollowCam(AssetsManager::GetTexture("Assets/square.png"), CreateTransformMatrix(btn.pos.x, btn.pos.y, 0, btn.width,btn.height), btnColor);
 		// Draw text if the string is not a empty string
-		if (btn.text != "") {
-			DrawTextUI(btn.text, btn.textOffsetX, btn.textOffsetY, textColor, textScale);
+		if (!btn.text.empty()) {
+			// Normalized coordinates
+			float normX = btn.pos.x / (Config::SCREEN_WIDTH / 2.0f);
+			float normY = btn.pos.y / (Config::SCREEN_HEIGHT / 2.0f);
+			DrawTextUI(btn.text, normX + btn.textOffsetX, normY + btn.textOffsetY, textColor, textScale);
 		}
 	}
 }

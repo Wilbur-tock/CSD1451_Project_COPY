@@ -8,7 +8,7 @@
 namespace MapManager {
 	std::vector<std::vector<Tile>> mapLayout(Config::GRID_HEIGHT, std::vector<Tile>(Config::GRID_WIDTH));
 
-	 void LoadMapData(const char* fileName, std::vector<std::vector<Tile>> &map) {
+	 void LoadMapData(std::string fileName, std::vector<std::vector<Tile>> &map) {
 		std::ifstream ifs{fileName};
 		if (!ifs) {
 			std::cerr << "Error: Could not open map data file at " << fileName << std::endl;

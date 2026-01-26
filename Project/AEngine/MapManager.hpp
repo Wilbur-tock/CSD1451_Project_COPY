@@ -26,7 +26,7 @@ namespace MapManager {
 	extern std::vector<std::vector<Tile>> mapLayout;
 
 	// Read map data from txt file and then update the data to 2D vector whatever or not barrier is needed
-	void LoadMapData(const char* fileName, std::vector<std::vector<Tile>>& map);
+	void LoadMapData(std::string fileName, std::vector<std::vector<Tile>>& map);
 
 	// Rendering of the map layout
 	void RenderMap(const std::vector<std::vector<Tile>>& map);

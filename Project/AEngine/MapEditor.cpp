@@ -3,6 +3,8 @@
 #include "MapEditor.hpp"
 #include "MapManager.hpp"
 #include "GraphicsManager.hpp"
+#include "AssetsManager.hpp"
+#include "Utils.hpp"
 
 using namespace MapManager;
 
@@ -33,8 +35,6 @@ namespace MapEditor {
 		for (int y = 0; y < Config::GRID_HEIGHT; ++y) {
 			for (int x = 0; x < Config::GRID_WIDTH; ++x) {
 				int val = newMap[y][x].type;
-				// Set the barrier limits
-				//int val = x == Config::MIN_GRID_X || x == Config::MAX_GRID_X || y == Config::MIN_GRID_Y || y == Config::MAX_GRID_Y ? MapManager::Tile_Barrier : MapManager::Tile_Air;
 				output << val << " ";
 			}
 			output << std::endl;
@@ -57,7 +57,7 @@ namespace MapEditor {
 			isDrawingNewMap = false;
 		}
 
-		for (int i = 0; i < MapManager::Tile_Count; i++) {
+		for (int i = 0; i < MapManager::Tile_Count; ++i) {
 			if (AEInputCheckTriggered(AEVK_1+i)) {
 				drawingBlockType = static_cast<MapManager::TileType>(i+1);
 			}
@@ -145,14 +145,12 @@ namespace MapEditor {
 				if (AEInputCheckTriggered(AEVK_0+i)) {
 					savingFilePath += std::to_string(i) + ".txt";
 					SaveMapFile(savingFilePath);
-					isDrawingNewMap = true;
 				}
 			}
 		}
 
 		if (AEInputCheckTriggered(AEVK_E)) {
 			SaveMapFile("../../Assets/Map/level.txt"); // MIGHT HAVE SOME ERROR WHEN BUILDING DUE TO FILE PATH
-			isDrawingNewMap = true;
 		}
 	}
 
@@ -171,6 +169,7 @@ namespace MapEditor {
 			output << std::endl;
 		}
 
+		isDrawingNewMap = true;
 		output.close();
 	}
 }
