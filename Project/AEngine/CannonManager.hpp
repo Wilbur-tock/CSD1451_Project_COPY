@@ -25,7 +25,7 @@ namespace CannonManager {
 	class Cannon {
 	private:
 		int ammoCount = 0;
-		float projectileLifespan = 10;
+		float projectileLifespan = 4;
 		AEVec2 cannonSize{ 30,10 };
 
 		// Power charging system (how far the cannon shoots the projectile)

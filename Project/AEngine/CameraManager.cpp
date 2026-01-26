@@ -1,4 +1,6 @@
-#include "CameraManager.hpp"
+
+#pragma once
+#include "cameraManager.hpp"
 #include "pch.hpp"
 
 namespace CameraController
@@ -7,6 +9,7 @@ namespace CameraController
     {
         AEVec2 position = { 0.0f, 0.0f };
         float moveSpeed = 300.0f;
+        float followSpeed = 5.0f;
 
         // Boundary limits
         float boundMinX = -FLT_MAX;
@@ -14,39 +17,72 @@ namespace CameraController
         float boundMinY = -FLT_MAX;
         float boundMaxY = FLT_MAX;
         bool useBounds = false;
+
+        // Camera state
+        CameraState currentState = CameraState::INPUT;
+        const AEVec2* followTarget = nullptr;
     }
 
     void Init()
     {
-        
         position = { 0.0f, 0.0f };
         moveSpeed = 300.0f;
+        followSpeed = 5.0f;
         useBounds = false;
+        currentState = CameraState::INPUT;
+        followTarget = nullptr;
 
         AEGfxSetCamPosition(position.x, position.y);
     }
 
     void Update(float dt)
     {
-        AEVec2 movement = { 0.0f, 0.0f };
-
-        // WASD movement
-        if (AEInputCheckCurr(AEVK_W))
-            movement.y += 1.0f;
-        if (AEInputCheckCurr(AEVK_S))
-            movement.y -= 1.0f;
-        if (AEInputCheckCurr(AEVK_A))
-            movement.x -= 1.0f;
-        if (AEInputCheckCurr(AEVK_D))
-            movement.x += 1.0f;
-
-        // Normalize diagonal movement
-        float length = AEVec2Length(&movement);
-        if (length > 0.0f)
+        switch (currentState)
         {
-            AEVec2Scale(&movement, &movement, 1.0f / length);
-            AEVec2Scale(&movement, &movement, moveSpeed * dt);
-            AEVec2Add(&position, &position, &movement);
+        case CameraState::STATIC:
+            // Camera doesn't move, do nothing
+            break;
+
+        case CameraState::INPUT:
+        {
+            AEVec2 movement = { 0.0f, 0.0f };
+
+            // WASD movement
+            if (AEInputCheckCurr(AEVK_W))
+                movement.y += 1.0f;
+            if (AEInputCheckCurr(AEVK_S))
+                movement.y -= 1.0f;
+            if (AEInputCheckCurr(AEVK_A))
+                movement.x -= 1.0f;
+            if (AEInputCheckCurr(AEVK_D))
+                movement.x += 1.0f;
+
+            // Normalize diagonal movement
+            float length = AEVec2Length(&movement);
+            if (length > 0.0f)
+            {
+                AEVec2Scale(&movement, &movement, 1.0f / length);
+                AEVec2Scale(&movement, &movement, moveSpeed * dt);
+                AEVec2Add(&position, &position, &movement);
+            }
+            break;
+        }
+
+        case CameraState::FOLLOW:
+        {
+            if (followTarget != nullptr)
+            {
+                // Smooth lerp towards target
+                AEVec2 targetPos = *followTarget;
+                AEVec2 direction;
+                AEVec2Sub(&direction, &targetPos, &position);
+
+                float lerpFactor = 1.0f - powf(0.001f, dt * followSpeed);
+                AEVec2Scale(&direction, &direction, lerpFactor);
+                AEVec2Add(&position, &position, &direction);
+            }
+            break;
+        }
         }
 
         // Apply boundary clamping if enabled
@@ -95,9 +131,29 @@ namespace CameraController
         useBounds = true;
     }
 
+    void SetState(CameraState newState)
+    {
+        currentState = newState;
+    }
+
+    void SetFollowTarget(const AEVec2* target)
+    {
+        followTarget = target;
+    }
+
+    void SetFollowSpeed(float speed)
+    {
+        followSpeed = speed;
+    }
+
     AEVec2 GetPosition()
     {
         return position;
+    }
+
+    CameraState GetState()
+    {
+        return currentState;
     }
 
     void SetMoveSpeed(float speed)

@@ -4,6 +4,7 @@
 #include "GraphicsManager.hpp"
 #include "AssetsManager.hpp"
 #include "Color.hpp"
+#include "CameraManager.hpp"
 
 namespace CannonManager {
 	Projectile::Projectile() : timer{ 0.0f }, pos{ 0.0f, 0.0f }, velocity{ 0.0f,0.0f } {}
@@ -34,14 +35,14 @@ namespace CannonManager {
 		// Calculate cannon angle
 		s32 mouseX, mouseY;
 		AEInputGetCursorPosition(&mouseX, &mouseY);
-		
+
 		// Different way to calculate world position of the mouse -MAX_MAP_WIDTH/2.f to MAX_MAP_WIDTH
 		float worldMouseX = (float)mouseX - (Config::SCREEN_WIDTH / 2.0f);
 		float worldMouseY = (Config::SCREEN_HEIGHT / 2.0f) - (float)mouseY;
 
 		// Add camera offset 
 		f32 camX = 0, camY = 0;
-		AEGfxGetCamPosition(&camX,&camY);
+		AEGfxGetCamPosition(&camX, &camY);
 		worldMouseX += camX;
 		worldMouseY += camY;
 
@@ -64,7 +65,7 @@ namespace CannonManager {
 			+ "\nMouse\nScreen Pos X: " + Utils::FormatFloat(mouseX, 2) + " Y: " + Utils::FormatFloat(mouseY, 2)
 			+ "\nWorld Pos (-" + Utils::FormatFloat(Config::WORLD_MAX_X, 2) + " to " + Utils::FormatFloat(Config::WORLD_MAX_X, 2) + ")"
 			+ "\nX: " + Utils::FormatFloat(worldMouseX, 2) + " Y : " + Utils::FormatFloat(worldMouseY, 2)
-			+ "\nWorld Pos (0.00" + " to " + Utils::FormatFloat(Config::WORLD_MAX_X*2, 2) + ")"
+			+ "\nWorld Pos (0.00" + " to " + Utils::FormatFloat(Config::WORLD_MAX_X * 2, 2) + ")"
 			+ "\nX: " + Utils::FormatFloat(mX, 2) + " Y: " + Utils::FormatFloat(mY, 2);
 
 		GraphicsManager::DrawTextUI(str, -1, 0.99f, Color{ 0,0,1 }, 0.8f);
@@ -122,8 +123,12 @@ namespace CannonManager {
 		ammo[ammoCount].velocity.y = sin(cannonAngle) * shotPower;
 		ammo[ammoCount].timer = projectileLifespan;
 
-		// Add to the vector lisst
+		// Add to the vector list
 		activeAmmo.push_back(ammo[ammoCount]);
+
+		// Set camera to follow the newly fired projectile
+		CameraController::SetFollowTarget(&activeAmmo.back().pos);
+		CameraController::SetState(CameraController::CameraState::FOLLOW);
 
 		// Once it reach the ammo limit reset the ammo count
 		if (++ammoCount >= ammoLimit) {
@@ -148,12 +153,18 @@ namespace CannonManager {
 		}
 	}
 
-	void Cannon::DestroyProjectile(Projectile &projectile) {
+	void Cannon::DestroyProjectile(Projectile& projectile) {
 		projectile.isActive = false;
 		// Find the index containing the projectile and erase from the active ammo vector
 		for (int i = 0; i < activeAmmo.size(); i++) {
 			if (activeAmmo[i].id == projectile.id) {
 				activeAmmo.erase(activeAmmo.begin() + i);
+
+				// Return camera to input control when all projectiles are destroyed
+				if (activeAmmo.empty()) {
+					CameraController::SetFollowTarget(nullptr);
+					CameraController::SetState(CameraController::CameraState::INPUT);
+				}
 
 				std::cout << "Removing " << i << " " << "Count " << activeAmmo.size() << std::endl;
 			}
@@ -163,7 +174,7 @@ namespace CannonManager {
 	void Cannon::UIChargeShotBar() {
 		AEGfxTexture* tex = AssetsManager::GetTexture("Assets/square.png");
 
-		float x = pos.x - (cannonSize.x*1.75f), y = pos.y;
+		float x = pos.x - (cannonSize.x * 1.75f), y = pos.y;
 		float w = 20, h = 75, gap = 5;
 
 		// Background Border Bar
@@ -175,11 +186,11 @@ namespace CannonManager {
 		x += gap, y += gap;
 
 		// Lighter background bar
-		AEMtx33 mat2 = GraphicsManager::CreateTransformMatrix(x, y, 0, w,-h);
+		AEMtx33 mat2 = GraphicsManager::CreateTransformMatrix(x, y, 0, w, -h);
 		GraphicsManager::DrawUI(tex, mat2, Color{ 0, 0.2f, 0, 1 });
 
 		float percentage = (power / maxPower);
-		float newH = h*percentage;
+		float newH = h * percentage;
 
 		// Bar
 		AEMtx33 mat3 = GraphicsManager::CreateTransformMatrix(x, y, 0, w, -newH);
