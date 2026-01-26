@@ -10,43 +10,50 @@ namespace CannonManager {
 		float gravity = 1500;
 
 	public:
+		int id = 0;
 		float timer;
 		AEVec2 pos, velocity;
 		bool isActive = false;
 
-		Projectile();
+		Projectile(); // Default intializer
 		Projectile(AEVec2 _pos, AEVec2 _velocity);
 
 		void Render();
-		void MoveProjectile(float speed, float dt);
-		void DestroyProjectile();
+		void MoveProjectile(float dt);
 	};
 
 	class Cannon {
 	private:
-		int projectileUsed = 0, projectileLifespan = 10;
+		int ammoCount = 0;
+		float projectileLifespan = 10;
 		AEVec2 cannonSize{ 30,10 };
 
 		// Power charging system (how far the cannon shoots the projectile)
-		float power = 100, minPower = 100, maxPower = 1500, chargeRate = 500;
+		float power = 100, minPower = 100, maxPower = 2000, chargeRate = 500;
 		bool isPowerIncrease = true;
 
 	public:
-		AEVec2 pos;
-		float cannonAngle;
-		std::vector<Projectile> bullets, activeProjectile;
-		int projectileAmount;
-		float projectileSpeed;
+		AEVec2 pos; // Position of the cannon
+		float cannonAngle; // Angle of the cannon for the projectile to shoot from
+		std::vector<Projectile> ammo, activeAmmo;
+		int ammoLimit;
+		float shotPower; // The amount of shot power player charged up
 
 		Cannon();
 		Cannon(AEVec2 _pos, int _projectileAmount);
 
+		/* Calculate the angle of the cannon based on the mouse position, render the cannon sprite
+		Calculate the charge shot power and update any shot projectiles */
 		void Update();
+		/* Check for left mouse input the shot power will be increased/decreased based on the charge rate */
 	    void ChargeShot(float dt);
 		void Render();
-		void ShootProjectile(float dt);
+		void ShootProjectile();
+		/* Render and move the projectile once it has reach the end of its lifespan it is destroy */
 		void ProjectileUpdate(float dt);
-		void UI();
+		void DestroyProjectile(Projectile& projectile);
+		/* UI to display the charging shot power bar */
+		void UIChargeShotBar();
 	};
 }
 

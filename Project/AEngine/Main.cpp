@@ -44,6 +44,8 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 		AESysFrameStart();
 		AEInputUpdate();
 
+		AEGfxSetBackgroundColor(0, 0, 0);
+
 		// Basic way to trigger exiting the application
 		// when ESCAPE is hit or when the window is closed
 		if (AEInputCheckTriggered(AEVK_ESCAPE) || 0 == AESysDoesWindowExist())

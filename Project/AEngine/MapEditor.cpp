@@ -7,24 +7,35 @@
 using namespace MapManager;
 
 namespace MapEditor {
-	TileType drawingBlockType = Tile_Block;
+	TileType drawingBlockType = Tile_Barrier;
 	bool isDrawingNewMap = true;
-	Tile newMap[Config::mapHeight][Config::mapWidth];
 
-	void ResetMapLayout(Tile map[Config::mapHeight][Config::mapWidth]) {
-		for (int y = 0; y < Config::mapHeight; ++y) {
-			for (int x = 0; x < Config::mapWidth; ++x) {
-				map[y][x].type = Tile_Air;
-			}
-		}
-	}
+	std::vector<std::vector<Tile>> newMap(Config::GRID_HEIGHT, std::vector<Tile>(Config::GRID_WIDTH));
+
+	//static void NewDefaultMap() {
+	//	const char* filePath = "Assets/Map/default.txt";
+	//	std::ofstream output{ filePath };
+	//
+	//	if (!output.is_open()) {
+	//		std::cerr << "Error: Could not open file at " << filePath << std::endl;
+	//		return;
+	//	}
+	//
+	//	for (int y = 0; y < Config::MAP_HEIGHT; ++y) {
+	//		for (int x = 0; x < Config::MAP_WIDTH; ++x) {
+	//			output << 0 << " ";
+	//		}
+	//		output << std::endl;
+	//	}
+	//
+	//	output.close();
+	//}
 
 	void InitMapEditor() {
 		// Reset settings
-		drawingBlockType = Tile_Block;
-
+		drawingBlockType = Tile_Barrier;
 		// Reset map
-		ResetMapLayout(newMap);
+		MapManager::LoadMapData("Assets/Map/default.txt", newMap, true);
 	}
 
 	void MapEditor() {
@@ -33,43 +44,76 @@ namespace MapEditor {
 			isDrawingNewMap = false;
 		}
 
-		if (AEInputCheckTriggered(AEVK_0)) {
+		if (AEInputCheckTriggered(AEVK_1)) {
+			drawingBlockType = Tile_Barrier;
+		}
+		else if (AEInputCheckTriggered(AEVK_2)) {
 			drawingBlockType = Tile_Block;
 		}
-		else if (AEInputCheckTriggered(AEVK_1)) {
-			drawingBlockType = Tile_Air; // TEMP CHANGED LATER WHEN MORE BLOCKS TYPE ARE INTRODUCED
+		else if (AEInputCheckTriggered(AEVK_3)) {
+			drawingBlockType = Tile_Cannon;
 		}
+		else if (AEInputCheckTriggered(AEVK_4)) {
+			drawingBlockType = Tile_Enemy_Minion;
+		}
+		else if (AEInputCheckTriggered(AEVK_5)) {
+			drawingBlockType = Tile_Enemy_Boss;
+		}
+
+		float worldMouseX = 0, worldMouseY = 0;
+		Utils::GetWorldMousePos(worldMouseX, worldMouseY);
+
+		int gridX = static_cast<int>(worldMouseX / Config::TILE_SIZE);
+		int gridY = static_cast<int>(worldMouseY / Config::TILE_SIZE);
+
+		// Formula for calculating gridX = worldMouseX (cam x + screenwidth(1600) + mouse x) / tileSize (32)
+		// Formula for calculating gridY = worldMouseY (cam Y - (screenheight / 2.0f) (450) + mouse y) / tileSize (32)
+
+		// This is to ensure that the grid index does not go out of range
+		Utils::Limit(gridX, Config::MIN_GRID_X, Config::MAX_GRID_X);
+		Utils::Limit(gridY, Config::MIN_GRID_Y, Config::MAX_GRID_Y);
+
+		//std::cout << "Mouse: (" << mouseX << ", " << mouseY << ") ";
+		//std::cout << "World: (" << worldMouseX << ", " << worldMouseY << ") ";
+		//std::cout << "Grid: (" << gridX << ", " << gridY << ")" << std::endl;
+
+		if (gridX >= 0 && gridX < Config::GRID_WIDTH && gridY >= 0 && gridY < Config::GRID_HEIGHT) {
+			if (gridX != Config::MIN_GRID_X && gridX != Config::MAX_GRID_X && gridY != Config::MIN_GRID_Y && gridY != Config::MAX_GRID_Y) {
+				if (AEInputCheckCurr(AEVK_LBUTTON)) {
+					newMap[gridY][gridX].type = drawingBlockType;
+				}
+				else if (AEInputCheckCurr(AEVK_RBUTTON)) {
+					newMap[gridY][gridX].type = MapManager::Tile_Air;
+				}
+			}
+		}
+
+		// Render the map
+		MapManager::RenderMap(newMap);
+
+		// Print out the information on how to use the editor
+		std::string helpStr = "'E' to save file | 'Q' to close map editor\nLeft Mouse - Place tile\nRight Mouse - Erase Tile\n1 - Barrier, 2 - Block, 3 - Cannon, 4 - Minion, 5 - Boss";
+		helpStr += "\nDrawing Tile " + std::to_string(drawingBlockType);
+		GraphicsManager::DrawTextUI(helpStr,-1.0f,.99f,Color{0,0,1, 1.0f}, 0.8f);
+
+		// Print out debugger information about the map editor
+		f32 x, y;
+		AEGfxGetCamPosition(&x, &y);
 
 		s32 mouseX, mouseY;
 		AEInputGetCursorPosition(&mouseX, &mouseY);
+		float mX = 0, mY = 0;
+		Utils::GetWorldMousePos(mX, mY);
+		std::string debugStr = "Grid\nIndex X: " + std::to_string(gridX) + " Y: " + std::to_string(gridY)
+			+ "\nPos X: " + Utils::FormatFloat(newMap[gridY][gridX].pos.x, 2) + " Y: " + Utils::FormatFloat(newMap[gridY][gridX].pos.y, 2)
+			+ "\nCamera\nPos X:" + Utils::FormatFloat(x, 2) + " Y: " + Utils::FormatFloat(y, 2)
+			+ "\nMouse\nScreen Pos X: " + Utils::FormatFloat(mouseX, 2) + " Y: " + Utils::FormatFloat(mouseY, 2)
+			+ "\nWorld Pos X: " + Utils::FormatFloat(mX, 2) + " Y: " + Utils::FormatFloat(mY, 2);
+		GraphicsManager::DrawTextUI(debugStr, 0.5f, .99f, Color{ 0,0,1, 1.0f }, 0.8f);
 
-		// Convert Screen Space to World Space
-		// AE Screen (0,0) is Top-Left, World (0,0) is Center
-		//float worldX = (float)mouseX - (Config::screenWidth / 2.0f);
-		//float worldY = (Config::screenHeight / 2.0f) - (float)mouseY;
-
-		// Convert World Space to Grid Index
-		int gridX = mouseX / Config::tileSize;
-		int gridY = mouseY / Config::tileSize;
-
-		// Bounds Checking & Input
-		if (gridX >= 0 && gridX < Config::mapWidth && gridY >= 0 && gridY < Config::mapHeight) {
-			if (AEInputCheckCurr(VK_LBUTTON)) {
-				newMap[gridY][gridX].type = drawingBlockType;
-				std::cout << gridY << " " << gridX << std::endl;
-			}
-			else if (AEInputCheckCurr(VK_RBUTTON)) {
-				newMap[gridY][gridX].type = MapManager::Tile_Air;
-			}
-		}
-
-		//TEMPORARY TEXTURE ONLY
-		AEGfxTexture* texture = AEGfxTextureLoad("Assets/square.png");
-		MapManager::RenderMap(texture, newMap);
-
-		// Save file onto the the bin folder
-		if (AEInputCheckTriggered(AEVK_S)) {
-			SaveMapFile("Assets/Map/map.txt");
+		// Save file
+		if (AEInputCheckTriggered(AEVK_E)) {
+			SaveMapFile("../../Assets/Map/drawnMap.txt"); // MIGHT HAVE SOME ERROR WHEN BUILDING DUE TO FILE PATH
 			isDrawingNewMap = true;
 		}
 	}
@@ -82,14 +126,13 @@ namespace MapEditor {
 			return;
 		}
 
-		for (int y = 0; y < Config::mapHeight; ++y) {
-			for (int x = 0; x < Config::mapWidth; ++x) {
+		for (int y = 0; y < Config::GRID_HEIGHT; ++y) {
+			for (int x = 0; x < Config::GRID_WIDTH; ++x) {
 				output << newMap[y][x].type << " ";
 			}
 			output << std::endl;
 		}
 
 		output.close();
-		//std::cout << "File Created Successfully at: " << filePath << std::endl;
 	}
 }
