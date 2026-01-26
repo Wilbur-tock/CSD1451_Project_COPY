@@ -20,7 +20,7 @@ namespace Utils {
 		y += (Config::SCREEN_HEIGHT / 2.0f) - camY;
 	}
 
-	std::string FormatFloat(float value, int precision) {
+	std::string FormatFloat(double value, int precision) {
 		std::stringstream ss;
 		ss << std::fixed << std::setprecision(precision) << value;
 		return ss.str();

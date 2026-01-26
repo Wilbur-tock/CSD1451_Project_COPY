@@ -10,7 +10,7 @@ namespace Utils {
 	void GetWorldMousePos(float& x, float& y);
 	void GetWorldPos(float& x, float& y);
 
-	std::string FormatFloat(float value, int precision);
+	std::string FormatFloat(double value, int precision);
 	// Set limit to ensure that the value does not go under minimum or over maximum
 	void Limit(int& val, int min, int max);
 }
