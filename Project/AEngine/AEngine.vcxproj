@@ -98,23 +98,39 @@ xcopy "$(SolutionDir)Extern\AlphaEngine\lib\fmod.dll" "$(OutDir)" /s /r /y /q</C
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="AssetsManager.cpp" />
+    <ClCompile Include="Button.cpp" />
     <ClCompile Include="CannonManager.cpp" />
+    <ClCompile Include="CollisionManager.cpp" />
+    <ClCompile Include="Color.cpp" />
+    <ClCompile Include="DebugPrint.cpp" />
     <ClCompile Include="GameStateManager.cpp" />
     <ClCompile Include="GraphicsManager.cpp" />
+    <ClCompile Include="Level.cpp" />
+    <ClCompile Include="Level1.cpp" />
     <ClCompile Include="Main.cpp" />
+    <ClCompile Include="MainMenu.cpp" />
     <ClCompile Include="MapEditor.cpp" />
     <ClCompile Include="MapManager.cpp" />
     <ClCompile Include="pch.cpp" />
+    <ClCompile Include="Utils.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AssetsManager.hpp" />
+    <ClInclude Include="Button.hpp" />
     <ClInclude Include="CannonManager.hpp" />
+    <ClInclude Include="CollisionManager.hpp" />
+    <ClInclude Include="Color.hpp" />
     <ClInclude Include="Config.hpp" />
+    <ClInclude Include="DebugPrint.hpp" />
     <ClInclude Include="GameStateManager.hpp" />
     <ClInclude Include="GraphicsManager.hpp" />
+    <ClInclude Include="Level.hpp" />
+    <ClInclude Include="Level1.hpp" />
+    <ClInclude Include="MainMenu.hpp" />
     <ClInclude Include="MapEditor.hpp" />
     <ClInclude Include="MapManager.hpp" />
     <ClInclude Include="pch.hpp" />
+    <ClInclude Include="Utils.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
