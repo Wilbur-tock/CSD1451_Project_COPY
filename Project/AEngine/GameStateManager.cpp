@@ -94,6 +94,12 @@ namespace GameStateManager {
 
         // Update camera (handles movement, clamping, flooring, and setting position)
         camera.Update(static_cast<float>(AEFrameRateControllerGetFrameTime()));
+
+        // Debugger
+        std::string str = "FPS: " + Utils::FormatFloat(static_cast<double>(AEFrameRateControllerGetFrameRate()), 2)
+            + "\nDeltaTime: " + Utils::FormatFloat(static_cast<double>(AEFrameRateControllerGetFrameTime()), 2);
+
+        GraphicsManager::DrawTextUI(str, -1.f, -0.9f, Color{ 0,0,1 }, 0.8f);
     }
 
     void Exit() {

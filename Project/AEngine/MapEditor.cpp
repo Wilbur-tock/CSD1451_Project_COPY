@@ -12,28 +12,39 @@ namespace MapEditor {
 
 	std::vector<std::vector<Tile>> newMap(Config::GRID_HEIGHT, std::vector<Tile>(Config::GRID_WIDTH));
 
-	//static void NewDefaultMap() {
-	//	const char* filePath = "Assets/Map/default.txt";
-	//	std::ofstream output{ filePath };
-	//
-	//	if (!output.is_open()) {
-	//		std::cerr << "Error: Could not open file at " << filePath << std::endl;
-	//		return;
-	//	}
-	//
-	//	for (int y = 0; y < Config::MAP_HEIGHT; ++y) {
-	//		for (int x = 0; x < Config::MAP_WIDTH; ++x) {
-	//			output << 0 << " ";
-	//		}
-	//		output << std::endl;
-	//	}
-	//
-	//	output.close();
-	//}
+	// If the Project/Assets/Map does not contain default.txt file 
+	// it will create a new one if not just return
+	static void CreateDefaultMap() {
+		const char* fileName = "../../Assets/Map/default.txt";
+		std::ifstream ifs{ fileName };
+		if (ifs) {
+			std::cout << "Contain default.txt " << fileName << std::endl;
+			return;
+		}
+
+		std::ofstream output{ fileName };
+	
+		if (!output.is_open()) {
+			std::cerr << "Error: Could not open file at " << fileName << std::endl;
+			return;
+		}
+	
+		for (int y = 0; y < Config::GRID_HEIGHT; ++y) {
+			for (int x = 0; x < Config::GRID_WIDTH; ++x) {
+				// Set the barrier limits
+				int val = x == Config::MIN_GRID_X || x == Config::MAX_GRID_X || y == Config::MIN_GRID_Y || y == Config::MAX_GRID_Y ? MapManager::Tile_Barrier : MapManager::Tile_Air;
+				output << val << " ";
+			}
+			output << std::endl;
+		}
+	
+		output.close();
+	}
 
 	void InitMapEditor() {
 		// Reset settings
 		drawingBlockType = Tile_Barrier;
+		CreateDefaultMap();
 		// Reset map
 		MapManager::LoadMapData("Assets/Map/default.txt", newMap, true);
 	}
@@ -63,19 +74,12 @@ namespace MapEditor {
 		float worldMouseX = 0, worldMouseY = 0;
 		Utils::GetWorldMousePos(worldMouseX, worldMouseY);
 
-		int gridX = static_cast<int>(worldMouseX / Config::TILE_SIZE);
-		int gridY = static_cast<int>(worldMouseY / Config::TILE_SIZE);
-
-		// Formula for calculating gridX = worldMouseX (cam x + screenwidth(1600) + mouse x) / tileSize (32)
-		// Formula for calculating gridY = worldMouseY (cam Y - (screenheight / 2.0f) (450) + mouse y) / tileSize (32)
+		int gridX = static_cast<int>((worldMouseX + Config::WORLD_MAX_X) / Config::TILE_SIZE);
+		int gridY = static_cast<int>((Config::WORLD_MAX_Y - worldMouseY) / Config::TILE_SIZE);
 
 		// This is to ensure that the grid index does not go out of range
 		Utils::Limit(gridX, Config::MIN_GRID_X, Config::MAX_GRID_X);
 		Utils::Limit(gridY, Config::MIN_GRID_Y, Config::MAX_GRID_Y);
-
-		//std::cout << "Mouse: (" << mouseX << ", " << mouseY << ") ";
-		//std::cout << "World: (" << worldMouseX << ", " << worldMouseY << ") ";
-		//std::cout << "Grid: (" << gridX << ", " << gridY << ")" << std::endl;
 
 		if (gridX >= 0 && gridX < Config::GRID_WIDTH && gridY >= 0 && gridY < Config::GRID_HEIGHT) {
 			if (gridX != Config::MIN_GRID_X && gridX != Config::MAX_GRID_X && gridY != Config::MIN_GRID_Y && gridY != Config::MAX_GRID_Y) {
