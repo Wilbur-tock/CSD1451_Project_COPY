@@ -1,60 +1,79 @@
 #include "pch.hpp"
 
 #include "MapManager.hpp"
+#include "GraphicsManager.hpp"
+#include "AssetsManager.hpp"
+#include "Color.hpp"
 
 namespace MapManager {
+	std::vector<std::vector<Tile>> mapLayout(Config::GRID_HEIGHT, std::vector<Tile>(Config::GRID_WIDTH));
 
-	Tile mapLayout[Config::mapHeight][Config::mapWidth];
-
-	void LoadMapData(const char* fileName) {
+	 void LoadMapData(const char* fileName, std::vector<std::vector<Tile>> &map, bool setBarrier) {
 		std::ifstream ifs{fileName};
 		if (!ifs) {
 			std::cerr << "Error: Could not open map data file at " << fileName << std::endl;
 			return;
 		}
 
-		for (int y = 0; y < Config::mapHeight; ++y) {
-			for (int x = 0; x < Config::mapWidth; ++x) {
+		// Calculate how many tiles fit on screen
+		int width = Config::GRID_WIDTH;
+		int height = Config::GRID_HEIGHT;
+		float tileSize = static_cast<float>(Config::TILE_SIZE);
+
+		// Offset to start from the top left corner
+		float startX = -((width * tileSize) / 2.0f) + (tileSize / 2.0f);
+		float startY = ((height * tileSize) / 2.0f) - (tileSize / 2.0f);
+
+		// Initialize each Tile class data in the 2D vector
+		for (int y = 0; y < Config::GRID_HEIGHT; ++y) {
+			for (int x = 0; x < Config::GRID_WIDTH; ++x) {
+				// Set type
 				int type = 0;
 				ifs >> type;
-				mapLayout[y][x].type = static_cast<TileType>(type);
+				//Set barrier around the edges
+				if (setBarrier) {
+					type = x == Config::MIN_GRID_X || x == Config::MAX_GRID_X || y == Config::MIN_GRID_Y || y == Config::MAX_GRID_Y ? Tile_Barrier : Tile_Air;
+				}
+				map[y][x].type = static_cast<TileType>(type);
+
+				// Set position
+				map[y][x].pos = { startX + (x * tileSize), startY - (y * tileSize) };
 			}
 		}
 
 		ifs.close();
 	}
 
-	void LoadAllMapData() {
-		LoadMapData("Assets/Map/level1.txt");
-	}
+	void RenderMap(const std::vector<std::vector<Tile>>& map) {
+		float tileSize = static_cast<float>(Config::TILE_SIZE);
 
-	void RenderMap(AEGfxTexture* tileTexture, Tile const map[Config::mapHeight][Config::mapWidth]) {
-		// Calculate how many tiles fit on screen
-		int width = Config::mapWidth;
-		int height = Config::mapHeight;
-		float tileSize = static_cast<float>(Config::tileSize);
+		for (std::vector<Tile> row : map) {
+			for (Tile tile : row) {
+				AEMtx33 transform = GraphicsManager::CreateTransformMatrix(tile.pos.x, tile.pos.y, 0.0f, tileSize / 2.0f, tileSize / 2.0f);
 
-
-		// Offset to center the grid or start from a corner
-		float startX = -(static_cast<float>(Config::screenWidth) / 2.0f) + (tileSize / 2.0f);
-		float startY = (static_cast<float>(Config::screenHeight) / 2.0f) - (tileSize / 2.0f);
-
-		for (int y = 0; y < height; ++y) {
-			for (int x = 0; x < width; ++x) {
-				float posX = startX + (x * tileSize);
-				float posY = startY - (y * tileSize);
-
-				AEMtx33 transform = GraphicsManager::CreateTransformMatrix(posX, posY, 0.0f, tileSize / 2.0f, tileSize / 2.0f);
+				TileType type = tile.type;
+				AEGfxTexture* texture = AssetsManager::GetTexture("Assets/square.png");
 
 				// TEMPORARY TO BE CHANGED TO TEXTURE ASSET LATER
-				float red = 0.9, g = 0.9, b = 0.9;
+				float red = 0.9f, g = 0.9f, b = 0.9f;
 
-				if (map[y][x].type == 1) {
+				if (type == Tile_Barrier) { // Barrier block
+					red = 0, g = 1, b = 0;
+				}
+				else if (type == Tile_Block) {
 					red = 1, g = 0, b = 0;
-					//std::cout << "Changed Grid:" << y << " " << x << std::endl;
+				}
+				else if (type == Tile_Cannon) {
+					red = 0, g = 0, b = 0;
+				}
+				else if (type == Tile_Enemy_Minion) {
+					red = 0, g = 0, b = 1;
+				}
+				else if (type == Tile_Enemy_Boss) {
+					red = 1, g = 1, b = 0;
 				}
 
-				GraphicsManager::DrawGameObject(tileTexture, transform, red, g, b, 1.0f);
+				GraphicsManager::DrawGameObject(texture, transform, Color{ red, g, b });
 			}
 		}
 	}
