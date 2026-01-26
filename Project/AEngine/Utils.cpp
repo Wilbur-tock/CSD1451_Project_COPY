@@ -6,7 +6,7 @@ namespace Utils {
 	bool isDebuggerOn = false;
 	Color debuggerColor = Color{ 0,1.f,0 };
 
-	std::pair<Color, float> debuggerInfo = {Color{0, 0.8f, 0 }, 0.8f};
+	std::pair<Color, float> debuggerInfo = {Color{0, 0.8f, 0 }, 0.75f};
 
 	void GetWorldMousePos(float& x, float& y) {
 		s32 mouseX, mouseY;

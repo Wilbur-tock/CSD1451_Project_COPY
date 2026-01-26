@@ -12,16 +12,30 @@ namespace MapEditor {
 	TileType defaultTile = Tile_Block_1;
 	TileType drawingBlockType = defaultTile;
 	bool isDrawingNewMap = true;
+	int totalLevelMap = 5;
+	std::string defaultSavePath = "Assets/Map/level.txt", defaultLoadPath = "Assets/Map/default.txt",
+		loadPath = "", savePath = "";
 
 	std::vector<std::vector<Tile>> newMap(Config::GRID_HEIGHT, std::vector<Tile>(Config::GRID_WIDTH));
 
 	// If the Project/Assets/Map does not contain default.txt file 
 	// it will create a new one if not just return
+	static void CreateDefaultMap();
+	// Ensure that the file path is going back to my project folder NOT THE BIN FOLDER
+	static std::string DebugFilePath(std::string filePath) { return "../../" + filePath; }
+
+	static void LoadNewMap(std::string filePath) {
+		MapManager::LoadMapData("Assets/Map/default.txt", newMap); // Reset the map to render
+		savePath = filePath;
+		if (filePath == defaultLoadPath) savePath = defaultSavePath;
+		loadPath = filePath;
+	}
+
 	static void CreateDefaultMap() {
-		const char* fileName = "../../Assets/Map/default.txt";
+		std::string fileName = defaultLoadPath;
 		std::ifstream ifs{ fileName };
 		if (ifs) {
-			std::cout << "Contain default.txt " << fileName << std::endl;
+			//std::cout << "Contain default.txt " << fileName << std::endl;
 			return;
 		}
 
@@ -47,8 +61,7 @@ namespace MapEditor {
 		// Reset settings
 		drawingBlockType = defaultTile;
 		CreateDefaultMap();
-		// Reset map
-		MapManager::LoadMapData("Assets/Map/default.txt", newMap);
+		LoadNewMap(defaultLoadPath);
 	}
 
 	void MapEditor() {
@@ -109,11 +122,41 @@ namespace MapEditor {
 			}
 		}
 
+		// Checking for input CTRL + {NUMBER} to load a new LEVEL MAP to edit
+		if (AEInputCheckCurr(AEVK_LCTRL) || AEInputCheckCurr(AEVK_RCTRL)) {
+			for (int i = 1; i <= totalLevelMap; ++i) {
+				if (AEInputCheckCurr(AEVK_0 + i)) {
+					// Have to load file from both BIN and my project folder
+					std::string newLoadPath = "Assets/Map/level" + std::to_string(i) + ".txt";
+					LoadNewMap(newLoadPath);
+
+					if (Utils::isDebuggerOn) {
+						newLoadPath =  DebugFilePath(newLoadPath);
+						LoadNewMap(newLoadPath);
+					}
+				}
+			}
+		}
+
+		if (AEInputCheckTriggered(AEVK_E)) {
+			SaveMapFile(savePath); // MIGHT HAVE SOME ERROR WHEN BUILDING DUE TO FILE PATH
+			if (Utils::isDebuggerOn) {
+				// Save file on both BIN folder and my project folder if debugger is on
+				SaveMapFile(savePath);
+
+				if (Utils::isDebuggerOn) {
+					SaveMapFile(DebugFilePath(savePath));
+				}
+			}
+		}
+
 		// Render the map
 		MapManager::RenderMap(newMap);
 
 		// Print out the information on how to use the editor
-		std::string helpStr = "'E' to save file | 'Q' to close map editor\nLeft Mouse - Place tile\nRight Mouse - Erase Tile";
+		std::string helpStr = "'E' to save file | 'Q' to close map editor\nCurrent File: "
+			+ loadPath + "\nSave File: " + savePath +
+			+ "\nLeft Mouse - Place tile\nRight Mouse - Erase Tile";
 		std::string tileNames[] = {"1.Player", "2.Cannon", "3.Minion", "4.Boss", "5.Ground", "6.Block_1", "7.Block_2"};
 		for (std::string name : tileNames) {
 			helpStr += "\n" + name;
@@ -136,21 +179,6 @@ namespace MapEditor {
 				+ "\nMouse\nScreen Pos X: " + Utils::FormatFloat(mouseX, 2) + " Y: " + Utils::FormatFloat(mouseY, 2)
 				+ "\nWorld Pos X: " + Utils::FormatFloat(mX, 2) + " Y: " + Utils::FormatFloat(mY, 2);
 			GraphicsManager::DrawTextUI(debugStr, 0.5f, .99f, Utils::debuggerInfo.first, Utils::debuggerInfo.second);
-		}
-
-		// Saving file
-		std::string savingFilePath = "../../Assets/Map/level";
-		if (AEInputCheckCurr(AEVK_LCTRL) || AEInputCheckCurr(AEVK_RCTRL)) {
-			for (int i = 1;i <= 5; i++) {
-				if (AEInputCheckTriggered(AEVK_0+i)) {
-					savingFilePath += std::to_string(i) + ".txt";
-					SaveMapFile(savingFilePath);
-				}
-			}
-		}
-
-		if (AEInputCheckTriggered(AEVK_E)) {
-			SaveMapFile("../../Assets/Map/level.txt"); // MIGHT HAVE SOME ERROR WHEN BUILDING DUE TO FILE PATH
 		}
 	}
 
