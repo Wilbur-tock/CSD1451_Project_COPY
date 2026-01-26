@@ -13,6 +13,10 @@ namespace Utils {
 	std::string FormatFloat(double value, int precision);
 	// Set limit to ensure that the value does not go under minimum or over maximum
 	void Limit(int& val, int min, int max);
+	// Set limit to ensure that the value does not go under minimum or over maximum
+	void Limit(float& val, float min, float max);
+	// Set limit to ensure that the value does not go under minimum or over maximum
+	void Limit(double& val, double min, double max);
 }
 
 #endif // !UTILS_HPP

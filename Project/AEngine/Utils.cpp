@@ -35,4 +35,14 @@ namespace Utils {
 		if (val < min) val = min;
 		if (val > max) val = max;
 	}
+	
+	void Limit(float& val, float min, float max) {
+		if (val < min) val = min;
+		if (val > max) val = max;
+	}
+	
+	void Limit(double& val, double min, double max) {
+		if (val < min) val = min;
+		if (val > max) val = max;
+	}
 }

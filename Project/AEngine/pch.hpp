@@ -9,6 +9,7 @@
 #include <string>
 #include <iomanip>
 #include <sstream>
+#include <algorithm>
 
 #include "AEEngine.h"
 #include "Config.hpp"

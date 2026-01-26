@@ -13,8 +13,6 @@ namespace GameStateManager {
     int current = 0, previous = 0, next = 0;
     // Temporary
     AEGfxTexture* texture;
-    AEVec2 v2{ -700,-325 };
-    CannonManager::Cannon cannon(v2, 50);
 
     // Camera instance
     CameraController camera;

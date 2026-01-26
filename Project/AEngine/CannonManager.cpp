@@ -5,10 +5,11 @@
 #include "Color.hpp"
 #include "CameraManager.hpp"
 #include "GameStateManager.hpp"
+#include "Utils.hpp"
 
 namespace CannonManager {
-    Projectile::Projectile() : timer{ 0.0f }, pos{ 0.0f, 0.0f }, velocity{ 0.0f,0.0f } {}
-    Projectile::Projectile(AEVec2 _pos, AEVec2 _velocity) : timer{ 0.0f }, pos(_pos), velocity(_velocity) {}
+    Projectile::Projectile() : timer{ 0.0f }, velocity{ 0.0f,0.0f } {}
+    Projectile::Projectile(AEVec2 _pos, AEGfxTexture* _texture, AEVec2 _velocity) : GameObject(_pos, _texture), timer{ 0.0f }, velocity(_velocity) {}
 
     void Projectile::Render() {
         AEGfxTexture* tex = AssetsManager::GetTexture("Assets/circle.png");
@@ -23,8 +24,8 @@ namespace CannonManager {
         pos.y += velocity.y * dt;
     }
 
-    Cannon::Cannon() : pos{ 0.0f,0.0f }, cannonAngle{ 0.0f }, ammo{ NULL }, ammoLimit{ 0 }, shotPower{ power } {}
-    Cannon::Cannon(AEVec2 _pos, int _projectileAmount) : pos(_pos), ammoLimit(_projectileAmount), cannonAngle{ 0.0f }, shotPower{ power } {
+    Cannon::Cannon() : cannonAngle{ 0.0f }, ammo{ NULL }, ammoLimit{ 0 }, shotPower{ power } {}
+    Cannon::Cannon(AEVec2 _pos, AEGfxTexture* _texture, int _projectileAmount) : GameObject(_pos, _texture), ammoLimit{ _projectileAmount }, cannonAngle{ 0.0f }, shotPower{ power } {
         ammo.clear();
         ammo.resize(ammoLimit);
         activeAmmo.clear();
@@ -39,8 +40,7 @@ namespace CannonManager {
         cannonAngle = atan2(worldMouseY - pos.y, worldMouseX - pos.x);
 
         // Add limits so it can only turn facing upwards or downwards limits
-        cannonAngle = cannonAngle < -1.5 ? -1.5f : cannonAngle;
-        cannonAngle = cannonAngle > 1.5 ? 1.5f : cannonAngle;
+        Utils::Limit(cannonAngle, -1.5f, 1.5f);
 
         // Debugger
         float mX = 0, mY = 0;
@@ -70,6 +70,9 @@ namespace CannonManager {
         if (AEInputCheckCurr(VK_LBUTTON)) {
             float chargeRateWithDT = chargeRate * dt;
             power += isPowerIncrease ? chargeRateWithDT : -chargeRateWithDT;
+
+            //Utils::Limit(power, minPower, maxPower);
+
             if (power > maxPower) {
                 power = maxPower;
                 isPowerIncrease = false;
@@ -92,9 +95,8 @@ namespace CannonManager {
     }
 
     void Cannon::Render() {
-        AEGfxTexture* tex = AssetsManager::GetTexture("Assets/test.png");
         AEMtx33 mat = GraphicsManager::CreateTransformMatrix(pos.x, pos.y, cannonAngle, cannonSize.x, cannonSize.y);
-        GraphicsManager::DrawGameObject(tex, mat, Color{ 1, 1, 1, 1 });
+        GraphicsManager::DrawGameObject(texture, mat, Color{ 1, 1, 1, 1 });
     }
 
     void Cannon::ShootProjectile() {
