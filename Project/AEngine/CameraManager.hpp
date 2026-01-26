@@ -1,14 +1,17 @@
 #pragma once
-#include "AEEngine.h"
+#include "pch.hpp"
 
-namespace CameraController
+class CameraController
 {
+public:
     enum class CameraState
     {
         STATIC,      // Camera doesn't move
         INPUT,       // Camera controlled by WASD input
         FOLLOW       // Camera follows a target
     };
+
+    CameraController();
 
     void Init();
     void Update(float dt);
@@ -18,8 +21,24 @@ namespace CameraController
     void SetFollowTarget(const AEVec2* target);
     void SetFollowSpeed(float speed);
 
-    AEVec2 GetPosition();
-    CameraState GetState();
+    AEVec2 GetPosition() const;
+    CameraState GetState() const;
 
     void SetMoveSpeed(float speed);
-}
+
+private:
+    AEVec2 position;
+    float moveSpeed;
+    float followSpeed;
+
+    // Boundary limits
+    float boundMinX;
+    float boundMaxX;
+    float boundMinY;
+    float boundMaxY;
+    bool useBounds;
+
+    // Camera state
+    CameraState currentState;
+    const AEVec2* followTarget;
+};

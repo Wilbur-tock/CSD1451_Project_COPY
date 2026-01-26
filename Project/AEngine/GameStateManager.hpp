@@ -4,10 +4,12 @@
 #include "pch.hpp"
 
 #include "Utils.hpp"
+#include "CameraManager.hpp"
 
 namespace GameStateManager {
 	extern Utils::FuncPtr fpLoad, fpInitalize, fpUpdate, fpDraw, fpFree, fpUnload;
 	extern int current, previous, next;
+	extern CameraController camera;
 
 	enum GSList {
 		GS_Main_Menu,

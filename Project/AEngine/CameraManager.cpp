@@ -1,163 +1,154 @@
-
-#pragma once
-#include "cameraManager.hpp"
 #include "pch.hpp"
+#include "CameraManager.hpp"
 
-namespace CameraController
+CameraController::CameraController()
+    : position{ 0.0f, 0.0f }
+    , moveSpeed(300.0f)
+    , followSpeed(5.0f)
+    , boundMinX(-FLT_MAX)
+    , boundMaxX(FLT_MAX)
+    , boundMinY(-FLT_MAX)
+    , boundMaxY(FLT_MAX)
+    , useBounds(false)
+    , currentState(CameraState::INPUT)
+    , followTarget(nullptr)
 {
-    namespace
+}
+
+void CameraController::Init()
+{
+    position = { 0.0f, 0.0f };
+    moveSpeed = 300.0f;
+    followSpeed = 5.0f;
+    useBounds = false;
+    currentState = CameraState::INPUT;
+    followTarget = nullptr;
+
+    AEGfxSetCamPosition(position.x, position.y);
+}
+
+void CameraController::Update(float dt)
+{
+    switch (currentState)
     {
-        AEVec2 position = { 0.0f, 0.0f };
-        float moveSpeed = 300.0f;
-        float followSpeed = 5.0f;
+    case CameraState::STATIC:
+        // Camera doesn't move, do nothing
+        break;
 
-        // Boundary limits
-        float boundMinX = -FLT_MAX;
-        float boundMaxX = FLT_MAX;
-        float boundMinY = -FLT_MAX;
-        float boundMaxY = FLT_MAX;
-        bool useBounds = false;
-
-        // Camera state
-        CameraState currentState = CameraState::INPUT;
-        const AEVec2* followTarget = nullptr;
-    }
-
-    void Init()
+    case CameraState::INPUT:
     {
-        position = { 0.0f, 0.0f };
-        moveSpeed = 300.0f;
-        followSpeed = 5.0f;
-        useBounds = false;
-        currentState = CameraState::INPUT;
-        followTarget = nullptr;
+        AEVec2 movement = { 0.0f, 0.0f };
 
-        AEGfxSetCamPosition(position.x, position.y);
-    }
+        // WASD movement
+        if (AEInputCheckCurr(AEVK_W))
+            movement.y += 1.0f;
+        if (AEInputCheckCurr(AEVK_S))
+            movement.y -= 1.0f;
+        if (AEInputCheckCurr(AEVK_A))
+            movement.x -= 1.0f;
+        if (AEInputCheckCurr(AEVK_D))
+            movement.x += 1.0f;
 
-    void Update(float dt)
-    {
-        switch (currentState)
+        // Normalize diagonal movement
+        float length = AEVec2Length(&movement);
+        if (length > 0.0f)
         {
-        case CameraState::STATIC:
-            // Camera doesn't move, do nothing
-            break;
+            AEVec2Scale(&movement, &movement, 1.0f / length);
+            AEVec2Scale(&movement, &movement, moveSpeed * dt);
+            AEVec2Add(&position, &position, &movement);
+        }
+        break;
+    }
 
-        case CameraState::INPUT:
+    case CameraState::FOLLOW:
+    {
+        if (followTarget != nullptr)
         {
-            AEVec2 movement = { 0.0f, 0.0f };
+            // Smooth lerp towards target
+            AEVec2 targetPos = *followTarget;
+            AEVec2 direction;
+            AEVec2Sub(&direction, &targetPos, &position);
 
-            // WASD movement
-            if (AEInputCheckCurr(AEVK_W))
-                movement.y += 1.0f;
-            if (AEInputCheckCurr(AEVK_S))
-                movement.y -= 1.0f;
-            if (AEInputCheckCurr(AEVK_A))
-                movement.x -= 1.0f;
-            if (AEInputCheckCurr(AEVK_D))
-                movement.x += 1.0f;
-
-            // Normalize diagonal movement
-            float length = AEVec2Length(&movement);
-            if (length > 0.0f)
-            {
-                AEVec2Scale(&movement, &movement, 1.0f / length);
-                AEVec2Scale(&movement, &movement, moveSpeed * dt);
-                AEVec2Add(&position, &position, &movement);
-            }
-            break;
+            float lerpFactor = 1.0f - powf(0.001f, dt * followSpeed);
+            AEVec2Scale(&direction, &direction, lerpFactor);
+            AEVec2Add(&position, &position, &direction);
         }
-
-        case CameraState::FOLLOW:
-        {
-            if (followTarget != nullptr)
-            {
-                // Smooth lerp towards target
-                AEVec2 targetPos = *followTarget;
-                AEVec2 direction;
-                AEVec2Sub(&direction, &targetPos, &position);
-
-                float lerpFactor = 1.0f - powf(0.001f, dt * followSpeed);
-                AEVec2Scale(&direction, &direction, lerpFactor);
-                AEVec2Add(&position, &position, &direction);
-            }
-            break;
-        }
-        }
-
-        // Apply boundary clamping if enabled
-        if (useBounds)
-        {
-            if (position.x < boundMinX) position.x = boundMinX;
-            if (position.x > boundMaxX) position.x = boundMaxX;
-            if (position.y < boundMinY) position.y = boundMinY;
-            if (position.y > boundMaxY) position.y = boundMaxY;
-        }
-
-        // Floor position for pixel-perfect rendering
-        position.x = floorf(position.x);
-        position.y = floorf(position.y);
-
-        // Apply camera transformation to Alpha Engine
-        AEGfxSetCamPosition(position.x, position.y);
+        break;
+    }
     }
 
-    void SetPosition(const AEVec2& pos)
+    // Apply boundary clamping if enabled
+    if (useBounds)
     {
-        position = pos;
-
-        // Apply boundary clamping if enabled
-        if (useBounds)
-        {
-            if (position.x < boundMinX) position.x = boundMinX;
-            if (position.x > boundMaxX) position.x = boundMaxX;
-            if (position.y < boundMinY) position.y = boundMinY;
-            if (position.y > boundMaxY) position.y = boundMaxY;
-        }
-
-        // Floor position for pixel-perfect rendering
-        position.x = floorf(position.x);
-        position.y = floorf(position.y);
-
-        AEGfxSetCamPosition(position.x, position.y);
+        if (position.x < boundMinX) position.x = boundMinX;
+        if (position.x > boundMaxX) position.x = boundMaxX;
+        if (position.y < boundMinY) position.y = boundMinY;
+        if (position.y > boundMaxY) position.y = boundMaxY;
     }
 
-    void SetBounds(float minX, float maxX, float minY, float maxY)
+    // Floor position for pixel-perfect rendering
+    position.x = floorf(position.x);
+    position.y = floorf(position.y);
+
+    // Apply camera transformation to Alpha Engine
+    AEGfxSetCamPosition(position.x, position.y);
+}
+
+void CameraController::SetPosition(const AEVec2& pos)
+{
+    position = pos;
+
+    // Apply boundary clamping if enabled
+    if (useBounds)
     {
-        boundMinX = minX;
-        boundMaxX = maxX;
-        boundMinY = minY;
-        boundMaxY = maxY;
-        useBounds = true;
+        if (position.x < boundMinX) position.x = boundMinX;
+        if (position.x > boundMaxX) position.x = boundMaxX;
+        if (position.y < boundMinY) position.y = boundMinY;
+        if (position.y > boundMaxY) position.y = boundMaxY;
     }
 
-    void SetState(CameraState newState)
-    {
-        currentState = newState;
-    }
+    // Floor position for pixel-perfect rendering
+    position.x = floorf(position.x);
+    position.y = floorf(position.y);
 
-    void SetFollowTarget(const AEVec2* target)
-    {
-        followTarget = target;
-    }
+    AEGfxSetCamPosition(position.x, position.y);
+}
 
-    void SetFollowSpeed(float speed)
-    {
-        followSpeed = speed;
-    }
+void CameraController::SetBounds(float minX, float maxX, float minY, float maxY)
+{
+    boundMinX = minX;
+    boundMaxX = maxX;
+    boundMinY = minY;
+    boundMaxY = maxY;
+    useBounds = true;
+}
 
-    AEVec2 GetPosition()
-    {
-        return position;
-    }
+void CameraController::SetState(CameraState newState)
+{
+    currentState = newState;
+}
 
-    CameraState GetState()
-    {
-        return currentState;
-    }
+void CameraController::SetFollowTarget(const AEVec2* target)
+{
+    followTarget = target;
+}
 
-    void SetMoveSpeed(float speed)
-    {
-        moveSpeed = speed;
-    }
+void CameraController::SetFollowSpeed(float speed)
+{
+    followSpeed = speed;
+}
+
+AEVec2 CameraController::GetPosition() const
+{
+    return position;
+}
+
+CameraController::CameraState CameraController::GetState() const
+{
+    return currentState;
+}
+
+void CameraController::SetMoveSpeed(float speed)
+{
+    moveSpeed = speed;
 }
