@@ -4,6 +4,7 @@
 #include "pch.hpp"
 
 namespace Utils {
+	extern bool isDebuggerOn;
 	using FuncPtr = void(*)(void);
 
 	// Get world mouse position instead of the screen position due to camera movement

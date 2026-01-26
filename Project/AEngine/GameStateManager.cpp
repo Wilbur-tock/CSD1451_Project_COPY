@@ -7,6 +7,7 @@
 #include "AssetsManager.hpp"
 #include "Level1.hpp"
 #include "CameraManager.hpp"
+#include "MainMenu.hpp"
 
 namespace GameStateManager {
     Utils::FuncPtr fpLoad, fpInitalize, fpUpdate, fpDraw, fpFree, fpUnload;
@@ -45,6 +46,12 @@ namespace GameStateManager {
         // Update Game state
         switch (current) {
         case GS_Main_Menu:
+            fpLoad = nullptr;
+            fpInitalize = nullptr;
+            fpUpdate = nullptr;
+            fpDraw = nullptr;
+            fpFree = nullptr;
+            fpUnload = nullptr;
             break;
         case GS_Map_Editor:
             fpLoad = nullptr;
@@ -93,13 +100,17 @@ namespace GameStateManager {
         // Update camera (handles movement, clamping, flooring, and setting position)
         camera.Update(static_cast<float>(AEFrameRateControllerGetFrameTime()));
 
+        if (AEInputCheckTriggered(AEVK_P)) {
+            Utils::isDebuggerOn = !Utils::isDebuggerOn;
+        }
 
-        //AEFrameRateControllerInit(60);
         // Debugger
-        std::string str = "FPS: " + Utils::FormatFloat(static_cast<double>(AEFrameRateControllerGetFrameRate()), 2)
-            + "\nDeltaTime: " + Utils::FormatFloat(static_cast<double>(AEFrameRateControllerGetFrameTime()), 2);
+        if (Utils::isDebuggerOn) {
+            std::string str = "FPS: " + Utils::FormatFloat(static_cast<double>(AEFrameRateControllerGetFrameRate()), 2)
+                + "\nDeltaTime: " + Utils::FormatFloat(static_cast<double>(AEFrameRateControllerGetFrameTime()), 2);
 
-        GraphicsManager::DrawTextUI(str, -1.f, -0.9f, Color{ 0,0,1 }, 0.8f);
+            GraphicsManager::DrawTextUI(str, -1.f, -0.9f, Color{ 0,0,1 }, 0.8f);
+        }
     }
 
     void Exit() {

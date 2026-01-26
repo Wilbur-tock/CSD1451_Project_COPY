@@ -1,6 +1,8 @@
 #include "Utils.hpp"
 
 namespace Utils {
+	bool isDebuggerOn = false;
+
 	void GetWorldMousePos(float& x, float& y) {
 		s32 mouseX, mouseY;
 		AEInputGetCursorPosition(&mouseX, &mouseY);
