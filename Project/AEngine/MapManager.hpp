@@ -6,27 +6,21 @@
 namespace MapManager {
 	enum TileType {
 		Tile_Air,
-		Tile_Barrier,
 		Tile_Block,
-		Tile_Cannon,
-		Tile_Enemy_Minion,
-		Tile_Enemy_Boss,
 	};
 
 	class Tile {
-		int size = Config::TILE_SIZE;
 	public:
 		TileType type = Tile_Air;
-		AEVec2 pos{ 0.0f,0.0f };
+		int size = 32;
 	};
 
-	extern std::vector<std::vector<Tile>> mapLayout;
+	extern Tile mapLayout[Config::mapHeight][Config::mapWidth];
 
-	/* Read map data from txt file and then update the data to 2D vector whatever or not barrier is needed */
-	void LoadMapData(const char* fileName, std::vector<std::vector<Tile>>& map, bool setBarrier = false);
+	void LoadAllMapData();
 
 	/* Rendering of the map layout */
-	void RenderMap(const std::vector<std::vector<Tile>>& map);
+	void RenderMap(AEGfxTexture* tileTexture, Tile const mapLayout[Config::mapHeight][Config::mapWidth]);
 }
 
 #endif // !MapManager_HPP
