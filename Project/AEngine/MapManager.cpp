@@ -8,7 +8,7 @@
 namespace MapManager {
 	std::vector<std::vector<Tile>> mapLayout(Config::GRID_HEIGHT, std::vector<Tile>(Config::GRID_WIDTH));
 
-	 void LoadMapData(const char* fileName, std::vector<std::vector<Tile>> &map, bool setBarrier) {
+	 void LoadMapData(const char* fileName, std::vector<std::vector<Tile>> &map) {
 		std::ifstream ifs{fileName};
 		if (!ifs) {
 			std::cerr << "Error: Could not open map data file at " << fileName << std::endl;
@@ -30,10 +30,6 @@ namespace MapManager {
 				// Set type
 				int type = 0;
 				ifs >> type;
-				//Set barrier around the edges
-				if (setBarrier) {
-					type = x == Config::MIN_GRID_X || x == Config::MAX_GRID_X || y == Config::MIN_GRID_Y || y == Config::MAX_GRID_Y ? Tile_Barrier : Tile_Air;
-				}
 				map[y][x].type = static_cast<TileType>(type);
 
 				// Set position
@@ -51,29 +47,12 @@ namespace MapManager {
 			for (Tile tile : row) {
 				AEMtx33 transform = GraphicsManager::CreateTransformMatrix(tile.pos.x, tile.pos.y, 0.0f, tileSize / 2.0f, tileSize / 2.0f);
 
-				TileType type = tile.type;
-				AEGfxTexture* texture = AssetsManager::GetTexture("Assets/square.png");
-
 				// TEMPORARY TO BE CHANGED TO TEXTURE ASSET LATER
-				float red = 0.9f, g = 0.9f, b = 0.9f;
+				AEGfxTexture* texture = AssetsManager::GetTexture("Assets/square.png");
+				Color colors[] = { Color{ 0.9f,0.9f,0.9f }, Color{0,1,0.5f},Color{1,0,0}, Color{0,0,0}, Color{0,0,1}, Color{1,1,0}, Color{0.25f, 0.25f,0.25f}, Color{0.25f, 0.25f,0} };
+				Color defaultColor = colors[tile.type];
 
-				if (type == Tile_Barrier) { // Barrier block
-					red = 0, g = 1, b = 0;
-				}
-				else if (type == Tile_Block) {
-					red = 1, g = 0, b = 0;
-				}
-				else if (type == Tile_Cannon) {
-					red = 0, g = 0, b = 0;
-				}
-				else if (type == Tile_Enemy_Minion) {
-					red = 0, g = 0, b = 1;
-				}
-				else if (type == Tile_Enemy_Boss) {
-					red = 1, g = 1, b = 0;
-				}
-
-				GraphicsManager::DrawGameObject(texture, transform, Color{ red, g, b });
+				GraphicsManager::DrawGameObject(texture, transform, defaultColor);
 			}
 		}
 	}

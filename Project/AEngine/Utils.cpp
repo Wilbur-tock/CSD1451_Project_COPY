@@ -1,7 +1,12 @@
 #include "Utils.hpp"
 
+#include "GraphicsManager.hpp"
+
 namespace Utils {
 	bool isDebuggerOn = false;
+	Color debuggerColor = Color{ 0,1.f,0 };
+
+	std::pair<Color, float> debuggerInfo = {Color{0, 0.8f, 0 }, 0.8f};
 
 	void GetWorldMousePos(float& x, float& y) {
 		s32 mouseX, mouseY;
@@ -25,6 +30,10 @@ namespace Utils {
 		// Use if values is from 0 to max
 		//x += camX + Config::SCREEN_WIDTH;
 		//y += (Config::SCREEN_HEIGHT / 2.0f) - camY;
+	}
+
+	void Debugger(AEVec2 pos, std::string str) {
+		GraphicsManager::DrawTextUI(str, -1.f, -0.9f, Color{0,1,0}, 0.8f);
 	}
 
 	std::string FormatFloat(double value, int precision) {

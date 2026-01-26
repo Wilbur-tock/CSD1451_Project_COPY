@@ -134,7 +134,9 @@ void MainMenuDraw(MainMenu* pMenu)
         f32 scale = 1.0f;
         f32 bgAlpha = 0.0f;
 
-        if (pMenu->selectedOption == i)
+        MenuOption option = static_cast<MenuOption>(i);
+
+        if (pMenu->selectedOption == option)
         {
             // Selected option (yellow with subtle pulse)
             f32 pulse = 0.5f + 0.5f * AESin(pMenu->animationTimer * 4.0f);
@@ -144,7 +146,7 @@ void MainMenuDraw(MainMenu* pMenu)
             scale = 1.15f;
             bgAlpha = 0.3f;
         }
-        else if (pMenu->hoveredOption == i)
+        else if (pMenu->hoveredOption == option)
         {
             // Hovered option (light)
             red = 0.9f;

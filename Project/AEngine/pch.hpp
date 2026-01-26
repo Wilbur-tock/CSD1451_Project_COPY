@@ -10,6 +10,7 @@
 #include <iomanip>
 #include <sstream>
 #include <algorithm>
+#include <map>
 
 #include "AEEngine.h"
 #include "Config.hpp"

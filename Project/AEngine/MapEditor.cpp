@@ -7,7 +7,8 @@
 using namespace MapManager;
 
 namespace MapEditor {
-	TileType drawingBlockType = Tile_Barrier;
+	TileType defaultTile = Tile_Block_1;
+	TileType drawingBlockType = defaultTile;
 	bool isDrawingNewMap = true;
 
 	std::vector<std::vector<Tile>> newMap(Config::GRID_HEIGHT, std::vector<Tile>(Config::GRID_WIDTH));
@@ -31,8 +32,9 @@ namespace MapEditor {
 	
 		for (int y = 0; y < Config::GRID_HEIGHT; ++y) {
 			for (int x = 0; x < Config::GRID_WIDTH; ++x) {
+				int val = newMap[y][x].type;
 				// Set the barrier limits
-				int val = x == Config::MIN_GRID_X || x == Config::MAX_GRID_X || y == Config::MIN_GRID_Y || y == Config::MAX_GRID_Y ? MapManager::Tile_Barrier : MapManager::Tile_Air;
+				//int val = x == Config::MIN_GRID_X || x == Config::MAX_GRID_X || y == Config::MIN_GRID_Y || y == Config::MAX_GRID_Y ? MapManager::Tile_Barrier : MapManager::Tile_Air;
 				output << val << " ";
 			}
 			output << std::endl;
@@ -41,12 +43,12 @@ namespace MapEditor {
 		output.close();
 	}
 
-	void InitMapEditor() {
+	static void InitMapEditor() {
 		// Reset settings
-		drawingBlockType = Tile_Barrier;
+		drawingBlockType = defaultTile;
 		CreateDefaultMap();
 		// Reset map
-		MapManager::LoadMapData("Assets/Map/default.txt", newMap, true);
+		MapManager::LoadMapData("Assets/Map/default.txt", newMap);
 	}
 
 	void MapEditor() {
@@ -55,22 +57,13 @@ namespace MapEditor {
 			isDrawingNewMap = false;
 		}
 
-		if (AEInputCheckTriggered(AEVK_1)) {
-			drawingBlockType = Tile_Barrier;
-		}
-		else if (AEInputCheckTriggered(AEVK_2)) {
-			drawingBlockType = Tile_Block;
-		}
-		else if (AEInputCheckTriggered(AEVK_3)) {
-			drawingBlockType = Tile_Cannon;
-		}
-		else if (AEInputCheckTriggered(AEVK_4)) {
-			drawingBlockType = Tile_Enemy_Minion;
-		}
-		else if (AEInputCheckTriggered(AEVK_5)) {
-			drawingBlockType = Tile_Enemy_Boss;
+		for (int i = 0; i < MapManager::Tile_Count; i++) {
+			if (AEInputCheckTriggered(AEVK_1+i)) {
+				drawingBlockType = static_cast<MapManager::TileType>(i+1);
+			}
 		}
 
+		// Calculate Grid x and y index
 		float worldMouseX = 0, worldMouseY = 0;
 		Utils::GetWorldMousePos(worldMouseX, worldMouseY);
 
@@ -81,13 +74,37 @@ namespace MapEditor {
 		Utils::Limit(gridX, Config::MIN_GRID_X, Config::MAX_GRID_X);
 		Utils::Limit(gridY, Config::MIN_GRID_Y, Config::MAX_GRID_Y);
 
+		// Check for input to draw the map editor
 		if (gridX >= 0 && gridX < Config::GRID_WIDTH && gridY >= 0 && gridY < Config::GRID_HEIGHT) {
-			if (gridX != Config::MIN_GRID_X && gridX != Config::MAX_GRID_X && gridY != Config::MIN_GRID_Y && gridY != Config::MAX_GRID_Y) {
-				if (AEInputCheckCurr(AEVK_LBUTTON)) {
-					newMap[gridY][gridX].type = drawingBlockType;
+			if (AEInputCheckCurr(AEVK_LBUTTON)) {
+				newMap[gridY][gridX].type = drawingBlockType;
+
+				if (AEInputCheckCurr(AEVK_LCTRL) || AEInputCheckCurr(AEVK_RCTRL)) {
+					for (int i = 0; i < Config::GRID_WIDTH; ++i) {
+						newMap[gridY][i].type = drawingBlockType;
+					}
 				}
-				else if (AEInputCheckCurr(AEVK_RBUTTON)) {
-					newMap[gridY][gridX].type = MapManager::Tile_Air;
+
+				if (AEInputCheckCurr(AEVK_LSHIFT) || AEInputCheckCurr(AEVK_RSHIFT)) {
+					for (int i = 0; i < Config::GRID_HEIGHT; ++i) {
+						newMap[i][gridX].type = drawingBlockType;
+					}
+				}
+			}
+			else if (AEInputCheckCurr(AEVK_RBUTTON)) {
+
+				newMap[gridY][gridX].type = MapManager::Tile_Air;
+
+				if (AEInputCheckCurr(AEVK_LCTRL) || AEInputCheckCurr(AEVK_RCTRL)) {
+					for (int i = 0; i < Config::GRID_WIDTH; ++i) {
+						newMap[gridY][i].type = MapManager::Tile_Air;
+					}
+				}
+
+				if (AEInputCheckCurr(AEVK_LSHIFT) || AEInputCheckCurr(AEVK_RSHIFT)) {
+					for (int i = 0; i < Config::GRID_HEIGHT; ++i) {
+						newMap[i][gridX].type = MapManager::Tile_Air;
+					}
 				}
 			}
 		}
@@ -96,9 +113,13 @@ namespace MapEditor {
 		MapManager::RenderMap(newMap);
 
 		// Print out the information on how to use the editor
-		std::string helpStr = "'E' to save file | 'Q' to close map editor\nLeft Mouse - Place tile\nRight Mouse - Erase Tile\n1 - Barrier, 2 - Block, 3 - Cannon, 4 - Minion, 5 - Boss";
+		std::string helpStr = "'E' to save file | 'Q' to close map editor\nLeft Mouse - Place tile\nRight Mouse - Erase Tile";
+		std::string tileNames[] = {"1.Player", "2.Cannon", "3.Minion", "4.Boss", "5.Ground", "6.Block_1", "7.Block_2"};
+		for (std::string name : tileNames) {
+			helpStr += "\n" + name;
+		}
 		helpStr += "\nDrawing Tile " + std::to_string(drawingBlockType);
-		GraphicsManager::DrawTextUI(helpStr,-1.0f,.99f,Color{0,0,1, 1.0f}, 0.8f);
+		GraphicsManager::DrawTextUI(helpStr,-1.0f,.99f, Utils::debuggerInfo.first, Utils::debuggerInfo.second);
 
 		// Print out debugger information about the map editor
 		if (Utils::isDebuggerOn) {
@@ -114,17 +135,28 @@ namespace MapEditor {
 				+ "\nCamera\nPos X:" + Utils::FormatFloat(x, 2) + " Y: " + Utils::FormatFloat(y, 2)
 				+ "\nMouse\nScreen Pos X: " + Utils::FormatFloat(mouseX, 2) + " Y: " + Utils::FormatFloat(mouseY, 2)
 				+ "\nWorld Pos X: " + Utils::FormatFloat(mX, 2) + " Y: " + Utils::FormatFloat(mY, 2);
-			GraphicsManager::DrawTextUI(debugStr, 0.5f, .99f, Color{ 0,0,1, 1.0f }, 0.8f);
+			GraphicsManager::DrawTextUI(debugStr, 0.5f, .99f, Utils::debuggerInfo.first, Utils::debuggerInfo.second);
 		}
 
-		// Save file
+		// Saving file
+		std::string savingFilePath = "../../Assets/Map/level";
+		if (AEInputCheckCurr(AEVK_LCTRL) || AEInputCheckCurr(AEVK_RCTRL)) {
+			for (int i = 1;i <= 5; i++) {
+				if (AEInputCheckTriggered(AEVK_0+i)) {
+					savingFilePath += std::to_string(i) + ".txt";
+					SaveMapFile(savingFilePath);
+					isDrawingNewMap = true;
+				}
+			}
+		}
+
 		if (AEInputCheckTriggered(AEVK_E)) {
-			SaveMapFile("../../Assets/Map/drawnMap.txt"); // MIGHT HAVE SOME ERROR WHEN BUILDING DUE TO FILE PATH
+			SaveMapFile("../../Assets/Map/level.txt"); // MIGHT HAVE SOME ERROR WHEN BUILDING DUE TO FILE PATH
 			isDrawingNewMap = true;
 		}
 	}
 
-	void SaveMapFile(const char* filePath) {
+	void SaveMapFile(std::string filePath) {
 		std::ofstream output{ filePath };
 
 		if (!output.is_open()) {
