@@ -10,7 +10,7 @@
 #include "MainMenu.hpp"
 
 namespace GameStateManager {
-    Utils::FuncPtr fpLoad, fpInitalize, fpUpdate, fpDraw, fpFree, fpUnload;
+    Utils::FuncPtr gsLoad, gsIntialize, gsUpdate, gsDraw, gsFree, gsUnload;
     int current = 0, previous = 0, next = 0;
     // Temporary
     AEGfxTexture* texture;
@@ -46,28 +46,28 @@ namespace GameStateManager {
         // Update Game state
         switch (current) {
         case GS_Main_Menu:
-            fpLoad = nullptr;
-            fpInitalize = nullptr;
-            fpUpdate = nullptr;
-            fpDraw = nullptr;
-            fpFree = nullptr;
-            fpUnload = nullptr;
+            gsLoad = nullptr;
+            gsIntialize = nullptr;
+            gsUpdate = nullptr;
+            gsDraw = nullptr;
+            gsFree = nullptr;
+            gsUnload = nullptr;
             break;
         case GS_Map_Editor:
-            fpLoad = nullptr;
-            fpInitalize = nullptr;
-            fpUpdate = MapEditor::MapEditor;
-            fpDraw = nullptr;
-            fpFree = nullptr;
-            fpUnload = nullptr;
+            gsLoad = nullptr;
+            gsIntialize = nullptr;
+            gsUpdate = MapEditor::MapEditor;
+            gsDraw = nullptr;
+            gsFree = MapEditor::Exit;
+            gsUnload = nullptr;
             break;
         case GS_Level_1:
-            fpLoad = Level1::Load;
-            fpInitalize = Level1::Initialize;
-            fpUpdate = Level1::Update;
-            fpDraw = nullptr;
-            fpFree = nullptr;
-            fpUnload = nullptr;
+            gsLoad = Level1::Load;
+            gsIntialize = Level1::Initialize;
+            gsUpdate = Level1::Update;
+            gsDraw = nullptr;
+            gsFree = nullptr;
+            gsUnload = nullptr;
             break;
         case GS_Level_2:
             break;
@@ -75,15 +75,20 @@ namespace GameStateManager {
 
         // Update to new state
         if (next != current) {
+            if (gsFree != nullptr) {
+                gsFree();
+            }
+
+            // Set next state settings
             previous = current;
             current = next;
-            if (fpInitalize != nullptr) {
-                fpInitalize();
+            if (gsIntialize != nullptr) {
+                gsIntialize();
             }
         }
 
-        if (fpUpdate != nullptr) {
-            fpUpdate();
+        if (gsUpdate != nullptr) {
+            gsUpdate();
         }
 
         if (AEInputCheckTriggered(AEVK_Q)) {

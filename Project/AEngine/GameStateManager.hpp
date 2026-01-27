@@ -7,7 +7,7 @@
 #include "CameraManager.hpp"
 
 namespace GameStateManager {
-	extern Utils::FuncPtr fpLoad, fpInitalize, fpUpdate, fpDraw, fpFree, fpUnload;
+	extern Utils::FuncPtr gsLoad, gsIntialize, gsUpdate, gsDraw, gsFree, gsUnload;
 	extern int current, previous, next;
 	extern CameraController camera;
 

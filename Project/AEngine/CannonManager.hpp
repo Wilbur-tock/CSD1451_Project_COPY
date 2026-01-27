@@ -29,7 +29,7 @@ namespace CannonManager {
 		AEVec2 defaultSize{ 30,10 };
 
 		// Power charging system (how far the cannon shoots the projectile)
-		float power = 100, minPower = 100, maxPower = 2000, chargeRate = maxPower * 0.75f;
+		float power = 100, minPower = 100, maxPower = 3000, chargeRate = maxPower * 0.75f;
 		bool isPowerIncrease = true;
 
 	public:

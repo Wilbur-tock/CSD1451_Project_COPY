@@ -33,6 +33,12 @@ namespace Utils {
 	void Limit(float& val, float min, float max);
 	// Set limit to ensure that the value does not go under minimum or over maximum
 	void Limit(double& val, double min, double max);
+	// Set val to wrap to max if it go below min and vice versa
+	void Wrap(int& val, int min, int max);
+	// Set val to wrap to max if it go below min and vice versa
+	void Wrap(float& val, float min, float max);
+	// Set val to wrap to max if it go below min and vice versa
+	void Wrap(double& val, double min, double max);
 }
 
 #endif // !UTILS_HPP

@@ -1,5 +1,5 @@
 #include "pch.hpp"
-
+#include "AEInput.h"
 #include "MapEditor.hpp"
 #include "MapManager.hpp"
 #include "GraphicsManager.hpp"
@@ -9,31 +9,29 @@
 using namespace MapManager;
 
 namespace MapEditor {
-	bool isDrawingNewMap = true;
+	bool isDrawingNewMap = true, isShowingTileList = true;
 	int totalLevelMap = 5;
-	std::string defaultSavePath = "Assets/Map/level.txt", defaultLoadPath = "Assets/Map/default.txt",
-		loadPath = "", savePath = "";
+	std::string const defaultSavePath = "Assets/Map/level.txt", defaultLoadPath = "Assets/Map/default.txt";
+	std::string loadPath = "", savePath = "";
 
 	std::vector<std::vector<Tile>> newMap(Config::GRID_HEIGHT, std::vector<Tile>(Config::GRID_WIDTH));
 
 	TileType defaultTile = TILE_BLOCK_GROUND;
 	TileType drawingTileType = defaultTile;
-	int selectedCategoryListId = 0, selectedTileListId = 0, tileId = defaultTile;
-	std::vector<std::string> categories = { "Blocks", "Player", "Enemies" };
-	std::vector<std::vector<std::string>> tileNames = {
-		{"Ground", "Block_1", "Block_2"},
-		{"Cannon", "Character"},
-		{"Cannon", "Boss", "Minion"},
-	};
+	int tileId = 1;
 
-	// If the Project/Assets/Map does not contain default.txt file 
-	// it will create a new one if not just return
-	static void CreateDefaultMap();
+	// If the Project/Assets/Map does not contain default.txt file it will create a new one if not just return
+	static void CheckForDefault();
+	static void LoadNewFile(std::string filePath);
+	static void SaveNewFile(std::string filePath);
+	static void InitMapEditor();
+	static void ResetMap(); // Reset the map 2D vector to be all of type 0
+
 	// Ensure that the file path is going back to my project folder NOT THE BIN FOLDER
 	static std::string DebugFilePath(std::string filePath) { return "../../" + filePath; }
 
 	static void LoadNewFile(std::string filePath) {
-		MapManager::ReadMapData("Assets/Map/default.txt", newMap); // Reset the map to render
+		MapManager::ReadMapData(filePath, newMap); // Reset the map to render
 		savePath = filePath;
 		if (filePath == defaultLoadPath) savePath = defaultSavePath;
 		loadPath = filePath;
@@ -57,24 +55,25 @@ namespace MapEditor {
 		output.close();
 	}
 
-	static void CreateDefaultMap() {
-		std::string fileName = defaultLoadPath;
-		std::ifstream ifs{ fileName };
+	static void CheckForDefault() {
+		std::string filePath = defaultLoadPath;
+		std::ifstream ifs{ filePath };
 		if (ifs) {
 			//std::cout << "Contain default.txt " << fileName << std::endl;
 			return;
 		}
 
-		std::ofstream output{ fileName };
+		std::ofstream output{ filePath };
 	
 		if (!output.is_open()) {
-			std::cerr << "Error: Could not open file at " << fileName << std::endl;
+			std::cerr << "Error: Could not open file at " << filePath << std::endl;
 			return;
 		}
 	
 		for (int y = 0; y < Config::GRID_HEIGHT; ++y) {
 			for (int x = 0; x < Config::GRID_WIDTH; ++x) {
-				int val = newMap[y][x].type;
+				int val = 0;
+				newMap[y][x].type = static_cast<TileType>(val);
 				output << val << " ";
 			}
 			output << std::endl;
@@ -86,11 +85,22 @@ namespace MapEditor {
 	static void InitMapEditor() {
 		// Reset settings
 		drawingTileType = defaultTile;
-		CreateDefaultMap();
-		LoadNewFile(defaultLoadPath);
+		CheckForDefault();
+
+		loadPath = defaultLoadPath;
+		savePath = defaultSavePath;
+		LoadNewFile(loadPath);
 
 		drawingTileType = defaultTile;
-		selectedCategoryListId = 0, selectedTileListId = 0, tileId = defaultTile;
+		tileId = 1;
+	}
+
+	static void ResetMap() {
+		for (std::vector<Tile> &list : newMap) {
+			for (Tile& tile : list) {
+				tile.type = static_cast<TileType>(0);
+			}
+		}
 	}
 
 	void MapEditor() {
@@ -145,38 +155,28 @@ namespace MapEditor {
 			}
 		}
 
-		// Change drawing tile category
-		if (AEInputCheckTriggered(AEVK_T)) {
-			selectedCategoryListId = ++selectedCategoryListId > categories.size() - 1 ? 0 : selectedCategoryListId;
-
-			// Reset
-			selectedTileListId = 0;
-			tileId = 0;
-			for (int c = 0; c < selectedCategoryListId; ++c) {
-				tileId += (static_cast<int>(tileNames[c].size()));
-			}
-			tileId++;
-			drawingTileType = static_cast<MapManager::TileType>(tileId);
+		if (AEInputCheckTriggered(AEVK_R)) {
+			ResetMap();
 		}
 
-		for (int i = 0; i < tileNames[selectedCategoryListId].size(); ++i) {
-			if (AEInputCheckTriggered(static_cast<u8>(AEVK_1 + i))) {
-				selectedTileListId = i;
-				tileId = i + 1;
+		// Change drawing tile category
+		s32 scroll = 0;
+		AEInputMouseWheelDelta(&scroll);
+		if (scroll != 0) {
+			tileId -= scroll;
+			Utils::Wrap(tileId, 1, MapManager::TILE_COUNT);
+			drawingTileType = static_cast<TileType>(tileId);
+		}
 
-				for (int c = 0; c < selectedCategoryListId; ++c) {
-					tileId += (static_cast<int>(tileNames[c].size()));
-				}
-
-				drawingTileType = static_cast<MapManager::TileType>(tileId);
-			}
+		if (AEInputCheckTriggered(AEVK_T)) {
+			isShowingTileList = !isShowingTileList;
 		}
 
 		// Checking for input CTRL + {NUMBER} to load a new LEVEL MAP to edit
 		if (AEInputCheckCurr(AEVK_LCTRL) || AEInputCheckCurr(AEVK_RCTRL)) {
 			for (int i = 1; i <= totalLevelMap; ++i) {
 				if (AEInputCheckCurr(static_cast<u8>(AEVK_0 + i))) {
-					// Have to load file from bin folder only
+					// Load file from bin folder only
 					std::string newLoadPath = "Assets/Map/level" + std::to_string(i) + ".txt";
 					LoadNewFile(newLoadPath);
 				}
@@ -199,19 +199,25 @@ namespace MapEditor {
 		// Print out the information on how to use the editor
 		std::string helpStr = "Current File: "
 			+ loadPath + "\nSave File: " + savePath +
-			+ "\n[E] to save file\n[Q] to close map editor\n[Left Mouse] Place tile\n[Right Mouse] Erase Tile";
+			+ "\n[Q] Quit Map Editor \n[E] Save file\n[R] Reset Map\n[LEFT CLICK] Place Tile\n[RIGHT CLICK] Erase Tile\n[T] Tile List ";
 
-		// List out the type of tiles able to be drawn
-		helpStr += "\n\nList of " + categories[selectedCategoryListId] + " Tiles [Key T]";
-		for (int i = 0; i < tileNames[selectedCategoryListId].size(); ++i) {
-			helpStr += "\n[" + std::to_string(i + 1) + "] " + tileNames[selectedCategoryListId][i];
-			if (selectedTileListId == i) {
-				helpStr += " [Currently Drawing] " + std::to_string(tileId);
+		if (isShowingTileList) {
+			helpStr += "[SHOWING]\n[SCROLL]";
+			// List out the type of tiles able to be drawn
+			for (int i = 0; i < MapManager::TILE_COUNT; ++i) {
+				int id = i + 1;
+				std::string str = "[ ] ";
+				if (tileId == id) {
+					str = "[O] ";
+				}
+				helpStr += "\n" + str + MapManager::TileTypeToString(id);
 			}
 		}
+		else {
+			helpStr += "[HIDING]";
+		}
 
-
-		GraphicsManager::DrawTextUI(helpStr,-1.0f,.99f, Utils::debuggerInfo.first, Utils::debuggerInfo.second);
+		GraphicsManager::DrawTextUI(helpStr,-1.0f,.99f, Utils::debuggerInfo.first, Utils::debuggerInfo.second * 0.9f);
 
 		// Print out debugger information about the map editor
 		if (Utils::isDebuggerOn) {
@@ -229,5 +235,9 @@ namespace MapEditor {
 				+ "\nWorld Pos X: " + Utils::FormatFloat(mX, 2) + " Y: " + Utils::FormatFloat(mY, 2);
 			GraphicsManager::DrawTextUI(debugStr, 0.5f, .99f, Utils::debuggerInfo.first, Utils::debuggerInfo.second);
 		}
+	}
+
+	void Exit() {
+		isDrawingNewMap = true;
 	}
 }

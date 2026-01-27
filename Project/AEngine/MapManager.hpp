@@ -18,6 +18,10 @@ namespace MapManager {
 		TILE_COUNT, // Count of the enum always at the last index
 	};
 
+	inline std::vector<std::string> tileNames = { "Air", "Ground", "Block_1", "Block_2", 
+		"Player Cannon", "Player Character", 
+		"Enemy Cannon", "Enemy Boss", "Enemy Minion" };
+
 	class Tile : public GameObject {
 		float size = Config::TILE_SIZE;
 	public:
@@ -28,6 +32,8 @@ namespace MapManager {
 	};
 
 	extern std::vector<std::vector<Tile>> mapLayout;
+
+	std::string TileTypeToString(int id);
 
 	// Read map data from txt file and then update the data to 2D vector whatever or not barrier is needed
 	void ReadMapData(std::string fileName, std::vector<std::vector<Tile>>& map);
