@@ -9,11 +9,11 @@
 
 namespace CannonManager {
     Projectile::Projectile() : timer{ 0.0f }, velocity{ 0.0f,0.0f } {}
-    Projectile::Projectile(AEVec2 _pos, AEGfxTexture* _texture, AEVec2 _velocity) : GameObject(_pos, _texture), timer{ 0.0f }, velocity(_velocity) {}
+    Projectile::Projectile(AEVec2 _pos, AEGfxTexture* _texture, AEVec2 _velocity) : GameObject(_pos, defaultSize, _texture), timer{ 0.0f }, velocity(_velocity) {}
 
     void Projectile::Render() {
         AEGfxTexture* tex = AssetsManager::GetTexture("Assets/circle.png");
-        AEMtx33 mat = GraphicsManager::CreateTransformMatrix(pos.x, pos.y, 0, projectileSize, projectileSize);
+        AEMtx33 mat = GraphicsManager::CreateTransformMatrix(pos.x, pos.y, 0, defaultSize.x, defaultSize.y);
         GraphicsManager::DrawGameObject(tex, mat, Color{ 0.5f, 0.5f, 0, 1 });
     }
 
@@ -25,7 +25,16 @@ namespace CannonManager {
     }
 
     Cannon::Cannon() : cannonAngle{ 0.0f }, ammo{ NULL }, ammoLimit{ 0 }, shotPower{ power } {}
-    Cannon::Cannon(AEVec2 _pos, AEGfxTexture* _texture, int _projectileAmount) : GameObject(_pos, _texture), ammoLimit{ _projectileAmount }, cannonAngle{ 0.0f }, shotPower{ power } {
+    Cannon::Cannon(AEVec2 _pos, AEGfxTexture* _texture, int _projectileAmount)
+        : GameObject(_pos, defaultSize, _texture), ammoLimit{ _projectileAmount }, cannonAngle{ 0.0f }, shotPower{ power } {
+        Reset();
+    }
+    Cannon::Cannon(AEVec2 _pos, AEGfxTexture* _texture, int _projectileAmount, AEVec2 _size) 
+        : GameObject(_pos, _size, _texture), ammoLimit{ _projectileAmount }, cannonAngle{ 0.0f }, shotPower{ power } {
+        Reset();
+    }
+
+    void Cannon::Reset() {
         ammo.clear();
         ammo.resize(ammoLimit);
         activeAmmo.clear();
@@ -97,7 +106,7 @@ namespace CannonManager {
     }
 
     void Cannon::Render() {
-        AEMtx33 mat = GraphicsManager::CreateTransformMatrix(pos.x, pos.y, cannonAngle, cannonSize.x, cannonSize.y);
+        AEMtx33 mat = GraphicsManager::CreateTransformMatrix(pos.x, pos.y, cannonAngle, defaultSize.x, defaultSize.y);
         GraphicsManager::DrawGameObject(texture, mat, Color{ 1, 1, 1, 1 });
     }
 
@@ -107,8 +116,8 @@ namespace CannonManager {
         ammo[ammoCount].id = ammoCount;
 
         // Add offset to ensure that the projectile spawn at the barrel instead of the middle of the cannon
-        ammo[ammoCount].pos.x = pos.x + cos(cannonAngle) * cannonSize.x;
-        ammo[ammoCount].pos.y = pos.y + sin(cannonAngle) * cannonSize.x;
+        ammo[ammoCount].pos.x = pos.x + cos(cannonAngle) * defaultSize.x;
+        ammo[ammoCount].pos.y = pos.y + sin(cannonAngle) * defaultSize.x;
 
         // Calculate velocity here once only to ensure that gravity has an effect
         ammo[ammoCount].velocity.x = cos(cannonAngle) * shotPower;
@@ -167,7 +176,7 @@ namespace CannonManager {
     void Cannon::UIChargeShotBar() {
         AEGfxTexture* tex = AssetsManager::GetTexture("Assets/square.png");
 
-        float x = pos.x - (cannonSize.x * 1.75f), y = pos.y;
+        float x = pos.x - (defaultSize.x * 1.75f), y = pos.y;
         float w = 20, h = 75, gap = 5;
 
         // Background Border Bar

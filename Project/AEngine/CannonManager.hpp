@@ -7,7 +7,7 @@
 namespace CannonManager {
 	class Projectile : public GameObject {
 	private:
-		float projectileSize = 10;
+		AEVec2 defaultSize{ 10,10 };
 		float gravity = 1500;
 
 	public:
@@ -26,7 +26,7 @@ namespace CannonManager {
 	private:
 		int ammoCount = 0;
 		float projectileLifespan = 4;
-		AEVec2 cannonSize{ 30,10 };
+		AEVec2 defaultSize{ 30,10 };
 
 		// Power charging system (how far the cannon shoots the projectile)
 		float power = 100, minPower = 100, maxPower = 2000, chargeRate = maxPower * 0.75f;
@@ -40,7 +40,10 @@ namespace CannonManager {
 
 		Cannon();
 		Cannon(AEVec2 _pos, AEGfxTexture* _texture, int _projectileAmount);
+		Cannon(AEVec2 _pos, AEGfxTexture* _texture, int _projectileAmount, AEVec2 _size);
 
+		// Reset values of the cannon to be 0
+		void Reset();
 		// Calculate the angle of the cannon based on the mouse position, render the cannon sprite
 		// Calculate the charge shot power and update any shot projectiles
 		void Update();

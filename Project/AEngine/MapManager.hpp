@@ -3,6 +3,7 @@
 
 #include "pch.hpp"
 
+// Contain enum TileType, class Tile
 namespace MapManager {
 	enum TileType {
 		TILE_EMPTY,
