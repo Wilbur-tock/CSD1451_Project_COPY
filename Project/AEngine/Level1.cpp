@@ -10,7 +10,7 @@ namespace Level1 {
 
 	void Load() {
 		levelData.Load();
-		MapManager::LoadMapData("Assets/Map/level1.txt", levelData.levelMap);
+		MapManager::ReadMapData("Assets/Map/level1.txt", levelData.levelMap);
 	}
 
 	void Initialize() {
@@ -18,7 +18,7 @@ namespace Level1 {
 		// Set cannon position
 		for (const std::vector<MapManager::Tile> &row : levelData.levelMap) {
 			for (const MapManager::Tile &tile : row) {
-				if (tile.type == MapManager::Tile_Cannon) {
+				if (tile.type == MapManager::TILE_CANNON_PLAYER) {
 					levelData.cannon.pos = tile.pos;
 					foundCannonPos = true;
 					break;

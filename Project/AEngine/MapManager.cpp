@@ -8,7 +8,7 @@
 namespace MapManager {
 	std::vector<std::vector<Tile>> mapLayout(Config::GRID_HEIGHT, std::vector<Tile>(Config::GRID_WIDTH));
 
-	 void LoadMapData(std::string fileName, std::vector<std::vector<Tile>> &map) {
+	 void ReadMapData(std::string fileName, std::vector<std::vector<Tile>> &map) {
 		std::ifstream ifs{fileName};
 		if (!ifs) {
 			std::cerr << "Error: Could not open map data file at " << fileName << std::endl;
@@ -43,16 +43,16 @@ namespace MapManager {
 	void RenderMap(const std::vector<std::vector<Tile>>& map) {
 		float tileSize = static_cast<float>(Config::TILE_SIZE);
 
-		for (std::vector<Tile> row : map) {
-			for (Tile tile : row) {
+		AEGfxTexture* tempTexture = AssetsManager::GetTexture("Assets/square.png");
+		for (std::vector<Tile> const& row : map) {
+			for (Tile const& tile : row) {
 				AEMtx33 transform = GraphicsManager::CreateTransformMatrix(tile.pos.x, tile.pos.y, 0.0f, tileSize / 2.0f, tileSize / 2.0f);
 
 				// TEMPORARY TO BE CHANGED TO TEXTURE ASSET LATER
-				AEGfxTexture* texture = AssetsManager::GetTexture("Assets/square.png");
 				Color colors[] = { Color{ 0.9f,0.9f,0.9f }, Color{0,1,0.5f},Color{1,0,0}, Color{0,0,0}, Color{0,0,1}, Color{1,1,0}, Color{0.25f, 0.25f,0.25f}, Color{0.25f, 0.25f,0} };
 				Color defaultColor = colors[tile.type];
 
-				GraphicsManager::DrawGameObject(texture, transform, defaultColor);
+				GraphicsManager::DrawGameObject(tempTexture, transform, defaultColor);
 			}
 		}
 	}

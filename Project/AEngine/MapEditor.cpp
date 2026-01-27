@@ -9,7 +9,7 @@
 using namespace MapManager;
 
 namespace MapEditor {
-	TileType defaultTile = Tile_Block_1;
+	TileType defaultTile = TILE_BLOCK_1;
 	TileType drawingBlockType = defaultTile;
 	bool isDrawingNewMap = true;
 	int totalLevelMap = 5;
@@ -24,11 +24,29 @@ namespace MapEditor {
 	// Ensure that the file path is going back to my project folder NOT THE BIN FOLDER
 	static std::string DebugFilePath(std::string filePath) { return "../../" + filePath; }
 
-	static void LoadNewMap(std::string filePath) {
-		MapManager::LoadMapData("Assets/Map/default.txt", newMap); // Reset the map to render
+	static void LoadNewFile(std::string filePath) {
+		MapManager::ReadMapData("Assets/Map/default.txt", newMap); // Reset the map to render
 		savePath = filePath;
 		if (filePath == defaultLoadPath) savePath = defaultSavePath;
 		loadPath = filePath;
+	}
+
+	static void SaveNewFile(std::string filePath) {
+		std::ofstream output{ filePath };
+
+		if (!output.is_open()) {
+			std::cerr << "Error: Could not open file at " << filePath << std::endl;
+			return;
+		}
+
+		for (int y = 0; y < Config::GRID_HEIGHT; ++y) {
+			for (int x = 0; x < Config::GRID_WIDTH; ++x) {
+				output << newMap[y][x].type << " ";
+			}
+			output << std::endl;
+		}
+
+		output.close();
 	}
 
 	static void CreateDefaultMap() {
@@ -61,7 +79,7 @@ namespace MapEditor {
 		// Reset settings
 		drawingBlockType = defaultTile;
 		CreateDefaultMap();
-		LoadNewMap(defaultLoadPath);
+		LoadNewFile(defaultLoadPath);
 	}
 
 	void MapEditor() {
@@ -70,7 +88,7 @@ namespace MapEditor {
 			isDrawingNewMap = false;
 		}
 
-		for (int i = 0; i < MapManager::Tile_Count; ++i) {
+		for (int i = 0; i < MapManager::TILE_COUNT; ++i) {
 			if (AEInputCheckTriggered(AEVK_1+i)) {
 				drawingBlockType = static_cast<MapManager::TileType>(i+1);
 			}
@@ -106,17 +124,17 @@ namespace MapEditor {
 			}
 			else if (AEInputCheckCurr(AEVK_RBUTTON)) {
 
-				newMap[gridY][gridX].type = MapManager::Tile_Air;
+				newMap[gridY][gridX].type = MapManager::TILE_EMPTY;
 
 				if (AEInputCheckCurr(AEVK_LCTRL) || AEInputCheckCurr(AEVK_RCTRL)) {
 					for (int i = 0; i < Config::GRID_WIDTH; ++i) {
-						newMap[gridY][i].type = MapManager::Tile_Air;
+						newMap[gridY][i].type = MapManager::TILE_EMPTY;
 					}
 				}
 
 				if (AEInputCheckCurr(AEVK_LSHIFT) || AEInputCheckCurr(AEVK_RSHIFT)) {
 					for (int i = 0; i < Config::GRID_HEIGHT; ++i) {
-						newMap[i][gridX].type = MapManager::Tile_Air;
+						newMap[i][gridX].type = MapManager::TILE_EMPTY;
 					}
 				}
 			}
@@ -125,29 +143,22 @@ namespace MapEditor {
 		// Checking for input CTRL + {NUMBER} to load a new LEVEL MAP to edit
 		if (AEInputCheckCurr(AEVK_LCTRL) || AEInputCheckCurr(AEVK_RCTRL)) {
 			for (int i = 1; i <= totalLevelMap; ++i) {
-				if (AEInputCheckCurr(AEVK_0 + i)) {
-					// Have to load file from both BIN and my project folder
+				if (AEInputCheckCurr(static_cast<u8>(AEVK_0 + i))) {
+					// Have to load file from bin folder only
 					std::string newLoadPath = "Assets/Map/level" + std::to_string(i) + ".txt";
-					LoadNewMap(newLoadPath);
-
-					if (Utils::isDebuggerOn) {
-						newLoadPath =  DebugFilePath(newLoadPath);
-						LoadNewMap(newLoadPath);
-					}
+					LoadNewFile(newLoadPath);
 				}
 			}
 		}
 
 		if (AEInputCheckTriggered(AEVK_E)) {
-			SaveMapFile(savePath); // MIGHT HAVE SOME ERROR WHEN BUILDING DUE TO FILE PATH
+			// Save file on both BIN folder and my project folder if debugger is on
+			SaveNewFile(savePath);
 			if (Utils::isDebuggerOn) {
-				// Save file on both BIN folder and my project folder if debugger is on
-				SaveMapFile(savePath);
-
-				if (Utils::isDebuggerOn) {
-					SaveMapFile(DebugFilePath(savePath));
-				}
+				SaveNewFile(DebugFilePath(savePath));
 			}
+
+			isDrawingNewMap = true;
 		}
 
 		// Render the map
@@ -180,24 +191,5 @@ namespace MapEditor {
 				+ "\nWorld Pos X: " + Utils::FormatFloat(mX, 2) + " Y: " + Utils::FormatFloat(mY, 2);
 			GraphicsManager::DrawTextUI(debugStr, 0.5f, .99f, Utils::debuggerInfo.first, Utils::debuggerInfo.second);
 		}
-	}
-
-	void SaveMapFile(std::string filePath) {
-		std::ofstream output{ filePath };
-
-		if (!output.is_open()) {
-			std::cerr << "Error: Could not open file at " << filePath << std::endl;
-			return;
-		}
-
-		for (int y = 0; y < Config::GRID_HEIGHT; ++y) {
-			for (int x = 0; x < Config::GRID_WIDTH; ++x) {
-				output << newMap[y][x].type << " ";
-			}
-			output << std::endl;
-		}
-
-		isDrawingNewMap = true;
-		output.close();
 	}
 }

@@ -4,10 +4,8 @@
 #include "pch.hpp"
 
 namespace MapEditor {
+	// Map editor containing all the functions to edit the map and save/load files
 	void MapEditor();
-
-	// Save files can be found in bin either debug/release in Assets/Map/ folder 
-	void SaveMapFile(std::string filePath);
 }
 
 #endif // !MAPEDITOR_HPP

@@ -103,10 +103,14 @@ namespace GameStateManager {
 
         // Debugger
         if (Utils::isDebuggerOn) {
-            std::string str = "FPS: " + Utils::FormatFloat(static_cast<double>(AEFrameRateControllerGetFrameRate()), 2)
-                + "\nDeltaTime: " + Utils::FormatFloat(static_cast<double>(AEFrameRateControllerGetFrameTime()), 2);
+            f32 camX, camY;
+            AEGfxGetCamPosition(&camX, &camY);
 
-            GraphicsManager::DrawTextUI(str, -1.f, -0.9f, Utils::debuggerInfo.first, Utils::debuggerInfo.second);
+            std::string str = "\nDebugger ON\nFPS: " + Utils::FormatFloat(static_cast<double>(AEFrameRateControllerGetFrameRate()), 2)
+                + "\nDeltaTime: " + Utils::FormatFloat(static_cast<double>(AEFrameRateControllerGetFrameTime()), 2)
+                + +"\nCamera Pos:\nX: " + Utils::FormatFloat(camX, 2) + " Y: " + Utils::FormatFloat(camY, 2);
+
+            GraphicsManager::DrawTextUI(str, -1.f, -0.75f, Utils::debuggerInfo.first, Utils::debuggerInfo.second);
         }
 
         // Origin

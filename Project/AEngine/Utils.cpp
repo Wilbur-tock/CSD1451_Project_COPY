@@ -3,7 +3,7 @@
 #include "GraphicsManager.hpp"
 
 namespace Utils {
-	bool isDebuggerOn = false;
+	bool isDebuggerOn = true;
 	Color debuggerColor = Color{ 0,1.f,0 };
 
 	std::pair<Color, float> debuggerInfo = {Color{0, 0.8f, 0 }, 0.75f};
