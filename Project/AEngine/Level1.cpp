@@ -18,7 +18,7 @@ namespace Level1 {
 		// Set cannon position
 		for (const std::vector<MapManager::Tile> &row : levelData.levelMap) {
 			for (const MapManager::Tile &tile : row) {
-				if (tile.type == MapManager::TILE_CANNON_PLAYER) {
+				if (tile.type == MapManager::TILE_PLAYER_CANNON) {
 					levelData.cannon.pos = tile.pos;
 					foundCannonPos = true;
 					break;

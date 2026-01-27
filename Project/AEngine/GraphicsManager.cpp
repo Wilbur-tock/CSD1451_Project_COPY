@@ -145,8 +145,9 @@ namespace GraphicsManager {
 				f32 w, h;
 				AEGfxGetPrintSize(textFont, pText, textScale, &w, &h);
 				AEGfxPrint(textFont, pText, x, currentY - h, textScale, color.GetRed(), color.GetGreen(), color.GetBlue(), color.GetAlpha());
-				currentY -= lineHeight * 1.5f; // Move down for next line
 			}
+
+			currentY -= lineHeight * 1.5f; // Move down for next line
 		}
 	}
 

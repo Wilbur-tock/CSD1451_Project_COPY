@@ -9,14 +9,22 @@
 using namespace MapManager;
 
 namespace MapEditor {
-	TileType defaultTile = TILE_BLOCK_1;
-	TileType drawingBlockType = defaultTile;
 	bool isDrawingNewMap = true;
 	int totalLevelMap = 5;
 	std::string defaultSavePath = "Assets/Map/level.txt", defaultLoadPath = "Assets/Map/default.txt",
 		loadPath = "", savePath = "";
 
 	std::vector<std::vector<Tile>> newMap(Config::GRID_HEIGHT, std::vector<Tile>(Config::GRID_WIDTH));
+
+	TileType defaultTile = TILE_BLOCK_GROUND;
+	TileType drawingTileType = defaultTile;
+	int selectedCategoryListId = 0, selectedTileListId = 0, tileId = defaultTile;
+	std::vector<std::string> categories = { "Blocks", "Player", "Enemies" };
+	std::vector<std::vector<std::string>> tileNames = {
+		{"Ground", "Block_1", "Block_2"},
+		{"Cannon", "Character"},
+		{"Cannon", "Boss", "Minion"},
+	};
 
 	// If the Project/Assets/Map does not contain default.txt file 
 	// it will create a new one if not just return
@@ -77,21 +85,18 @@ namespace MapEditor {
 
 	static void InitMapEditor() {
 		// Reset settings
-		drawingBlockType = defaultTile;
+		drawingTileType = defaultTile;
 		CreateDefaultMap();
 		LoadNewFile(defaultLoadPath);
+
+		drawingTileType = defaultTile;
+		selectedCategoryListId = 0, selectedTileListId = 0, tileId = defaultTile;
 	}
 
 	void MapEditor() {
 		if (isDrawingNewMap) {
 			InitMapEditor();
 			isDrawingNewMap = false;
-		}
-
-		for (int i = 0; i < MapManager::TILE_COUNT; ++i) {
-			if (AEInputCheckTriggered(AEVK_1+i)) {
-				drawingBlockType = static_cast<MapManager::TileType>(i+1);
-			}
 		}
 
 		// Calculate Grid x and y index
@@ -108,17 +113,17 @@ namespace MapEditor {
 		// Check for input to draw the map editor
 		if (gridX >= 0 && gridX < Config::GRID_WIDTH && gridY >= 0 && gridY < Config::GRID_HEIGHT) {
 			if (AEInputCheckCurr(AEVK_LBUTTON)) {
-				newMap[gridY][gridX].type = drawingBlockType;
+				newMap[gridY][gridX].type = drawingTileType;
 
 				if (AEInputCheckCurr(AEVK_LCTRL) || AEInputCheckCurr(AEVK_RCTRL)) {
 					for (int i = 0; i < Config::GRID_WIDTH; ++i) {
-						newMap[gridY][i].type = drawingBlockType;
+						newMap[gridY][i].type = drawingTileType;
 					}
 				}
 
 				if (AEInputCheckCurr(AEVK_LSHIFT) || AEInputCheckCurr(AEVK_RSHIFT)) {
 					for (int i = 0; i < Config::GRID_HEIGHT; ++i) {
-						newMap[i][gridX].type = drawingBlockType;
+						newMap[i][gridX].type = drawingTileType;
 					}
 				}
 			}
@@ -137,6 +142,32 @@ namespace MapEditor {
 						newMap[i][gridX].type = MapManager::TILE_EMPTY;
 					}
 				}
+			}
+		}
+
+		// Change drawing tile category
+		if (AEInputCheckTriggered(AEVK_T)) {
+			selectedCategoryListId = ++selectedCategoryListId > categories.size() - 1 ? 0 : selectedCategoryListId;
+
+			// Reset
+			selectedTileListId = 0;
+			tileId = 0;
+			for (int c = 0; c < selectedCategoryListId; ++c) {
+				tileId += (static_cast<int>(tileNames[c].size()));
+			}
+			tileId++;
+		}
+
+		for (int i = 0; i < tileNames[selectedCategoryListId].size(); ++i) {
+			if (AEInputCheckTriggered(static_cast<u8>(AEVK_1 + i))) {
+				selectedTileListId = i;
+				tileId = i + 1;
+
+				for (int c = 0; c < selectedCategoryListId; ++c) {
+					tileId += (static_cast<int>(tileNames[c].size()));
+				}
+
+				drawingTileType = static_cast<MapManager::TileType>(tileId);
 			}
 		}
 
@@ -165,14 +196,20 @@ namespace MapEditor {
 		MapManager::RenderMap(newMap);
 
 		// Print out the information on how to use the editor
-		std::string helpStr = "'E' to save file | 'Q' to close map editor\nCurrent File: "
+		std::string helpStr = "Current File: "
 			+ loadPath + "\nSave File: " + savePath +
-			+ "\nLeft Mouse - Place tile\nRight Mouse - Erase Tile";
-		std::string tileNames[] = {"1.Player", "2.Cannon", "3.Minion", "4.Boss", "5.Ground", "6.Block_1", "7.Block_2"};
-		for (std::string name : tileNames) {
-			helpStr += "\n" + name;
+			+ "\n[E] to save file\n[Q] to close map editor\n[Left Mouse] Place tile\n[Right Mouse] Erase Tile";
+
+		// List out the type of tiles able to be drawn
+		helpStr += "\n\nList of " + categories[selectedCategoryListId] + " Tiles [Key T]";
+		for (int i = 0; i < tileNames[selectedCategoryListId].size(); ++i) {
+			helpStr += "\n[" + std::to_string(i + 1) + "] " + tileNames[selectedCategoryListId][i];
+			if (selectedTileListId == i) {
+				helpStr += " [Currently Drawing] " + std::to_string(tileId);
+			}
 		}
-		helpStr += "\nDrawing Tile " + std::to_string(drawingBlockType);
+
+
 		GraphicsManager::DrawTextUI(helpStr,-1.0f,.99f, Utils::debuggerInfo.first, Utils::debuggerInfo.second);
 
 		// Print out debugger information about the map editor

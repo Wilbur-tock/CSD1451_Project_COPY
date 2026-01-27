@@ -19,8 +19,8 @@ namespace CollisionManager {
         AEInputGetCursorPosition(&mouseX, &mouseY);
 
         // Convert mouse position to world position but without the camera movement adjustment
-        mouseX -= Config::SCREEN_WIDTH / 2.0f;
-        mouseY = Config::SCREEN_HEIGHT / 2.0f - mouseY;
+        mouseX -= static_cast<s32>(Config::SCREEN_WIDTH / 2.0f);
+        mouseY = static_cast<s32>(Config::SCREEN_HEIGHT / 2.0f - mouseY);
 
         // Calculate Bounding Box
         float left = x;

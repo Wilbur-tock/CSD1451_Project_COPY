@@ -8,6 +8,10 @@
 namespace MapManager {
 	std::vector<std::vector<Tile>> mapLayout(Config::GRID_HEIGHT, std::vector<Tile>(Config::GRID_WIDTH));
 
+	Tile::Tile(AEVec2 _pos, AEGfxTexture* _texture, TileType _type) 
+		: GameObject{ _pos, {size,size}, _texture, Color{1,1,1} }, type{ _type } {
+	}
+
 	 void ReadMapData(std::string fileName, std::vector<std::vector<Tile>> &map) {
 		std::ifstream ifs{fileName};
 		if (!ifs) {
@@ -24,16 +28,16 @@ namespace MapManager {
 		float startX = -((width * tileSize) / 2.0f) + (tileSize / 2.0f);
 		float startY = ((height * tileSize) / 2.0f) - (tileSize / 2.0f);
 
+		AEGfxTexture* tileTexture = AssetsManager::GetTexture("Assets/square.png");
+
 		// Initialize each Tile class data in the 2D vector
 		for (int y = 0; y < Config::GRID_HEIGHT; ++y) {
 			for (int x = 0; x < Config::GRID_WIDTH; ++x) {
 				// Set type
 				int type = 0;
 				ifs >> type;
-				map[y][x].type = static_cast<TileType>(type);
 
-				// Set position
-				map[y][x].pos = { startX + (x * tileSize), startY - (y * tileSize) };
+				map[y][x] = Tile({ startX + (x * tileSize), startY - (y * tileSize) }, tileTexture, static_cast<TileType>(type));
 			}
 		}
 
@@ -43,7 +47,6 @@ namespace MapManager {
 	void RenderMap(const std::vector<std::vector<Tile>>& map) {
 		float tileSize = static_cast<float>(Config::TILE_SIZE);
 
-		AEGfxTexture* tempTexture = AssetsManager::GetTexture("Assets/square.png");
 		for (std::vector<Tile> const& row : map) {
 			for (Tile const& tile : row) {
 				AEMtx33 transform = GraphicsManager::CreateTransformMatrix(tile.pos.x, tile.pos.y, 0.0f, tileSize / 2.0f, tileSize / 2.0f);
@@ -52,7 +55,7 @@ namespace MapManager {
 				Color colors[] = { Color{ 0.9f,0.9f,0.9f }, Color{0,1,0.5f},Color{1,0,0}, Color{0,0,0}, Color{0,0,1}, Color{1,1,0}, Color{0.25f, 0.25f,0.25f}, Color{0.25f, 0.25f,0} };
 				Color defaultColor = colors[tile.type];
 
-				GraphicsManager::DrawGameObject(tempTexture, transform, defaultColor);
+				GraphicsManager::DrawGameObject(tile.texture, transform, defaultColor);
 			}
 		}
 	}

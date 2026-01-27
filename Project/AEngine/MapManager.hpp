@@ -2,26 +2,29 @@
 #define MAPMANAGER_HPP
 
 #include "pch.hpp"
+#include "GameObject.hpp"
 
 // Contain enum TileType, class Tile
 namespace MapManager {
 	enum TileType {
 		TILE_EMPTY,
-		TILE_PLAYER_CHARACTER,
-		TILE_CANNON_PLAYER,
-		TILE_ENEMY_MINION,
-		TILE_ENEMY_BOSS,
-		TILE_GROUND,
+		TILE_BLOCK_GROUND,
 		TILE_BLOCK_1,
 		TILE_BLOCK_2,
+		TILE_PLAYER_CANNON,
+		TILE_PLAYER_CHARACTER,
+		TILE_ENEMY_MINION,
+		TILE_ENEMY_BOSS,
 		TILE_COUNT, // Count of the enum always at the last index
 	};
 
-	class Tile {
-		int size = Config::TILE_SIZE;
+	class Tile : public GameObject {
+		float size = Config::TILE_SIZE;
 	public:
 		TileType type = TILE_EMPTY;
-		AEVec2 pos{ 0.0f,0.0f };
+
+		Tile() = default;
+		Tile(AEVec2 _pos, AEGfxTexture* _texture, TileType _type);
 	};
 
 	extern std::vector<std::vector<Tile>> mapLayout;
