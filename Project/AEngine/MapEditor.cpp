@@ -156,6 +156,7 @@ namespace MapEditor {
 				tileId += (static_cast<int>(tileNames[c].size()));
 			}
 			tileId++;
+			drawingTileType = static_cast<MapManager::TileType>(tileId);
 		}
 
 		for (int i = 0; i < tileNames[selectedCategoryListId].size(); ++i) {
