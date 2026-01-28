@@ -38,17 +38,20 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 		// Informing the system about the loop's start
 		AESysFrameStart();
 
-		AEGfxSetBackgroundColor(0, 0, 0);
-
 		// Basic way to trigger exiting the application
 		// when ESCAPE is hit or when the window is closed
 		if (AEInputCheckTriggered(AEVK_ESCAPE) || 0 == AESysDoesWindowExist())
+			gGameRunning = 0;
+
+		// Check if game state is QUIT (from main menu)
+		if (GameStateManager::current == GameStateManager::GS_QUIT)
 			gGameRunning = 0;
 
 		// Your own update logic goes here
 		GameStateManager::Update();
 
 		// Your own rendering logic goes here
+
 
 		// Informing the system about the loop's end
 		AESysFrameEnd();
