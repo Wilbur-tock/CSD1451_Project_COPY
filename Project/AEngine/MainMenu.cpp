@@ -181,12 +181,12 @@ namespace MainMenu {
     // Button callback functions
     void OnPlayClicked() {
         // Transition to Level 1
-        GameStateManager::next = GameStateManager::GS_Level_1;
+        GameStateManager::next = GameStateManager::GS_LEVEL_1;
     }
 
     void OnMapEditorClicked() {
         // Transition to Map Editor
-        GameStateManager::next = GameStateManager::GS_Map_Editor;
+        GameStateManager::next = GameStateManager::GS_MAP_EDITOR;
     }
 
     void OnQuitClicked() {

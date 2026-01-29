@@ -3,6 +3,7 @@
 #include "MapManager.hpp"
 #include "CannonManager.hpp"
 #include "Level.hpp"
+#include "CameraManager.hpp"
 
 namespace Level1 {
 	Level levelData;
@@ -13,6 +14,7 @@ namespace Level1 {
 	}
 
 	void Initialize() {
+		CameraManager::camera.SetPosition(levelData.cannon.pos);
 	}
 
 	void Update() {

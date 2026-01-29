@@ -11,29 +11,22 @@
 
 namespace GameStateManager {
     Utils::FuncPtr gsLoad, gsIntialize, gsUpdate, gsDraw, gsFree, gsUnload;
-    int current = 0, previous = 0, next = 0;
+    GameState current, previous, next;
+    bool setNewState = false;
     float loadingTimer = 0.0f;
+    float dt = 0.0f;
     // Temporary
     AEGfxTexture* texture;
 
-    void SetGameState(GameStateList nextState) {
-        next = nextState;
-
-        if (current != next) {
-
-        }
-    }
-
     void Load() {
-        GraphicsManager::Load();
-
         // Start with main menu
-        current = GS_Level_1;
-        previous = next = GS_Main_Menu;
+        current = previous = GS_INIT;
+        next = GS_MAIN_MENU;
 
         texture = AssetsManager::GetTexture("Assets/square.png");
 
         // Load all game states
+        GraphicsManager::Load();
         MainMenu::Load();
         Level1::Load();
 
@@ -50,74 +43,81 @@ namespace GameStateManager {
             Config::WORLD_MIN_Y + halfH,
             Config::WORLD_MAX_Y - halfH
         );
-
-        // Initialize the main menu since we're starting with it
-        //MainMenu::Initialize();
-        //Level1::Initialize();
     }
 
     void Update() {
+        dt = static_cast<float>(AEFrameRateControllerGetFrameTime());
+
         // Handle quit state
         if (current == GS_QUIT) {
             // This will cause the game loop to exit
             return;
         }
 
-        // Update Game state function pointers based on current state
-
-
         // State transition logic
         if (next != current) {
-            // Call Free on the current state
-            if (gsFree != nullptr) {
-                gsFree();
+            if (!setNewState) {
+                loadingTimer = 0.75f;
+                setNewState = true;
             }
+            else {
+                loadingTimer -= dt;
 
-            // Update state
-            previous = current;
-            current = next;
+                if (loadingTimer <= 0.0f){
+                    // Call Free on the current state
+                    if (gsFree != nullptr) {
+                        gsFree();
+                    }
 
-            switch (current) {
-            case GS_Main_Menu:
-                gsLoad = MainMenu::Load;
-                gsIntialize = MainMenu::Initialize;
-                gsUpdate = MainMenu::Update;
-                gsDraw = MainMenu::Draw;
-                gsFree = MainMenu::Free;
-                gsUnload = MainMenu::Unload;
-                break;
-            case GS_Map_Editor:
-                gsLoad = nullptr;
-                gsIntialize = nullptr;
-                gsUpdate = MapEditor::MapEditor;
-                gsDraw = nullptr;
-                gsFree = MapEditor::Exit;
-                gsUnload = nullptr;
-                break;
-            case GS_Level_1:
-                gsLoad = Level1::Load;
-                gsIntialize = Level1::Initialize;
-                gsUpdate = Level1::Update;
-                gsDraw = nullptr;
-                gsFree = nullptr;
-                gsUnload = nullptr;
-                break;
-            case GS_Level_2:
-                // TODO: Implement Level 2
-                break;
-            case GS_Restart:
-                // Restart current level
-                next = previous;
-                break;
-            case GS_Exit:
-                // Return to main menu
-                next = GS_Main_Menu;
-                break;
-            }
+                    // Update state
+                    previous = current;
+                    current = next;
+                    setNewState = false;
 
-            // Call Initialize on the new state
-            if (gsIntialize != nullptr) {
-                gsIntialize();
+                    // Update Game state function pointers based on current state
+                    switch (current) {
+                    case GS_MAIN_MENU:
+                        gsLoad = MainMenu::Load;
+                        gsIntialize = MainMenu::Initialize;
+                        gsUpdate = MainMenu::Update;
+                        gsDraw = MainMenu::Draw;
+                        gsFree = MainMenu::Free;
+                        gsUnload = MainMenu::Unload;
+                        break;
+                    case GS_MAP_EDITOR:
+                        gsLoad = nullptr;
+                        gsIntialize = nullptr;
+                        gsUpdate = MapEditor::MapEditor;
+                        gsDraw = nullptr;
+                        gsFree = MapEditor::Exit;
+                        gsUnload = nullptr;
+                        break;
+                    case GS_LEVEL_1:
+                        gsLoad = Level1::Load;
+                        gsIntialize = Level1::Initialize;
+                        gsUpdate = Level1::Update;
+                        gsDraw = nullptr;
+                        gsFree = nullptr;
+                        gsUnload = nullptr;
+                        break;
+                    case GS_LEVEL_2:
+                        // TODO: Implement Level 2
+                        break;
+                    case GS_RESTART:
+                        // Restart current level
+                        next = previous;
+                        break;
+                    case GS_EXIT:
+                        // Return to main menu
+                        next = GS_MAIN_MENU;
+                        break;
+                    }
+
+                    // Call Initialize on the new state
+                    if (gsIntialize != nullptr) {
+                        gsIntialize();
+                    }
+                }
             }
         }
 
@@ -127,7 +127,7 @@ namespace GameStateManager {
         }
 
         // Global controls (available in all states except main menu)
-        if (current != GS_Main_Menu) {
+        if (current != GS_MAIN_MENU) {
             // Toggle debugger
             if (AEInputCheckTriggered(AEVK_P)) {
                 Utils::isDebuggerOn = !Utils::isDebuggerOn;
@@ -135,7 +135,7 @@ namespace GameStateManager {
 
             // Return to main menu with ESC (except when already in main menu)
             if (AEInputCheckTriggered(AEVK_M)) {
-                next = GS_Main_Menu;
+                next = GS_MAIN_MENU;
             }
 
             // Debugger display
@@ -143,8 +143,8 @@ namespace GameStateManager {
                 f32 camX, camY;
                 AEGfxGetCamPosition(&camX, &camY);
 
-                std::string str = "\nDebugger ON\nFPS: " + Utils::FormatFloat(static_cast<double>(AEFrameRateControllerGetFrameRate()), 2)
-                    + "\nDeltaTime: " + Utils::FormatFloat(static_cast<double>(AEFrameRateControllerGetFrameTime()), 2)
+                std::string str = "\n[P] Debugger ON\nFPS: " + Utils::FormatFloat(AEFrameRateControllerGetFrameRate(), 2)
+                    + "\nDeltaTime: " + Utils::FormatFloat(dt, 2)
                     + "\nCamera Pos:\nX: " + Utils::FormatFloat(camX, 2) + " Y: " + Utils::FormatFloat(camY, 2)
                     + "\n\nControls:\nP - Toggle Debugger\nM - Main Menu";
 

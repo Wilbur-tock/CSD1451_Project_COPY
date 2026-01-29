@@ -2,8 +2,8 @@
 // includes
 
 #include <crtdbg.h> // To check for memory leaks
-#include "AEEngine.h"
 #include "GameStateManager.hpp"
+#include "AEEngine.h"
 
 // ---------------------------------------------------------------------------
 // main
@@ -40,18 +40,12 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
 		// Basic way to trigger exiting the application
 		// when ESCAPE is hit or when the window is closed
-		if (AEInputCheckTriggered(AEVK_ESCAPE) || 0 == AESysDoesWindowExist())
+		if (AEInputCheckTriggered(AEVK_ESCAPE) || 0 == AESysDoesWindowExist() || GameStateManager::current == GameStateManager::GS_QUIT) {
 			gGameRunning = 0;
-
-		// Check if game state is QUIT (from main menu)
-		if (GameStateManager::current == GameStateManager::GS_QUIT)
-			gGameRunning = 0;
+		}
 
 		// Your own update logic goes here
 		GameStateManager::Update();
-
-		// Your own rendering logic goes here
-
 
 		// Informing the system about the loop's end
 		AESysFrameEnd();

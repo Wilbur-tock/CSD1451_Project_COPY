@@ -71,10 +71,8 @@ namespace CannonManager {
 
         Render();
 
-        float dt = static_cast<float>(AEFrameRateControllerGetFrameTime());
-        ChargeShot(dt);
-
-        ProjectileUpdate(dt);
+        ChargeShot(GameStateManager::dt);
+        ProjectileUpdate(GameStateManager::dt);
     }
 
     void Cannon::ChargeShot(float dt) {
