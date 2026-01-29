@@ -8,6 +8,7 @@
 #include "Level1.hpp"
 #include "CameraManager.hpp"
 #include "MainMenu.hpp"
+#include "Credits.hpp"
 
 namespace GameStateManager {
     Utils::FuncPtr gsLoad, gsIntialize, gsUpdate, gsDraw, gsFree, gsUnload;
@@ -29,6 +30,7 @@ namespace GameStateManager {
         GraphicsManager::Load();
         MainMenu::Load();
         Level1::Load();
+        Credits::Load();
 
         // Initialize camera controller
         CameraManager::camera.Init();
@@ -102,6 +104,14 @@ namespace GameStateManager {
                         break;
                     case GS_LEVEL_2:
                         // TODO: Implement Level 2
+                        break;
+                    case GS_CREDITS:
+                        gsLoad = Credits::Load;
+                        gsIntialize = Credits::Initialize;
+                        gsUpdate = Credits::Update;
+                        gsDraw = Credits::Draw;
+                        gsFree = Credits::Free;
+                        gsUnload = Credits::Unload;
                         break;
                     case GS_RESTART:
                         // Restart current level

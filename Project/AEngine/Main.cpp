@@ -25,7 +25,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	AESysInit(hInstance, nCmdShow, 1600, 900, 1, 60, false, NULL);
 
 	// Changing the window title
-	AESysSetWindowTitle("Game Name");
+	AESysSetWindowTitle("Justin Likes Kids");
 
 	// reset the system modules
 	AESysReset();

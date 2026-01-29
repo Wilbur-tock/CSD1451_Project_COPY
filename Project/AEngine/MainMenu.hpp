@@ -16,11 +16,13 @@ namespace MainMenu {
     // Button callback functions
     void OnPlayClicked();
     void OnMapEditorClicked();
+    void OnCreditsClicked();
     void OnQuitClicked();
 
     // Menu buttons
     extern Button playButton;
     extern Button mapEditorButton;
+    extern Button creditsButton;
     extern Button quitButton;
 
     // Menu state

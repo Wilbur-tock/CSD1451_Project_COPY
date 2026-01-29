@@ -12,6 +12,7 @@ namespace GameStateManager {
 		GS_MAP_EDITOR,
 		GS_LEVEL_1,
 		GS_LEVEL_2,
+		GS_CREDITS,
 		GS_RESTART,
 		GS_EXIT,
 		GS_QUIT,
