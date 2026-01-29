@@ -29,7 +29,7 @@ namespace CannonManager {
         : GameObject(_pos, defaultSize, _texture), ammoLimit{ _projectileAmount }, cannonAngle{ 0.0f }, shotPower{ power } {
         Reset();
     }
-    Cannon::Cannon(AEVec2 _pos, AEGfxTexture* _texture, int _projectileAmount, AEVec2 _size) 
+    Cannon::Cannon(AEVec2 _pos, AEGfxTexture* _texture, int _projectileAmount, AEVec2 _size)
         : GameObject(_pos, _size, _texture), ammoLimit{ _projectileAmount }, cannonAngle{ 0.0f }, shotPower{ power } {
         Reset();
     }
@@ -128,8 +128,8 @@ namespace CannonManager {
         activeAmmo.push_back(ammo[ammoCount]);
 
         // Set camera to follow the newly fired projectile
-        GameStateManager::camera.SetFollowTarget(&activeAmmo.back().pos);
-        GameStateManager::camera.SetState(CameraController::CameraState::FOLLOW);
+        CameraManager::camera.SetFollowTarget(&activeAmmo.back().pos);
+        CameraManager::camera.SetState(CameraManager::CameraController::CameraState::FOLLOW);
 
         // Once it reach the ammo limit reset the ammo count
         if (++ammoCount >= ammoLimit) {
@@ -163,9 +163,9 @@ namespace CannonManager {
 
                 // Return camera to input control when all projectiles are destroyed
                 if (activeAmmo.empty()) {
-                    GameStateManager::camera.SetFollowTarget(nullptr);
-                    GameStateManager::camera.SetState(CameraController::CameraState::INPUT);
-					GameStateManager::camera.SetPosition(pos);
+                    CameraManager::camera.SetFollowTarget(nullptr);
+                    CameraManager::camera.SetState(CameraManager::CameraController::CameraState::INPUT);
+                    CameraManager::camera.SetPosition(pos);
                 }
 
                 std::cout << "Removing " << i << " " << "Count " << activeAmmo.size() << std::endl;

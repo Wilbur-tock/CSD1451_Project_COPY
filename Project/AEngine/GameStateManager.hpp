@@ -2,14 +2,12 @@
 #define GAMESTATEMANAGER_HPP
 
 #include "pch.hpp"
-
 #include "Utils.hpp"
 #include "CameraManager.hpp"
 
 namespace GameStateManager {
 	extern Utils::FuncPtr gsLoad, gsIntialize, gsUpdate, gsDraw, gsFree, gsUnload;
 	extern int current, previous, next;
-	extern CameraController camera;
 
 	enum GSList {
 		GS_Main_Menu,
@@ -28,4 +26,4 @@ namespace GameStateManager {
 	void Exit();
 }
 
-#endif // 
+#endif //

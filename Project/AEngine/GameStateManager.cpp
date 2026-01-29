@@ -15,9 +15,6 @@ namespace GameStateManager {
     // Temporary
     AEGfxTexture* texture;
 
-    // Camera instance
-    CameraController camera;
-
     void Load() {
         GraphicsManager::Load();
 
@@ -32,13 +29,13 @@ namespace GameStateManager {
         Level1::Load();
 
         // Initialize camera controller
-        camera.Init();
-        camera.SetMoveSpeed(1500.0f);
+        CameraManager::camera.Init();
+        CameraManager::camera.SetMoveSpeed(1500.0f);
 
         // Set world boundaries
         float halfW = Config::SCREEN_WIDTH / 2.0f;
         float halfH = Config::SCREEN_HEIGHT / 2.0f;
-        camera.SetBounds(
+        CameraManager::camera.SetBounds(
             Config::WORLD_MIN_X + halfW,
             Config::WORLD_MAX_X - halfW,
             Config::WORLD_MIN_Y + halfH,
@@ -146,7 +143,7 @@ namespace GameStateManager {
             }
 
             // Update camera (handles movement, clamping, flooring, and setting position)
-            camera.Update(static_cast<float>(AEFrameRateControllerGetFrameTime()));
+            CameraManager::camera.Update(static_cast<float>(AEFrameRateControllerGetFrameTime()));
         }
         else {
             // In main menu, reset camera to center

@@ -48,7 +48,7 @@ namespace CannonManager {
 		// Calculate the charge shot power and update any shot projectiles
 		void Update();
 		// Check for left mouse input the shot power will be increased/decreased based on the charge rate
-	    void ChargeShot(float dt);
+		void ChargeShot(float dt);
 		void Render();
 		void ShootProjectile();
 		// Render and move the projectile once it has reach the end of its lifespan it is destroy
