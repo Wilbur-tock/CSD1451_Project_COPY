@@ -146,29 +146,28 @@ namespace CannonManager {
                 bullet.MoveProjectile(dt);
                 bullet.timer -= 1 * dt;
 
-                // Destroy the projectile once it has reach its lifespan or something else
-                if (bullet.timer <= 0.0f) {
-                    DestroyProjectile(bullet);
-                }
+                DestroyProjectile(bullet);
             }
         }
     }
 
     void Cannon::DestroyProjectile(Projectile& projectile) {
-        projectile.isActive = false;
-        // Find the index containing the projectile and erase from the active ammo vector
-        for (int i = 0; i < activeAmmo.size(); i++) {
-            if (activeAmmo[i].id == projectile.id) {
-                activeAmmo.erase(activeAmmo.begin() + i);
+        if (projectile.timer <= 0.0f || !projectile.IsInMapBounds()) {
+            projectile.isActive = false;
+            // Find the index containing the projectile and erase from the active ammo vector
+            for (int i = 0; i < activeAmmo.size(); i++) {
+                if (activeAmmo[i].id == projectile.id) {
+                    activeAmmo.erase(activeAmmo.begin() + i);
 
-                // Return camera to input control when all projectiles are destroyed
-                if (activeAmmo.empty()) {
-                    CameraManager::camera.SetFollowTarget(nullptr);
-                    CameraManager::camera.SetState(CameraManager::CameraController::CameraState::INPUT);
-                    CameraManager::camera.SetPosition(pos);
+                    // Return camera to input control when all projectiles are destroyed
+                    if (activeAmmo.empty()) {
+                        CameraManager::camera.SetFollowTarget(nullptr);
+                        CameraManager::camera.SetState(CameraManager::CameraController::CameraState::INPUT);
+                        CameraManager::camera.SetPosition(pos);
+                    }
+
+                    std::cout << "Removing " << i << " " << "Count " << activeAmmo.size() << std::endl;
                 }
-
-                std::cout << "Removing " << i << " " << "Count " << activeAmmo.size() << std::endl;
             }
         }
     }

@@ -12,8 +12,17 @@
 namespace GameStateManager {
     Utils::FuncPtr gsLoad, gsIntialize, gsUpdate, gsDraw, gsFree, gsUnload;
     int current = 0, previous = 0, next = 0;
+    float loadingTimer = 0.0f;
     // Temporary
     AEGfxTexture* texture;
+
+    void SetGameState(GameStateList nextState) {
+        next = nextState;
+
+        if (current != next) {
+
+        }
+    }
 
     void Load() {
         GraphicsManager::Load();

@@ -28,8 +28,6 @@ namespace CollisionManager {
         float top = y;        // Y is the top
         float bottom = y - h;    // It grows down, so bottom is Y minus height
 
-        //std::cout << mouseX << " " << mouseY << " | " << x << " " << y << " | " << left << " " << right << " " << top << " " << bottom << std::endl;
-
         return (mouseX >= left && mouseX <= right && mouseY <= top && mouseY >= bottom);
     }
 }

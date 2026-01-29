@@ -15,6 +15,7 @@ public:
 
 	GameObject() = default;
 	GameObject(AEVec2 _pos, AEVec2 _size, AEGfxTexture* _texture, Color _textureColor = Color{0,0,0});
+	bool IsInMapBounds();
 };
 
 #endif // GAMEOBJECT_HPP

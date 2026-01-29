@@ -3,3 +3,8 @@
 GameObject::GameObject(AEVec2 _pos, AEVec2 _size, AEGfxTexture* _texture, Color _textureColor) 
 	: pos{ _pos }, size{_size}, texture {_texture}, textureColor{ _textureColor } {
 }
+
+bool GameObject::IsInMapBounds() {
+	using namespace Config;
+	return pos.x >= WORLD_MIN_X && pos.x <= WORLD_MAX_X && pos.y >= WORLD_MIN_Y && pos.y <= WORLD_MAX_Y;
+}

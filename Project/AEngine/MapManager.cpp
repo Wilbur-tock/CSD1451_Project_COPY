@@ -56,7 +56,7 @@ namespace MapManager {
 				AEMtx33 transform = GraphicsManager::CreateTransformMatrix(tile.pos.x, tile.pos.y, 0.0f, tileSize / 2.0f, tileSize / 2.0f);
 
 				// TEMPORARY TO BE CHANGED TO TEXTURE ASSET LATER
-				Color colors[] = { Color{ 0.9f,0.9f,0.9f }, Color{0.5f,0.75f,0.5f},Color{1,0,0}, Color{0,0,0}, Color{0,0,1}, Color{1,1,0}, Color{0.25f, 0.25f,0.25f}, Color{0.25f, 0.25f,1} };
+				Color colors[] = { Color{ 0.9f,0.9f,0.9f }, Color{0.5f,0.5f,0.5f},Color{1,0,0}, Color{0,0,0}, Color{0,0,1}, Color{1,1,0}, Color{0.25f, 0.25f,0.25f}, Color{0.25f, 0.25f,1} };
 				Color defaultColor = colors[tile.type];
 
 				GraphicsManager::DrawGameObject(tile.texture, transform, defaultColor);

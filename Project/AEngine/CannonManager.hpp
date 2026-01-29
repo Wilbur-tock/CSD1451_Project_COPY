@@ -53,6 +53,7 @@ namespace CannonManager {
 		void ShootProjectile();
 		// Render and move the projectile once it has reach the end of its lifespan it is destroy
 		void ProjectileUpdate(float dt);
+		// Destroy projectile once it reached the end of its lifespan or out of the map bounds
 		void DestroyProjectile(Projectile& projectile);
 		// UI to display the charging shot power bar */
 		void UIChargeShotBar();
