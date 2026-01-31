@@ -101,7 +101,7 @@ namespace MapEditor {
 	//	tileId = 1;
 	//}
 
-	static void InitMapEditor() {
+	static void ResetEditor() {
 		// Reset settings
 		drawingTileType = defaultTile;
 		tileId = static_cast<int>(defaultTile);
