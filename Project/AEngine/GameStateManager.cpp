@@ -16,17 +16,14 @@ namespace GameStateManager {
     bool setNewState = false;
     float loadingTimer = 0.0f;
     float dt = 0.0f;
-    // Temporary
-    AEGfxTexture* texture;
 
     void Load() {
         // Start with main menu
         current = previous = GS_INIT;
         next = GS_MAIN_MENU;
 
-        texture = AssetsManager::GetTexture("Assets/square.png");
-
-        // Load all game states
+        // Load all resources
+        AssetsManager::Load();
         GraphicsManager::Load();
         MainMenu::Load();
         Level1::Load();
@@ -158,7 +155,7 @@ namespace GameStateManager {
                     + "\nCamera Pos:\nX: " + Utils::FormatFloat(camX, 2) + " Y: " + Utils::FormatFloat(camY, 2)
                     + "\n\nControls:\nP - Toggle Debugger\nM - Main Menu";
 
-                GraphicsManager::DrawTextUI(str, -1.f, -0.75f, Utils::debuggerInfo.first, Utils::debuggerInfo.second);
+                GraphicsManager::DrawTextUI(TextObject{ str, {-1.f, -0.75f}, Utils::debuggerInfo.first, Utils::debuggerInfo.second });
             }
 
             // Update camera (handles movement, clamping, flooring, and setting position)

@@ -32,8 +32,9 @@ namespace Utils {
 		//y += (Config::SCREEN_HEIGHT / 2.0f) - camY;
 	}
 
-	void Debugger(AEVec2 pos, std::string str) {
-		GraphicsManager::DrawTextUI(str, -1.f, -0.9f, Color{0,1,0}, 0.8f);
+	void ToNormalize(float& x, float& y) {
+		x /= (Config::SCREEN_WIDTH / 2.0f);
+		y /= (Config::SCREEN_HEIGHT / 2.0f);
 	}
 
 	std::string FormatFloat(double value, int precision) {

@@ -7,8 +7,6 @@ namespace GraphicsManager {
 	enum CoordinateType { WORLD, SCREEN };
 
 	AEGfxVertexList* pMeshMiddle = nullptr, *pMeshCorner = nullptr;
-	s8 textFont;
-
 
 	// Use either WORLD or SCREEN based on which rectMode to use center or corner rectMode, texture to render (image/sprite),
 	// 3x3 matrix created using CreateTransformMatrix
@@ -51,7 +49,6 @@ namespace GraphicsManager {
 	}
 
 	void Load() {
-		textFont = AEGfxCreateFont("Assets/liberation-mono.ttf", Config::FONT_SIZE);
 		GenerateMesh();
 	}
 
@@ -116,12 +113,16 @@ namespace GraphicsManager {
 		DrawUI(pTex, transform, color);
 	}
 
-	void DrawTextUI(std::string text, f32 x, f32 y, Color color, float textScale) {
-		f32 currentY = y;
+	void DrawTextUI(TextObject textObj) {
+		//Utils::Limit(textObj.pos.x, -1.0f, 1.0f);
+		//Utils::Limit(textObj.pos.y, -1.0f, 1.0f);
+		Utils::Limit(textObj.scale, 0.0f, 1.0f);
+
+		std::string text = textObj.textContent;
 
 		// Get line height and print size with a default text
-		f32 charWidth, lineHeight;
-		AEGfxGetPrintSize(textFont, "A", textScale, &charWidth, &lineHeight);
+		f32 charWidth, lineHeight, currentY = textObj.pos.y;
+		AEGfxGetPrintSize(AssetsManager::textFont, "A", textObj.scale, &charWidth, &lineHeight);
 
 		size_t start = 0;
 		size_t end = text.find('\n');
@@ -143,32 +144,30 @@ namespace GraphicsManager {
 			if (!line.empty()) {
 				char const* pText = line.c_str();
 				f32 w, h;
-				AEGfxGetPrintSize(textFont, pText, textScale, &w, &h);
-				AEGfxPrint(textFont, pText, x, currentY - h, textScale, color.GetRed(), color.GetGreen(), color.GetBlue(), color.GetAlpha());
+				AEGfxGetPrintSize(AssetsManager::textFont, pText, textObj.scale, &w, &h);
+				AEGfxPrint(AssetsManager::textFont, pText, textObj.pos.x, currentY - h, textObj.scale, 
+					textObj.color.GetRed(), textObj.color.GetGreen(), textObj.color.GetBlue(), textObj.color.GetAlpha());
 			}
 
 			currentY -= lineHeight * 1.5f; // Move down for next line
 		}
 	}
 
-	void DrawButton(Button btn, Color textColor, float textScale) {
-		bool isHovered = CollisionManager::IsPointInRect(btn.pos.x, btn.pos.y, btn.width, btn.height);
+	void DrawButton(Button btn) {
+		bool isHovered = CollisionManager::IsPointInRect(btn.pos.x, btn.pos.y, btn.size.x, btn.size.y);
 		Color btnColor = btn.color;
 		if (isHovered) {
 			btnColor = Color{ btn.color.GetRed(), btn.color.GetGreen(), btn.color.GetBlue(), btn.color.GetAlpha() * 0.5f}; // Assign hovered color
 			if (AEInputCheckTriggered(AEVK_LBUTTON)) {
-				btn.onClick;
+				btn.onClick();
 			}
 		}
 		
 		// Draw button object
-		DrawUIFollowCam(AssetsManager::GetTexture("Assets/square.png"), CreateTransformMatrix(btn.pos.x, btn.pos.y, 0, btn.width,btn.height), btnColor);
+		DrawUIFollowCam(AssetsManager::GetTexture("Assets/square.png"), CreateTransformMatrix(btn.pos.x, btn.pos.y, 0, btn.size.x, btn.size.y), btnColor);
 		// Draw text if the string is not a empty string
-		if (!btn.text.empty()) {
-			// Normalized coordinates
-			float normX = btn.pos.x / (Config::SCREEN_WIDTH / 2.0f);
-			float normY = btn.pos.y / (Config::SCREEN_HEIGHT / 2.0f);
-			DrawTextUI(btn.text, normX + btn.textOffsetX, normY + btn.textOffsetY, textColor, textScale);
+		if (!btn.textObj.textContent.empty()) {
+			DrawTextUI(btn.textObj);
 		}
 	}
 }

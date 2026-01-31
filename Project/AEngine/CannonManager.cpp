@@ -66,7 +66,7 @@ namespace CannonManager {
                 + "\nMouse\nScreen Pos X: " + Utils::FormatFloat(mouseX, 2) + " Y: " + Utils::FormatFloat(mouseY, 2)
                 + "\nWorld\nPos X: " + Utils::FormatFloat(worldMouseX, 2) + " Y : " + Utils::FormatFloat(worldMouseY, 2);
 
-            GraphicsManager::DrawTextUI(str, -1, 0.99f, Utils::debuggerInfo.first, Utils::debuggerInfo.second);
+            GraphicsManager::DrawTextUI(TextObject{ str, { -1, 0.99f}, Utils::debuggerInfo.first, Utils::debuggerInfo.second });
         }
 
         Render();

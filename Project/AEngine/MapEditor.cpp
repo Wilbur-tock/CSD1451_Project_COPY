@@ -217,7 +217,7 @@ namespace MapEditor {
 			helpStr += "[HIDING]";
 		}
 
-		GraphicsManager::DrawTextUI(helpStr,-1.0f,.99f, Utils::debuggerInfo.first, Utils::debuggerInfo.second * 0.9f);
+		GraphicsManager::DrawTextUI(TextObject{ helpStr, {-1.0f,.99f}, Utils::debuggerInfo.first, Utils::debuggerInfo.second * 0.9f });
 
 		// Print out debugger information about the map editor
 		if (Utils::isDebuggerOn) {
@@ -233,7 +233,7 @@ namespace MapEditor {
 				+ "\nCamera\nPos X:" + Utils::FormatFloat(x, 2) + " Y: " + Utils::FormatFloat(y, 2)
 				+ "\nMouse\nScreen Pos X: " + Utils::FormatFloat(mouseX, 2) + " Y: " + Utils::FormatFloat(mouseY, 2)
 				+ "\nWorld Pos X: " + Utils::FormatFloat(mX, 2) + " Y: " + Utils::FormatFloat(mY, 2);
-			GraphicsManager::DrawTextUI(debugStr, 0.5f, .99f, Utils::debuggerInfo.first, Utils::debuggerInfo.second);
+			GraphicsManager::DrawTextUI(TextObject{ debugStr,{ 0.5f, 0.99f}, Utils::debuggerInfo.first, Utils::debuggerInfo.second });
 		}
 	}
 

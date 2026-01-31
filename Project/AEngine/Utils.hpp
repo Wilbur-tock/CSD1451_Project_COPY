@@ -24,9 +24,9 @@ namespace Utils {
 	// Get world mouse position instead of the screen position due to camera movement
 	void GetWorldMousePos(float& x, float& y);
 	void GetWorldPos(float& x, float& y);
+	void ToNormalize(float& x, float& y);
 
 	std::string FormatFloat(double value, int precision);
-	void Debugger(AEVec2 pos, std::string str);
 	// Set limit to ensure that the value does not go under minimum or over maximum
 	void Limit(int& val, int min, int max);
 	// Set limit to ensure that the value does not go under minimum or over maximum

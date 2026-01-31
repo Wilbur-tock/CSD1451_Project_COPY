@@ -116,6 +116,7 @@ xcopy "$(SolutionDir)Extern\AlphaEngine\lib\fmod.dll" "$(OutDir)" /s /r /y /q</C
     <ClCompile Include="MapEditor.cpp" />
     <ClCompile Include="MapManager.cpp" />
     <ClCompile Include="pch.cpp" />
+    <ClCompile Include="TextObject.cpp" />
     <ClCompile Include="Utils.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -137,6 +138,7 @@ xcopy "$(SolutionDir)Extern\AlphaEngine\lib\fmod.dll" "$(OutDir)" /s /r /y /q</C
     <ClInclude Include="MapEditor.hpp" />
     <ClInclude Include="MapManager.hpp" />
     <ClInclude Include="pch.hpp" />
+    <ClInclude Include="TextObject.hpp" />
     <ClInclude Include="Utils.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

@@ -1,45 +1,87 @@
+#include "pch.hpp"
 #include "Button.hpp"
+#include "AssetsManager.hpp"
 
-// string text, aevec2 _pos, width, float, color, texture,
-Button::Button(std::string _text, AEVec2 _pos, float _width, float _height, Color _color, AEGfxTexture* _texture, Utils::RectMode _rectMode, Utils::FuncPtr _onClick)
-	: text{ _text }, pos{ _pos }, width{ _width }, height{ _height }, color{ _color }, texture{ _texture },
-	 onClick{ _onClick } {
-	// Add offset for the text inside the button
-	//float gap = 0.01f, x = 0, y = 0;
-    //float halfW = _width / 2.0f;
-    //float halfH = _height / 2.0f;
-    // NOT FIXED YET TO BE FIXED
-    //switch (_rectMode) {
-    //case Utils::RECT_TOP_LEFT:
-    //    x = 0;          
-    //    y = 0;
-    //    break;
-    //case Utils::RECT_TOP_CENTER:
-    //    x = halfW;      y = 0;
-    //    break;
-    //case Utils::RECT_TOP_RIGHT:
-    //    x = _width;     y = 0;
-    //    break;
-    //case Utils::RECT_CENTER_LEFT:
-    //    x = 0;          y = -halfH;
-    //    break;
-    //case Utils::RECT_CENTER:
-    //    x = halfW;      y = -halfH;
-    //    break;
-    //case Utils::RECT_CENTER_RIGHT:
-    //    x = _width;     y = -halfH;
-    //    break;
-    //case Utils::RECT_BOTTOM_LEFT:
-    //    x = 0;          y = -_height;
-    //    break;
-    //case Utils::RECT_BOTTOM_CENTER:
-    //    x = halfW;      y = -_height;
-    //    break;
-    //case Utils::RECT_BOTTOM_RIGHT:
-    //    x = _width;     y = -_height;
-    //    break;
-    //}
+Button::Button(AEVec2 _pos, AEVec2 _size, Color _color, AEGfxTexture* _texture, Utils::FuncPtr _onClick)
+    : pos{ _pos }, size{_size}, color{_color}, texture{_texture}, onClick{_onClick} {
+}
 
-	textOffsetX = 0;
-	textOffsetY = 0;
+Button::Button(TextObject _textObj, Utils::RectMode _rectMode, AEVec2 _pos, AEVec2 _size, Color _color, AEGfxTexture* _texture, Utils::FuncPtr _onClick)
+    : textObj{_textObj}, pos{ _pos }, size{ _size }, color{ _color }, texture{ _texture }, onClick{ _onClick } {
+
+    // Must always get the size of the string to be printed out
+    const char* myText = _textObj.textContent.c_str();
+    // Get the normalized text width and height
+    f32 textW, textH;
+    AEGfxGetPrintSize(AssetsManager::textFont, myText, textObj.scale, &textW, &textH);
+
+    float x = pos.x, y = pos.y, borderGap = 0.01f;
+
+    switch (_rectMode) {
+        case Utils::RECT_TOP_LEFT: {
+            Utils::ToNormalize(x, y);
+            textObj.pos.x = x + borderGap;
+            textObj.pos.y = y - borderGap;
+            break;
+        }
+        case Utils::RECT_TOP_CENTER: {
+            x += (size.x / 2.0f);
+            Utils::ToNormalize(x, y);
+            textObj.pos.x = x - (textW / 2.0f);
+            textObj.pos.y = y ;
+            break;
+        }
+        case Utils::RECT_TOP_RIGHT: {
+            x += size.x;
+            Utils::ToNormalize(x, y);
+            textObj.pos.x = x - (textW) - borderGap;
+            textObj.pos.y = y - borderGap;
+            break;
+        }
+        case Utils::RECT_CENTER_LEFT: {
+            y -= (size.y / 2.0f);
+            Utils::ToNormalize(x, y);
+            textObj.pos.x = x + borderGap;
+            textObj.pos.y = y + (textH / 2.0f);
+            break;
+        }
+        case Utils::RECT_CENTER: {
+            // Convert button position from corner rectmode to middle rectmode (world pos)
+            // then convert to normalized position 
+            // then minus half of the text width and height
+            x += (size.x / 2.0f), y -= (size.y / 2.0f);
+            Utils::ToNormalize(x, y);
+            textObj.pos.x = x - (textW / 2.0f);
+            textObj.pos.y = y + (textH / 2.0f);
+            break;
+        }
+        case Utils::RECT_CENTER_RIGHT: {
+            x += size.x, y -= (size.y / 2.0f);
+            Utils::ToNormalize(x, y);
+            textObj.pos.x = x - (textW) - borderGap;
+            textObj.pos.y = y + (textH / 2.0f);
+            break;
+        }
+        case Utils::RECT_BOTTOM_LEFT: {
+            y -= (size.y);
+            Utils::ToNormalize(x, y);
+            textObj.pos.x = x + borderGap;
+            textObj.pos.y = y + textH + borderGap;
+            break;
+        }
+        case Utils::RECT_BOTTOM_CENTER: {
+            x += (size.x / 2.0f), y -= (size.y);
+            Utils::ToNormalize(x, y);
+            textObj.pos.x = x - (textW / 2.0f);
+            textObj.pos.y = y + textH + borderGap;
+            break;
+        }
+        case Utils::RECT_BOTTOM_RIGHT: {
+            x += size.x, y -= (size.y);
+            Utils::ToNormalize(x, y);
+            textObj.pos.x = x - textW - borderGap;
+            textObj.pos.y = y + textH + borderGap;
+            break;
+        }
+    }
 }

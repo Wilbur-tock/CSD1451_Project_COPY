@@ -5,6 +5,14 @@
 namespace AssetsManager {
     std::map<std::string, AEGfxTexture*> textureCache;
 
+    AEGfxTexture* squareTexture;
+    s8 textFont;
+
+    void Load() {
+        squareTexture = GetTexture("Assets/square.png");
+        textFont = AEGfxCreateFont("Assets/liberation-mono.ttf", Config::FONT_SIZE);
+    }
+
     AEGfxTexture* GetTexture(const char* filePath) {
         // Check if we already loaded this file
         auto it = textureCache.find(filePath);

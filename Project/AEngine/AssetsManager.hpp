@@ -8,6 +8,11 @@ namespace AssetsManager {
 	// Storage for textures
 	extern std::map<std::string, AEGfxTexture*> textureCache;
 
+	extern AEGfxTexture* squareTexture;
+	extern s8 textFont;
+
+	void Load();
+
 	// Find the texture inside the storage or else load the texture
 	AEGfxTexture* GetTexture(const char* filePath);
 

@@ -126,22 +126,20 @@ namespace Credits {
         }
 
         // Draw credits text with scroll offset
-        GraphicsManager::DrawTextUI(
+        GraphicsManager::DrawTextUI(TextObject{
             creditsText,
-            -0.1f,              // X position (centered-ish)
-            scrollOffset,       // Y position (scrolling)
+            { -0.1f, scrollOffset},       // Y position (scrolling)
             Color(1.0f, 1.0f, 1.0f, 1.0f),  // White text
-            0.9f                // Text scale
+            0.9f }              // Text scale
         );
 
         // Draw hint at bottom
         std::string hint = "ESC - Return to Menu  |  SPACE - Skip";
-        GraphicsManager::DrawTextUI(
+        GraphicsManager::DrawTextUI(TextObject{
             hint,
-            -0.98f,
-            -0.93f,
+            { -0.98f, -0.93f },
             Color(0.6f, 0.6f, 0.6f, 1.0f),
-            0.7f
+            0.7f }
         );
     }
 
