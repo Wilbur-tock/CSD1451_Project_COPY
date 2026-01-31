@@ -11,6 +11,8 @@ namespace CannonManager {
     Projectile::Projectile() : timer{ 0.0f }, velocity{ 0.0f,0.0f } {}
     Projectile::Projectile(AEVec2 _pos, AEGfxTexture* _texture, AEVec2 _velocity) : GameObject(_pos, defaultSize, _texture), timer{ 0.0f }, velocity(_velocity) {}
 
+    TextObject debugText{ "", {-1, 0.99f}, Utils::debuggerInfo.first, Utils::debuggerInfo.second };
+
     void Projectile::Render() {
         AEGfxTexture* tex = AssetsManager::GetTexture("Assets/circle.png");
         AEMtx33 mat = GraphicsManager::CreateTransformMatrix(pos.x, pos.y, 0, defaultSize.x, defaultSize.y);
@@ -60,13 +62,13 @@ namespace CannonManager {
             s32 mouseX, mouseY;
             AEInputGetCursorPosition(&mouseX, &mouseY);
 
-            std::string str = "Cannon\nPos X: " + Utils::FormatFloat(pos.x, 2) + " Y: " + Utils::FormatFloat(pos.y, 2)
+            debugText.textContent = "Cannon\nPos X: " + Utils::FormatFloat(pos.x, 2) + " Y: " + Utils::FormatFloat(pos.y, 2)
                 + "\nWorld Pos X: " + Utils::FormatFloat(cX, 2) + " Y: " + Utils::FormatFloat(cY, 2)
                 + "\nAngle: " + Utils::FormatFloat(cannonAngle * (180.0f / 3.14159265359), 2)
                 + "\nMouse\nScreen Pos X: " + Utils::FormatFloat(mouseX, 2) + " Y: " + Utils::FormatFloat(mouseY, 2)
                 + "\nWorld\nPos X: " + Utils::FormatFloat(worldMouseX, 2) + " Y : " + Utils::FormatFloat(worldMouseY, 2);
 
-            GraphicsManager::DrawTextUI(TextObject{ str, { -1, 0.99f}, Utils::debuggerInfo.first, Utils::debuggerInfo.second });
+            GraphicsManager::DrawTextUI(debugText);
         }
 
         Render();
