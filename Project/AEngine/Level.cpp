@@ -2,6 +2,7 @@
 #include "Level.hpp"
 #include "AssetsManager.hpp"
 #include "MapManager.hpp"
+#include "Color.hpp"
 
 void Level::Load(std::string filePath) {
 	levelMap.resize(Config::GRID_HEIGHT, std::vector<MapManager::Tile>(Config::GRID_WIDTH));
@@ -23,5 +24,14 @@ void Level::Load(std::string filePath) {
 		if (foundCannonPos) break;
 	}
 
-	cannon = CannonManager::Cannon(playerCannonStartPos, AssetsManager::GetTexture("Assets/square"), 10);
+	AEGfxTexture* barrelTex = AssetsManager::GetTexture("Assets/cannonBarrel.png");
+	if (!barrelTex)
+		barrelTex = AssetsManager::GetTexture("Assets/square.png"); // fallback
+
+	// Pick barrel half-size (these are SCALE values, not full pixels)
+	// Your old barrel used {30,10} (meaning it appears ~60x20 pixels)
+	AEVec2 barrelHalfSize{ 60, 20 };
+
+	cannon = CannonManager::Cannon(playerCannonStartPos, barrelTex, 10, barrelHalfSize);
+	cannon.textureColor = Color{ 1, 1, 1, 1 };   // black barrel
 }

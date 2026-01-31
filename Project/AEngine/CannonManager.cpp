@@ -26,11 +26,14 @@ namespace CannonManager {
 
     Cannon::Cannon() : cannonAngle{ 0.0f }, ammo{ NULL }, ammoLimit{ 0 }, shotPower{ power } {}
     Cannon::Cannon(AEVec2 _pos, AEGfxTexture* _texture, int _projectileAmount)
-        : GameObject(_pos, defaultSize, _texture), ammoLimit{ _projectileAmount }, cannonAngle{ 0.0f }, shotPower{ power } {
+        : GameObject(_pos, defaultSize, _texture, Color{ 1,1,1,1 }),
+        ammoLimit{ _projectileAmount }, cannonAngle{ 0.0f }, shotPower{ power } {
         Reset();
     }
+
     Cannon::Cannon(AEVec2 _pos, AEGfxTexture* _texture, int _projectileAmount, AEVec2 _size)
-        : GameObject(_pos, _size, _texture), ammoLimit{ _projectileAmount }, cannonAngle{ 0.0f }, shotPower{ power } {
+        : GameObject(_pos, _size, _texture, Color{ 1,1,1,1 }),
+        ammoLimit{ _projectileAmount }, cannonAngle{ 0.0f }, shotPower{ power } {
         Reset();
     }
 
@@ -104,8 +107,10 @@ namespace CannonManager {
     }
 
     void Cannon::Render() {
-        AEMtx33 mat = GraphicsManager::CreateTransformMatrix(pos.x, pos.y, cannonAngle, defaultSize.x, defaultSize.y);
-        GraphicsManager::DrawGameObject(texture, mat, Color{ 1, 1, 1, 1 });
+        // NOTE: size.x/size.y are your "half-size" scales (same convention as your tiles use tileSize/2)
+        AEMtx33 mat = GraphicsManager::CreateTransformMatrix(pos.x, pos.y, cannonAngle, size.x, size.y);
+        // NOTE: now you can tint the barrel by setting cannon.textureColor elsewhere
+        GraphicsManager::DrawGameObject(texture, mat, textureColor);
     }
 
     void Cannon::ShootProjectile() {
@@ -114,8 +119,8 @@ namespace CannonManager {
         ammo[ammoCount].id = ammoCount;
 
         // Add offset to ensure that the projectile spawn at the barrel instead of the middle of the cannon
-        ammo[ammoCount].pos.x = pos.x + cos(cannonAngle) * defaultSize.x;
-        ammo[ammoCount].pos.y = pos.y + sin(cannonAngle) * defaultSize.x;
+        ammo[ammoCount].pos.x = pos.x + cos(cannonAngle) * size.x;
+        ammo[ammoCount].pos.y = pos.y + sin(cannonAngle) * size.x;
 
         // Calculate velocity here once only to ensure that gravity has an effect
         ammo[ammoCount].velocity.x = cos(cannonAngle) * shotPower;

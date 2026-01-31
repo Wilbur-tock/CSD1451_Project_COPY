@@ -14,6 +14,7 @@ namespace Level1 {
 	}
 
 	void Initialize() {
+		AEGfxSetBackgroundColor(0.92f, 0.92f, 0.95f);
 		CameraManager::camera.SetPosition(levelData.cannon.pos);
 	}
 

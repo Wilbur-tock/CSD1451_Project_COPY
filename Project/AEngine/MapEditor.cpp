@@ -16,9 +16,13 @@ namespace MapEditor {
 
 	std::vector<std::vector<Tile>> newMap(Config::GRID_HEIGHT, std::vector<Tile>(Config::GRID_WIDTH));
 
+	//TileType defaultTile = TILE_BLOCK_GROUND;
+	//TileType drawingTileType = defaultTile;
+	//int tileId = 1;
 	TileType defaultTile = TILE_BLOCK_GROUND;
 	TileType drawingTileType = defaultTile;
-	int tileId = 1;
+	// 0-based id that matches TileType enum values
+	int tileId = static_cast<int>(defaultTile);
 
 	// If the Project/Assets/Map does not contain default.txt file it will create a new one if not just return
 	static void CheckForDefault();
@@ -82,17 +86,29 @@ namespace MapEditor {
 		output.close();
 	}
 
+	//static void InitMapEditor() {
+	//	// Reset settings
+	//	drawingTileType = defaultTile;
+	//	CheckForDefault();
+
+	//	loadPath = defaultLoadPath;
+	//	savePath = defaultSavePath;
+	//	LoadNewFile(loadPath);
+
+	//	drawingTileType = defaultTile;
+	//	tileId = 1;
+	//}
+
 	static void InitMapEditor() {
 		// Reset settings
 		drawingTileType = defaultTile;
+		tileId = static_cast<int>(defaultTile);
+
 		CheckForDefault();
 
 		loadPath = defaultLoadPath;
 		savePath = defaultSavePath;
 		LoadNewFile(loadPath);
-
-		drawingTileType = defaultTile;
-		tileId = 1;
 	}
 
 	static void ResetMap() {
@@ -108,6 +124,8 @@ namespace MapEditor {
 			InitMapEditor();
 			isDrawingNewMap = false;
 		}
+
+		AEGfxSetBackgroundColor(0.92f, 0.92f, 0.95f);
 
 		// Calculate Grid x and y index
 		float worldMouseX = 0, worldMouseY = 0;
@@ -162,11 +180,11 @@ namespace MapEditor {
 		// Change drawing tile category
 		s32 scroll = 0;
 		AEInputMouseWheelDelta(&scroll);
-		if (scroll != 0) {
-			tileId -= scroll;
-			Utils::Wrap(tileId, 1, MapManager::TILE_COUNT);
-			drawingTileType = static_cast<TileType>(tileId);
-		}
+		if (scroll > 0) tileId -= 1;
+		else if (scroll < 0) tileId += 1;
+
+		Utils::Wrap(tileId, 0, MapManager::TILE_COUNT - 1);
+		drawingTileType = static_cast<TileType>(tileId);
 
 		if (AEInputCheckTriggered(AEVK_T)) {
 			isShowingTileList = !isShowingTileList;
@@ -197,15 +215,21 @@ namespace MapEditor {
 		MapManager::RenderMap(newMap);
 
 		// Print out the information on how to use the editor
-		std::string helpStr = "Current File: "
-			+ loadPath + "\nSave File: " + savePath +
-			+ "\n[Q] Quit Map Editor \n[E] Save file\n[R] Reset Map\n[LEFT CLICK] Place Tile\n[RIGHT CLICK] Erase Tile\n[T] Tile List ";
+		std::string helpStr =
+			"Current File: " + loadPath +
+			"\nSave File: " + savePath +
+			"\n[Q] Quit Map Editor"
+			"\n[E] Save file"
+			"\n[R] Reset Map"
+			"\n[LEFT CLICK] Place Tile"
+			"\n[RIGHT CLICK] Erase Tile"
+			"\n[T] Tile List ";
 
 		if (isShowingTileList) {
 			helpStr += "[SHOWING]\n[SCROLL]";
+			helpStr += "\nSelected: " + MapManager::TileTypeToString(tileId) + " (" + std::to_string(tileId) + ")";
 			// List out the type of tiles able to be drawn
-			for (int i = 0; i < MapManager::TILE_COUNT; ++i) {
-				int id = i + 1;
+			for (int id = 0; id < MapManager::TILE_COUNT; ++id) {
 				std::string str = "[ ] ";
 				if (tileId == id) {
 					str = "[O] ";
