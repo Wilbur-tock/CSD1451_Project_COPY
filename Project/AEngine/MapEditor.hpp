@@ -4,6 +4,7 @@
 #include "pch.hpp"
 
 namespace MapEditor {
+	void Init();
 	// Map editor containing all the functions to edit the map and save/load files
 	void MapEditor();
 	void Exit();

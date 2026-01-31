@@ -113,7 +113,7 @@ namespace GraphicsManager {
 		DrawUI(pTex, transform, color);
 	}
 
-	void DrawTextUI(TextObject textObj) {
+	void DrawTextUI(TextObject& textObj) {
 		//Utils::Limit(textObj.pos.x, -1.0f, 1.0f);
 		//Utils::Limit(textObj.pos.y, -1.0f, 1.0f);
 		Utils::Limit(textObj.scale, 0.0f, 1.0f);
@@ -153,14 +153,10 @@ namespace GraphicsManager {
 		}
 	}
 
-	void DrawButton(Button btn) {
-		bool isHovered = CollisionManager::IsPointInRect(btn.pos.x, btn.pos.y, btn.size.x, btn.size.y);
+	void DrawButton(Button &btn) {
 		Color btnColor = btn.color;
-		if (isHovered) {
+		if (btn.isHovered) {
 			btnColor = Color{ btn.color.GetRed(), btn.color.GetGreen(), btn.color.GetBlue(), btn.color.GetAlpha() * 0.5f}; // Assign hovered color
-			if (AEInputCheckTriggered(AEVK_LBUTTON)) {
-				btn.onClick();
-			}
 		}
 		
 		// Draw button object

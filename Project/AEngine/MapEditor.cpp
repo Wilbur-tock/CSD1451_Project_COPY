@@ -24,11 +24,13 @@ namespace MapEditor {
 	// 0-based id that matches TileType enum values
 	int tileId = static_cast<int>(defaultTile);
 
+	TextObject helpText, debugText;
+
 	// If the Project/Assets/Map does not contain default.txt file it will create a new one if not just return
 	static void CheckForDefault();
 	static void LoadNewFile(std::string filePath);
 	static void SaveNewFile(std::string filePath);
-	static void InitMapEditor();
+	static void ResetEditor();
 	static void ResetMap(); // Reset the map 2D vector to be all of type 0
 
 	// Ensure that the file path is going back to my project folder NOT THE BIN FOLDER
@@ -119,9 +121,14 @@ namespace MapEditor {
 		}
 	}
 
+	void Init() {
+		helpText = { "", {-1.0f,.99f}, Utils::debuggerInfo.first, Utils::debuggerInfo.second * 0.9f };
+		debugText = { "",{ 0.5f, 0.99f}, Utils::debuggerInfo.first, Utils::debuggerInfo.second };
+	}
+
 	void MapEditor() {
 		if (isDrawingNewMap) {
-			InitMapEditor();
+			ResetEditor();
 			isDrawingNewMap = false;
 		}
 
@@ -241,7 +248,8 @@ namespace MapEditor {
 			helpStr += "[HIDING]";
 		}
 
-		GraphicsManager::DrawTextUI(TextObject{ helpStr, {-1.0f,.99f}, Utils::debuggerInfo.first, Utils::debuggerInfo.second * 0.9f });
+		helpText.textContent = helpStr;
+		GraphicsManager::DrawTextUI(helpText);
 
 		// Print out debugger information about the map editor
 		if (Utils::isDebuggerOn) {
@@ -252,12 +260,12 @@ namespace MapEditor {
 			AEInputGetCursorPosition(&mouseX, &mouseY);
 			float mX = 0, mY = 0;
 			Utils::GetWorldMousePos(mX, mY);
-			std::string debugStr = "Grid\nIndex X: " + std::to_string(gridX) + " Y: " + std::to_string(gridY)
+			debugText.textContent = "Grid\nIndex X: " + std::to_string(gridX) + " Y: " + std::to_string(gridY)
 				+ "\nPos X: " + Utils::FormatFloat(newMap[gridY][gridX].pos.x, 2) + " Y: " + Utils::FormatFloat(newMap[gridY][gridX].pos.y, 2)
 				+ "\nCamera\nPos X:" + Utils::FormatFloat(x, 2) + " Y: " + Utils::FormatFloat(y, 2)
 				+ "\nMouse\nScreen Pos X: " + Utils::FormatFloat(mouseX, 2) + " Y: " + Utils::FormatFloat(mouseY, 2)
 				+ "\nWorld Pos X: " + Utils::FormatFloat(mX, 2) + " Y: " + Utils::FormatFloat(mY, 2);
-			GraphicsManager::DrawTextUI(TextObject{ debugStr,{ 0.5f, 0.99f}, Utils::debuggerInfo.first, Utils::debuggerInfo.second });
+			GraphicsManager::DrawTextUI(debugText);
 		}
 	}
 

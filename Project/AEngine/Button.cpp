@@ -1,6 +1,7 @@
 #include "pch.hpp"
 #include "Button.hpp"
 #include "AssetsManager.hpp"
+#include "CollisionManager.hpp"
 
 Button::Button(AEVec2 _pos, AEVec2 _size, Color _color, AEGfxTexture* _texture, Utils::FuncPtr _onClick)
     : pos{ _pos }, size{_size}, color{_color}, texture{_texture}, onClick{_onClick} {
@@ -84,4 +85,14 @@ Button::Button(TextObject _textObj, Utils::RectMode _rectMode, AEVec2 _pos, AEVe
             break;
         }
     }
+}
+
+void Button::Update() {
+     isHovered = CollisionManager::IsPointInRect(pos.x, pos.y, size.x, size.y);
+
+     if (isHovered) {
+         if (AEInputCheckTriggered(AEVK_LBUTTON) && onClick) {
+             onClick();
+         }
+     }
 }

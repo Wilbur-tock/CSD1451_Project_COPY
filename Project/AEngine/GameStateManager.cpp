@@ -17,6 +17,8 @@ namespace GameStateManager {
     float loadingTimer = 0.0f;
     float dt = 0.0f;
 
+    TextObject debugText;
+
     void Load() {
         // Start with main menu
         current = previous = GS_INIT;
@@ -42,6 +44,8 @@ namespace GameStateManager {
             Config::WORLD_MIN_Y + halfH,
             Config::WORLD_MAX_Y - halfH
         );
+
+        debugText = { "",{-1.f, -0.75f}, Utils::debuggerInfo.first, Utils::debuggerInfo.second };
     }
 
     void Update() {
@@ -85,7 +89,7 @@ namespace GameStateManager {
                         break;
                     case GS_MAP_EDITOR:
                         gsLoad = nullptr;
-                        gsIntialize = nullptr;
+                        gsIntialize = MapEditor::Init;
                         gsUpdate = MapEditor::MapEditor;
                         gsDraw = nullptr;
                         gsFree = MapEditor::Exit;
@@ -150,12 +154,12 @@ namespace GameStateManager {
                 f32 camX, camY;
                 AEGfxGetCamPosition(&camX, &camY);
 
-                std::string str = "\n[P] Debugger ON\nFPS: " + Utils::FormatFloat(AEFrameRateControllerGetFrameRate(), 2)
+                debugText.textContent = "\n[P] Debugger ON\nFPS: " + Utils::FormatFloat(AEFrameRateControllerGetFrameRate(), 2)
                     + "\nDeltaTime: " + Utils::FormatFloat(dt, 2)
                     + "\nCamera Pos:\nX: " + Utils::FormatFloat(camX, 2) + " Y: " + Utils::FormatFloat(camY, 2)
                     + "\n\nControls:\nP - Toggle Debugger\nM - Main Menu";
 
-                GraphicsManager::DrawTextUI(TextObject{ str, {-1.f, -0.75f}, Utils::debuggerInfo.first, Utils::debuggerInfo.second });
+                GraphicsManager::DrawTextUI(debugText);
             }
 
             // Update camera (handles movement, clamping, flooring, and setting position)

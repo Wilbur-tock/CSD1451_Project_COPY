@@ -5,8 +5,7 @@
 #include "Utils.hpp"
 
 namespace Credits {
-    // Credits text
-    std::string creditsText;
+    TextObject creditsText, hintText;
 
     // Background texture
     AEGfxTexture* bgTexture = nullptr;
@@ -24,25 +23,17 @@ namespace Credits {
         // Reset scroll position
         scrollOffset = -1.0f;  // Start from bottom of screen
 
-        // Build credits text
-        creditsText = 
+        creditsText = { 
             "GAME CREDITS\n\n"
-
             "=== Basement Dwellers ===\n\n"
-
-            "Da Lao Ban\n"
-            /*"Programming\n"*/
+            "Programming\n"
             "Dayrius Goh\n\n"
-
             "Game Design\n"
             "Justin Wong\n\n"
-
             "Sound & Music\n"
             "Bryan Lim\n\n"
-
             "Level Design\n"
             "Wilbur Tock\n\n"
-
             "UI Design\n"
             "Ken Nixon\n\n\n"
 
@@ -78,7 +69,15 @@ namespace Credits {
             "WWW.DIGIPEN.EDU\n"
             "All content @2025 DigiPen Institute of Technology Singapore.\nAll Rights Reserved\n\n"
 
-            "Press ESC or BACKSPACE to return to menu";
+            "Press ESC or BACKSPACE to return to menu",
+            {0,0},
+        };
+
+        hintText = { "ESC - Return to Menu  |  SPACE - Skip",
+        { -0.98f, -0.93f },
+        Color(0.6f, 0.6f, 0.6f, 1.0f),
+        0.7f
+        };
     }
 
     void Update() {
@@ -126,21 +125,11 @@ namespace Credits {
         }
 
         // Draw credits text with scroll offset
-        GraphicsManager::DrawTextUI(TextObject{
-            creditsText,
-            { -0.1f, scrollOffset},       // Y position (scrolling)
-            Color(1.0f, 1.0f, 1.0f, 1.0f),  // White text
-            0.9f }              // Text scale
-        );
+        creditsText.pos = { -0.1f, scrollOffset };
+        GraphicsManager::DrawTextUI(creditsText);
 
         // Draw hint at bottom
-        std::string hint = "ESC - Return to Menu  |  SPACE - Skip";
-        GraphicsManager::DrawTextUI(TextObject{
-            hint,
-            { -0.98f, -0.93f },
-            Color(0.6f, 0.6f, 0.6f, 1.0f),
-            0.7f }
-        );
+        GraphicsManager::DrawTextUI(hintText);
     }
 
     void Free() {

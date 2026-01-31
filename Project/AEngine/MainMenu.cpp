@@ -7,16 +7,11 @@
 
 namespace MainMenu {
     // Menu buttons
-    Button playButton;
-    Button mapEditorButton;
-    Button creditsButton;
-    Button quitButton;
+    Button playButton, mapEditorButton, creditsButton, quitButton;
+    TextObject gameTitle, instructions;
 
     // Menu state
     bool isInitialized = false;
-
-    // Menu title
-    std::string title = "Justin Likes Kids";
 
     // Background texture
     AEGfxTexture* bgTexture = nullptr;
@@ -90,6 +85,19 @@ namespace MainMenu {
             buttonTexture,
             OnQuitClicked
         );
+
+        gameTitle = { "Game Title",
+            { -0.3f, 0.65f }, // position (normalized)
+            Color(1.0f, 1.0f, 1.0f, 1.0f),  // White color
+            2.0f,
+        };
+
+        instructions = {
+            "Click a button or use keyboard shortcuts:\n1 - Play Game | 2 - Map Editor | 3 - Credits | Q - Quit",
+            { -0.98f, -0.9f },
+            Color(0.7f, 0.7f, 0.7f, 1.0f),
+            0.7f,
+        };
     }
 
     void Draw() {
@@ -109,21 +117,10 @@ namespace MainMenu {
         }
 
         // Draw title
-        GraphicsManager::DrawTextUI(
-            TextObject{ title,
-            { -0.3f, 0.65f }, // position (normalized)
-            Color(1.0f, 1.0f, 1.0f, 1.0f),  // White color
-            2.0f }    // Larger text scale for title
-        );
+        GraphicsManager::DrawTextUI(gameTitle);
 
         // Draw subtitle or instructions
-        std::string instructions = "Click a button or use keyboard shortcuts:\n1 - Play Game | 2 - Map Editor | 3 - Credits | Q - Quit";
-        GraphicsManager::DrawTextUI(
-            TextObject{ instructions,
-            { -0.98f, -0.9f },
-            Color(0.7f, 0.7f, 0.7f, 1.0f),
-            0.7f }  // Smaller text scale
-        );
+        GraphicsManager::DrawTextUI(instructions);
 
         // Draw buttons using GraphicsManager
         Color buttonTextColor(1.0f, 1.0f, 1.0f, 1.0f);  // White text
@@ -134,41 +131,10 @@ namespace MainMenu {
     }
 
     void Update() {
-        // Handle button interactions
-        //bool playHovered = CollisionManager::IsPointInRect(
-        //    playButton.pos.x, playButton.pos.y,
-        //    playButton.width, playButton.height
-        //);
-        //bool editorHovered = CollisionManager::IsPointInRect(
-        //    mapEditorButton.pos.x, mapEditorButton.pos.y,
-        //    mapEditorButton.width, mapEditorButton.height
-        //);
-        //
-        //bool creditsHovered = CollisionManager::IsPointInRect(
-        //    creditsButton.pos.x, creditsButton.pos.y,
-        //    creditsButton.width, creditsButton.height
-        //);
-        //
-        //bool quitHovered = CollisionManager::IsPointInRect(
-        //    quitButton.pos.x, quitButton.pos.y,
-        //    quitButton.width, quitButton.height
-        //);
-        //
-        //// Check for button clicks
-        //if (AEInputCheckTriggered(AEVK_LBUTTON)) {
-        //    if (playHovered) {
-        //        OnPlayClicked();
-        //    }
-        //    else if (editorHovered) {
-        //        OnMapEditorClicked();
-        //    }
-        //    else if (creditsHovered) {
-        //        OnCreditsClicked();
-        //    }
-        //    else if (quitHovered) {
-        //        OnQuitClicked();
-        //    }
-        //}
+        playButton.Update();
+        mapEditorButton.Update();
+        creditsButton.Update();
+        quitButton.Update();
 
         // Keyboard shortcuts
         if (AEInputCheckTriggered(AEVK_1)) {
