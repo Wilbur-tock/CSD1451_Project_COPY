@@ -15,7 +15,7 @@ void Level::Load(std::string filePath) {
 	for (const std::vector<MapManager::Tile>& row : levelMap) {
 		for (const MapManager::Tile& tile : row) {
 			if (tile.type == MapManager::TILE_PLAYER_CANNON) {
-				playerCannonStartPos = tile.pos;
+				playerCannonStartPos = { tile.pos.x,tile.pos.y + tile.size.y/2.0f };
 				foundCannonPos = true;
 				break;
 			}

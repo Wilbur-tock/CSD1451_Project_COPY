@@ -19,7 +19,7 @@ namespace MapEditor {
 	//TileType defaultTile = TILE_BLOCK_GROUND;
 	//TileType drawingTileType = defaultTile;
 	//int tileId = 1;
-	TileType defaultTile = TILE_BLOCK_GROUND;
+	TileType defaultTile = TILE_BLOCK_GROUND_0;
 	TileType drawingTileType = defaultTile;
 	// 0-based id that matches TileType enum values
 	int tileId = static_cast<int>(defaultTile);
@@ -223,7 +223,7 @@ namespace MapEditor {
 			helpStr += "[SHOWING]\n[SCROLL]";
 			helpStr += "\nSelected: " + MapManager::TileTypeToString(tileId) + " (" + std::to_string(tileId) + ")";
 			// List out the type of tiles able to be drawn
-			for (int i = 0; i < MapManager::TILE_COUNT; ++i) {
+			for (int i = 0; i < MapManager::TILE_COUNT - 1; ++i) {
 				int id = i + 1;
 				std::string str = "[ ] ";
 				if (tileId == id) {

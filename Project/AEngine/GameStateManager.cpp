@@ -25,6 +25,7 @@ namespace GameStateManager {
         next = GS_MAIN_MENU;
 
         // Load all resources
+        MapManager::Load();
         AssetsManager::Load();
         GraphicsManager::Load();
         MainMenu::Load();

@@ -14,7 +14,7 @@ namespace MapManager {
 	static const char* CANNON_BASE_PATH = "Assets/cannonBase.png"; //Cannon (for testing now, not actual sprite)
 
 	Tile::Tile(AEVec2 _pos, AEGfxTexture* _texture, TileType _type) 
-		: GameObject{ _pos, {size,size}, _texture, Color{1,1,1} }, type{ _type } {
+		: GameObject{ _pos, {defaultSize,defaultSize}, _texture, Color{1,1,1} }, type{ _type } {
 	}
 
 	// Cached textures
@@ -26,9 +26,8 @@ namespace MapManager {
 	static AEGfxTexture* gCannonBaseTex = nullptr;
 	static AEGfxTexture* gFallbackTex = nullptr;
 
-	static void EnsureTileTexturesLoaded()
-	{
-		if (gTileTex[MapManager::TILE_BLOCK_GROUND]) return;
+	void Load() {
+		if (gTileTex[MapManager::TILE_BLOCK_GROUND_0]) return;
 
 		gFallbackTex = AssetsManager::GetTexture("Assets/square.png");
 		gFloorTopTex = AssetsManager::GetTexture(FLOOR_TOP_PATH);
@@ -46,7 +45,9 @@ namespace MapManager {
 
 		gTileTex[MapManager::TILE_EMPTY] = nullptr;
 		// ground uses top/fill selection in RenderMap (this just marks “loaded”)
-		gTileTex[MapManager::TILE_BLOCK_GROUND] = gFloorTopTex;
+		gTileTex[MapManager::TILE_BLOCK_GROUND_0] = gFloorTopTex;
+		gTileTex[MapManager::TILE_BLOCK_GROUND_1] = gFloorFillTex;
+		gTileTex[MapManager::TILE_BLOCK_GROUND_2] = gFloorFillTex;
 
 		// ✅ DO NOT overwrite these afterwards
 		gTileTex[MapManager::TILE_BLOCK_1] = gTower1Tex;
@@ -84,16 +85,15 @@ namespace MapManager {
 			<< CANNON_BASE_PATH << "\n";
 	}
 
-	static AEGfxTexture* TextureForTile(MapManager::TileType t)
-	{
-		EnsureTileTexturesLoaded();
-		if (t < 0 || t >= MapManager::TILE_COUNT) return nullptr;
-		return gTileTex[t];
-	}
+	//static AEGfxTexture* TextureForTile(MapManager::TileType t)
+	//{
+	//	LoadTileTextures();
+	//	if (t < 0 || t >= MapManager::TILE_COUNT) return nullptr;
+	//	return gTileTex[t];
+	//}
 
 	std::string TileTypeToString(int id) {
-		if (id < 0 || id >= static_cast<int>(tileNames.size()))
-			return "INVALID";
+		if (id < 0 || id >= static_cast<int>(tileNames.size())) return "INVALID";
 		return tileNames[id];
 	}
 
@@ -128,6 +128,9 @@ namespace MapManager {
 						<< " -> forcing TILE_EMPTY\n";
 					type = MapManager::TILE_EMPTY;
 				}
+				else {
+					tileTexture = gTileTex[type];
+				}
 
 				map[y][x] = Tile({ startX + (x * tileSize), startY - (y * tileSize) }, tileTexture, static_cast<TileType>(type));
 			}
@@ -138,21 +141,19 @@ namespace MapManager {
 
 
 	void RenderMap(const std::vector<std::vector<Tile>>& map) {
-		EnsureTileTexturesLoaded();
-
 		float tileSize = static_cast<float>(Config::TILE_SIZE);
 
 		// For each column x, find the first (topmost) ground tile y
-		std::vector<int> surfaceY(Config::GRID_WIDTH, -1);
-		for (int x = 0; x < Config::GRID_WIDTH; ++x) {
-			for (int y = 0; y < Config::GRID_HEIGHT; ++y) {
-				TileType t = map[y][x].type;
-				if (t == TILE_BLOCK_GROUND || t == TILE_PLAYER_CANNON) {
-					surfaceY[x] = y;
-					break;
-				}
-			}
-		}
+		//std::vector<int> surfaceY(Config::GRID_WIDTH, -1);
+		//for (int x = 0; x < Config::GRID_WIDTH; ++x) {
+		//	for (int y = 0; y < Config::GRID_HEIGHT; ++y) {
+		//		TileType t = map[y][x].type;
+		//		if (t == TILE_BLOCK_GROUND_0 || t == TILE_PLAYER_CANNON) {
+		//			surfaceY[x] = y;
+		//			break;
+		//		}
+		//	}
+		//}
 
 		for (int y = 0; y < Config::GRID_HEIGHT; ++y) {
 			for (int x = 0; x < Config::GRID_WIDTH; ++x) {
@@ -163,27 +164,24 @@ namespace MapManager {
 
 				AEMtx33 transform = GraphicsManager::CreateTransformMatrix(tile.pos.x, tile.pos.y, 0.0f, tileSize / 2.0f, tileSize / 2.0f);
 
-				if (tile.type == TILE_BLOCK_GROUND) {
-					bool isSurface = (surfaceY[x] == y);
-					AEGfxTexture* floorTex = isSurface ? gFloorTopTex : gFloorFillTex;
-					GraphicsManager::DrawGameObject(floorTex, transform, Color{ 1,1,1,1 });
-					continue;
-				}
-				if (tile.type == TILE_PLAYER_CANNON) {
-					bool isSurface = (surfaceY[x] == y);
-					AEGfxTexture* under = isSurface ? gFloorTopTex : gFloorFillTex;
+				//if (tile.type == TILE_BLOCK_GROUND_0) {
+				//	bool isSurface = (surfaceY[x] == y);
+				//	AEGfxTexture* floorTex = isSurface ? gFloorTopTex : gFloorFillTex;
+				//	GraphicsManager::DrawGameObject(floorTex, transform, Color{ 1,1,1,1 });
+				//	continue;
+				//}
+				//if (tile.type == TILE_PLAYER_CANNON) {
+				//	bool isSurface = (surfaceY[x] == y);
+				//	AEGfxTexture* under = isSurface ? gFloorTopTex : gFloorFillTex;
+				//
+				//	// 1) draw floor underneath (keeps the grass strip continuous)
+				//	GraphicsManager::DrawGameObject(under, transform, Color{ 1,1,1,1 });
+				//	// 2) draw cannon base on top (so it no longer looks like floor)
+				//	GraphicsManager::DrawGameObject(gCannonBaseTex, transform, Color{ 1,1,1,1 });
+				//	continue;
+				//}
 
-					// 1) draw floor underneath (keeps the grass strip continuous)
-					GraphicsManager::DrawGameObject(under, transform, Color{ 1,1,1,1 });
-					// 2) draw cannon base on top (so it no longer looks like floor)
-					GraphicsManager::DrawGameObject(gCannonBaseTex, transform, Color{ 1,1,1,1 });
-					continue;
-				}
-
-				AEGfxTexture* tex = TextureForTile(tile.type);
-				if (!tex) tex = gFallbackTex;
-
-				GraphicsManager::DrawGameObject(tex, transform, Color{ 1,1,1,1 });
+				GraphicsManager::DrawGameObject(gTileTex[tile.type], transform, Color{1,1,1,1});
 			}
 		}
 	}
