@@ -13,21 +13,6 @@ namespace CannonManager {
 
     void Projectile::MoveProjectile() {
         float dt = GameStateManager::dt;
-       
-        if (collisionDetected) {
-            float friction = 0.9f;
-            velocity.x *= friction;
-
-            // Moving extremely slow, just stop it
-            if (std::abs(velocity.x) < 0.1f) {
-                velocity.x = 0;
-            }
-        }
-        else {
-            // Only apply gravity if we haven't hit the ground yet
-            velocity.y -= gravity * dt;
-        }
-
         AEVec2 newPos = { velocity.x * dt, velocity.y * dt };
         pos.x += newPos.x;
         pos.y += newPos.y;
@@ -132,6 +117,8 @@ namespace CannonManager {
         // Assign values to an projectile
         ammo[ammoCount].isActive = true;
         ammo[ammoCount].id = ammoCount;
+        ammo[ammoCount].mode = ATTACK;
+
         projectileToFollowId = ammoCount;
 
         // Add offset to ensure that the projectile spawn at the barrel instead of the middle of the cannon
@@ -156,61 +143,116 @@ namespace CannonManager {
     }
 
     void Cannon::UpdateProjectile() {
-        float dt = GameStateManager::dt;
         for (Projectile& projectile : activeAmmo) {
-            if (projectile.isActive == true) {
-                projectile.Render();
-                projectile.MoveProjectile();
-                projectile.timer -= 1 * dt;
+            if (!projectile.isActive == true) continue;
+
+            float dt = GameStateManager::dt;
+            // Increased the frequency of the collision check by using loops
+            // ensuring faster moving projectiles are check for collision multiple times
+            // to ensure that the GHOSTING of block bug does not happen
+            // Using sub_steps to ensure that it still moving at a per frame rate time (dt or 1/10 dt but 10 loops) even though it is looping
+            const int SUB_STEPS = 10;
+            float subDt = dt / SUB_STEPS;
+
+            bool hasDealDamage = false;
+
+            for (int step = 0; step < SUB_STEPS; ++step) {
+                projectile.isGrounded = false;
+
+                //projectile.MoveProjectile();
+                projectile.pos.x += projectile.velocity.x * subDt;
+                projectile.pos.y += projectile.velocity.y * subDt;
 
                 // Check for collision in a 3x3 area with the projectile
                 int gridX = static_cast<int>((projectile.pos.x + Config::WORLD_MAX_X) / Config::TILE_SIZE);
                 int gridY = static_cast<int>((Config::WORLD_MAX_Y - projectile.pos.y) / Config::TILE_SIZE);
 
+                bool collisionFoundInStep = false; // to prevent GHOSTING of blocks bug
+
                 int maxY = gridY + 1, maxX = gridX + 1;
-                for (int y = gridY-1; y <= maxY; ++y) {
-                    for (int x = gridX - 1; x <= maxX; ++x) {
+                for (int y = gridY - 1; y <= maxY && !collisionFoundInStep; ++y) {
+                    for (int x = gridX - 1; x <= maxX && !collisionFoundInStep; ++x) {
                         if (x >= 0 && x < Config::GRID_WIDTH && y >= 0 && y < Config::GRID_HEIGHT) {
                             MapManager::Tile& tile = (*MapManager::currentMap)[y][x];
 
-                            Color c= { 0,1,0 };
-                            if (x != gridX && y != gridY) c = { 1,1,1 };
+                            if (tile.IsBlocks() || tile.IsGround()) {
+                                float radius = projectile.size.x / 2.0f;
 
-                            if (tile.isDestroyable) {
                                 if (CollisionManager::AreCircleSquareIntersecting(
                                     tile.pos.x, tile.pos.y, tile.size.x, tile.size.y,
-                                    projectile.pos.x, projectile.pos.y, projectile.size.x*2))
+                                    projectile.pos.x, projectile.pos.y, radius))
                                 {
-                                    //projectile.collisionDetected = true;
-                                    tile.Damage(damage); 
-                                    break;
-                                }
-                            }
-                            else if (tile.IsGround()) {
-                                projectile.velocity.y = 0;
+                                    // Bounds
+                                    float tileTop = tile.pos.y + (tile.size.y / 2.0f);
+                                    float tileBottom = tile.pos.y - (tile.size.y / 2.0f);
+                                    float tileLeft = tile.pos.x - (tile.size.x / 2.0f);
+                                    float tileRight = tile.pos.x + (tile.size.x / 2.0f);
 
-                                // 3. Resolve Position: Snap to the top of the tile to prevent sinking
-                                float tileTop = tile.pos.y + (tile.size.y / 2.0f);
-                                projectile.pos.y = tileTop + (projectile.size.y); // Adjust based on your pivot
-                                projectile.collisionDetected = true;
+                                    float overlapX = (radius + tile.size.x / 2.0f) - std::abs(projectile.pos.x - tile.pos.x);
+                                    float overlapY = (radius + tile.size.y / 2.0f) - std::abs(projectile.pos.y - tile.pos.y);
+
+                                    if (overlapX < overlapY) {
+                                        // Resolve X (Wall)
+                                        if (projectile.pos.x < tile.pos.x) {
+                                            projectile.pos.x = tileLeft - radius - 0.1f; // Nudge out
+                                            if (projectile.velocity.x > 0) projectile.velocity.x *= -0.4f;
+                                        }
+                                        else {
+                                            projectile.pos.x = tileRight + radius + 0.1f; // Nudge out
+                                            if (projectile.velocity.x < 0) projectile.velocity.x *= -0.4f;
+                                        }
+                                    }
+                                    else {
+                                        // Resolve Y (Floor/Ceiling)
+                                        if (projectile.pos.y > tile.pos.y) { // Ensure the projectile is flush to the tile
+                                            projectile.pos.y = tileTop + radius;
+                                            projectile.isGrounded = true;
+                                            projectile.velocity.y *= -0.2f;
+                                            if (std::abs(projectile.velocity.y) < 0.5f) projectile.velocity.y = 0;
+                                        }
+                                        else { // If it hits the celling fall down
+                                            projectile.pos.y = tileBottom - radius;
+                                            projectile.velocity.y *= -0.5f;
+                                        }
+                                    }
+                                    projectile.collisionDetected = true;
+                                    collisionFoundInStep = true;
+
+                                    // Only deal damage once
+                                    if (tile.IsBlocks() && !hasDealDamage && projectile.mode == ATTACK) {
+                                        tile.Damage(damage);
+                                        hasDealDamage = true;
+                                        projectile.mode = IDLE;
+                                    }
+                                }
                             }
                         }
                     }
                 }
 
-                if (projectile.collisionDetected && projectile.toBeDestroyed == false) {
-                    projectile.timer = 2.5f;
-                    projectile.toBeDestroyed = true;
+                if (projectile.isGrounded) {
+                    projectile.velocity.x *= pow(Config::FRICTION, subDt);
+                    if (std::abs(projectile.velocity.x) < 0.1f) projectile.velocity.x = 0;
+                    projectile.velocity.y = 0;
                 }
-
-                DestroyProjectile(projectile);
+                else {
+                    projectile.velocity.y -= Config::GRAVITY * subDt;
+                }
             }
+
+            DestroyProjectile(projectile);
+            projectile.Render();
         }
     }
 
     void Cannon::DestroyProjectile(Projectile& projectile) {
+        // Start timer if it going to be destroy
+        if (projectile.collisionDetected && projectile.toBeDestroyed == false) {
+            projectile.timer = 5.0f;
+            projectile.toBeDestroyed = true;
+        }
+
         if (projectile.toBeDestroyed) {
-            std::cout << "Timer: " << projectile.timer << std::endl;
             projectile.timer -= 1.0f *GameStateManager::dt;
         }
 

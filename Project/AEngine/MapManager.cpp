@@ -150,12 +150,15 @@ namespace MapManager {
 				else {
 					tileTexture = gTileTex[type];
 				}
-				map[y][x].pos = { startX + (x * tileSize), startY - (y * tileSize) };
-				map[y][x].texture = tileTexture;
-				map[y][x].type = static_cast<TileType>(type);
-				map[y][x].id.x = static_cast<f32>(x);
-				map[y][x].id.y = static_cast<f32>(y);
-				map[y][x].isDestroyable = type >= MapManager::TILE_BLOCK_1 && type <= MapManager::TILE_BLOCK_2;
+
+				Tile& tile = map[y][x];
+				tile.pos = { startX + (x * tileSize), startY - (y * tileSize) };
+				tile.size = { Config::TILE_SIZE,Config::TILE_SIZE };
+				tile.texture = tileTexture;
+				tile.type = static_cast<TileType>(type);
+				tile.id.x = static_cast<f32>(x);
+				tile.id.y = static_cast<f32>(y);
+				tile.isDestroyable = type >= MapManager::TILE_BLOCK_1 && type <= MapManager::TILE_BLOCK_2;
 			}
 		}
 
@@ -166,8 +169,6 @@ namespace MapManager {
 
 
 	void RenderMap(const std::vector<std::vector<Tile>>& map) {
-		float tileSize = static_cast<float>(Config::TILE_SIZE);
-
 		// For each column x, find the first (topmost) ground tile y
 		//std::vector<int> surfaceY(Config::GRID_WIDTH, -1);
 		//for (int x = 0; x < Config::GRID_WIDTH; ++x) {
@@ -187,7 +188,7 @@ namespace MapManager {
 
 				if (tile.type == TILE_EMPTY) continue;
 
-				AEMtx33 transform = GraphicsManager::CreateTransformMatrix(tile.pos.x, tile.pos.y, 0.0f, tileSize / 2.0f, tileSize / 2.0f);
+				AEMtx33 transform = GraphicsManager::CreateTransformMatrix(tile.pos.x, tile.pos.y, 0.0f, tile.size.x / 2.0f, tile.size.y / 2.0f);
 
 				//if (tile.type == TILE_BLOCK_GROUND_0) {
 				//	bool isSurface = (surfaceY[x] == y);

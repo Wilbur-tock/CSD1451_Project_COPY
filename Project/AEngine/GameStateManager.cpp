@@ -170,6 +170,12 @@ namespace GameStateManager {
             // In main menu, reset camera to center
             AEGfxSetCamPosition(0.0f, 0.0f);
         }
+
+        if (AEInputCheckCurr(AEVK_LCTRL)) {
+            if (AEInputCheckCurr(AEVK_R)) {
+                Load();
+            }
+        }
     }
 
     void Exit() {

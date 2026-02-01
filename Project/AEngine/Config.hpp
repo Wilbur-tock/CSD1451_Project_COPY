@@ -17,6 +17,9 @@ namespace Config {
 	constexpr int FONT_SIZE = 24;
 	// Use font scale to adjust the size of the text when it is being drawn
 	constexpr float FONT_SCALE = 1.0f;
+
+	// PHYSICS
+	constexpr float GRAVITY = 1500.0f, FRICTION = 0.9f;
 }
 
 #define KEY_SAVEFILE AEVK_ESCAPE

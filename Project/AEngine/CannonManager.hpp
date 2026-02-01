@@ -14,6 +14,11 @@
 #include "CollisionManager.hpp"
 
 namespace CannonManager {
+	enum ProjectileMode {
+		IDLE,
+		ATTACK,
+	};
+
 	class Projectile : public GameObject {
 	private:
 		AEVec2 defaultSize{ 10,10 };
@@ -22,7 +27,8 @@ namespace CannonManager {
 	public:
 		float timer;
 		AEVec2 velocity; // Vector rate of change
-		bool isActive = false, collisionDetected = false, toBeDestroyed = false;
+		bool isActive = false, collisionDetected = false, isGrounded = false, toBeDestroyed = false;
+		ProjectileMode mode = IDLE;
 
 		Projectile(); // Default intializer
 		Projectile(AEVec2 _pos, AEGfxTexture* _texture, AEVec2 _velocity);
@@ -35,11 +41,11 @@ namespace CannonManager {
 	class Cannon : public GameObject {
 	private:
 		int ammoCount = 0;
-		float projectileLifespan = 4, defaultDamage{ 100.0f };
+		float projectileLifespan = 4, defaultDamage{ 10.0f };
 		AEVec2 defaultSize{ 30,10 };
 
 		// Power charging system (how far the cannon shoots the projectile)
-		float power = 100, minPower = 100, maxPower = 3000, chargeRate = maxPower * 0.75f;
+		float power = 100, minPower = 100, maxPower = 2500, chargeRate = maxPower * 0.75f;
 		bool isPowerIncrease = true;
 
 	public:
