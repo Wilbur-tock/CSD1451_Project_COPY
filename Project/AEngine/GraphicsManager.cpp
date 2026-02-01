@@ -160,7 +160,7 @@ namespace GraphicsManager {
 		}
 		
 		// Draw button object
-		DrawUIFollowCam(AssetsManager::GetTexture("Assets/square.png"), CreateTransformMatrix(btn.pos.x, btn.pos.y, 0, btn.size.x, btn.size.y), btnColor);
+		DrawUIFollowCam(AssetsManager::squareTexture, CreateTransformMatrix(btn.pos.x, btn.pos.y, 0, btn.size.x, btn.size.y), btnColor);
 		// Draw text if the string is not a empty string
 		if (!btn.textObj.textContent.empty()) {
 			DrawTextUI(btn.textObj);

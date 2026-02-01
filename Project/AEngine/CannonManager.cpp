@@ -14,9 +14,8 @@ namespace CannonManager {
     TextObject debugText{ "", {-1, 0.99f}, Utils::debuggerInfo.first, Utils::debuggerInfo.second };
 
     void Projectile::Render() {
-        AEGfxTexture* tex = AssetsManager::GetTexture("Assets/circle.png");
         AEMtx33 mat = GraphicsManager::CreateTransformMatrix(pos.x, pos.y, 0, defaultSize.x, defaultSize.y);
-        GraphicsManager::DrawGameObject(tex, mat, Color{ 0.5f, 0.5f, 0, 1 });
+        GraphicsManager::DrawGameObject(AssetsManager::circleTexture, mat, Color{ 0.5f, 0.5f, 0, 1 });
     }
 
     void Projectile::MoveProjectile(float dt) {
@@ -109,9 +108,8 @@ namespace CannonManager {
     }
 
     void Cannon::Render() {
-        // NOTE: size.x/size.y are your "half-size" scales (same convention as your tiles use tileSize/2)
+        // size.x/size.y are your "half-size" scales (same convention as your tiles use tileSize/2)
         AEMtx33 mat = GraphicsManager::CreateTransformMatrix(pos.x, pos.y, cannonAngle, size.x, size.y);
-        // NOTE: now you can tint the barrel by setting cannon.textureColor elsewhere
         GraphicsManager::DrawGameObject(texture, mat, textureColor);
     }
 
@@ -178,7 +176,7 @@ namespace CannonManager {
     }
 
     void Cannon::UIChargeShotBar() {
-        AEGfxTexture* tex = AssetsManager::GetTexture("Assets/square.png");
+        AEGfxTexture* tex = AssetsManager::squareTexture;
 
         float x = pos.x - (defaultSize.x * 1.75f), y = pos.y;
         float w = 20, h = 75, gap = 5;

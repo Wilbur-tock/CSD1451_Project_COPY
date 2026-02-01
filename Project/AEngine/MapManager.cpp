@@ -159,12 +159,9 @@ namespace MapManager {
 
 				const Tile& tile = map[y][x];
 
-				if (tile.type == TILE_EMPTY)
-					continue;
+				if (tile.type == TILE_EMPTY) continue;
 
-				AEMtx33 transform =
-					GraphicsManager::CreateTransformMatrix(tile.pos.x, tile.pos.y, 0.0f,
-						tileSize / 2.0f, tileSize / 2.0f);
+				AEMtx33 transform = GraphicsManager::CreateTransformMatrix(tile.pos.x, tile.pos.y, 0.0f, tileSize / 2.0f, tileSize / 2.0f);
 
 				if (tile.type == TILE_BLOCK_GROUND) {
 					bool isSurface = (surfaceY[x] == y);

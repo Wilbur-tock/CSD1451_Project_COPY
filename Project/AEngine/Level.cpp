@@ -25,8 +25,7 @@ void Level::Load(std::string filePath) {
 	}
 
 	AEGfxTexture* barrelTex = AssetsManager::GetTexture("Assets/cannonBarrel.png");
-	if (!barrelTex)
-		barrelTex = AssetsManager::GetTexture("Assets/square.png"); // fallback
+	if (!barrelTex) barrelTex = AssetsManager::GetTexture("Assets/square.png"); // fallback
 
 	// Pick barrel half-size (these are SCALE values, not full pixels)
 	// Your old barrel used {30,10} (meaning it appears ~60x20 pixels)

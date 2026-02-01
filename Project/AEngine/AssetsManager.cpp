@@ -5,12 +5,13 @@
 namespace AssetsManager {
     std::map<std::string, AEGfxTexture*> textureCache;
 
-    AEGfxTexture* squareTexture;
+    AEGfxTexture* squareTexture, *circleTexture;
     s8 textFont;
 
     void Load() {
         squareTexture = GetTexture("Assets/square.png");
         textFont = AEGfxCreateFont("Assets/liberation-mono.ttf", Config::FONT_SIZE);
+        circleTexture = AssetsManager::GetTexture("Assets/circle.png");
     }
 
     AEGfxTexture* GetTexture(const char* filePath) {

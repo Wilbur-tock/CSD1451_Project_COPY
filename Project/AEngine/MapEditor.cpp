@@ -88,19 +88,6 @@ namespace MapEditor {
 		output.close();
 	}
 
-	//static void InitMapEditor() {
-	//	// Reset settings
-	//	drawingTileType = defaultTile;
-	//	CheckForDefault();
-
-	//	loadPath = defaultLoadPath;
-	//	savePath = defaultSavePath;
-	//	LoadNewFile(loadPath);
-
-	//	drawingTileType = defaultTile;
-	//	tileId = 1;
-	//}
-
 	static void ResetEditor() {
 		// Reset settings
 		drawingTileType = defaultTile;
@@ -187,11 +174,11 @@ namespace MapEditor {
 		// Change drawing tile category
 		s32 scroll = 0;
 		AEInputMouseWheelDelta(&scroll);
-		if (scroll > 0) tileId -= 1;
-		else if (scroll < 0) tileId += 1;
-
-		Utils::Wrap(tileId, 0, MapManager::TILE_COUNT - 1);
-		drawingTileType = static_cast<TileType>(tileId);
+		if (scroll != 0) {
+			tileId -= scroll;
+			Utils::Wrap(tileId, 1, MapManager::TILE_COUNT);
+			drawingTileType = static_cast<TileType>(tileId);
+		}
 
 		if (AEInputCheckTriggered(AEVK_T)) {
 			isShowingTileList = !isShowingTileList;
@@ -236,7 +223,8 @@ namespace MapEditor {
 			helpStr += "[SHOWING]\n[SCROLL]";
 			helpStr += "\nSelected: " + MapManager::TileTypeToString(tileId) + " (" + std::to_string(tileId) + ")";
 			// List out the type of tiles able to be drawn
-			for (int id = 0; id < MapManager::TILE_COUNT; ++id) {
+			for (int i = 0; i < MapManager::TILE_COUNT; ++i) {
+				int id = i + 1;
 				std::string str = "[ ] ";
 				if (tileId == id) {
 					str = "[O] ";
