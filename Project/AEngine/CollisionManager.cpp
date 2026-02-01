@@ -14,6 +14,33 @@ namespace CollisionManager {
         return distanceSq <= radiusSumSq;
     }
 
+    bool AreCircleSquareIntersecting(float sX, float sY, float sWidth, float sHeight, float cX, float cY, float r) {
+        // Calculate the bounds of the square
+        float halfW = sWidth / 2.0f;
+        float halfH = sHeight / 2.0f;
+
+        float minX = sX - halfW;
+        float maxX = sX + halfW;
+        float minY = sY - halfH;
+        float maxY = sY + halfH;
+
+        // Find the closest point on the AABB to the circle center
+        float closestX = cX;
+        float closestY = cY;
+
+        Utils::Limit(closestX, minX, maxX);
+        Utils::Limit(closestY, minY, maxY);
+
+        // Calculate the distance from the circle center to this closest point
+        float distanceX = cX - closestX;
+        float distanceY = cY - closestY;
+
+        // Use the squared distance to check collision
+        float distanceSquared = (distanceX * distanceX) + (distanceY * distanceY);
+
+        return distanceSquared < (r * r);
+    }
+
     bool IsPointInRect(float x, float y, float w, float h) {
         s32 mouseX = 0, mouseY = 0;
         AEInputGetCursorPosition(&mouseX, &mouseY);

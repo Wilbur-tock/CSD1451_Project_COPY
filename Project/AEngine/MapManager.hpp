@@ -27,14 +27,23 @@ namespace MapManager {
 
 	class Tile : public GameObject {
 		float defaultSize = Config::TILE_SIZE;
+		float maxHealth{ 100.0f }, minHealth{ 0.0f }, health{ 100.0f };
 	public:
 		TileType type = TILE_EMPTY;
+		AEVec2 id{0,0}; // Grid index x and y
+		bool isDestroyable = false;
 
 		Tile() = default;
 		Tile(AEVec2 _pos, AEGfxTexture* _texture, TileType _type);
+
+		void Damage(float damage);
+		float GetHealth();
+
+		bool IsGround();
+		bool IsBlocks();
 	};
 
-	extern std::vector<std::vector<Tile>> mapLayout;
+	extern std::vector<std::vector<Tile>> *currentMap; // Current map layout that is being displayed onto the map
 
 	std::string TileTypeToString(int id);
 

@@ -114,8 +114,6 @@ namespace GraphicsManager {
 	}
 
 	void DrawTextUI(TextObject& textObj) {
-		//Utils::Limit(textObj.pos.x, -1.0f, 1.0f);
-		//Utils::Limit(textObj.pos.y, -1.0f, 1.0f);
 		Utils::Limit(textObj.scale, 0.0f, 1.0f);
 
 		std::string text = textObj.textContent;

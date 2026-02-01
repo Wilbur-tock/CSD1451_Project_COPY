@@ -14,6 +14,11 @@ public:
 	// Level map
 	std::vector<std::vector<MapManager::Tile>> levelMap;
 
+	// min and max position that has ground collision
+	AEVec2 minGround{ 0,0 }, maxGround{ 0,0 };
+
+	TextObject debugText;
+
 	// Read level map data and load level resources
 	void Load(std::string filePath);
 };

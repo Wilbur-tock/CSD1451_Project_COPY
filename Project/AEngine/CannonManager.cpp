@@ -1,11 +1,4 @@
-#include "pch.hpp"
 #include "CannonManager.hpp"
-#include "GraphicsManager.hpp"
-#include "AssetsManager.hpp"
-#include "Color.hpp"
-#include "CameraManager.hpp"
-#include "GameStateManager.hpp"
-#include "Utils.hpp"
 
 namespace CannonManager {
     Projectile::Projectile() : timer{ 0.0f }, velocity{ 0.0f,0.0f } {}
@@ -14,15 +7,36 @@ namespace CannonManager {
     TextObject debugText{ "", {-1, 0.99f}, Utils::debuggerInfo.first, Utils::debuggerInfo.second };
 
     void Projectile::Render() {
-        AEMtx33 mat = GraphicsManager::CreateTransformMatrix(pos.x, pos.y, 0, defaultSize.x, defaultSize.y);
+        AEMtx33 mat = GraphicsManager::CreateTransformMatrix(pos.x, pos.y, 0, size.x, size.y);
         GraphicsManager::DrawGameObject(AssetsManager::circleTexture, mat, Color{ 0.5f, 0.5f, 0, 1 });
     }
 
-    void Projectile::MoveProjectile(float dt) {
-        velocity.y -= gravity * dt;
+    void Projectile::MoveProjectile() {
+        float dt = GameStateManager::dt;
+       
+        if (collisionDetected) {
+            float friction = 0.9f;
+            velocity.x *= friction;
 
-        pos.x += velocity.x * dt;
-        pos.y += velocity.y * dt;
+            // Moving extremely slow, just stop it
+            if (std::abs(velocity.x) < 0.1f) {
+                velocity.x = 0;
+            }
+        }
+        else {
+            // Only apply gravity if we haven't hit the ground yet
+            velocity.y -= gravity * dt;
+        }
+
+        AEVec2 newPos = { velocity.x * dt, velocity.y * dt };
+        pos.x += newPos.x;
+        pos.y += newPos.y;
+    }
+
+    void Projectile::Destroy(int &projectileId) {
+        isActive = collisionDetected = toBeDestroyed = false;
+        timer = 0.0f;
+        projectileId = -1;
     }
 
     Cannon::Cannon() : cannonAngle{ 0.0f }, ammo{ NULL }, ammoLimit{ 0 }, shotPower{ power } {}
@@ -41,6 +55,11 @@ namespace CannonManager {
     void Cannon::Reset() {
         ammo.clear();
         ammo.resize(ammoLimit);
+        // Initalize all the projectile variables
+        for (Projectile &projectile : ammo) {
+            projectile = { {0,0}, AssetsManager::circleTexture, {0,0} };
+            projectile.size = { 10,10 };
+        }
         activeAmmo.clear();
         ammoCount = 0;
     }
@@ -74,17 +93,14 @@ namespace CannonManager {
         }
 
         Render();
-
-        ChargeShot(GameStateManager::dt);
-        ProjectileUpdate(GameStateManager::dt);
+        ChargeShot();
+        UpdateProjectile();
     }
 
-    void Cannon::ChargeShot(float dt) {
+    void Cannon::ChargeShot() {
         if (AEInputCheckCurr(VK_LBUTTON)) {
-            float chargeRateWithDT = chargeRate * dt;
+            float chargeRateWithDT = chargeRate * GameStateManager::dt;
             power += isPowerIncrease ? chargeRateWithDT : -chargeRateWithDT;
-
-            //Utils::Limit(power, minPower, maxPower);
 
             if (power > maxPower) {
                 power = maxPower;
@@ -96,7 +112,6 @@ namespace CannonManager {
             }
 
             UIChargeShotBar();
-            //std::cout << power << std::endl;
         }
 
         // Shoot when the button is RELEASED
@@ -117,6 +132,7 @@ namespace CannonManager {
         // Assign values to an projectile
         ammo[ammoCount].isActive = true;
         ammo[ammoCount].id = ammoCount;
+        projectileToFollowId = ammoCount;
 
         // Add offset to ensure that the projectile spawn at the barrel instead of the middle of the cannon
         ammo[ammoCount].pos.x = pos.x + cos(cannonAngle) * size.x;
@@ -130,45 +146,83 @@ namespace CannonManager {
         // Add to the vector list
         activeAmmo.push_back(ammo[ammoCount]);
 
-        // Set camera to follow the newly fired projectile
-        CameraManager::camera.SetFollowTarget(&activeAmmo.back().pos);
-        CameraManager::camera.SetState(CameraManager::CameraController::CameraState::FOLLOW);
-
         // Once it reach the ammo limit reset the ammo count
         if (++ammoCount >= ammoLimit) {
             ammoCount = 0;
         }
 
+        SetCamera(true);
         std::cout << "Projectile Fired!" << " " << ammoCount << std::endl;
     }
 
-    void Cannon::ProjectileUpdate(float dt) {
-        for (Projectile& bullet : activeAmmo) {
-            if (bullet.isActive == true) {
-                bullet.Render();
-                bullet.MoveProjectile(dt);
-                bullet.timer -= 1 * dt;
+    void Cannon::UpdateProjectile() {
+        float dt = GameStateManager::dt;
+        for (Projectile& projectile : activeAmmo) {
+            if (projectile.isActive == true) {
+                projectile.Render();
+                projectile.MoveProjectile();
+                projectile.timer -= 1 * dt;
 
-                DestroyProjectile(bullet);
+                // Check for collision in a 3x3 area with the projectile
+                int gridX = static_cast<int>((projectile.pos.x + Config::WORLD_MAX_X) / Config::TILE_SIZE);
+                int gridY = static_cast<int>((Config::WORLD_MAX_Y - projectile.pos.y) / Config::TILE_SIZE);
+
+                int maxY = gridY + 1, maxX = gridX + 1;
+                for (int y = gridY-1; y <= maxY; ++y) {
+                    for (int x = gridX - 1; x <= maxX; ++x) {
+                        if (x >= 0 && x < Config::GRID_WIDTH && y >= 0 && y < Config::GRID_HEIGHT) {
+                            MapManager::Tile& tile = (*MapManager::currentMap)[y][x];
+
+                            Color c= { 0,1,0 };
+                            if (x != gridX && y != gridY) c = { 1,1,1 };
+
+                            if (tile.isDestroyable) {
+                                if (CollisionManager::AreCircleSquareIntersecting(
+                                    tile.pos.x, tile.pos.y, tile.size.x, tile.size.y,
+                                    projectile.pos.x, projectile.pos.y, projectile.size.x*2))
+                                {
+                                    //projectile.collisionDetected = true;
+                                    tile.Damage(damage); 
+                                    break;
+                                }
+                            }
+                            else if (tile.IsGround()) {
+                                projectile.velocity.y = 0;
+
+                                // 3. Resolve Position: Snap to the top of the tile to prevent sinking
+                                float tileTop = tile.pos.y + (tile.size.y / 2.0f);
+                                projectile.pos.y = tileTop + (projectile.size.y); // Adjust based on your pivot
+                                projectile.collisionDetected = true;
+                            }
+                        }
+                    }
+                }
+
+                if (projectile.collisionDetected && projectile.toBeDestroyed == false) {
+                    projectile.timer = 2.5f;
+                    projectile.toBeDestroyed = true;
+                }
+
+                DestroyProjectile(projectile);
             }
         }
     }
 
     void Cannon::DestroyProjectile(Projectile& projectile) {
+        if (projectile.toBeDestroyed) {
+            std::cout << "Timer: " << projectile.timer << std::endl;
+            projectile.timer -= 1.0f *GameStateManager::dt;
+        }
+
+        // Destroy projectile and erase it from vector if the timer runs out or out of bounds
         if (projectile.timer <= 0.0f || !projectile.IsInMapBounds()) {
-            projectile.isActive = false;
+            projectile.Destroy(projectileToFollowId);
+
             // Find the index containing the projectile and erase from the active ammo vector
             for (int i = 0; i < activeAmmo.size(); i++) {
                 if (activeAmmo[i].id == projectile.id) {
                     activeAmmo.erase(activeAmmo.begin() + i);
-
-                    // Return camera to input control when all projectiles are destroyed
-                    if (activeAmmo.empty()) {
-                        CameraManager::camera.SetFollowTarget(nullptr);
-                        CameraManager::camera.SetState(CameraManager::CameraController::CameraState::INPUT);
-                        CameraManager::camera.SetPosition(pos);
-                    }
-
+                    SetCamera(false);
                     std::cout << "Removing " << i << " " << "Count " << activeAmmo.size() << std::endl;
                 }
             }
@@ -199,5 +253,19 @@ namespace CannonManager {
         // Bar
         AEMtx33 mat3 = GraphicsManager::CreateTransformMatrix(x, y, 0, w, -newH);
         GraphicsManager::DrawUI(tex, mat3, Color{ 0, 0.8f, 0, 1 });
+    }
+
+    void Cannon::SetCamera(bool isFollowingProjectile) {
+        if (isFollowingProjectile) {
+            // Set camera to follow the newly fired projectile
+            CameraManager::camera.SetFollowTarget(&activeAmmo.back().pos);
+            CameraManager::camera.SetState(CameraManager::CameraController::CameraState::FOLLOW);
+        }
+        else {
+            // Return camera to input control
+            CameraManager::camera.SetFollowTarget(nullptr);
+            CameraManager::camera.SetState(CameraManager::CameraController::CameraState::INPUT);
+            CameraManager::camera.SetPosition(pos);
+        }
     }
 }

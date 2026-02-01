@@ -1,10 +1,4 @@
-#include "pch.hpp"
-#include "AEInput.h"
 #include "MapEditor.hpp"
-#include "MapManager.hpp"
-#include "GraphicsManager.hpp"
-#include "AssetsManager.hpp"
-#include "Utils.hpp"
 
 using namespace MapManager;
 
@@ -121,16 +115,8 @@ namespace MapEditor {
 
 		AEGfxSetBackgroundColor(0.92f, 0.92f, 0.95f);
 
-		// Calculate Grid x and y index
-		float worldMouseX = 0, worldMouseY = 0;
-		Utils::GetWorldMousePos(worldMouseX, worldMouseY);
-
-		int gridX = static_cast<int>((worldMouseX + Config::WORLD_MAX_X) / Config::TILE_SIZE);
-		int gridY = static_cast<int>((Config::WORLD_MAX_Y - worldMouseY) / Config::TILE_SIZE);
-
-		// This is to ensure that the grid index does not go out of range
-		Utils::Limit(gridX, Config::MIN_GRID_X, Config::MAX_GRID_X);
-		Utils::Limit(gridY, Config::MIN_GRID_Y, Config::MAX_GRID_Y);
+		int gridX = 0, gridY = 0;
+		Utils::GetGridIndex(gridX, gridY);
 
 		// Check for input to draw the map editor
 		if (gridX >= 0 && gridX < Config::GRID_WIDTH && gridY >= 0 && gridY < Config::GRID_HEIGHT) {
@@ -195,6 +181,10 @@ namespace MapEditor {
 			}
 		}
 
+		if (AEInputCheckTriggered(AEVK_Q)) {
+			GameStateManager::next = GameStateManager::GS_MAIN_MENU;
+		}
+
 		if (AEInputCheckTriggered(AEVK_E)) {
 			// Save file on both BIN folder and my project folder if debugger is on
 			SaveNewFile(savePath);
@@ -248,9 +238,13 @@ namespace MapEditor {
 			AEInputGetCursorPosition(&mouseX, &mouseY);
 			float mX = 0, mY = 0;
 			Utils::GetWorldMousePos(mX, mY);
+			Tile& tile = (*currentMap)[gridY][gridX];
+
 			debugText.textContent = "Grid\nIndex X: " + std::to_string(gridX) + " Y: " + std::to_string(gridY)
+				+ "\nTile: " + MapManager::TileTypeToString(tile.type)
 				+ "\nPos X: " + Utils::FormatFloat(newMap[gridY][gridX].pos.x, 2) + " Y: " + Utils::FormatFloat(newMap[gridY][gridX].pos.y, 2)
-				+ "\nCamera\nPos X:" + Utils::FormatFloat(x, 2) + " Y: " + Utils::FormatFloat(y, 2)
+				+ "\nCamera " + std::to_string(CameraManager::camera.GetState()) +
+				+ "\nPos X:" + Utils::FormatFloat(x, 2) + " Y: " + Utils::FormatFloat(y, 2)
 				+ "\nMouse\nScreen Pos X: " + Utils::FormatFloat(mouseX, 2) + " Y: " + Utils::FormatFloat(mouseY, 2)
 				+ "\nWorld Pos X: " + Utils::FormatFloat(mX, 2) + " Y: " + Utils::FormatFloat(mY, 2);
 			GraphicsManager::DrawTextUI(debugText);

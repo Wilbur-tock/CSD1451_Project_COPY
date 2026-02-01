@@ -2,6 +2,12 @@
 #define MAPEDITOR_HPP
 
 #include "pch.hpp"
+#include "AEInput.h"
+#include "MapManager.hpp"
+#include "GraphicsManager.hpp"
+#include "AssetsManager.hpp"
+#include "Utils.hpp"
+#include "GameStateManager.hpp"
 
 namespace MapEditor {
 	void Init();

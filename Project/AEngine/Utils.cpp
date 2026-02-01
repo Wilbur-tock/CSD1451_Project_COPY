@@ -26,10 +26,19 @@ namespace Utils {
 		// Adding the offset from camera moving and add the screenWidth if the mapWidth is larger than the screenWidth
 		x += camX;
 		y += camY;
+	}
 
-		// Use if values is from 0 to max
-		//x += camX + Config::SCREEN_WIDTH;
-		//y += (Config::SCREEN_HEIGHT / 2.0f) - camY;
+	void GetGridIndex(int& x, int& y) {
+		// Calculate Grid x and y index
+		float worldMouseX = 0, worldMouseY = 0;
+		Utils::GetWorldMousePos(worldMouseX, worldMouseY);
+
+		x = static_cast<int>((worldMouseX + Config::WORLD_MAX_X) / Config::TILE_SIZE);
+		y = static_cast<int>((Config::WORLD_MAX_Y - worldMouseY) / Config::TILE_SIZE);
+
+		// This is to ensure that the grid index does not go out of range
+		Utils::Limit(x, Config::MIN_GRID_X, Config::MAX_GRID_X);
+		Utils::Limit(y, Config::MIN_GRID_Y, Config::MAX_GRID_Y);
 	}
 
 	void ToNormalize(float& x, float& y) {

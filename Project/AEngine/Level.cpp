@@ -10,19 +10,26 @@ void Level::Load(std::string filePath) {
 	// Read map data
 	MapManager::ReadMapData(filePath, levelMap);
 
-	bool foundCannonPos = false;
+	float minX = Config::GRID_WIDTH, minY = Config::GRID_WIDTH, maxX = 0, maxY = 0;
 	// Find cannon starting position
-	for (const std::vector<MapManager::Tile>& row : levelMap) {
-		for (const MapManager::Tile& tile : row) {
-			if (tile.type == MapManager::TILE_PLAYER_CANNON) {
-				playerCannonStartPos = { tile.pos.x,tile.pos.y + tile.size.y/2.0f };
-				foundCannonPos = true;
-				break;
-			}
-		}
+	for (int y = 0; y < Config::GRID_HEIGHT; ++y) {
+		for (int x = 0; x < Config::GRID_WIDTH; ++x) {
+			MapManager::Tile& tile = levelMap[y][x];
 
-		if (foundCannonPos) break;
+			// Find cannon starting position
+			if (tile.type == MapManager::TILE_PLAYER_CANNON) {
+				playerCannonStartPos = { tile.pos.x,tile.pos.y + tile.size.y / 2.0f };
+			}
+
+			minX = tile.IsGround() && x < minX ? x : minX;
+			maxX = tile.IsGround() && x > maxX ? x : maxX;
+			minY = tile.IsGround() && y < minY ? y : minY;
+			maxY = tile.IsGround() && y > maxY ? y : maxY;
+		}
 	}
+
+	minGround = { minX, minY };
+	maxGround = { maxX, maxY };
 
 	AEGfxTexture* barrelTex = AssetsManager::GetTexture("Assets/cannonBarrel.png");
 	if (!barrelTex) barrelTex = AssetsManager::GetTexture("Assets/square.png"); // fallback
@@ -33,4 +40,6 @@ void Level::Load(std::string filePath) {
 
 	cannon = CannonManager::Cannon(playerCannonStartPos, barrelTex, 10, barrelHalfSize);
 	cannon.textureColor = Color{ 1, 1, 1, 1 };   // black barrel
+
+	debugText = { "",{ -1.0f, 0.99f}, Utils::debuggerInfo.first, Utils::debuggerInfo.second };
 }

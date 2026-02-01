@@ -5,7 +5,7 @@
 #include "Color.hpp"
 
 namespace MapManager {
-	std::vector<std::vector<Tile>> mapLayout(Config::GRID_HEIGHT, std::vector<Tile>(Config::GRID_WIDTH));
+	std::vector<std::vector<Tile>> *currentMap;
 
 	static const char* FLOOR_TOP_PATH = "Assets/floorTile.png";  // surface layer floor
 	static const char* FLOOR_FILL_PATH = "Assets/floorFill.png";  // underground fill of floor
@@ -14,7 +14,26 @@ namespace MapManager {
 	static const char* CANNON_BASE_PATH = "Assets/cannonBase.png"; //Cannon (for testing now, not actual sprite)
 
 	Tile::Tile(AEVec2 _pos, AEGfxTexture* _texture, TileType _type) 
-		: GameObject{ _pos, {defaultSize,defaultSize}, _texture, Color{1,1,1} }, type{ _type } {
+		: GameObject{ _pos, {defaultSize,defaultSize}, _texture, Color{1,1,1} }, type{ _type }, id{ 0,0 } {
+	}
+
+	void Tile::Damage(float damage) {
+		health -= damage;
+		if (health <= minHealth) {
+			type = TILE_EMPTY; //TEMPORARY
+		}
+		//std::cout << "Damaged Tile x: " << id.x << " y: " << id.y << " health: " << health << std::endl;
+	}
+
+	float Tile::GetHealth() {
+		return health;
+	}
+
+	bool Tile::IsGround(){
+		return type >= TILE_BLOCK_GROUND_0 && type <= TILE_BLOCK_GROUND_2;
+	}
+	bool Tile::IsBlocks() {
+		return type >= TILE_BLOCK_1 && type <= TILE_BLOCK_2;
 	}
 
 	// Cached textures
@@ -131,10 +150,16 @@ namespace MapManager {
 				else {
 					tileTexture = gTileTex[type];
 				}
-
-				map[y][x] = Tile({ startX + (x * tileSize), startY - (y * tileSize) }, tileTexture, static_cast<TileType>(type));
+				map[y][x].pos = { startX + (x * tileSize), startY - (y * tileSize) };
+				map[y][x].texture = tileTexture;
+				map[y][x].type = static_cast<TileType>(type);
+				map[y][x].id.x = static_cast<f32>(x);
+				map[y][x].id.y = static_cast<f32>(y);
+				map[y][x].isDestroyable = type >= MapManager::TILE_BLOCK_1 && type <= MapManager::TILE_BLOCK_2;
 			}
 		}
+
+		currentMap = &map;
 
 		ifs.close();
 	}

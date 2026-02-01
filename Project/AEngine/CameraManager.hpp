@@ -6,7 +6,7 @@ namespace CameraManager
     class CameraController
     {
     public:
-        enum class CameraState
+        enum CameraState
         {
             STATIC,      // Camera doesn't move
             INPUT,       // Camera controlled by WASD input
