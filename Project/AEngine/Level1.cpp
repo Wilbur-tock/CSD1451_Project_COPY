@@ -13,9 +13,10 @@ namespace Level1 {
 		levelData.Load("Assets/Map/level1.txt");
 	}
 
-	void Initialize() {
+	void Init() {
 		AEGfxSetBackgroundColor(0.92f, 0.92f, 0.95f);
 		CameraManager::camera.SetPosition(levelData.cannon.pos);
+		levelData.Init();
 	}
 
 	void Update() {
@@ -36,7 +37,7 @@ namespace Level1 {
 
 			MapManager::Tile& tile = (*MapManager::currentMap)[gridY][gridX];
 
-			levelData.debugText.textContent = "Grid\nIndex X: " + std::to_string(gridX) + " Y: " + std::to_string(gridY)
+			levelData.debugText.textContent = "Grid:\nIndex X: " + std::to_string(gridX) + " Y: " + std::to_string(gridY)
 				+ "\nTile: " + MapManager::TileTypeToString(tile.type) + " " + Utils::FormatFloat(tile.GetHealth(), 2) +
 				+"\nPos X: " + Utils::FormatFloat(tile.pos.x, 2) + " Y: " + Utils::FormatFloat(tile.pos.y, 2)
 				+ "\nCamera " + std::to_string(CameraManager::camera.GetState()) +

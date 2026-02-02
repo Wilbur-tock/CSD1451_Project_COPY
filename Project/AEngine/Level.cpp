@@ -43,3 +43,7 @@ void Level::Load(std::string filePath) {
 
 	debugText = { "",{ -1.0f, 0.99f}, Utils::debuggerInfo.first, Utils::debuggerInfo.second };
 }
+
+void Level::Init() {
+	MapManager::currentMap = &levelMap;
+}

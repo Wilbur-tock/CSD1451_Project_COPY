@@ -98,7 +98,7 @@ namespace GameStateManager {
                         break;
                     case GS_LEVEL_1:
                         gsLoad = Level1::Load;
-                        gsIntialize = Level1::Initialize;
+                        gsIntialize = Level1::Init;
                         gsUpdate = Level1::Update;
                         gsDraw = nullptr;
                         gsFree = nullptr;

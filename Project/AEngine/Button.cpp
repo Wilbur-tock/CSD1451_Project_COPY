@@ -14,7 +14,7 @@ Button::Button(TextObject _textObj, Utils::RectMode _rectMode, AEVec2 _pos, AEVe
     const char* myText = _textObj.textContent.c_str();
     // Get the normalized text width and height
     f32 textW, textH;
-    AEGfxGetPrintSize(AssetsManager::textFont, myText, textObj.scale, &textW, &textH);
+    AEGfxGetPrintSize(AssetsManager::textFont, myText, textObj.textScale, &textW, &textH);
 
     float x = pos.x, y = pos.y, borderGap = 0.01f;
 

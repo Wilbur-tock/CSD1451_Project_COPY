@@ -21,6 +21,7 @@ public:
 
 	// Read level map data and load level resources
 	void Load(std::string filePath);
+	void Init();
 };
 
 #endif // !LEVEL_HPP

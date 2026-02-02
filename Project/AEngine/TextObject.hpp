@@ -10,7 +10,7 @@ public:
 	std::string textContent;
 	AEVec2 pos{ 0,0 };
 	Color color;
-	float scale = 1.0f;
+	float textScale = 1.0f;
 
 	TextObject() = default;
 	TextObject(std::string _text, AEVec2 _pos = {0,0}, Color _color = Color{ 1,1,1 }, float _scale = 1.0f);

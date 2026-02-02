@@ -114,13 +114,13 @@ namespace GraphicsManager {
 	}
 
 	void DrawTextUI(TextObject& textObj) {
-		Utils::Limit(textObj.scale, 0.0f, 1.0f);
+		//Utils::Limit(textObj.textScale, 0.0f, 1.0f);
 
 		std::string text = textObj.textContent;
 
 		// Get line height and print size with a default text
 		f32 charWidth, lineHeight, currentY = textObj.pos.y;
-		AEGfxGetPrintSize(AssetsManager::textFont, "A", textObj.scale, &charWidth, &lineHeight);
+		AEGfxGetPrintSize(AssetsManager::textFont, "A", textObj.textScale, &charWidth, &lineHeight);
 
 		size_t start = 0;
 		size_t end = text.find('\n');
@@ -142,8 +142,8 @@ namespace GraphicsManager {
 			if (!line.empty()) {
 				char const* pText = line.c_str();
 				f32 w, h;
-				AEGfxGetPrintSize(AssetsManager::textFont, pText, textObj.scale, &w, &h);
-				AEGfxPrint(AssetsManager::textFont, pText, textObj.pos.x, currentY - h, textObj.scale, 
+				AEGfxGetPrintSize(AssetsManager::textFont, pText, textObj.textScale, &w, &h);
+				AEGfxPrint(AssetsManager::textFont, pText, textObj.pos.x, currentY - h, textObj.textScale, 
 					textObj.color.GetRed(), textObj.color.GetGreen(), textObj.color.GetBlue(), textObj.color.GetAlpha());
 			}
 
