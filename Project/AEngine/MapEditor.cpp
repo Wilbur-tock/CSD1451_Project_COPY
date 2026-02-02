@@ -103,8 +103,8 @@ namespace MapEditor {
 	}
 
 	void Init() {
-		helpText = { "", {-1.0f,.99f}, Utils::debuggerInfo.first, Utils::debuggerInfo.second * 0.9f };
-		debugText = { "",{ 0.5f, 0.99f}, Utils::debuggerInfo.first, Utils::debuggerInfo.second };
+		helpText =  { "", Utils::debuggerInfo.second * 0.9f,{-1.0f,.99f}, Utils::debuggerInfo.first };
+		debugText = { "", Utils::debuggerInfo.second, { 0.5f, 0.99f},   Utils::debuggerInfo.first  };
 	}
 
 	void MapEditor() {

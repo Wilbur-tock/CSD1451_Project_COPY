@@ -4,7 +4,7 @@ namespace CannonManager {
     Projectile::Projectile() : timer{ 0.0f }, velocity{ 0.0f,0.0f } {}
     Projectile::Projectile(AEVec2 _pos, AEGfxTexture* _texture, AEVec2 _velocity) : GameObject(_pos, defaultSize, _texture), timer{ 0.0f }, velocity(_velocity) {}
 
-    TextObject debugText{ "", {-1, 0.99f}, Utils::debuggerInfo.first, Utils::debuggerInfo.second };
+    TextObject debugText{ "",Utils::debuggerInfo.second, {-1, 0.99f}, Utils::debuggerInfo.first };
 
     void Projectile::Render() {
         AEMtx33 mat = GraphicsManager::CreateTransformMatrix(pos.x, pos.y, 0, size.x, size.y);

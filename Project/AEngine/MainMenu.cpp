@@ -86,17 +86,17 @@ namespace MainMenu {
             OnQuitClicked
         );
 
-        gameTitle = { "Game Title",
+        gameTitle = { "FORTRESS FIGHT",
+            2.5f,
             { -0.3f, 0.65f }, // position (normalized)
             Color(1.0f, 1.0f, 1.0f, 1.0f),  // White color
-            2.0f,
         };
 
         instructions = {
             "Click a button or use keyboard shortcuts:\n1 - Play Game | 2 - Map Editor | 3 - Credits | Q - Quit",
+            0.7f,
             { -0.98f, -0.9f },
             Color(0.7f, 0.7f, 0.7f, 1.0f),
-            0.7f,
         };
     }
 

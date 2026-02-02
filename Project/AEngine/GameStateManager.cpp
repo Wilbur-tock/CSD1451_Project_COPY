@@ -46,7 +46,7 @@ namespace GameStateManager {
             Config::WORLD_MAX_Y - halfH
         );
 
-        debugText = { "",{-1.f, -0.75f}, Utils::debuggerInfo.first, Utils::debuggerInfo.second };
+        debugText = { "", Utils::debuggerInfo.second, {-1.f, -0.75f}, Utils::debuggerInfo.first };
     }
 
     void Update() {

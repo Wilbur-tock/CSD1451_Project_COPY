@@ -70,13 +70,12 @@ namespace Credits {
             "All content @2025 DigiPen Institute of Technology Singapore.\nAll Rights Reserved\n\n"
 
             "Press ESC or BACKSPACE to return to menu",
-            {0,0},
         };
 
         hintText = { "ESC - Return to Menu  |  SPACE - Skip",
-        { -0.98f, -0.93f },
-        Color(0.6f, 0.6f, 0.6f, 1.0f),
-        0.7f
+            0.7f,
+            { -0.98f, -0.93f },
+            Color(0.6f, 0.6f, 0.6f, 1.0f),
         };
     }
 

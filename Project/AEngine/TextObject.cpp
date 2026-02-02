@@ -1,4 +1,4 @@
 #include "TextObject.hpp"
 
-TextObject::TextObject(std::string _textContent, AEVec2 _pos, Color _color, float _scale) 
-	: textContent{ _textContent }, pos{ _pos }, color{ _color }, textScale{ _scale } {}
+TextObject::TextObject(std::string _textContent, float _scale, AEVec2 _pos, Color _color)
+	: textContent{ _textContent }, textScale{ _scale }, pos{ _pos }, color{ _color } {}
