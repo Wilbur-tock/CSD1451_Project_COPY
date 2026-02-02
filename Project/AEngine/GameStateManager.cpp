@@ -181,7 +181,8 @@ namespace GameStateManager {
     void Exit() {
         // Call unload for all states
         MainMenu::Unload();
-
+        AssetsManager::Unload();
+        GraphicsManager::Unload();
         // Free camera resources if needed
     }
 }

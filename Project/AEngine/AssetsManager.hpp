@@ -17,7 +17,7 @@ namespace AssetsManager {
 	AEGfxTexture* GetTexture(const char* filePath);
 
 	// Clean up all memory at the end of the game
-	void UnloadAll();
+	void Unload();
 }
 
 #endif // !ASSETSMANAHER_HPP

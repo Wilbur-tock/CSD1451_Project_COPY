@@ -12,6 +12,7 @@ namespace GraphicsManager {
 
 	// Load all resources required and generate mesh
 	void Load();
+	void Unload();
 
 	// Create the transform matrix to be used to draw out the texture on the mesh,
 	// x,y - position of where the texture is going to be render at

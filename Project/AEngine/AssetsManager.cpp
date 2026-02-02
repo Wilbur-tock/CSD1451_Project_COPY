@@ -29,7 +29,7 @@ namespace AssetsManager {
         return newTex;
     }
 
-    void UnloadAll() {
+    void Unload() {
         //Unload all textures inside texture cache
         for (auto const &pair : textureCache) {
             AEGfxTextureUnload(pair.second);

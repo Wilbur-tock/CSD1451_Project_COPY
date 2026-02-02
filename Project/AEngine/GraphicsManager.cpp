@@ -52,6 +52,17 @@ namespace GraphicsManager {
 		GenerateMesh();
 	}
 
+	void Unload() {
+		if (pMeshMiddle) {
+			AEGfxMeshFree(pMeshMiddle);
+			pMeshMiddle = nullptr;
+		}
+		if (pMeshCorner) {
+			AEGfxMeshFree(pMeshCorner);
+			pMeshCorner = nullptr;
+		}
+	}
+
 	AEMtx33 CreateTransformMatrix(float x, float y, float rot, float scaleX, float scaleY) {
 		AEMtx33 matScale, matRot, matTrans, matResult;
 
