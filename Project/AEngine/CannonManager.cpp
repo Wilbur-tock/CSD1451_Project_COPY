@@ -4,8 +4,6 @@ namespace CannonManager {
     Projectile::Projectile() : timer{ 0.0f }, velocity{ 0.0f,0.0f } {}
     Projectile::Projectile(AEVec2 _pos, AEGfxTexture* _texture, AEVec2 _velocity) : GameObject(_pos, defaultSize, _texture), timer{ 0.0f }, velocity(_velocity) {}
 
-    TextObject debugText{ "",Utils::debuggerInfo.second, {-1, 0.99f}, Utils::debuggerInfo.first };
-
     void Projectile::Render() {
         AEMtx33 mat = GraphicsManager::CreateTransformMatrix(pos.x, pos.y, 0, size.x, size.y);
         GraphicsManager::DrawGameObject(AssetsManager::circleTexture, mat, Color{ 0.5f, 0.5f, 0, 1 });
@@ -18,10 +16,9 @@ namespace CannonManager {
         pos.y += newPos.y;
     }
 
-    void Projectile::Destroy(int &projectileId) {
+    void Projectile::Destroy() {
         isActive = collisionDetected = toBeDestroyed = false;
         timer = 0.0f;
-        projectileId = -1;
     }
 
     Cannon::Cannon() : cannonAngle{ 0.0f }, ammo{ NULL }, ammoLimit{ 0 }, shotPower{ power } {}
@@ -35,6 +32,12 @@ namespace CannonManager {
         : GameObject(_pos, _size, _texture, Color{ 1,1,1,1 }),
         ammoLimit{ _projectileAmount }, cannonAngle{ 0.0f }, shotPower{ power } {
         Reset();
+    }
+
+    float Cannon::GetDamage() const { return damage; }
+    void Cannon::SetDamage(float _damage) { 
+        damage = _damage;
+        Utils::Limit(damage, minDamage, maxDamage); 
     }
 
     void Cannon::Reset() {
@@ -59,27 +62,29 @@ namespace CannonManager {
         // Add limits so it can only turn facing upwards or downwards limits
         Utils::Limit(cannonAngle, -1.5f, 1.5f);
 
-        // Debugger
-        if (Utils::isDebuggerOn) {
-            float mX = 0, mY = 0;
-            Utils::GetWorldMousePos(mX, mY);
-            float cX = pos.x, cY = pos.y;
-            Utils::GetWorldPos(cX, cY);
-            s32 mouseX, mouseY;
-            AEInputGetCursorPosition(&mouseX, &mouseY);
-
-            debugText.textContent = "Cannon\nPos X: " + Utils::FormatFloat(pos.x, 2) + " Y: " + Utils::FormatFloat(pos.y, 2)
-                + "\nWorld Pos X: " + Utils::FormatFloat(cX, 2) + " Y: " + Utils::FormatFloat(cY, 2)
-                + "\nAngle: " + Utils::FormatFloat(cannonAngle * (180.0f / 3.14159265359), 2)
-                + "\nMouse\nScreen Pos X: " + Utils::FormatFloat(mouseX, 2) + " Y: " + Utils::FormatFloat(mouseY, 2)
-                + "\nWorld\nPos X: " + Utils::FormatFloat(worldMouseX, 2) + " Y : " + Utils::FormatFloat(worldMouseY, 2);
-
-            GraphicsManager::DrawTextUI(debugText);
-        }
-
-        Render();
         ChargeShot();
         UpdateProjectile();
+
+        // Debugger
+        if (Utils::isDebuggerOn) {
+            //float mX = 0, mY = 0;
+            //Utils::GetWorldMousePos(mX, mY);
+            //float cX = pos.x, cY = pos.y;
+            //Utils::GetWorldPos(cX, cY);
+            //s32 mouseX, mouseY;
+            //AEInputGetCursorPosition(&mouseX, &mouseY);
+            //
+            //TextObject txtObj{ "", Utils::debuggerInfo.first, Utils::debuggerInfo.second, {0.5f, 0.99f} };
+            //txtObj.textContent = "Cannon\nPos X: " + Utils::FormatFloat(pos.x, 2) + " Y: " + Utils::FormatFloat(pos.y, 2)
+            //    + "\nAngle: " + Utils::FormatFloat(cannonAngle * (180.0f / 3.14159265359), 2);
+            //if (activeAmmo.size() > 0) {
+            //    txtObj.textContent += "\nProjectile:\nVelocity x: " + Utils::FormatFloat(activeAmmo.back().velocity.x, 2)
+            //        + " y: " + Utils::FormatFloat(activeAmmo.back().velocity.y, 2);
+            //}
+            //
+            //GraphicsManager::DrawTextUI(txtObj);
+        }
+        Render();
     }
 
     void Cannon::ChargeShot() {
@@ -118,8 +123,6 @@ namespace CannonManager {
         ammo[ammoCount].isActive = true;
         ammo[ammoCount].id = ammoCount;
         ammo[ammoCount].mode = ATTACK;
-
-        projectileToFollowId = ammoCount;
 
         // Add offset to ensure that the projectile spawn at the barrel instead of the middle of the cannon
         ammo[ammoCount].pos.x = pos.x + cos(cannonAngle) * size.x;
@@ -192,18 +195,19 @@ namespace CannonManager {
                                     float overlapY = (radius + tile.size.y / 2.0f) - std::abs(projectile.pos.y - tile.pos.y);
 
                                     if (overlapX < overlapY) {
-                                        // Resolve X (Wall)
+                                        float bounce = -0.3f;
+                                        // Resolve X (Wall) - Hit a side wall
                                         if (projectile.pos.x < tile.pos.x) {
                                             projectile.pos.x = tileLeft - radius - 0.1f; // Nudge out
-                                            if (projectile.velocity.x > 0) projectile.velocity.x *= -0.4f;
+                                            if (projectile.velocity.x > 0) projectile.velocity.x *= bounce;
                                         }
                                         else {
                                             projectile.pos.x = tileRight + radius + 0.1f; // Nudge out
-                                            if (projectile.velocity.x < 0) projectile.velocity.x *= -0.4f;
+                                            if (projectile.velocity.x < 0) projectile.velocity.x *= bounce;
                                         }
                                     }
                                     else {
-                                        // Resolve Y (Floor/Ceiling)
+                                        // Resolve Y (Floor/Ceiling) - Hit the top or bottom of the block
                                         if (projectile.pos.y > tile.pos.y) { // Ensure the projectile is flush to the tile
                                             projectile.pos.y = tileTop + radius;
                                             projectile.isGrounded = true;
@@ -238,6 +242,11 @@ namespace CannonManager {
                 else {
                     projectile.velocity.y -= Config::GRAVITY * subDt;
                 }
+
+                // If the velocity is tiny, the projectiile should just stop
+                //float threshold = 5.0f;
+                //if (std::abs(projectile.velocity.x) < threshold) projectile.velocity.x = 0;
+                //if (std::abs(projectile.velocity.y) < threshold) projectile.velocity.y = 0;
             }
 
             DestroyProjectile(projectile);
@@ -246,19 +255,23 @@ namespace CannonManager {
     }
 
     void Cannon::DestroyProjectile(Projectile& projectile) {
+        //float speedSq = (projectile.velocity.x * projectile.velocity.x) +
+        //    (projectile.velocity.y * projectile.velocity.y);
+
         // Start timer if it going to be destroy
         if (projectile.collisionDetected && projectile.toBeDestroyed == false) {
-            projectile.timer = 5.0f;
+            projectile.timer = 3.0f;
             projectile.toBeDestroyed = true;
         }
 
         if (projectile.toBeDestroyed) {
-            projectile.timer -= 1.0f *GameStateManager::dt;
+            projectile.timer -= 1.0f * GameStateManager::dt;
+            std::cout << projectile.timer << std::endl;
         }
 
         // Destroy projectile and erase it from vector if the timer runs out or out of bounds
         if (projectile.timer <= 0.0f || !projectile.IsInMapBounds()) {
-            projectile.Destroy(projectileToFollowId);
+            projectile.Destroy();
 
             // Find the index containing the projectile and erase from the active ammo vector
             for (int i = 0; i < activeAmmo.size(); i++) {

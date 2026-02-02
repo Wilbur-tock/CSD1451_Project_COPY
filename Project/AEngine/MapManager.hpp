@@ -8,11 +8,11 @@
 namespace MapManager {
 	enum TileType {
 		TILE_EMPTY,
-		TILE_BLOCK_GROUND_0,
+		TILE_BLOCK_GROUND_0, // Must the first ground index
 		TILE_BLOCK_GROUND_1,
-		TILE_BLOCK_GROUND_2,
-		TILE_BLOCK_1,
-		TILE_BLOCK_2,
+		TILE_BLOCK_GROUND_2, // Must be the last ground index
+		TILE_BLOCK_1, // Must be first block index
+		TILE_BLOCK_2, // Must be the last block index
 		TILE_PLAYER_CANNON,
 		TILE_PLAYER_CHARACTER,
 		TILE_ENEMY_CANNON,
@@ -31,16 +31,15 @@ namespace MapManager {
 	public:
 		TileType type = TILE_EMPTY;
 		AEVec2 id{0,0}; // Grid index x and y
-		bool isDestroyable = false;
 
 		Tile() = default;
 		Tile(AEVec2 _pos, AEGfxTexture* _texture, TileType _type);
 
 		void Damage(float damage);
-		float GetHealth();
 
-		bool IsGround();
-		bool IsBlocks();
+		float GetHealth() const;
+		bool IsGround() const;
+		bool IsBlocks() const;
 	};
 
 	extern std::vector<std::vector<Tile>> *currentMap; // Current map layout that is being displayed onto the map

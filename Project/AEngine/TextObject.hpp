@@ -13,7 +13,7 @@ public:
 	Color color;
 
 	TextObject() = default;
-	TextObject(std::string _text, float _scale = 1.0f, AEVec2 _pos = {0,0}, Color _color = Color{ 1,1,1 });
+	TextObject(std::string _text, float _scale = 1.0f, Color _color = Color{ 1,1,1 }, AEVec2 _pos = {0,0});
 };
 
 #endif // !TEXTOBJECT_HPP

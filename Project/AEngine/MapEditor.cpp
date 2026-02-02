@@ -10,9 +10,6 @@ namespace MapEditor {
 
 	std::vector<std::vector<Tile>> newMap(Config::GRID_HEIGHT, std::vector<Tile>(Config::GRID_WIDTH));
 
-	//TileType defaultTile = TILE_BLOCK_GROUND;
-	//TileType drawingTileType = defaultTile;
-	//int tileId = 1;
 	TileType defaultTile = TILE_BLOCK_GROUND_0;
 	TileType drawingTileType = defaultTile;
 	// 0-based id that matches TileType enum values
@@ -103,8 +100,8 @@ namespace MapEditor {
 	}
 
 	void Init() {
-		helpText =  { "", Utils::debuggerInfo.second * 0.9f,{-1.0f,.99f}, Utils::debuggerInfo.first };
-		debugText = { "", Utils::debuggerInfo.second, { 0.5f, 0.99f},   Utils::debuggerInfo.first  };
+		helpText =  { "",  Utils::debuggerInfo.first, Utils::debuggerInfo.second,{-1.0f,.99f} };
+		debugText = { "",  Utils::debuggerInfo.first, Utils::debuggerInfo.second, { 0.5f, 0.99f} };
 	}
 
 	void MapEditor() {

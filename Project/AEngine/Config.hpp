@@ -19,7 +19,7 @@ namespace Config {
 	constexpr float FONT_SCALE = 1.0f;
 
 	// PHYSICS
-	constexpr float GRAVITY = 1500.0f, FRICTION = 0.9f;
+	constexpr float GRAVITY = 1500.0f, FRICTION = 0.8f;
 }
 
 #define KEY_SAVEFILE AEVK_ESCAPE

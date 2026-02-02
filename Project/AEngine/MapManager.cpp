@@ -25,14 +25,14 @@ namespace MapManager {
 		//std::cout << "Damaged Tile x: " << id.x << " y: " << id.y << " health: " << health << std::endl;
 	}
 
-	float Tile::GetHealth() {
+	float Tile::GetHealth() const {
 		return health;
 	}
 
-	bool Tile::IsGround(){
+	bool Tile::IsGround() const {
 		return type >= TILE_BLOCK_GROUND_0 && type <= TILE_BLOCK_GROUND_2;
 	}
-	bool Tile::IsBlocks() {
+	bool Tile::IsBlocks() const {
 		return type >= TILE_BLOCK_1 && type <= TILE_BLOCK_2;
 	}
 
@@ -158,7 +158,6 @@ namespace MapManager {
 				tile.type = static_cast<TileType>(type);
 				tile.id.x = static_cast<f32>(x);
 				tile.id.y = static_cast<f32>(y);
-				tile.isDestroyable = type >= MapManager::TILE_BLOCK_1 && type <= MapManager::TILE_BLOCK_2;
 			}
 		}
 

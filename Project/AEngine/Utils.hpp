@@ -6,7 +6,7 @@
 
 namespace Utils {
 	extern bool isDebuggerOn;
-	extern std::pair<Color, float> debuggerInfo; // Store the text color and text size
+	extern std::pair<float, Color> debuggerInfo; // Store the text scale and color
 	typedef std::function<void()> FuncPtr;
 
 	enum RectMode {

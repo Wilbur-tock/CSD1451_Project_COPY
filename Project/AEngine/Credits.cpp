@@ -74,8 +74,8 @@ namespace Credits {
 
         hintText = { "ESC - Return to Menu  |  SPACE - Skip",
             0.7f,
-            { -0.98f, -0.93f },
             Color(0.6f, 0.6f, 0.6f, 1.0f),
+            { -0.98f, -0.93f },
         };
     }
 
