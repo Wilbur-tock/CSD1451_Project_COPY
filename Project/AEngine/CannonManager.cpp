@@ -2,18 +2,30 @@
 
 namespace CannonManager {
     Projectile::Projectile() : timer{ 0.0f }, velocity{ 0.0f,0.0f } {}
-    Projectile::Projectile(AEVec2 _pos, AEGfxTexture* _texture, AEVec2 _velocity) : GameObject(_pos, defaultSize, _texture), timer{ 0.0f }, velocity(_velocity) {}
+    Projectile::Projectile(AEVec2 _pos, AEGfxTexture* _texture, AEVec2 _velocity) 
+        : GameObject(_pos, defaultSize, _texture), timer{ 0.0f }, velocity(_velocity) {}
 
     void Projectile::Render() {
         AEMtx33 mat = GraphicsManager::CreateTransformMatrix(pos.x, pos.y, 0, size.x, size.y);
         GraphicsManager::DrawGameObject(AssetsManager::circleTexture, mat, Color{ 0.5f, 0.5f, 0, 1 });
     }
 
-    void Projectile::MoveProjectile() {
-        float dt = GameStateManager::dt;
-        AEVec2 newPos = { velocity.x * dt, velocity.y * dt };
-        pos.x += newPos.x;
-        pos.y += newPos.y;
+    void Projectile::MoveProjectile(float dt) {
+        if (isGrounded) {
+            velocity.x *= pow(Config::FRICTION, dt);
+            velocity.y = 0; // ensure that the projectile stay on the ground
+            if (std::abs(velocity.x) < 1.0f) velocity.x = 0;
+        }
+        else {
+            velocity.y -= Config::GRAVITY * dt;
+        }
+
+        pos.x += velocity.x * dt;
+        pos.y += velocity.y * dt;
+    }
+
+    void Projectile::ConsumeAttackCharge() {
+
     }
 
     void Projectile::Destroy() {
@@ -21,16 +33,10 @@ namespace CannonManager {
         timer = 0.0f;
     }
 
-    Cannon::Cannon() : cannonAngle{ 0.0f }, ammo{ NULL }, ammoLimit{ 0 }, shotPower{ power } {}
-    Cannon::Cannon(AEVec2 _pos, AEGfxTexture* _texture, int _projectileAmount)
-        : GameObject(_pos, defaultSize, _texture, Color{ 1,1,1,1 }),
-        ammoLimit{ _projectileAmount }, cannonAngle{ 0.0f }, shotPower{ power } {
-        Reset();
-    }
-
-    Cannon::Cannon(AEVec2 _pos, AEGfxTexture* _texture, int _projectileAmount, AEVec2 _size)
+    Cannon::Cannon() : ammoLimit {10} { Reset(); }
+    Cannon::Cannon(AEVec2 _pos, AEGfxTexture* _texture, int _ammoLimit, AEVec2 _size)
         : GameObject(_pos, _size, _texture, Color{ 1,1,1,1 }),
-        ammoLimit{ _projectileAmount }, cannonAngle{ 0.0f }, shotPower{ power } {
+        ammoLimit{ _ammoLimit }, cannonAngle{ 0.0f }, shotPower{ power } {
         Reset();
     }
 
@@ -41,6 +47,7 @@ namespace CannonManager {
     }
 
     void Cannon::Reset() {
+        // Reset to default
         ammo.clear();
         ammo.resize(ammoLimit);
         // Initalize all the projectile variables
@@ -48,7 +55,7 @@ namespace CannonManager {
             projectile = { {0,0}, AssetsManager::circleTexture, {0,0} };
             projectile.size = { 10,10 };
         }
-        activeAmmo.clear();
+        activeAmmo.clear(); // ensure that there should not be any active ammo when cannon is reset
         ammoCount = 0;
     }
 
@@ -67,22 +74,28 @@ namespace CannonManager {
 
         // Debugger
         if (Utils::isDebuggerOn) {
-            //float mX = 0, mY = 0;
-            //Utils::GetWorldMousePos(mX, mY);
-            //float cX = pos.x, cY = pos.y;
-            //Utils::GetWorldPos(cX, cY);
-            //s32 mouseX, mouseY;
-            //AEInputGetCursorPosition(&mouseX, &mouseY);
-            //
-            //TextObject txtObj{ "", Utils::debuggerInfo.first, Utils::debuggerInfo.second, {0.5f, 0.99f} };
-            //txtObj.textContent = "Cannon\nPos X: " + Utils::FormatFloat(pos.x, 2) + " Y: " + Utils::FormatFloat(pos.y, 2)
-            //    + "\nAngle: " + Utils::FormatFloat(cannonAngle * (180.0f / 3.14159265359), 2);
-            //if (activeAmmo.size() > 0) {
-            //    txtObj.textContent += "\nProjectile:\nVelocity x: " + Utils::FormatFloat(activeAmmo.back().velocity.x, 2)
-            //        + " y: " + Utils::FormatFloat(activeAmmo.back().velocity.y, 2);
-            //}
-            //
-            //GraphicsManager::DrawTextUI(txtObj);
+            float mX = 0, mY = 0;
+            Utils::GetWorldMousePos(mX, mY);
+            float cX = pos.x, cY = pos.y;
+            Utils::GetWorldPos(cX, cY);
+            s32 mouseX, mouseY;
+            AEInputGetCursorPosition(&mouseX, &mouseY);
+            
+            TextObject txtObj{ "", Utils::debuggerInfo.first, Utils::debuggerInfo.second, {0.5f, 0.99f} };
+            txtObj.textContent = "Cannon\nPos X: " + Utils::FormatFloat(pos.x, 2) + " Y: " + Utils::FormatFloat(pos.y, 2)
+                + "\nAngle: " + Utils::FormatFloat(cannonAngle * (180.0f / 3.14159265359), 2);
+            if (activeAmmo.size() > 0) {
+                Projectile& projectile = activeAmmo.back();
+                txtObj.textContent += "\nActive Projectile:\nSize: x: "
+                    + Utils::FormatFloat(projectile.size.x, 2) + " y: " + Utils::FormatFloat(projectile.size.y, 2)
+                    +"\nVelocity x : " + Utils::FormatFloat(activeAmmo.back().velocity.x, 2)
+                    + " y: " + Utils::FormatFloat(projectile.velocity.y, 2)
+                    + "\nGrounded: " + std::string(projectile.isGrounded ? "true" : "false")
+                    + "\nTo Be Destroyed: " + std::string(projectile.toBeDestroyed ? "true" : "false")
+                    + "\nTimer: " + Utils::FormatFloat(projectile.timer,2);
+            }
+            
+            GraphicsManager::DrawTextUI(txtObj);
         }
         Render();
     }
@@ -147,7 +160,7 @@ namespace CannonManager {
 
     void Cannon::UpdateProjectile() {
         for (Projectile& projectile : activeAmmo) {
-            if (!projectile.isActive == true) continue;
+            if (!projectile.isActive) continue;
 
             float dt = GameStateManager::dt;
             // Increased the frequency of the collision check by using loops
@@ -157,24 +170,20 @@ namespace CannonManager {
             const int SUB_STEPS = 10;
             float subDt = dt / SUB_STEPS;
 
-            bool hasDealDamage = false;
-
             for (int step = 0; step < SUB_STEPS; ++step) {
-                projectile.isGrounded = false;
+                // Set movement first
+                projectile.MoveProjectile(subDt);
 
-                //projectile.MoveProjectile();
-                projectile.pos.x += projectile.velocity.x * subDt;
-                projectile.pos.y += projectile.velocity.y * subDt;
+                bool wasGrounded = projectile.isGrounded;
+                projectile.isGrounded = false;
 
                 // Check for collision in a 3x3 area with the projectile
                 int gridX = static_cast<int>((projectile.pos.x + Config::WORLD_MAX_X) / Config::TILE_SIZE);
                 int gridY = static_cast<int>((Config::WORLD_MAX_Y - projectile.pos.y) / Config::TILE_SIZE);
 
-                bool collisionFoundInStep = false; // to prevent GHOSTING of blocks bug
-
                 int maxY = gridY + 1, maxX = gridX + 1;
-                for (int y = gridY - 1; y <= maxY && !collisionFoundInStep; ++y) {
-                    for (int x = gridX - 1; x <= maxX && !collisionFoundInStep; ++x) {
+                for (int y = gridY - 1; y <= maxY; ++y) {
+                    for (int x = gridX - 1; x <= maxX; ++x) {
                         if (x >= 0 && x < Config::GRID_WIDTH && y >= 0 && y < Config::GRID_HEIGHT) {
                             MapManager::Tile& tile = (*MapManager::currentMap)[y][x];
 
@@ -194,7 +203,8 @@ namespace CannonManager {
                                     float overlapX = (radius + tile.size.x / 2.0f) - std::abs(projectile.pos.x - tile.pos.x);
                                     float overlapY = (radius + tile.size.y / 2.0f) - std::abs(projectile.pos.y - tile.pos.y);
 
-                                    if (overlapX < overlapY) {
+                                    float bias = 0.1f;
+                                    if (overlapX < (overlapY + bias)) {
                                         float bounce = -0.3f;
                                         // Resolve X (Wall) - Hit a side wall
                                         if (projectile.pos.x < tile.pos.x) {
@@ -204,6 +214,13 @@ namespace CannonManager {
                                         else {
                                             projectile.pos.x = tileRight + radius + 0.1f; // Nudge out
                                             if (projectile.velocity.x < 0) projectile.velocity.x *= bounce;
+                                        }
+
+                                        // Ensure that projectile stays grounded when it hit the side of the wall 
+                                        // if it is already grounded
+                                        if (wasGrounded) {
+                                            projectile.isGrounded = true;
+                                            projectile.velocity.y = 0;
                                         }
                                     }
                                     else {
@@ -220,12 +237,10 @@ namespace CannonManager {
                                         }
                                     }
                                     projectile.collisionDetected = true;
-                                    collisionFoundInStep = true;
 
                                     // Only deal damage once
-                                    if (tile.IsBlocks() && !hasDealDamage && projectile.mode == ATTACK) {
+                                    if (tile.IsBlocks() && projectile.mode == ATTACK) {
                                         tile.Damage(damage);
-                                        hasDealDamage = true;
                                         projectile.mode = IDLE;
                                     }
                                 }
@@ -234,19 +249,34 @@ namespace CannonManager {
                     }
                 }
 
-                if (projectile.isGrounded) {
-                    projectile.velocity.x *= pow(Config::FRICTION, subDt);
-                    if (std::abs(projectile.velocity.x) < 0.1f) projectile.velocity.x = 0;
-                    projectile.velocity.y = 0;
-                }
-                else {
-                    projectile.velocity.y -= Config::GRAVITY * subDt;
-                }
+                // SECONDARY CHECK IF THE PROJECTILE IS GROUNDED OR NOT
+                if (!projectile.isGrounded) {
+                    float radius = projectile.size.x / 2.0f;
 
-                // If the velocity is tiny, the projectiile should just stop
-                //float threshold = 5.0f;
-                //if (std::abs(projectile.velocity.x) < threshold) projectile.velocity.x = 0;
-                //if (std::abs(projectile.velocity.y) < threshold) projectile.velocity.y = 0;
+                    for (int y = gridY - 1; y <= maxY; ++y) {
+                        for (int x = gridX - 1; x <= maxX; ++x) {
+                            if (x >= 0 && x < Config::GRID_WIDTH && y >= 0 && y < Config::GRID_HEIGHT) {
+                                MapManager::Tile& tile = (*MapManager::currentMap)[y][x];
+
+                                if (tile.IsBlocks() || tile.IsGround()) {
+                                    float tileTop = tile.pos.y + (tile.size.y / 2.0f);
+                                    float tileLeft = tile.pos.x - (tile.size.x / 2.0f);
+                                    float tileRight = tile.pos.x + (tile.size.x / 2.0f);
+
+                                    // Check if projectile is resting on top of this tile
+                                    if (projectile.pos.x >= tileLeft - radius &&
+                                        projectile.pos.x <= tileRight + radius &&
+                                        std::abs(projectile.pos.y - (tileTop + radius)) < 0.3f) {
+                                        projectile.isGrounded = true;
+                                        projectile.velocity.y = 0;
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                        if (projectile.isGrounded) break;
+                    }
+                }
             }
 
             DestroyProjectile(projectile);
@@ -255,18 +285,16 @@ namespace CannonManager {
     }
 
     void Cannon::DestroyProjectile(Projectile& projectile) {
-        //float speedSq = (projectile.velocity.x * projectile.velocity.x) +
-        //    (projectile.velocity.y * projectile.velocity.y);
+        float speedSq = (projectile.velocity.x * projectile.velocity.x) + (projectile.velocity.y * projectile.velocity.y);
 
-        // Start timer if it going to be destroy
-        if (projectile.collisionDetected && projectile.toBeDestroyed == false) {
-            projectile.timer = 3.0f;
+        // Start timer if it going to be destroy and projectile stops moving
+        if (projectile.collisionDetected && projectile.toBeDestroyed == false && speedSq <= 0.1f) {
+            projectile.timer = projectileLifespan;
             projectile.toBeDestroyed = true;
         }
 
         if (projectile.toBeDestroyed) {
             projectile.timer -= 1.0f * GameStateManager::dt;
-            std::cout << projectile.timer << std::endl;
         }
 
         // Destroy projectile and erase it from vector if the timer runs out or out of bounds

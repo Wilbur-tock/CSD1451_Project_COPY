@@ -23,27 +23,27 @@ namespace CannonManager {
 	private:
 		AEVec2 defaultSize{ 10,10 };
 		float gravity = 1500;
-
+		int attackCharges = 1;
 	public:
 		float timer = 0.0f;
-		int numOfAttacks = 1;
 		AEVec2 velocity; // Vector rate of change
 		bool isActive = false, collisionDetected = false, isGrounded = false, toBeDestroyed = false;
 		ProjectileMode mode = IDLE;
 
-		Projectile(); // Default intializer
+		Projectile();
 		Projectile(AEVec2 _pos, AEGfxTexture* _texture, AEVec2 _velocity);
 
 		void Render();
-		void MoveProjectile();
+		void MoveProjectile(float dt);
+		void ConsumeAttackCharge();
 		void Destroy();
 	};
 
 	class Cannon : public GameObject {
 	private:
-		int ammoCount = 0, ammoLimit;
-		float cannonAngle; // Angle of the cannon for the projectile to shoot from
-		float projectileLifespan = 4, defaultDamage{ 10.0f }, minDamage{ 0.0f },maxDamage{ 100.0f };
+		int ammoCount = 0, ammoLimit = 10;
+		float cannonAngle = 0.0f; // Angle of the cannon for the projectile to shoot from
+		float projectileLifespan = 3.0f, defaultDamage{ 10.0f }, minDamage{ 0.0f },maxDamage{ 100.0f };
 		float damage = defaultDamage; // Damage of the projectile shot from the cannon
 		AEVec2 defaultSize{ 30,10 };
 
@@ -55,18 +55,16 @@ namespace CannonManager {
 	public:
 		std::vector<Projectile> ammo, activeAmmo;
 
-		// Intializer
-
+		// Constructors
 		Cannon();
-		Cannon(AEVec2 _pos, AEGfxTexture* _texture, int _projectileAmount);
-		Cannon(AEVec2 _pos, AEGfxTexture* _texture, int _projectileAmount, AEVec2 _size);
+		Cannon(AEVec2 _pos, AEGfxTexture* _texture, int _ammoLimit, AEVec2 _size = {30,10});
 
 		// Getters & Setters
 		
 		float GetDamage() const;
 		void SetDamage(float _damage);
 
-		// Reset values of the cannon to be 0
+		// Reset values of the cannon ammo vectors to be in its default state
 		void Reset();
 		// Calculate the angle of the cannon based on the mouse position, render the cannon sprite
 		// Calculate the charge shot power and update any shot projectiles

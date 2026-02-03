@@ -1,8 +1,6 @@
 #ifndef CONFIG_HPP
 #define CONFIG_HPP
 
-#include "pch.hpp"
-
 namespace Config {
 	constexpr int SCREEN_WIDTH = 1600, SCREEN_HEIGHT = 900, TILE_SIZE = 32;
 	// World map
@@ -19,9 +17,7 @@ namespace Config {
 	constexpr float FONT_SCALE = 1.0f;
 
 	// PHYSICS
-	constexpr float GRAVITY = 1500.0f, FRICTION = 0.8f;
+	constexpr float GRAVITY = 1500.0f, FRICTION = 0.25f;
 }
-
-#define KEY_SAVEFILE AEVK_ESCAPE
 
 #endif // !CONFIG_HPP
