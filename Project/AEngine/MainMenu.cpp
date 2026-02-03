@@ -20,9 +20,9 @@ namespace MainMenu {
     void Load() {
         // Load any textures or assets needed for the menu
         // This runs once when the game starts
-        buttonTexture = AssetsManager::GetTexture("Assets/square.png");
-        bgTexture = AssetsManager::GetTexture("Assets/Harambe.png");
-        bgTexture = nullptr;
+        buttonTexture = AssetsManager::GetTexture("Assets/buttonTexture.png");
+        bgTexture = AssetsManager::GetTexture("Assets/cloudBgFp.png");
+        /*bgTexture = nullptr;*/
     }
 
     void Initialize() {
@@ -45,7 +45,7 @@ namespace MainMenu {
             Utils::RECT_CENTER,
             playPos,
             { btnWidth, btnHeight },
-            Color(0.2f, 0.6f, 0.9f, 0.8f),  // Blue color
+            Color(0.2f, 0.6f, 0.9f, 1.0f),  // Blue color
             buttonTexture,
             OnPlayClicked
         );
@@ -57,7 +57,7 @@ namespace MainMenu {
             Utils::RECT_CENTER,
             editorPos,
             { btnWidth, btnHeight },
-            Color(0.3f, 0.7f, 0.3f, 0.8f),  // Green color
+            Color(0.3f, 0.7f, 0.3f, 1.0f),  // Green color
             buttonTexture,
             OnMapEditorClicked
         );
@@ -69,7 +69,7 @@ namespace MainMenu {
             Utils::RECT_CENTER,
             creditsPos,
             { btnWidth, btnHeight },
-            Color(0.7f, 0.5f, 0.9f, 0.8f),  // Purple color
+            Color(0.7f, 0.5f, 0.9f, 1.0f),  // Purple color
             buttonTexture,
             OnCreditsClicked
         );
@@ -81,7 +81,7 @@ namespace MainMenu {
             Utils::RECT_CENTER,
             quitPos,
             { btnWidth, btnHeight },
-            Color(0.8f, 0.2f, 0.2f, 0.8f),  // Red color
+            Color(0.8f, 0.2f, 0.2f, 1.0f),  // Red color
             buttonTexture,
             OnQuitClicked
         );

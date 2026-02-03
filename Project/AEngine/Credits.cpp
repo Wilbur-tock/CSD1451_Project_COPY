@@ -26,22 +26,22 @@ namespace Credits {
         creditsText = { 
             "GAME CREDITS\n\n"
             "=== Basement Dwellers ===\n\n"
-            "Programming\n"
+            "Tech Lead\n"
             "Dayrius Goh\n\n"
-            "Game Design\n"
+            "Project Manager\n"
             "Justin Wong\n\n"
-            "Sound & Music\n"
+            "Audio Lead\n"
             "Bryan Lim\n\n"
-            "Level Design\n"
+            "Data Lead\n"
             "Wilbur Tock\n\n"
-            "UI Design\n"
+            "UI/UX Lead\n"
             "Ken Nixon\n\n\n"
 
-            //"Made with assets made by {Fill In The Blank}\n\n\n"
+            "Made with assets made by Kenney (www.kenney.nl)\n\n\n"
 
-            "Created by \n"
-            "DigiPen Institute of Technology Singapore\n"
-            "for the Alpha Engine\n\n"
+            //"Created by \n"
+            //"DigiPen Institute of Technology Singapore\n"
+            //"for the Alpha Engine\n\n"
 
             "=== Special Thanks ===\n\n"
 
@@ -52,7 +52,7 @@ namespace Credits {
             "Claude Comair\n\n"
 
             "Executives: \n"
-            "Claude Comair, CHU Jason Yeu Tat, Michael GATS, TAN Chek Ming, \n "
+            "Claude Comair, CHU Jason Yeu Tat, \n Michael GATS, TAN Chek Ming, \n "
             "Prasanna Kumar GHALI, Mandy WONG, Johnny DEEK\n\n"
 
             "All our playtesters\n"
@@ -61,7 +61,7 @@ namespace Credits {
             "=== Tools & Libraries ===\n\n"
 
             "Alpha Engine\n"
-            "FMOD Audio Library\n"
+            "Created/distributed by Kenney (www.kenney.nl)\n"
             "Liberation Mono Font\n\n\n"
 
             "Thank you for playing!\n\n"
@@ -69,10 +69,10 @@ namespace Credits {
             "WWW.DIGIPEN.EDU\n"
             "All content @2025 DigiPen Institute of Technology Singapore.\nAll Rights Reserved\n\n"
 
-            "Press ESC or BACKSPACE to return to menu",
+            "Press M to return to menu",
         };
 
-        hintText = { "ESC - Return to Menu  |  SPACE - Skip",
+        hintText = { "M - Return to Menu  |  SPACE - Skip",
             0.7f,
             Color(0.6f, 0.6f, 0.6f, 1.0f),
             { -0.98f, -0.93f },
@@ -124,7 +124,7 @@ namespace Credits {
         }
 
         // Draw credits text with scroll offset
-        creditsText.pos = { -0.1f, scrollOffset };
+        creditsText.pos = { -0.3f, scrollOffset };
         GraphicsManager::DrawTextUI(creditsText);
 
         // Draw hint at bottom
