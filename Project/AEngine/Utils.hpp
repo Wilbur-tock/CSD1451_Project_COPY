@@ -26,7 +26,10 @@ namespace Utils {
 	void GetWorldPos(float& x, float& y);
 	void ToNormalize(float& x, float& y);
 	// Get the grid index based on mouse position
-	void GetGridIndex(int& x, int& y);
+	void GetMouseGridIndex(int& x, int& y);
+	void GetGridIndex(int& x, int& y, AEVec2 const worldPos);
+	// Return true if it is out of bounds
+	bool IsGridIndexOutOfBounds(int x, int y);
 
 	std::string FormatFloat(double value, int precision);
 	// Set limit to ensure that the value does not go under minimum or over maximum

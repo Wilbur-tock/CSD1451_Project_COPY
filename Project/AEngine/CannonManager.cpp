@@ -5,6 +5,11 @@ namespace CannonManager {
     Projectile::Projectile(AEVec2 _pos, AEGfxTexture* _texture, AEVec2 _velocity) 
         : GameObject(_pos, defaultSize, _texture), timer{ 0.0f }, velocity(_velocity) {}
 
+    int  Projectile::GetAttackCharges() const { return attackCharges; }
+    void Projectile::SetAttackCharges(int value) { attackCharges = std::clamp(value, 0, 100); }
+    ProjectileMode Projectile::GetMode() const { return mode; }
+    void Projectile::SetMode(ProjectileMode newMode) { mode = newMode; }
+
     void Projectile::Render() {
         AEMtx33 mat = GraphicsManager::CreateTransformMatrix(pos.x, pos.y, 0, size.x, size.y);
         GraphicsManager::DrawGameObject(AssetsManager::circleTexture, mat, Color{ 0.5f, 0.5f, 0, 1 });
@@ -14,7 +19,7 @@ namespace CannonManager {
         if (isGrounded) {
             velocity.x *= pow(Config::FRICTION, dt);
             velocity.y = 0; // ensure that the projectile stay on the ground
-            if (std::abs(velocity.x) < 1.0f) velocity.x = 0;
+            if (std::abs(velocity.x) < Config::MINIMUM_VELOCITY) velocity.x = 0;
         }
         else {
             velocity.y -= Config::GRAVITY * dt;
@@ -25,7 +30,10 @@ namespace CannonManager {
     }
 
     void Projectile::ConsumeAttackCharge() {
-
+        if (--attackCharges <= 0) {
+            attackCharges = 0;
+            mode = IDLE;
+        }
     }
 
     void Projectile::Destroy() {
@@ -41,10 +49,7 @@ namespace CannonManager {
     }
 
     float Cannon::GetDamage() const { return damage; }
-    void Cannon::SetDamage(float _damage) { 
-        damage = _damage;
-        Utils::Limit(damage, minDamage, maxDamage); 
-    }
+    void Cannon::SetDamage(float _damage) { damage = std::clamp(_damage, minDamage, maxDamage); }
 
     void Cannon::Reset() {
         // Reset to default
@@ -81,18 +86,19 @@ namespace CannonManager {
             s32 mouseX, mouseY;
             AEInputGetCursorPosition(&mouseX, &mouseY);
             
-            TextObject txtObj{ "", Utils::debuggerInfo.first, Utils::debuggerInfo.second, {0.5f, 0.99f} };
+            TextObject txtObj{ "", Utils::debuggerInfo.first * 0.8f, Utils::debuggerInfo.second, {0.5f, 0.99f} };
             txtObj.textContent = "Cannon\nPos X: " + Utils::FormatFloat(pos.x, 2) + " Y: " + Utils::FormatFloat(pos.y, 2)
-                + "\nAngle: " + Utils::FormatFloat(cannonAngle * (180.0f / 3.14159265359), 2);
+                + "\nAngle: " + Utils::FormatFloat(cannonAngle * (180.0f / 3.14159265359), 2)
+                + "\nDamage: " + Utils::FormatFloat(damage,2);
             if (activeAmmo.size() > 0) {
                 Projectile& projectile = activeAmmo.back();
                 txtObj.textContent += "\nActive Projectile:\nSize: x: "
                     + Utils::FormatFloat(projectile.size.x, 2) + " y: " + Utils::FormatFloat(projectile.size.y, 2)
-                    +"\nVelocity x : " + Utils::FormatFloat(activeAmmo.back().velocity.x, 2)
-                    + " y: " + Utils::FormatFloat(projectile.velocity.y, 2)
+                    +"\nVelocity x : " + Utils::FormatFloat(activeAmmo.back().velocity.x, 2) + " y: " + Utils::FormatFloat(projectile.velocity.y, 2)
                     + "\nGrounded: " + std::string(projectile.isGrounded ? "true" : "false")
                     + "\nTo Be Destroyed: " + std::string(projectile.toBeDestroyed ? "true" : "false")
-                    + "\nTimer: " + Utils::FormatFloat(projectile.timer,2);
+                    + "\nTimer: " + Utils::FormatFloat(projectile.timer,2)
+                    + "\nAttack Charges: " + std::to_string(projectile.GetAttackCharges());
             }
             
             GraphicsManager::DrawTextUI(txtObj);
@@ -135,7 +141,7 @@ namespace CannonManager {
         // Assign values to an projectile
         ammo[ammoCount].isActive = true;
         ammo[ammoCount].id = ammoCount;
-        ammo[ammoCount].mode = ATTACK;
+        ammo[ammoCount].SetMode(ATTACK);
 
         // Add offset to ensure that the projectile spawn at the barrel instead of the middle of the cannon
         ammo[ammoCount].pos.x = pos.x + cos(cannonAngle) * size.x;
@@ -173,104 +179,119 @@ namespace CannonManager {
             for (int step = 0; step < SUB_STEPS; ++step) {
                 // Set movement first
                 projectile.MoveProjectile(subDt);
-
-                bool wasGrounded = projectile.isGrounded;
                 projectile.isGrounded = false;
 
                 // Check for collision in a 3x3 area with the projectile
-                int gridX = static_cast<int>((projectile.pos.x + Config::WORLD_MAX_X) / Config::TILE_SIZE);
-                int gridY = static_cast<int>((Config::WORLD_MAX_Y - projectile.pos.y) / Config::TILE_SIZE);
+                int gridX = 0, gridY = 0;
+                Utils::GetGridIndex(gridX, gridY, projectile.pos);
 
-                int maxY = gridY + 1, maxX = gridX + 1;
-                for (int y = gridY - 1; y <= maxY; ++y) {
-                    for (int x = gridX - 1; x <= maxX; ++x) {
-                        if (x >= 0 && x < Config::GRID_WIDTH && y >= 0 && y < Config::GRID_HEIGHT) {
-                            MapManager::Tile& tile = (*MapManager::currentMap)[y][x];
+                float radius = projectile.size.x / 2.0f;
+                int minX = gridX - 1, minY = gridY - 1, maxX = gridX + 1, maxY = gridY + 1;
+                for (int y = minY; y <= maxY; ++y) {
+                    for (int x = minX; x <= maxX; ++x) {
+                        if (Utils::IsGridIndexOutOfBounds(x, y)) continue;
 
-                            if (tile.IsBlocks() || tile.IsGround()) {
-                                float radius = projectile.size.x / 2.0f;
+                        MapManager::Tile& tile = (*MapManager::currentMap)[y][x];
 
-                                if (CollisionManager::AreCircleSquareIntersecting(
-                                    tile.pos.x, tile.pos.y, tile.size.x, tile.size.y,
-                                    projectile.pos.x, projectile.pos.y, radius))
-                                {
-                                    // Bounds
-                                    float tileTop = tile.pos.y + (tile.size.y / 2.0f);
-                                    float tileBottom = tile.pos.y - (tile.size.y / 2.0f);
-                                    float tileLeft = tile.pos.x - (tile.size.x / 2.0f);
-                                    float tileRight = tile.pos.x + (tile.size.x / 2.0f);
+                        if (tile.IsBlocks() || tile.IsGround()) {
+                            if (CollisionManager::AreCircleSquareIntersecting(
+                                tile.pos.x, tile.pos.y, tile.size.x, tile.size.y,
+                                projectile.pos.x, projectile.pos.y, radius))
+                            {
+                                // Bounds
+                                float tileTop = tile.pos.y + (tile.size.y / 2.0f);
+                                float tileBottom = tile.pos.y - (tile.size.y / 2.0f);
+                                float tileLeft = tile.pos.x - (tile.size.x / 2.0f);
+                                float tileRight = tile.pos.x + (tile.size.x / 2.0f);
 
-                                    float overlapX = (radius + tile.size.x / 2.0f) - std::abs(projectile.pos.x - tile.pos.x);
-                                    float overlapY = (radius + tile.size.y / 2.0f) - std::abs(projectile.pos.y - tile.pos.y);
+                                float overlapX = (radius + tile.size.x / 2.0f) - std::abs(projectile.pos.x - tile.pos.x);
+                                float overlapY = (radius + tile.size.y / 2.0f) - std::abs(projectile.pos.y - tile.pos.y);
 
-                                    float bias = 0.1f;
-                                    if (overlapX < (overlapY + bias)) {
-                                        float bounce = -0.3f;
-                                        // Resolve X (Wall) - Hit a side wall
-                                        if (projectile.pos.x < tile.pos.x) {
-                                            projectile.pos.x = tileLeft - radius - 0.1f; // Nudge out
-                                            if (projectile.velocity.x > 0) projectile.velocity.x *= bounce;
-                                        }
-                                        else {
-                                            projectile.pos.x = tileRight + radius + 0.1f; // Nudge out
-                                            if (projectile.velocity.x < 0) projectile.velocity.x *= bounce;
-                                        }
-
-                                        // Ensure that projectile stays grounded when it hit the side of the wall 
-                                        // if it is already grounded
-                                        if (wasGrounded) {
-                                            projectile.isGrounded = true;
-                                            projectile.velocity.y = 0;
-                                        }
+                                float bias = 0.1f;
+                                if (overlapX < (overlapY + bias)) {
+                                    float bounce = -0.3f;
+                                    // Resolve X (Wall) - Hit a side wall
+                                    if (projectile.pos.x < tile.pos.x) {
+                                        projectile.pos.x = tileLeft - radius - 0.1f; // Nudge out
+                                        if (projectile.velocity.x > 0) projectile.velocity.x *= bounce;
                                     }
                                     else {
-                                        // Resolve Y (Floor/Ceiling) - Hit the top or bottom of the block
-                                        if (projectile.pos.y > tile.pos.y) { // Ensure the projectile is flush to the tile
-                                            projectile.pos.y = tileTop + radius;
-                                            projectile.isGrounded = true;
-                                            projectile.velocity.y *= -0.2f;
-                                            if (std::abs(projectile.velocity.y) < 0.5f) projectile.velocity.y = 0;
-                                        }
-                                        else { // If it hits the celling fall down
-                                            projectile.pos.y = tileBottom - radius;
-                                            projectile.velocity.y *= -0.5f;
-                                        }
-                                    }
-                                    projectile.collisionDetected = true;
-
-                                    // Only deal damage once
-                                    if (tile.IsBlocks() && projectile.mode == ATTACK) {
-                                        tile.Damage(damage);
-                                        projectile.mode = IDLE;
+                                        projectile.pos.x = tileRight + radius + 0.1f; // Nudge out
+                                        if (projectile.velocity.x < 0) projectile.velocity.x *= bounce;
                                     }
                                 }
+                                else {
+                                    // Resolve Y (Floor/Ceiling) - Hit the top or bottom of the block
+                                    if (projectile.pos.y > tile.pos.y) {
+                                        projectile.pos.y = tileTop + radius; // Flush to the tile
+                                        projectile.isGrounded = true;
+                                        projectile.velocity.y *= -0.2f; // Lose 80% of its velocity
+                                        if (std::abs(projectile.velocity.y) < Config::MINIMUM_VELOCITY) projectile.velocity.y = 0; // prevent tiny velocity
+                                    }
+                                    else { // If it hits the celling fall down
+                                        projectile.pos.y = tileBottom - radius;
+                                        projectile.velocity.y *= -0.5f; // Lost 50% of its velocity
+                                    }
+                                }
+                                projectile.collisionDetected = true;
+
+                                // Damaged tiles one collision is detected
+                                if (projectile.collisionDetected && projectile.GetMode() == ATTACK) {
+                                    int minDX = x, minDY = y, maxDX = x, maxDY = y;
+                                    // Increased damage radius
+                                    if (damageTileRadiusMultipler > 1) {
+                                        int addRadius = damageTileRadiusMultipler - 1;
+                                        minDX -= addRadius;
+                                        minDY -= addRadius;
+                                        maxDX += addRadius;
+                                        maxDY += addRadius;
+                                    }
+
+                                    for (int dY = minDY; dY <= maxDY; ++dY) {
+                                        for (int dX = minDX; dX <= maxDX; ++dX) {
+                                            if (Utils::IsGridIndexOutOfBounds(dX, dY)) continue;
+
+                                            MapManager::Tile& tileToDamage = (*MapManager::currentMap)[dY][dX];
+                                            // Only damage blocks type
+                                            if (!tileToDamage.IsBlocks()) continue;
+
+                                            tileToDamage.Damage(damage);
+
+                                            std::cout << "Damage Tile: " << MapManager::TileTypeToString(tile.type)
+                                                << " x: " << tile.gridId.x << " y: " << tile.gridId.y
+                                                << " " << tile.GetHealth() << std::endl;
+                                        }
+                                    }
+
+                                    projectile.ConsumeAttackCharge();
+                                }
                             }
+
                         }
                     }
                 }
 
                 // SECONDARY CHECK IF THE PROJECTILE IS GROUNDED OR NOT
                 if (!projectile.isGrounded) {
-                    float radius = projectile.size.x / 2.0f;
+                    // Only need to check 2x3 for additonal checks
+                    for (int y = gridY; y <= maxY; ++y) {
+                        for (int x = minX; x <= maxX; ++x) {
+                            if (Utils::IsGridIndexOutOfBounds(x, y)) continue;
 
-                    for (int y = gridY - 1; y <= maxY; ++y) {
-                        for (int x = gridX - 1; x <= maxX; ++x) {
-                            if (x >= 0 && x < Config::GRID_WIDTH && y >= 0 && y < Config::GRID_HEIGHT) {
-                                MapManager::Tile& tile = (*MapManager::currentMap)[y][x];
+                            MapManager::Tile& tile = (*MapManager::currentMap)[y][x];
 
-                                if (tile.IsBlocks() || tile.IsGround()) {
-                                    float tileTop = tile.pos.y + (tile.size.y / 2.0f);
-                                    float tileLeft = tile.pos.x - (tile.size.x / 2.0f);
-                                    float tileRight = tile.pos.x + (tile.size.x / 2.0f);
+                            if (tile.IsBlocks() || tile.IsGround()) {
+                                float tileTop = tile.pos.y + (tile.size.y / 2.0f);
+                                float tileLeft = tile.pos.x - (tile.size.x / 2.0f);
+                                float tileRight = tile.pos.x + (tile.size.x / 2.0f);
 
-                                    // Check if projectile is resting on top of this tile
-                                    if (projectile.pos.x >= tileLeft - radius &&
-                                        projectile.pos.x <= tileRight + radius &&
-                                        std::abs(projectile.pos.y - (tileTop + radius)) < 0.3f) {
-                                        projectile.isGrounded = true;
-                                        projectile.velocity.y = 0;
-                                        break;
-                                    }
+                                // Check if projectile is resting on top of this tile
+                                if (projectile.pos.x >= tileLeft - radius &&
+                                    projectile.pos.x <= tileRight + radius &&
+                                    std::abs(projectile.pos.y - (tileTop + radius)) < 0.3f) {
+                                    projectile.isGrounded = true;
+                                    projectile.velocity.y = 0;
+                                    break;
                                 }
                             }
                         }

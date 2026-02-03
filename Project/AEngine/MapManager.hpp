@@ -30,7 +30,7 @@ namespace MapManager {
 		float maxHealth{ 100.0f }, minHealth{ 0.0f }, health{ 100.0f };
 	public:
 		TileType type = TILE_EMPTY;
-		AEVec2 id{0,0}; // Grid index x and y
+		AEVec2 gridId{0,0}; // Grid index x and y
 
 		Tile() = default;
 		Tile(AEVec2 _pos, AEGfxTexture* _texture, TileType _type);

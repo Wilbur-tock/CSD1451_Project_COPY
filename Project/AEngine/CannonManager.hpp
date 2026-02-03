@@ -22,16 +22,20 @@ namespace CannonManager {
 	class Projectile : public GameObject {
 	private:
 		AEVec2 defaultSize{ 10,10 };
-		float gravity = 1500;
 		int attackCharges = 1;
+		ProjectileMode mode = IDLE;
 	public:
 		float timer = 0.0f;
-		AEVec2 velocity; // Vector rate of change
+		AEVec2 velocity; // Vector rate of change of displacement (direction * speed)
 		bool isActive = false, collisionDetected = false, isGrounded = false, toBeDestroyed = false;
-		ProjectileMode mode = IDLE;
 
 		Projectile();
 		Projectile(AEVec2 _pos, AEGfxTexture* _texture, AEVec2 _velocity);
+
+		int GetAttackCharges() const;
+		void SetAttackCharges(int value);
+		ProjectileMode GetMode() const;
+		void SetMode(ProjectileMode newMode);
 
 		void Render();
 		void MoveProjectile(float dt);
@@ -44,7 +48,8 @@ namespace CannonManager {
 		int ammoCount = 0, ammoLimit = 10;
 		float cannonAngle = 0.0f; // Angle of the cannon for the projectile to shoot from
 		float projectileLifespan = 3.0f, defaultDamage{ 10.0f }, minDamage{ 0.0f },maxDamage{ 100.0f };
-		float damage = defaultDamage; // Damage of the projectile shot from the cannon
+		float damage = 100; // Damage of the projectile shot from the cannon
+		int damageTileRadiusMultipler = 2;
 		AEVec2 defaultSize{ 30,10 };
 
 		// Power charging system (how far the cannon shoots the projectile)

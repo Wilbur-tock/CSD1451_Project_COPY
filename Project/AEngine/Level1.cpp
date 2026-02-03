@@ -16,6 +16,7 @@ namespace Level1 {
 	void Init() {
 		AEGfxSetBackgroundColor(0.92f, 0.92f, 0.95f);
 		CameraManager::camera.SetPosition(levelData.cannon.pos);
+		CameraManager::camera.SetState(CameraManager::CameraController::INPUT);
 		levelData.Init();
 	}
 
@@ -33,7 +34,7 @@ namespace Level1 {
 			Utils::GetWorldMousePos(mX, mY);
 
 			int gridX = 0, gridY = 0;
-			Utils::GetGridIndex(gridX, gridY);
+			Utils::GetMouseGridIndex(gridX, gridY);
 
 			MapManager::Tile& tile = (*MapManager::currentMap)[gridY][gridX];
 

@@ -98,6 +98,10 @@ namespace MainMenu {
             Color(0.7f, 0.7f, 0.7f, 1.0f),
             { -0.98f, -0.9f },
         };
+
+        // Reset camera to orgin pos and can't move
+        CameraManager::camera.SetPosition({0, 0});
+        CameraManager::camera.SetState(CameraManager::CameraController::STATIC);
     }
 
     void Draw() {

@@ -138,44 +138,38 @@ namespace GameStateManager {
             gsUpdate();
         }
 
-        // Global controls (available in all states except main menu)
-        if (current != GS_MAIN_MENU) {
-            // Toggle debugger
-            if (AEInputCheckTriggered(AEVK_P)) {
-                Utils::isDebuggerOn = !Utils::isDebuggerOn;
-            }
-
-            // Return to main menu with ESC (except when already in main menu)
-            if (AEInputCheckTriggered(AEVK_M)) {
-                next = GS_MAIN_MENU;
-            }
-
-            // Debugger display
-            if (Utils::isDebuggerOn) {
-                f32 camX, camY;
-                AEGfxGetCamPosition(&camX, &camY);
-
-                debugText.textContent = "\n[P] Debugger ON\nFPS: " + Utils::FormatFloat(AEFrameRateControllerGetFrameRate(), 2)
-                    + "\nDeltaTime: " + Utils::FormatFloat(dt, 2)
-                    + "\nCamera Pos:\nX: " + Utils::FormatFloat(camX, 2) + " Y: " + Utils::FormatFloat(camY, 2)
-                    + "\n\nControls:\nP - Toggle Debugger\nM - Main Menu";
-
-                GraphicsManager::DrawTextUI(debugText);
-            }
-
-            // Update camera (handles movement, clamping, flooring, and setting position)
-            CameraManager::camera.Update(static_cast<float>(AEFrameRateControllerGetFrameTime()));
-        }
-        else {
-            // In main menu, reset camera to center
-            AEGfxSetCamPosition(0.0f, 0.0f);
+        // Toggle debugger
+        if (AEInputCheckTriggered(AEVK_P)) {
+            Utils::isDebuggerOn = !Utils::isDebuggerOn;
         }
 
+        // Return to main menu with ESC (except when already in main menu)
+        if (AEInputCheckTriggered(AEVK_M)) {
+            next = GS_MAIN_MENU;
+        }
+
+        // Reload assets
         if (AEInputCheckCurr(AEVK_LCTRL)) {
             if (AEInputCheckCurr(AEVK_R)) {
                 Load();
             }
         }
+
+        // Debugger display
+        if (Utils::isDebuggerOn) {
+            f32 camX, camY;
+            AEGfxGetCamPosition(&camX, &camY);
+
+            debugText.textContent = "\n[P] Debugger ON\nFPS: " + Utils::FormatFloat(AEFrameRateControllerGetFrameRate(), 2)
+                + "\nDeltaTime: " + Utils::FormatFloat(dt, 2)
+                + "\nCamera Pos:\nX: " + Utils::FormatFloat(camX, 2) + " Y: " + Utils::FormatFloat(camY, 2)
+                + "\n\nControls:\nP - Toggle Debugger\nM - Main Menu";
+
+            GraphicsManager::DrawTextUI(debugText);
+        }
+
+        // Update camera (handles movement, clamping, flooring, and setting position)
+        CameraManager::camera.Update(dt);
     }
 
     void Exit() {

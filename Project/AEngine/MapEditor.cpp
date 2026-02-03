@@ -102,6 +102,9 @@ namespace MapEditor {
 	void Init() {
 		helpText =  { "",  Utils::debuggerInfo.first, Utils::debuggerInfo.second,{-1.0f,.99f} };
 		debugText = { "",  Utils::debuggerInfo.first, Utils::debuggerInfo.second, { 0.5f, 0.99f} };
+
+		CameraManager::camera.SetPosition({ 0, 0 });
+		CameraManager::camera.SetState(CameraManager::CameraController::INPUT);
 	}
 
 	void MapEditor() {
@@ -113,7 +116,7 @@ namespace MapEditor {
 		AEGfxSetBackgroundColor(0.92f, 0.92f, 0.95f);
 
 		int gridX = 0, gridY = 0;
-		Utils::GetGridIndex(gridX, gridY);
+		Utils::GetMouseGridIndex(gridX, gridY);
 
 		// Check for input to draw the map editor
 		if (gridX >= 0 && gridX < Config::GRID_WIDTH && gridY >= 0 && gridY < Config::GRID_HEIGHT) {
@@ -182,13 +185,14 @@ namespace MapEditor {
 			GameStateManager::next = GameStateManager::GS_MAIN_MENU;
 		}
 
+		// Save file on both BIN folder and my project folder if debugger is on
 		if (AEInputCheckTriggered(AEVK_E)) {
-			// Save file on both BIN folder and my project folder if debugger is on
 			SaveNewFile(savePath);
 			if (Utils::isDebuggerOn) {
 				SaveNewFile(DebugFilePath(savePath));
 			}
 
+			GameStateManager::Load(); // Reload all the assets
 			isDrawingNewMap = true;
 		}
 

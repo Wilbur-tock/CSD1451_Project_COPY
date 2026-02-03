@@ -28,22 +28,30 @@ namespace Utils {
 		y += camY;
 	}
 
-	void GetGridIndex(int& x, int& y) {
+	void ToNormalize(float& x, float& y) {
+		x /= (Config::SCREEN_WIDTH / 2.0f);
+		y /= (Config::SCREEN_HEIGHT / 2.0f);
+	}
+
+	void GetMouseGridIndex(int& x, int& y) {
 		// Calculate Grid x and y index
 		float worldMouseX = 0, worldMouseY = 0;
 		Utils::GetWorldMousePos(worldMouseX, worldMouseY);
 
-		x = static_cast<int>((worldMouseX + Config::WORLD_MAX_X) / Config::TILE_SIZE);
-		y = static_cast<int>((Config::WORLD_MAX_Y - worldMouseY) / Config::TILE_SIZE);
+		GetGridIndex(x, y, { worldMouseX, worldMouseY });
 
 		// This is to ensure that the grid index does not go out of range
-		Utils::Limit(x, Config::MIN_GRID_X, Config::MAX_GRID_X);
-		Utils::Limit(y, Config::MIN_GRID_Y, Config::MAX_GRID_Y);
+		x = std::clamp(x, Config::MIN_GRID_X, Config::MAX_GRID_X);
+		y = std::clamp(y, Config::MIN_GRID_Y, Config::MAX_GRID_Y);
 	}
 
-	void ToNormalize(float& x, float& y) {
-		x /= (Config::SCREEN_WIDTH / 2.0f);
-		y /= (Config::SCREEN_HEIGHT / 2.0f);
+	void GetGridIndex(int& x, int& y, AEVec2 const worldPos) {
+		x = static_cast<int>((worldPos.x + Config::WORLD_MAX_X) / Config::TILE_SIZE);
+		y = static_cast<int>((Config::WORLD_MAX_Y - worldPos.y) / Config::TILE_SIZE);
+	}
+
+	bool IsGridIndexOutOfBounds(int x, int y) {
+		return x < 0 || x >= Config::GRID_WIDTH || y < 0 || y >= Config::GRID_HEIGHT;
 	}
 
 	std::string FormatFloat(double value, int precision) {

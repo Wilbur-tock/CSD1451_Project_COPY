@@ -14,7 +14,7 @@ namespace MapManager {
 	static const char* CANNON_BASE_PATH = "Assets/cannonBase.png"; //Cannon (for testing now, not actual sprite)
 
 	Tile::Tile(AEVec2 _pos, AEGfxTexture* _texture, TileType _type) 
-		: GameObject{ _pos, {defaultSize,defaultSize}, _texture, Color{1,1,1} }, type{ _type }, id{ 0,0 } {
+		: GameObject{ _pos, {defaultSize,defaultSize}, _texture, Color{1,1,1} }, type{ _type }, gridId{ 0,0 } {
 	}
 
 	void Tile::Damage(float damage) {
@@ -156,8 +156,8 @@ namespace MapManager {
 				tile.size = { Config::TILE_SIZE,Config::TILE_SIZE };
 				tile.texture = tileTexture;
 				tile.type = static_cast<TileType>(type);
-				tile.id.x = static_cast<f32>(x);
-				tile.id.y = static_cast<f32>(y);
+				tile.gridId.x = static_cast<f32>(x);
+				tile.gridId.y = static_cast<f32>(y);
 			}
 		}
 
