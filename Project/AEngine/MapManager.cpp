@@ -34,7 +34,7 @@ namespace MapManager {
 	bool Tile::IsGround() const {
 		return type >= TILE_BLOCK_GROUND_0 && type <= TILE_BLOCK_GROUND_2;
 	}
-	bool Tile::IsBlocks() {
+	bool Tile::IsBlocks() const {
 		return type == TILE_BLOCK_1
 			|| type == TILE_BLOCK_2
 			|| type == TILE_BLOCK_1_TOP
@@ -168,10 +168,8 @@ namespace MapManager {
 				tile.size = { Config::TILE_SIZE,Config::TILE_SIZE };
 				tile.texture = tileTexture;
 				tile.type = static_cast<TileType>(type);
-				tile.id.x = static_cast<f32>(x);
-				tile.id.y = static_cast<f32>(y);
-				tile.isDestroyable = (tile.type == TILE_BLOCK_1 || tile.type == TILE_BLOCK_2
-					|| tile.type == TILE_BLOCK_1_TOP || tile.type == TILE_BLOCK_2_TOP);
+				tile.gridId.x = static_cast<f32>(x);
+				tile.gridId.y = static_cast<f32>(y);
 			}
 		}
 
