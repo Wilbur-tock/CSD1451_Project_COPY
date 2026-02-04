@@ -28,6 +28,9 @@ namespace GameStateManager {
 	void Update();
 
 	void Exit();
+
+	// Render loading screen during state transitions
+	void RenderLoadingScreen();
 }
 
 #endif //

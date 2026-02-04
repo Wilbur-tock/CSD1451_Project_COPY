@@ -88,14 +88,14 @@ namespace MainMenu {
 
         gameTitle = { "FORTRESS FIGHT",
             2.5f,
-            Color(1.0f, 1.0f, 1.0f, 1.0f),  // White color
+            Color(0.0f, 0.0f, 0.0f, 1.0f),  // White color
             { -0.3f, 0.65f }, // position (normalized)
         };
 
         instructions = {
-            "Click a button or use keyboard shortcuts:\n1 - Play Game | 2 - Map Editor | 3 - Credits | Q - Quit",
+            "Click a button or use keyboard shortcuts:\n1 - Play Game | 2 - Map Editor | 3 - Credits | ESC - Quit",
             0.7f,
-            Color(0.7f, 0.7f, 0.7f, 1.0f),
+            Color(0.0f, 0.0f, 0.0f, 1.0f),
             { -0.98f, -0.9f },
         };
 

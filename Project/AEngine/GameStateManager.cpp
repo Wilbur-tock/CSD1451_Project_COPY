@@ -17,7 +17,86 @@ namespace GameStateManager {
     float loadingTimer = 0.0f;
     float dt = 0.0f;
 
+    // Loading screen animation variables
+    float dotAnimTimer = 0.0f;
+    int dotCount = 0;
+
     TextObject debugText;
+
+    void RenderLoadingScreen() {
+        // Reset camera to center for loading screen
+        AEGfxSetCamPosition(0.0f, 0.0f);
+
+        // Dark background
+        AEGfxSetBackgroundColor(0.1f, 0.1f, 0.15f);
+
+        // Calculate progress (0.0 to 1.0)
+        float maxTime = 0.9f;
+        float progress = 1.0f - (loadingTimer / maxTime);
+        if (progress > 1.0f) progress = 1.0f;
+
+        // Animated dots
+        dotAnimTimer += dt;
+        if (dotAnimTimer >= 0.3f) {
+            dotAnimTimer = 0.0f;
+            dotCount = (dotCount + 1) % 4;
+        }
+
+        std::string dots = "";
+        for (int i = 0; i < dotCount; i++) {
+            dots += ".";
+        }
+
+        // Draw "LOADING..." text
+        TextObject loadingTextObj{
+            "LOADING" + dots,
+            1.5f,
+            Color(1.0f, 1.0f, 1.0f, 1.0f),
+            { -0.15f, 0.2f }
+        };
+        GraphicsManager::DrawTextUI(loadingTextObj);
+
+        // Loading bar dimensions (in screen pixels)
+        float barWidth = 600.0f;
+        float barHeight = 40.0f;
+
+        // Center the bar on screen (x=0 is screen center in world coords when cam is at 0,0)
+        float barX = 0.0f;  // Center X
+        float barY = 15.0f;  // Below the loading text
+
+        // Background bar (full width, dark gray)
+        AEMtx33 bgMat = GraphicsManager::CreateTransformMatrix(
+            barX - (barWidth / 2.0f),  // Start from left edge
+            barY,
+            0,
+            barWidth,
+            barHeight
+        );
+        GraphicsManager::DrawUIFollowCam(AssetsManager::squareTexture, bgMat, Color(0.2f, 0.2f, 0.2f, 1.0f));
+
+        // Progress bar (fills from left to right)
+        float progressWidth = barWidth * progress;
+        if (progressWidth > 0) {
+            AEMtx33 progressMat = GraphicsManager::CreateTransformMatrix(
+                barX - (barWidth / 2.0f),  // Start from same left edge
+                barY,
+                0,
+                progressWidth,  // Only the progress portion
+                barHeight
+            );
+            GraphicsManager::DrawUIFollowCam(AssetsManager::squareTexture, progressMat, Color(0.3f, 0.7f, 1.0f, 1.0f));
+        }
+
+        // Percentage text (centered below bar)
+        int percentage = static_cast<int>(progress * 100);
+        TextObject percentText{
+            std::to_string(percentage) + "%",
+            1.2f,
+            Color(1.0f, 1.0f, 1.0f, 1.0f),
+            { -0.03f, -0.15f }
+        };
+        GraphicsManager::DrawTextUI(percentText);
+    }
 
     void Load() {
         // Start with main menu
@@ -61,13 +140,18 @@ namespace GameStateManager {
         // State transition logic
         if (next != current) {
             if (!setNewState) {
-                loadingTimer = 0.75f;
+                loadingTimer = 0.9f; // Initialize timer
+                dotAnimTimer = 0.0f; // Reset dot animation
+                dotCount = 0;
                 setNewState = true;
             }
             else {
                 loadingTimer -= dt;
 
-                if (loadingTimer <= 0.0f){
+                // Render loading screen during transition
+                RenderLoadingScreen();
+
+                if (loadingTimer <= 0.0f) {
                     // Call Free on the current state
                     if (gsFree != nullptr) {
                         gsFree();
@@ -130,6 +214,8 @@ namespace GameStateManager {
                         gsIntialize();
                     }
                 }
+                // Return early during loading - don't update the game state
+                return;
             }
         }
 
