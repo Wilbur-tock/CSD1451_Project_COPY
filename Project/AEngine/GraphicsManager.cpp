@@ -50,6 +50,7 @@ namespace GraphicsManager {
 
 	void Load() {
 		GenerateMesh();
+		AEGfxSetTextureMode(AE_GFX_TM_PRECISE);
 	}
 
 	void Unload() {

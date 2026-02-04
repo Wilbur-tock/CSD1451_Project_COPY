@@ -7,10 +7,12 @@
 namespace MapManager {
 	std::vector<std::vector<Tile>> *currentMap;
 
-	static const char* FLOOR_TOP_PATH = "Assets/floorTile.png";  // surface layer floor
-	static const char* FLOOR_FILL_PATH = "Assets/floorFill.png";  // underground fill of floor
-	static const char* TOWER_BLOCK_1_PATH = "Assets/towerBlock1.png";
-	static const char* TOWER_BLOCK_2_PATH = "Assets/towerBlock2.png";
+	static const char* FLOOR_TOP_PATH = "Assets/floorTop.png";  // top layer floor
+	static const char* FLOOR_FILL_PATH = "Assets/floorBody.png";  // underground fill of floor
+	static const char* TOWER_BLOCK_TOP_1_PATH = "Assets/towerBlockTop1.png"; // Tower Block Top (1)
+	static const char* TOWER_BLOCK_1_PATH = "Assets/towerBlockBody1.png"; // Tower Block Body (1)
+	static const char* TOWER_BLOCK_TOP_2_PATH = "Assets/towerBlockTop2.png"; // Tower Block Top (2)
+	static const char* TOWER_BLOCK_2_PATH = "Assets/towerBlockBody2.png"; // Tower Block Body (2)
 	static const char* CANNON_BASE_PATH = "Assets/cannonBase.png"; //Cannon (for testing now, not actual sprite)
 
 	Tile::Tile(AEVec2 _pos, AEGfxTexture* _texture, TileType _type) 
@@ -32,34 +34,43 @@ namespace MapManager {
 	bool Tile::IsGround() const {
 		return type >= TILE_BLOCK_GROUND_0 && type <= TILE_BLOCK_GROUND_2;
 	}
-	bool Tile::IsBlocks() const {
-		return type >= TILE_BLOCK_1 && type <= TILE_BLOCK_2;
+	bool Tile::IsBlocks() {
+		return type == TILE_BLOCK_1
+			|| type == TILE_BLOCK_2
+			|| type == TILE_BLOCK_1_TOP
+			|| type == TILE_BLOCK_2_TOP;
 	}
 
 	// Cached textures
 	static AEGfxTexture* gTileTex[MapManager::TILE_COUNT] = { nullptr };
 	static AEGfxTexture* gFloorTopTex = nullptr;
 	static AEGfxTexture* gFloorFillTex = nullptr;
-	static AEGfxTexture* gTower1Tex = nullptr;
-	static AEGfxTexture* gTower2Tex = nullptr;
+	static AEGfxTexture* gTower1TopTex = nullptr;
+	static AEGfxTexture* gTower1BodyTex = nullptr;
+	static AEGfxTexture* gTower2TopTex = nullptr;
+	static AEGfxTexture* gTower2BodyTex = nullptr;
 	static AEGfxTexture* gCannonBaseTex = nullptr;
 	static AEGfxTexture* gFallbackTex = nullptr;
 
 	void Load() {
-		if (gTileTex[MapManager::TILE_BLOCK_GROUND_0]) return;
+		if (gTileTex[MapManager::TILE_BLOCK_GROUND_0]) return;	
 
 		gFallbackTex = AssetsManager::GetTexture("Assets/square.png");
 		gFloorTopTex = AssetsManager::GetTexture(FLOOR_TOP_PATH);
 		gFloorFillTex = AssetsManager::GetTexture(FLOOR_FILL_PATH);
-		gTower1Tex = AssetsManager::GetTexture(TOWER_BLOCK_1_PATH);
-		gTower2Tex = AssetsManager::GetTexture(TOWER_BLOCK_2_PATH);
+		gTower1TopTex = AssetsManager::GetTexture(TOWER_BLOCK_TOP_1_PATH);
+		gTower1BodyTex = AssetsManager::GetTexture(TOWER_BLOCK_1_PATH);
+		gTower2TopTex = AssetsManager::GetTexture(TOWER_BLOCK_TOP_2_PATH);
+		gTower2BodyTex = AssetsManager::GetTexture(TOWER_BLOCK_2_PATH);
 		gCannonBaseTex = AssetsManager::GetTexture(CANNON_BASE_PATH);
 
 		// Safety Fallback
 		if (!gFloorTopTex)  gFloorTopTex = gFallbackTex;
 		if (!gFloorFillTex) gFloorFillTex = gFallbackTex;
-		if (!gTower1Tex)     gTower1Tex = gFallbackTex;
-		if (!gTower2Tex)     gTower2Tex = gFallbackTex;
+		if (!gTower1TopTex)  gTower1TopTex = gFallbackTex;
+		if (!gTower1BodyTex)  gTower1BodyTex = gFallbackTex;
+		if (!gTower2TopTex)  gTower2TopTex = gFallbackTex;
+		if (!gTower2BodyTex)  gTower2BodyTex = gFallbackTex;
 		if (!gCannonBaseTex) gCannonBaseTex = gFallbackTex;
 
 		gTileTex[MapManager::TILE_EMPTY] = nullptr;
@@ -68,9 +79,11 @@ namespace MapManager {
 		gTileTex[MapManager::TILE_BLOCK_GROUND_1] = gFloorFillTex;
 		gTileTex[MapManager::TILE_BLOCK_GROUND_2] = gFloorFillTex;
 
-		// ✅ DO NOT overwrite these afterwards
-		gTileTex[MapManager::TILE_BLOCK_1] = gTower1Tex;
-		gTileTex[MapManager::TILE_BLOCK_2] = gTower2Tex;
+		// DO NOT overwrite these afterwards
+		gTileTex[MapManager::TILE_BLOCK_1_TOP] = gTower1TopTex;
+		gTileTex[MapManager::TILE_BLOCK_1] = gTower1BodyTex;
+		gTileTex[MapManager::TILE_BLOCK_2_TOP] = gTower2TopTex;
+		gTileTex[MapManager::TILE_BLOCK_2] = gTower2BodyTex;
 
 		// cannon base tile texture
 		gTileTex[MapManager::TILE_PLAYER_CANNON] = gCannonBaseTex;
@@ -93,23 +106,22 @@ namespace MapManager {
 			std::cerr << "[MapManager] WARNING: missing cannon base texture at "
 				<< CANNON_BASE_PATH << std::endl;
 		}
-		if (gTower1Tex == gFallbackTex)
-			std::cerr << "[MapManager] WARNING: missing towerBlock1 at " 
+		if (gTower1TopTex == gFallbackTex)
+			std::cerr << "[MapManager] WARNING: missing towerBlockTop1 at " 
+			<< TOWER_BLOCK_TOP_1_PATH << "\n";
+		if (gTower1BodyTex == gFallbackTex)
+			std::cerr << "[MapManager] WARNING: missing towerBlockBody1 at " 
 			<< TOWER_BLOCK_1_PATH << "\n";
-		if (gTower2Tex == gFallbackTex)
-			std::cerr << "[MapManager] WARNING: missing towerBlock2 at " 
+		if (gTower2TopTex == gFallbackTex)
+			std::cerr << "[MapManager] WARNING: missing towerBlockTop2 at " 
+			<< TOWER_BLOCK_TOP_2_PATH << "\n";
+		if (gTower2BodyTex == gFallbackTex)
+			std::cerr << "[MapManager] WARNING: missing towerBlockBody2 at " 
 			<< TOWER_BLOCK_2_PATH << "\n";
 		if (gCannonBaseTex == gFallbackTex)
 			std::cerr << "[MapManager] WARNING: missing cannonBase at " 
 			<< CANNON_BASE_PATH << "\n";
 	}
-
-	//static AEGfxTexture* TextureForTile(MapManager::TileType t)
-	//{
-	//	LoadTileTextures();
-	//	if (t < 0 || t >= MapManager::TILE_COUNT) return nullptr;
-	//	return gTileTex[t];
-	//}
 
 	std::string TileTypeToString(int id) {
 		if (id < 0 || id >= static_cast<int>(tileNames.size())) return "INVALID";
@@ -156,8 +168,10 @@ namespace MapManager {
 				tile.size = { Config::TILE_SIZE,Config::TILE_SIZE };
 				tile.texture = tileTexture;
 				tile.type = static_cast<TileType>(type);
-				tile.gridId.x = static_cast<f32>(x);
-				tile.gridId.y = static_cast<f32>(y);
+				tile.id.x = static_cast<f32>(x);
+				tile.id.y = static_cast<f32>(y);
+				tile.isDestroyable = (tile.type == TILE_BLOCK_1 || tile.type == TILE_BLOCK_2
+					|| tile.type == TILE_BLOCK_1_TOP || tile.type == TILE_BLOCK_2_TOP);
 			}
 		}
 
@@ -166,46 +180,12 @@ namespace MapManager {
 		ifs.close();
 	}
 
-
 	void RenderMap(const std::vector<std::vector<Tile>>& map) {
-		// For each column x, find the first (topmost) ground tile y
-		//std::vector<int> surfaceY(Config::GRID_WIDTH, -1);
-		//for (int x = 0; x < Config::GRID_WIDTH; ++x) {
-		//	for (int y = 0; y < Config::GRID_HEIGHT; ++y) {
-		//		TileType t = map[y][x].type;
-		//		if (t == TILE_BLOCK_GROUND_0 || t == TILE_PLAYER_CANNON) {
-		//			surfaceY[x] = y;
-		//			break;
-		//		}
-		//	}
-		//}
-
 		for (int y = 0; y < Config::GRID_HEIGHT; ++y) {
 			for (int x = 0; x < Config::GRID_WIDTH; ++x) {
-
 				const Tile& tile = map[y][x];
-
 				if (tile.type == TILE_EMPTY) continue;
-
 				AEMtx33 transform = GraphicsManager::CreateTransformMatrix(tile.pos.x, tile.pos.y, 0.0f, tile.size.x / 2.0f, tile.size.y / 2.0f);
-
-				//if (tile.type == TILE_BLOCK_GROUND_0) {
-				//	bool isSurface = (surfaceY[x] == y);
-				//	AEGfxTexture* floorTex = isSurface ? gFloorTopTex : gFloorFillTex;
-				//	GraphicsManager::DrawGameObject(floorTex, transform, Color{ 1,1,1,1 });
-				//	continue;
-				//}
-				//if (tile.type == TILE_PLAYER_CANNON) {
-				//	bool isSurface = (surfaceY[x] == y);
-				//	AEGfxTexture* under = isSurface ? gFloorTopTex : gFloorFillTex;
-				//
-				//	// 1) draw floor underneath (keeps the grass strip continuous)
-				//	GraphicsManager::DrawGameObject(under, transform, Color{ 1,1,1,1 });
-				//	// 2) draw cannon base on top (so it no longer looks like floor)
-				//	GraphicsManager::DrawGameObject(gCannonBaseTex, transform, Color{ 1,1,1,1 });
-				//	continue;
-				//}
-
 				GraphicsManager::DrawGameObject(gTileTex[tile.type], transform, Color{1,1,1,1});
 			}
 		}

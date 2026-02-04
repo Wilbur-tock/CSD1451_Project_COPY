@@ -162,7 +162,7 @@ namespace MapEditor {
 		AEInputMouseWheelDelta(&scroll);
 		if (scroll != 0) {
 			tileId -= scroll;
-			Utils::Wrap(tileId, 1, MapManager::TILE_COUNT);
+			Utils::Wrap(tileId, 1, MapManager::TILE_COUNT - 1);
 			drawingTileType = static_cast<TileType>(tileId);
 		}
 
