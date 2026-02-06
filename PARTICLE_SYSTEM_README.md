@@ -39,6 +39,7 @@ ParticleEmitter(AEVec2 position, int maxParticles = 100)
 - `SetColor(Color col)` - Base particle color
 - `SetFadeOut(bool fade)` - Enable/disable alpha fading
 - `SetPosition(AEVec2 pos)` - Update emitter position
+- `SetGravity(float gravityAccel)` - Set gravity acceleration (default: 50 units/sec²)
 
 #### Core Methods
 - `Update(float deltaTime)` - Updates all particles and spawns new ones
@@ -60,7 +61,8 @@ ParticleEmitter(AEVec2 position, int maxParticles = 100)
 
 ### 3. Physics Simulation
 - Particles move based on velocity vectors
-- Simple gravity applied to all particles (50 units/sec²)
+- Configurable gravity applied to all particles (default 50 units/sec², can be customized)
+- Use `SetGravity(0.0f)` for floating particles or negative values for upward drift
 - Position updated each frame: `position += velocity * deltaTime`
 
 ### 4. Lifetime Management

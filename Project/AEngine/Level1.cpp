@@ -12,6 +12,7 @@ namespace Level1 {
 	Level levelData;
 	
 	// Particle emitter for demonstration
+	// Note: Cleaned up in Free() to prevent memory leaks
 	ParticleSystem::ParticleEmitter* particleEmitter = nullptr;
 
 	void Load() {

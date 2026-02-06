@@ -30,6 +30,7 @@ namespace ParticleSystem {
 		float emissionRate;         // Particles per second
 		float emissionTimer;        // Internal timer for emission
 		AEGfxVertexList* particleMesh;
+		float gravity;              // Gravity acceleration (units/sec^2)
 
 		// Particle spawning parameters
 		float minLifetime, maxLifetime;
@@ -53,6 +54,7 @@ namespace ParticleSystem {
 		void SetColor(Color col);
 		void SetFadeOut(bool fade);
 		void SetPosition(AEVec2 pos);
+		void SetGravity(float gravityAccel);
 
 		// Update and render
 		void Update(float deltaTime);

@@ -2,8 +2,13 @@
 #include "GameStateManager.hpp"
 #include <cstdlib>
 #include <ctime>
+#include <cmath>
 
 namespace ParticleSystem {
+
+	// Constants
+	const float PI = 3.14159265f;
+	const float DEFAULT_GRAVITY = 50.0f;
 
 	// Helper function to generate random float in range
 	static float RandomFloat(float min, float max) {
@@ -13,7 +18,7 @@ namespace ParticleSystem {
 
 	// Helper function to generate random angle
 	static float RandomAngle() {
-		return RandomFloat(0.0f, 2.0f * 3.14159265f);
+		return RandomFloat(0.0f, 2.0f * PI);
 	}
 
 	ParticleEmitter::ParticleEmitter(AEVec2 position, int maxParticles) 
@@ -22,6 +27,7 @@ namespace ParticleSystem {
 		  emissionRate(10.0f),
 		  emissionTimer(0.0f),
 		  particleMesh(nullptr),
+		  gravity(DEFAULT_GRAVITY),
 		  minLifetime(1.0f), maxLifetime(2.0f),
 		  minSpeed(50.0f), maxSpeed(100.0f),
 		  minSize(5.0f), maxSize(10.0f),
@@ -31,12 +37,12 @@ namespace ParticleSystem {
 		particles.resize(maxParticles);
 		CreateParticleMesh();
 		
-		// Seed random number generator
-		static bool seeded = false;
-		if (!seeded) {
+		// Seed random number generator once per process
+		static bool seeded = []() {
 			srand(static_cast<unsigned int>(time(nullptr)));
-			seeded = true;
-		}
+			return true;
+		}();
+		(void)seeded; // Suppress unused variable warning
 	}
 
 	ParticleEmitter::~ParticleEmitter() {
@@ -91,6 +97,10 @@ namespace ParticleSystem {
 
 	void ParticleEmitter::SetPosition(AEVec2 pos) {
 		emitterPosition = pos;
+	}
+
+	void ParticleEmitter::SetGravity(float gravityAccel) {
+		gravity = gravityAccel;
 	}
 
 	void ParticleEmitter::EmitParticle() {
@@ -148,8 +158,8 @@ namespace ParticleSystem {
 				AEVec2Scale(&displacement, &p.velocity, deltaTime);
 				AEVec2Add(&p.position, &p.position, &displacement);
 				
-				// Apply simple gravity (optional physics)
-				p.velocity.y -= 50.0f * deltaTime;
+				// Apply gravity (simple physics)
+				p.velocity.y -= gravity * deltaTime;
 				
 				// Update alpha for fade out effect
 				if (fadeOut) {

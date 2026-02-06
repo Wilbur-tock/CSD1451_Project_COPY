@@ -58,6 +58,7 @@ namespace ParticleEffects {
 		emitter->SetSpeedRange(200.0f, 300.0f);  // Fast downward
 		emitter->SetSizeRange(2.0f, 4.0f);
 		emitter->SetColor(Color(0.5f, 0.5f, 1.0f, 0.6f));  // Light blue
+		emitter->SetGravity(100.0f);  // Strong gravity for rain
 		emitter->SetFadeOut(false);
 	}
 	
@@ -68,6 +69,7 @@ namespace ParticleEffects {
 		emitter->SetSpeedRange(60.0f, 120.0f);
 		emitter->SetSizeRange(8.0f, 12.0f);
 		emitter->SetColor(Color(0.5f, 0.2f, 1.0f, 1.0f));  // Purple
+		emitter->SetGravity(0.0f);  // No gravity for floating magic particles
 		emitter->SetFadeOut(true);
 	}
 	
