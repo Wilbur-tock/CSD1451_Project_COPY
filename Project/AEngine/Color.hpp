@@ -15,6 +15,7 @@ public:
 	float GetGreen();
 	float GetBlue();
 	float GetAlpha();
+	void SetAlpha(float _a);
 };
 
 #endif // ! COLOR_HPP

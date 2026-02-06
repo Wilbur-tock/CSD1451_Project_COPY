@@ -29,3 +29,7 @@ float Color::GetBlue() {
 float Color::GetAlpha() {
 	return a;
 }
+
+void Color::SetAlpha(float _a) {
+	a = _a < min ? min : _a > max ? max : _a;
+}

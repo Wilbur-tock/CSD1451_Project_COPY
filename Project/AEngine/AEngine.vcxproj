@@ -139,6 +139,7 @@ xcopy "$(SolutionDir)Extern\AlphaEngine\lib\fmod.dll" "$(OutDir)" /s /r /y /q</C
     <ClInclude Include="MainMenu.hpp" />
     <ClInclude Include="MapEditor.hpp" />
     <ClInclude Include="MapManager.hpp" />
+    <ClInclude Include="ParticleEffects.hpp" />
     <ClInclude Include="ParticleSystem.hpp" />
     <ClInclude Include="pch.hpp" />
     <ClInclude Include="TextObject.hpp" />

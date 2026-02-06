@@ -6,6 +6,7 @@
 #include "CameraManager.hpp"
 #include "TextObject.hpp"
 #include "ParticleSystem.hpp"
+#include "ParticleEffects.hpp"
 
 namespace Level1 {
 	Level levelData;
@@ -28,13 +29,8 @@ namespace Level1 {
 		AEVec2Set(&emitterPos, levelData.cannon.pos.x, levelData.cannon.pos.y + 100.0f);
 		particleEmitter = new ParticleSystem::ParticleEmitter(emitterPos, 200);
 		
-		// Configure particle properties
-		particleEmitter->SetEmissionRate(30.0f);  // 30 particles per second
-		particleEmitter->SetLifetimeRange(1.0f, 3.0f);
-		particleEmitter->SetSpeedRange(80.0f, 150.0f);
-		particleEmitter->SetSizeRange(8.0f, 15.0f);
-		particleEmitter->SetColor(Color(1.0f, 0.7f, 0.2f, 1.0f));  // Orange particles
-		particleEmitter->SetFadeOut(true);
+		// Use pre-configured fire effect
+		ParticleEffects::ConfigureFire(particleEmitter);
 	}
 
 	void Update() {

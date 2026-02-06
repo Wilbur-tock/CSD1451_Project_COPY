@@ -6,6 +6,7 @@ This document describes the particle system implementation for the CSD1451_Proje
 ## Implementation Files
 - **ParticleSystem.hpp** - Header file containing particle structure and emitter class declarations
 - **ParticleSystem.cpp** - Implementation file with particle logic and rendering
+- **ParticleEffects.hpp** - Pre-configured particle effect presets (optional helper)
 - **Level1.cpp** - Integration example showing particle system in action
 
 ## Architecture
@@ -158,6 +159,25 @@ void Free() {
 - Multiple emitters can be used for different effects
 
 ## Extending the System
+
+### Using Pre-configured Effects (ParticleEffects.hpp)
+For convenience, `ParticleEffects.hpp` provides pre-configured particle effects:
+
+```cpp
+#include "ParticleEffects.hpp"
+
+// Create emitter
+ParticleSystem::ParticleEmitter* emitter = new ParticleSystem::ParticleEmitter(pos, 200);
+
+// Apply preset configurations
+ParticleEffects::ConfigureFire(emitter);      // Fire effect
+ParticleEffects::ConfigureSmoke(emitter);     // Smoke effect
+ParticleEffects::ConfigureSparkle(emitter);   // Sparkle effect
+ParticleEffects::ConfigureExplosion(emitter); // Explosion burst
+ParticleEffects::ConfigureRain(emitter);      // Rain effect
+ParticleEffects::ConfigureMagic(emitter);     // Magic/energy effect
+ParticleEffects::ConfigureDust(emitter);      // Dust/debris effect
+```
 
 ### Adding New Features
 1. **Multiple Particle Shapes**: Modify `CreateParticleMesh()` to support different shapes
