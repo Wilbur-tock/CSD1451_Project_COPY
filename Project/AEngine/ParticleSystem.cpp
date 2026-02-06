@@ -7,7 +7,7 @@
 namespace ParticleSystem {
 
 	// Constants
-	const float PI = 3.14159265f;
+	// const float PI = 3.14159265f;
 	const float DEFAULT_GRAVITY = 50.0f;
 
 	// Helper function to generate random float in range
