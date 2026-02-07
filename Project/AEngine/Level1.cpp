@@ -16,7 +16,7 @@ namespace Level1 {
 	ParticleSystem::ParticleEmitter* particleEmitter = nullptr;
 
 	void Load() {
-		levelData.Load("Assets/Map/level1.txt");
+		levelData.Load("Assets/Map/level4.txt");
 	}
 
 	void Init() {
