@@ -27,7 +27,7 @@ namespace CannonManager {
 	public:
 		float timer = 0.0f;
 		AEVec2 velocity; // Vector rate of change of displacement (direction * speed)
-		bool isActive = false, collisionDetected = false, isGrounded = false, toBeDestroyed = false;
+		bool isActive = false, isCollisionDetected = false, isGrounded = false, toBeDestroyed = false;
 
 		Projectile();
 		Projectile(AEVec2 _pos, AEGfxTexture* _texture, AEVec2 _velocity);
@@ -46,28 +46,31 @@ namespace CannonManager {
 	class Cannon : public GameObject {
 	private:
 		int ammoCount = 0, ammoLimit = 10;
+		bool isShootingRight = true;
 		float cannonAngle = 0.0f; // Angle of the cannon for the projectile to shoot from
-		float projectileLifespan = 3.0f, defaultDamage{ 10.0f }, minDamage{ 0.0f },maxDamage{ 100.0f };
-		float damage = 100; // Damage of the projectile shot from the cannon
+
+		float projectileLifespan = 2.0f;
+		int defaultDamage{10}, minDamage{0},maxDamage{100};
+		int damage = 100; // Damage of the projectile shot from the cannon
 		int damageTileRadiusMultipler = 2;
 		AEVec2 defaultSize{ 30,10 };
 
 		// Power charging system (how far the cannon shoots the projectile)
-		float power = 100, minPower = 100, maxPower = 2500, chargeRate = maxPower * 0.75f;
+		float minPower = 100, maxPower = 2500, chargeRate = maxPower * 0.75f;
+		float chargingPower;
 		float shotPower; // The amount of shot power player charged up
 		bool isPowerIncrease = true;
-
 	public:
 		std::vector<Projectile> ammo, activeAmmo;
 
 		// Constructors
 		Cannon();
-		Cannon(AEVec2 _pos, AEGfxTexture* _texture, int _ammoLimit, AEVec2 _size = {30,10});
+		Cannon(AEVec2 _pos, AEGfxTexture* _texture, int _ammoLimit, bool _isShootingRight = true, AEVec2 _size = {30,10});
 
 		// Getters & Setters
 		
-		float GetDamage() const;
-		void SetDamage(float _damage);
+		int GetDamage() const;
+		void SetDamage(int _damage);
 
 		// Reset values of the cannon ammo vectors to be in its default state
 		void Reset();
@@ -86,6 +89,7 @@ namespace CannonManager {
 		// UI to display the charging shot power bar */
 		void UIChargeShotBar();
 		void SetCamera(bool isFollowingProjectile);
+		void DrawTrajectory();
 	};
 }
 

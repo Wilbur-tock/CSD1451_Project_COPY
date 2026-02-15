@@ -17,7 +17,7 @@ namespace Config {
 	constexpr float FONT_SCALE = 1.0f;
 
 	// PHYSICS
-	constexpr float GRAVITY = 1500.0f, FRICTION = 0.25f, MINIMUM_VELOCITY = 2.5f;
+	constexpr float GRAVITY = 1500.0f, FRICTION = 0.25f, MINIMUM_VELOCITY = 5.0f;
 }
 
 #endif // !CONFIG_HPP

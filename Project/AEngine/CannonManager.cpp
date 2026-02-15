@@ -37,19 +37,19 @@ namespace CannonManager {
     }
 
     void Projectile::Destroy() {
-        isActive = collisionDetected = toBeDestroyed = false;
+        isActive = isCollisionDetected = toBeDestroyed = false;
         timer = 0.0f;
     }
 
     Cannon::Cannon() : ammoLimit {10} { Reset(); }
-    Cannon::Cannon(AEVec2 _pos, AEGfxTexture* _texture, int _ammoLimit, AEVec2 _size)
+    Cannon::Cannon(AEVec2 _pos, AEGfxTexture* _texture, int _ammoLimit, bool _isShootingRight, AEVec2 _size)
         : GameObject(_pos, _size, _texture, Color{ 1,1,1,1 }),
-        ammoLimit{ _ammoLimit }, cannonAngle{ 0.0f }, shotPower{ power } {
+        ammoLimit{ _ammoLimit }, isShootingRight{_isShootingRight}, cannonAngle{0.0f}, ammoCount{ 0 } {
         Reset();
     }
 
-    float Cannon::GetDamage() const { return damage; }
-    void Cannon::SetDamage(float _damage) { damage = std::clamp(_damage, minDamage, maxDamage); }
+    int Cannon::GetDamage() const { return damage; }
+    void Cannon::SetDamage(int _damage) { damage = std::clamp(_damage, minDamage, maxDamage); }
 
     void Cannon::Reset() {
         // Reset to default
@@ -70,9 +70,19 @@ namespace CannonManager {
 
         // Calculate angle toward mouse
         cannonAngle = atan2(worldMouseY - pos.y, worldMouseX - pos.x);
-
         // Add limits so it can only turn facing upwards or downwards limits
-        Utils::Limit(cannonAngle, -1.5f, 1.5f);
+        if (isShootingRight) {
+            cannonAngle = std::clamp(cannonAngle, -1.5f, 1.5f);
+        }
+        else {
+            // Clamp to left hemisphere
+            if (cannonAngle > 0) {
+                cannonAngle = std::clamp(cannonAngle, 1.5f, 3.5f);   // Upper left: 1.5 to 3.5
+            }
+            else {
+                cannonAngle = std::clamp(cannonAngle, -3.5f, -1.5f); // Lower left: -3.5 to -1.5
+            }
+        }
 
         ChargeShot();
         UpdateProjectile();
@@ -88,13 +98,14 @@ namespace CannonManager {
             
             TextObject txtObj{ "", Utils::debuggerInfo.first * 0.8f, Utils::debuggerInfo.second, {0.5f, 0.99f} };
             txtObj.textContent = "Cannon\nPos X: " + Utils::FormatFloat(pos.x, 2) + " Y: " + Utils::FormatFloat(pos.y, 2)
-                + "\nAngle: " + Utils::FormatFloat(cannonAngle * (180.0f / 3.14159265359), 2)
+                + "\nAngle: " + Utils::FormatFloat(cannonAngle * (180.0f / 3.14159265359), 2) + " " + Utils::FormatFloat(cannonAngle,2)
                 + "\nDamage: " + Utils::FormatFloat(damage,2);
             if (activeAmmo.size() > 0) {
                 Projectile& projectile = activeAmmo.back();
                 txtObj.textContent += "\nActive Projectile:\nSize: x: "
                     + Utils::FormatFloat(projectile.size.x, 2) + " y: " + Utils::FormatFloat(projectile.size.y, 2)
-                    +"\nVelocity x : " + Utils::FormatFloat(activeAmmo.back().velocity.x, 2) + " y: " + Utils::FormatFloat(projectile.velocity.y, 2)
+                    + "\nPos x: " + Utils::FormatFloat(projectile.pos.x, 2) + " y " + Utils::FormatFloat(projectile.pos.y, 2)
+                    + "\nVelocity x: " + Utils::FormatFloat(activeAmmo.back().velocity.x, 2) + " y: " + Utils::FormatFloat(projectile.velocity.y, 2)
                     + "\nGrounded: " + std::string(projectile.isGrounded ? "true" : "false")
                     + "\nTo Be Destroyed: " + std::string(projectile.toBeDestroyed ? "true" : "false")
                     + "\nTimer: " + Utils::FormatFloat(projectile.timer,2)
@@ -107,16 +118,17 @@ namespace CannonManager {
     }
 
     void Cannon::ChargeShot() {
+        DrawTrajectory();
         if (AEInputCheckCurr(VK_LBUTTON)) {
             float chargeRateWithDT = chargeRate * GameStateManager::dt;
-            power += isPowerIncrease ? chargeRateWithDT : -chargeRateWithDT;
+            chargingPower += isPowerIncrease ? chargeRateWithDT : -chargeRateWithDT;
 
-            if (power > maxPower) {
-                power = maxPower;
+            if (chargingPower > maxPower) {
+                chargingPower = maxPower;
                 isPowerIncrease = false;
             }
-            if (power < minPower) {
-                power = minPower;
+            if (chargingPower < minPower) {
+                chargingPower = minPower;
                 isPowerIncrease = true;
             }
 
@@ -125,9 +137,9 @@ namespace CannonManager {
 
         // Shoot when the button is RELEASED
         if (AEInputCheckReleased(VK_LBUTTON)) {
-            shotPower = power;
+            shotPower = chargingPower;
             ShootProjectile(); // Pass the built-up power
-            power = minPower; // Reset for next shot
+            chargingPower = minPower; // Reset for next shot
         }
     }
 
@@ -186,6 +198,7 @@ namespace CannonManager {
                 Utils::GetGridIndex(gridX, gridY, projectile.pos);
 
                 float radius = projectile.size.x / 2.0f;
+                float bias = 0.25f;
                 int minX = gridX - 1, minY = gridY - 1, maxX = gridX + 1, maxY = gridY + 1;
                 for (int y = minY; y <= maxY; ++y) {
                     for (int x = minX; x <= maxX; ++x) {
@@ -207,7 +220,6 @@ namespace CannonManager {
                                 float overlapX = (radius + tile.size.x / 2.0f) - std::abs(projectile.pos.x - tile.pos.x);
                                 float overlapY = (radius + tile.size.y / 2.0f) - std::abs(projectile.pos.y - tile.pos.y);
 
-                                float bias = 0.1f;
                                 if (overlapX < (overlapY + bias)) {
                                     float bounce = -0.3f;
                                     // Resolve X (Wall) - Hit a side wall
@@ -233,10 +245,10 @@ namespace CannonManager {
                                         projectile.velocity.y *= -0.5f; // Lost 50% of its velocity
                                     }
                                 }
-                                projectile.collisionDetected = true;
+                                projectile.isCollisionDetected = true;
 
-                                // Damaged tiles one collision is detected
-                                if (projectile.collisionDetected && projectile.GetMode() == ATTACK) {
+                                // Damaged tiles once a collision with a block/ground is detected
+                                if (projectile.isCollisionDetected && projectile.GetMode() == ATTACK) {
                                     int minDX = x, minDY = y, maxDX = x, maxDY = y;
                                     // Increased damage radius
                                     if (damageTileRadiusMultipler > 1) {
@@ -259,7 +271,7 @@ namespace CannonManager {
 
                                             std::cout << "Damage Tile: " << MapManager::TileTypeToString(tile.type)
                                                 << " x: " << tile.gridId.x << " y: " << tile.gridId.y
-                                                << " " << tile.GetHealth() << std::endl;
+                                                << " " << tile.attributes.GetHealth() << std::endl;
                                         }
                                     }
 
@@ -273,7 +285,7 @@ namespace CannonManager {
 
                 // SECONDARY CHECK IF THE PROJECTILE IS GROUNDED OR NOT
                 if (!projectile.isGrounded) {
-                    // Only need to check 2x3 for additonal checks
+                    // Only and MUST check 2x3 for additonal checks
                     for (int y = gridY; y <= maxY; ++y) {
                         for (int x = minX; x <= maxX; ++x) {
                             if (Utils::IsGridIndexOutOfBounds(x, y)) continue;
@@ -285,10 +297,11 @@ namespace CannonManager {
                                 float tileLeft = tile.pos.x - (tile.size.x / 2.0f);
                                 float tileRight = tile.pos.x + (tile.size.x / 2.0f);
 
-                                // Check if projectile is resting on top of this tile
+                                // Check if projectile is resting on top of this tile by checking the projectile x-axis is within the tile x-axis
+                                // and its y-axis is the same +- bias as the tile + projectile radius
                                 if (projectile.pos.x >= tileLeft - radius &&
                                     projectile.pos.x <= tileRight + radius &&
-                                    std::abs(projectile.pos.y - (tileTop + radius)) < 0.3f) {
+                                    std::abs(projectile.pos.y - (tileTop + radius)) < bias) {
                                     projectile.isGrounded = true;
                                     projectile.velocity.y = 0;
                                     break;
@@ -309,7 +322,7 @@ namespace CannonManager {
         float speedSq = (projectile.velocity.x * projectile.velocity.x) + (projectile.velocity.y * projectile.velocity.y);
 
         // Start timer if it going to be destroy and projectile stops moving
-        if (projectile.collisionDetected && projectile.toBeDestroyed == false && speedSq <= 0.1f) {
+        if (projectile.isCollisionDetected && projectile.toBeDestroyed == false && speedSq <= 0.1f) {
             projectile.timer = projectileLifespan;
             projectile.toBeDestroyed = true;
         }
@@ -351,7 +364,7 @@ namespace CannonManager {
         AEMtx33 mat2 = GraphicsManager::CreateTransformMatrix(x, y, 0, w, -h);
         GraphicsManager::DrawUI(tex, mat2, Color{ 0, 0.2f, 0, 1 });
 
-        float percentage = (power / maxPower);
+        float percentage = (chargingPower / maxPower);
         float newH = h * percentage;
 
         // Bar
@@ -370,6 +383,31 @@ namespace CannonManager {
             CameraManager::camera.SetFollowTarget(nullptr);
             CameraManager::camera.SetState(CameraManager::CameraController::CameraState::INPUT);
             CameraManager::camera.SetPosition(pos);
+        }
+    }
+
+    void Cannon::DrawTrajectory() {
+        int numDots = 0; //DON'T DRAW FOR NOW
+        // Starting position (at the barrel tip, matching ShootProjectile)
+        float startX = pos.x + cos(cannonAngle) * size.x;
+        float startY = pos.y + sin(cannonAngle) * size.x;
+
+        // Initial velocity components
+        float vx = cos(cannonAngle) * maxPower;
+        float vy = sin(cannonAngle) * maxPower;
+
+        // Time step between each dot (e.g., 0.1 seconds into the future)
+        float timeStep = 0.05f;
+
+        for (int i = 0; i < numDots; i++) {
+            float t = i * timeStep;
+
+            // Kinematic equations
+            float drawX = startX + (vx * t);
+            float drawY = startY + (vy * t) - (0.5f * Config::GRAVITY * t * t);
+
+            float alpha = 1.0f - static_cast<float>(i / numDots);
+            GraphicsManager::DrawGameObject(AssetsManager::circleTexture, GraphicsManager::CreateTransformMatrix(drawX, drawY, 0, 10, 10), { 1,1,1, alpha });
         }
     }
 }

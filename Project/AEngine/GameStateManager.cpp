@@ -146,6 +146,7 @@ namespace GameStateManager {
                 setNewState = true;
             }
             else {
+                // Is currently Loading
                 loadingTimer -= dt;
 
                 // Render loading screen during transition

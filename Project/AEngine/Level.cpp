@@ -38,7 +38,7 @@ void Level::Load(std::string filePath) {
 	// Your old barrel used {30,10} (meaning it appears ~60x20 pixels)
 	AEVec2 barrelHalfSize{ 60, 20 };
 
-	cannon = CannonManager::Cannon(playerCannonStartPos, barrelTex, 10, barrelHalfSize);
+	cannon = CannonManager::Cannon(playerCannonStartPos, barrelTex, 10, true, barrelHalfSize);
 	cannon.textureColor = Color{ 1, 1, 1, 1 };   // black barrel
 
 	debugText = { "", Utils::debuggerInfo.first, Utils::debuggerInfo.second, { -1.0f, 0.99f} };

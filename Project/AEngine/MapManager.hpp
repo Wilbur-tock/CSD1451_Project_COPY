@@ -3,6 +3,7 @@
 
 #include "pch.hpp"
 #include "GameObject.hpp"
+#include "Attributes.hpp"
 
 // Contain enum TileType, class Tile
 namespace MapManager {
@@ -28,18 +29,17 @@ namespace MapManager {
 		"Enemy Cannon", "Enemy Minion", "Enemy Boss" };
 
 	class Tile : public GameObject {
-		float defaultSize = Config::TILE_SIZE;
-		float maxHealth{ 100.0f }, minHealth{ 0.0f }, health{ 100.0f };
+		float const defaultSize = Config::TILE_SIZE;
 	public:
 		TileType type = TILE_EMPTY;
 		AEVec2 gridId{0,0}; // Grid index x and y
+		Attributes attributes;
 
 		Tile() = default;
 		Tile(AEVec2 _pos, AEGfxTexture* _texture, TileType _type);
 
-		void Damage(float damage);
+		void Damage(int damage);
 
-		float GetHealth() const;
 		bool IsGround() const;
 		bool IsBlocks() const;
 	};

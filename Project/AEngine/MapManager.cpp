@@ -19,16 +19,12 @@ namespace MapManager {
 		: GameObject{ _pos, {defaultSize,defaultSize}, _texture, Color{1,1,1} }, type{ _type }, gridId{ 0,0 } {
 	}
 
-	void Tile::Damage(float damage) {
-		health -= damage;
-		if (health <= minHealth) {
+	void Tile::Damage(int damage) {
+		attributes.Damage(damage);
+		if (attributes.GetHealth() <= 0) {
 			type = TILE_EMPTY; //TEMPORARY
 		}
 		//std::cout << "Damaged Tile x: " << id.x << " y: " << id.y << " health: " << health << std::endl;
-	}
-
-	float Tile::GetHealth() const {
-		return health;
 	}
 
 	bool Tile::IsGround() const {
