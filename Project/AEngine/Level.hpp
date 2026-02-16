@@ -3,8 +3,9 @@
 
 #include "pch.hpp"
 
-#include "MapManager.hpp"
 #include "CannonManager.hpp"
+#include "Tile.hpp"
+#include "TextObject.hpp"
 
 class Level {
 public:
@@ -12,7 +13,7 @@ public:
 	CannonManager::Cannon cannon;
 	AEVec2 playerCannonStartPos{ 0,0 };
 	// Level map
-	std::vector<std::vector<MapManager::Tile>> levelMap;
+	std::vector<std::vector<Tile>> levelMap;
 
 	// min and max position that has ground collision
 	AEVec2 minGround{ 0,0 }, maxGround{ 0,0 };

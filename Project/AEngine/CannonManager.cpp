@@ -1,5 +1,15 @@
 #include "CannonManager.hpp"
 
+#include "MapManager.hpp"
+#include "GraphicsManager.hpp"
+#include "AssetsManager.hpp"
+#include "Color.hpp"
+#include "CameraManager.hpp"
+#include "GameStateManager.hpp"
+#include "Utils.hpp"
+#include "CollisionManager.hpp"
+#include "Tile.hpp"
+
 namespace CannonManager {
     Projectile::Projectile() : timer{ 0.0f }, velocity{ 0.0f,0.0f } {}
     Projectile::Projectile(AEVec2 _pos, AEGfxTexture* _texture, AEVec2 _velocity) 
@@ -170,11 +180,11 @@ namespace CannonManager {
             for (int dX = minDX; dX <= maxDX; ++dX) {
                 if (Utils::IsGridIndexOutOfBounds(dX, dY)) continue;
 
-                MapManager::Tile& tileToDamage = (*MapManager::currentMap)[dY][dX];
+                Tile& tileToDamage = (*MapManager::currentMap)[dY][dX];
                 // Only damage blocks type
                 if (!tileToDamage.IsBlocks()) continue;
 
-                std::cout << "Damage Tile: " << MapManager::TileTypeToString(tileToDamage.Type())
+                std::cout << "Damage Tile: " << TileTypeToString(tileToDamage.Type())
                     << " x: " << tileToDamage.gridId.x << " y: " << tileToDamage.gridId.y
                     << " " << tileToDamage.attributes.GetHealth() << std::endl;
 
@@ -245,7 +255,7 @@ namespace CannonManager {
                     for (int x = minX; x <= maxX; ++x) {
                         if (Utils::IsGridIndexOutOfBounds(x, y)) continue;
 
-                        MapManager::Tile& tile = (*MapManager::currentMap)[y][x];
+                        Tile& tile = (*MapManager::currentMap)[y][x];
 
                         if (tile.IsBlocks() || tile.IsGround()) {
                             if (CollisionManager::AreCircleSquareIntersecting(
@@ -333,7 +343,7 @@ namespace CannonManager {
                         for (int x = minX; x <= maxX; ++x) {
                             if (Utils::IsGridIndexOutOfBounds(x, y)) continue;
 
-                            MapManager::Tile& tile = (*MapManager::currentMap)[y][x];
+                            Tile& tile = (*MapManager::currentMap)[y][x];
 
                             if (tile.IsBlocks() || tile.IsGround()) {
                                 float tileTop = tile.pos.y + (tile.size.y / 2.0f);

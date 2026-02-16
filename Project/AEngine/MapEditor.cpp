@@ -1,5 +1,12 @@
 #include "MapEditor.hpp"
 
+#include "MapManager.hpp"
+#include "GraphicsManager.hpp"
+#include "AssetsManager.hpp"
+#include "Utils.hpp"
+#include "Tile.hpp"
+#include "GameStateManager.hpp"
+
 using namespace MapManager;
 
 namespace MapEditor {
@@ -137,17 +144,17 @@ namespace MapEditor {
 			}
 			else if (AEInputCheckCurr(AEVK_RBUTTON)) {
 
-				newMap[gridY][gridX].Type(MapManager::TILE_EMPTY);
+				newMap[gridY][gridX].Type(TILE_EMPTY);
 
 				if (AEInputCheckCurr(AEVK_LCTRL) || AEInputCheckCurr(AEVK_RCTRL)) {
 					for (int i = 0; i < Config::GRID_WIDTH; ++i) {
-						newMap[gridY][i].Type(MapManager::TILE_EMPTY);
+						newMap[gridY][i].Type(TILE_EMPTY);
 					}
 				}
 
 				if (AEInputCheckCurr(AEVK_LSHIFT) || AEInputCheckCurr(AEVK_RSHIFT)) {
 					for (int i = 0; i < Config::GRID_HEIGHT; ++i) {
-						newMap[i][gridX].Type(MapManager::TILE_EMPTY);
+						newMap[i][gridX].Type(TILE_EMPTY);
 					}
 				}
 			}
@@ -162,7 +169,7 @@ namespace MapEditor {
 		AEInputMouseWheelDelta(&scroll);
 		if (scroll != 0) {
 			tileId -= scroll;
-			Utils::Wrap(tileId, 1, MapManager::TILE_COUNT - 1);
+			Utils::Wrap(tileId, 1, TILE_COUNT - 1);
 			drawingTileType = static_cast<TileType>(tileId);
 		}
 
@@ -212,15 +219,15 @@ namespace MapEditor {
 
 		if (isShowingTileList) {
 			helpStr += "[SHOWING]\n[SCROLL]";
-			helpStr += "\nSelected: " + MapManager::TileTypeToString(tileId) + " (" + std::to_string(tileId) + ")";
+			helpStr += "\nSelected: " + TileTypeToString(tileId) + " (" + std::to_string(tileId) + ")";
 			// List out the type of tiles able to be drawn
-			for (int i = 0; i < MapManager::TILE_COUNT - 1; ++i) {
+			for (int i = 0; i < TILE_COUNT - 1; ++i) {
 				int id = i + 1;
 				std::string str = "[ ] ";
 				if (tileId == id) {
 					str = "[O] ";
 				}
-				helpStr += "\n" + str + MapManager::TileTypeToString(id);
+				helpStr += "\n" + str + TileTypeToString(id);
 			}
 		}
 		else {
@@ -242,7 +249,7 @@ namespace MapEditor {
 			Tile& tile = (*currentMap)[gridY][gridX];
 
 			debugText.textContent = "Grid\nIndex X: " + std::to_string(gridX) + " Y: " + std::to_string(gridY)
-				+ "\nTile: " + MapManager::TileTypeToString(tile.Type())
+				+ "\nTile: " + TileTypeToString(tile.Type())
 				+ "\nPos X: " + Utils::FormatFloat(newMap[gridY][gridX].pos.x, 2) + " Y: " + Utils::FormatFloat(newMap[gridY][gridX].pos.y, 2)
 				+ "\nCamera " + std::to_string(CameraManager::camera.GetState()) +
 				+ "\nPos X:" + Utils::FormatFloat(x, 2) + " Y: " + Utils::FormatFloat(y, 2)

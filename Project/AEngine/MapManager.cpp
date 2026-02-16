@@ -1,4 +1,5 @@
 ﻿#include "MapManager.hpp"
+
 #include "GraphicsManager.hpp"
 #include "AssetsManager.hpp"
 #include "Color.hpp"
@@ -14,32 +15,8 @@ namespace MapManager {
 	static const char* TOWER_BLOCK_2_PATH = "Assets/towerBlockBody2.png"; // Tower Block Body (2)
 	static const char* CANNON_BASE_PATH = "Assets/cannonBase.png"; //Cannon (for testing now, not actual sprite)
 
-	Tile::Tile(AEVec2 _pos, AEGfxTexture* _texture, TileType _type) 
-		: GameObject{ _pos, {defaultSize,defaultSize}, _texture, Color{1,1,1} }, type{ _type }, gridId{ 0,0 } {
-	}
-
-	TileType Tile::Type() const { return type; }
-	void Tile::Type(TileType newType) {
-		type = newType;
-	}
-
-	bool Tile::IsGround() const {
-		return type >= TILE_BLOCK_GROUND_0 && type <= TILE_BLOCK_GROUND_2;
-	}
-	bool Tile::IsBlocks() const {
-		return type >= TILE_BLOCK_1_TOP && type <= TILE_BLOCK_2;
-	}
-
-	void Tile::Damage(int damage) {
-		attributes.Damage(damage);
-		if (attributes.GetHealth() <= 0) {
-			type = TILE_EMPTY; //TEMPORARY
-		}
-		//std::cout << "Damaged Tile x: " << id.x << " y: " << id.y << " health: " << health << std::endl;
-	}
-
 	// Cached textures
-	static AEGfxTexture* gTileTex[MapManager::TILE_COUNT] = { nullptr };
+	static AEGfxTexture* gTileTex[TILE_COUNT] = { nullptr };
 	static AEGfxTexture* gFloorTopTex = nullptr;
 	static AEGfxTexture* gFloorFillTex = nullptr;
 	static AEGfxTexture* gTower1TopTex = nullptr;
@@ -50,7 +27,7 @@ namespace MapManager {
 	static AEGfxTexture* gFallbackTex = nullptr;
 
 	void Load() {
-		if (gTileTex[MapManager::TILE_BLOCK_GROUND_0]) return;	
+		if (gTileTex[TILE_BLOCK_GROUND_0]) return;	
 
 		gFallbackTex = AssetsManager::GetTexture("Assets/square.png");
 		gFloorTopTex = AssetsManager::GetTexture(FLOOR_TOP_PATH);
@@ -70,25 +47,25 @@ namespace MapManager {
 		if (!gTower2BodyTex)  gTower2BodyTex = gFallbackTex;
 		if (!gCannonBaseTex) gCannonBaseTex = gFallbackTex;
 
-		gTileTex[MapManager::TILE_EMPTY] = nullptr;
+		gTileTex[TILE_EMPTY] = nullptr;
 		// ground uses top/fill selection in RenderMap (this just marks “loaded”)
-		gTileTex[MapManager::TILE_BLOCK_GROUND_0] = gFloorTopTex;
-		gTileTex[MapManager::TILE_BLOCK_GROUND_1] = gFloorFillTex;
-		gTileTex[MapManager::TILE_BLOCK_GROUND_2] = gFloorFillTex;
+		gTileTex[TILE_BLOCK_GROUND_0] = gFloorTopTex;
+		gTileTex[TILE_BLOCK_GROUND_1] = gFloorFillTex;
+		gTileTex[TILE_BLOCK_GROUND_2] = gFloorFillTex;
 
 		// DO NOT overwrite these afterwards
-		gTileTex[MapManager::TILE_BLOCK_1_TOP] = gTower1TopTex;
-		gTileTex[MapManager::TILE_BLOCK_1] = gTower1BodyTex;
-		gTileTex[MapManager::TILE_BLOCK_2_TOP] = gTower2TopTex;
-		gTileTex[MapManager::TILE_BLOCK_2] = gTower2BodyTex;
+		gTileTex[TILE_BLOCK_1_TOP] = gTower1TopTex;
+		gTileTex[TILE_BLOCK_1] = gTower1BodyTex;
+		gTileTex[TILE_BLOCK_2_TOP] = gTower2TopTex;
+		gTileTex[TILE_BLOCK_2] = gTower2BodyTex;
 
 		// cannon base tile texture
-		gTileTex[MapManager::TILE_PLAYER_CANNON] = gCannonBaseTex;
+		gTileTex[TILE_PLAYER_CANNON] = gCannonBaseTex;
 
 		// other types can stay fallback for now
-		gTileTex[MapManager::TILE_PLAYER_CHARACTER] = gFallbackTex;
-		gTileTex[MapManager::TILE_ENEMY_MINION] = gFallbackTex;
-		gTileTex[MapManager::TILE_ENEMY_BOSS] = gFallbackTex;
+		gTileTex[TILE_PLAYER_CHARACTER] = gFallbackTex;
+		gTileTex[TILE_ENEMY_MINION] = gFallbackTex;
+		gTileTex[TILE_ENEMY_BOSS] = gFallbackTex;
 
 		// Debug prints if missing
 		if (gFloorTopTex == gFallbackTex) {
@@ -120,11 +97,6 @@ namespace MapManager {
 			<< CANNON_BASE_PATH << "\n";
 	}
 
-	std::string TileTypeToString(int id) {
-		if (id < 0 || id >= static_cast<int>(tileNames.size())) return "INVALID";
-		return tileNames[id];
-	}
-
 	void ReadMapData(std::string fileName, std::vector<std::vector<Tile>> &map) {
 		std::ifstream ifs{fileName};
 		if (!ifs) {
@@ -150,11 +122,11 @@ namespace MapManager {
 				int type = 0;
 				ifs >> type;
 
-				if (type < 0 || type >= MapManager::TILE_COUNT) {
+				if (type < 0 || type >= TILE_COUNT) {
 					std::cerr << "[MapManager] WARNING: invalid tile id " << type
 						<< " at (" << x << "," << y << ") in " << fileName
 						<< " -> forcing TILE_EMPTY\n";
-					type = MapManager::TILE_EMPTY;
+					type = TILE_EMPTY;
 				}
 				else {
 					tileTexture = gTileTex[type];

@@ -5,6 +5,9 @@
 #include "Level.hpp"
 #include "CameraManager.hpp"
 #include "TextObject.hpp"
+#include "Utils.hpp"
+#include "Tile.hpp"
+#include "GraphicsManager.hpp"
 
 namespace Level1 {
 	Level levelData;
@@ -36,10 +39,10 @@ namespace Level1 {
 			int gridX = 0, gridY = 0;
 			Utils::GetMouseGridIndex(gridX, gridY);
 
-			MapManager::Tile& tile = (*MapManager::currentMap)[gridY][gridX];
+			Tile& tile = (*MapManager::currentMap)[gridY][gridX];
 
 			levelData.debugText.textContent = "Grid:\nIndex X: " + std::to_string(gridX) + " Y: " + std::to_string(gridY)
-				+ "\nTile: " + MapManager::TileTypeToString(tile.Type()) + " " + Utils::FormatFloat(tile.attributes.GetHealth(), 2) +
+				+ "\nTile: " + TileTypeToString(tile.Type()) + " " + Utils::FormatFloat(tile.attributes.GetHealth(), 2) +
 				+"\nPos X: " + Utils::FormatFloat(tile.pos.x, 2) + " Y: " + Utils::FormatFloat(tile.pos.y, 2)
 				+ "\nCamera " + std::to_string(CameraManager::camera.GetState()) +
 				+ "\nPos X : " + Utils::FormatFloat(x, 2) + " Y : " + Utils::FormatFloat(y, 2)

@@ -1,11 +1,12 @@
-#include "pch.hpp"
 #include "Level.hpp"
+
 #include "AssetsManager.hpp"
 #include "MapManager.hpp"
 #include "Color.hpp"
+#include "Utils.hpp"
 
 void Level::Load(std::string filePath) {
-	levelMap.resize(Config::GRID_HEIGHT, std::vector<MapManager::Tile>(Config::GRID_WIDTH));
+	levelMap.resize(Config::GRID_HEIGHT, std::vector<Tile>(Config::GRID_WIDTH));
 
 	// Read map data
 	MapManager::ReadMapData(filePath, levelMap);
@@ -14,10 +15,10 @@ void Level::Load(std::string filePath) {
 	// Find cannon starting position
 	for (int y = 0; y < Config::GRID_HEIGHT; ++y) {
 		for (int x = 0; x < Config::GRID_WIDTH; ++x) {
-			MapManager::Tile& tile = levelMap[y][x];
+			Tile& tile = levelMap[y][x];
 
 			// Find cannon starting position
-			if (tile.Type() == MapManager::TILE_PLAYER_CANNON) {
+			if (tile.Type() == TILE_PLAYER_CANNON) {
 				playerCannonStartPos = { tile.pos.x,tile.pos.y + tile.size.y / 2.0f };
 			}
 

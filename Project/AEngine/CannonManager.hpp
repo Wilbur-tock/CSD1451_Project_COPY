@@ -4,14 +4,6 @@
 #include "pch.hpp"
 
 #include "GameObject.hpp"
-#include "MapManager.hpp"
-#include "GraphicsManager.hpp"
-#include "AssetsManager.hpp"
-#include "Color.hpp"
-#include "CameraManager.hpp"
-#include "GameStateManager.hpp"
-#include "Utils.hpp"
-#include "CollisionManager.hpp"
 
 namespace CannonManager {
 	enum ProjectileMode {
