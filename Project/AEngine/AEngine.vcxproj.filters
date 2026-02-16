@@ -140,13 +140,13 @@
     <ClInclude Include="TextObject.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Utils.hpp">
-      <Filter>Source Files</Filter>
-    </ClInclude>
     <ClInclude Include="Calculation.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Attributes.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Utils.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

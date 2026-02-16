@@ -44,7 +44,7 @@ namespace MapEditor {
 
 		for (int y = 0; y < Config::GRID_HEIGHT; ++y) {
 			for (int x = 0; x < Config::GRID_WIDTH; ++x) {
-				output << newMap[y][x].type << " ";
+				output << newMap[y][x].Type() << " ";
 			}
 			output << std::endl;
 		}
@@ -70,7 +70,7 @@ namespace MapEditor {
 		for (int y = 0; y < Config::GRID_HEIGHT; ++y) {
 			for (int x = 0; x < Config::GRID_WIDTH; ++x) {
 				int val = 0;
-				newMap[y][x].type = static_cast<TileType>(val);
+				newMap[y][x].Type(static_cast<TileType>(val));
 				output << val << " ";
 			}
 			output << std::endl;
@@ -94,7 +94,7 @@ namespace MapEditor {
 	static void ResetMap() {
 		for (std::vector<Tile> &list : newMap) {
 			for (Tile& tile : list) {
-				tile.type = static_cast<TileType>(0);
+				tile.Type(static_cast<TileType>(0));
 			}
 		}
 	}
@@ -121,33 +121,33 @@ namespace MapEditor {
 		// Check for input to draw the map editor
 		if (gridX >= 0 && gridX < Config::GRID_WIDTH && gridY >= 0 && gridY < Config::GRID_HEIGHT) {
 			if (AEInputCheckCurr(AEVK_LBUTTON)) {
-				newMap[gridY][gridX].type = drawingTileType;
+				newMap[gridY][gridX].Type(drawingTileType);
 
 				if (AEInputCheckCurr(AEVK_LCTRL) || AEInputCheckCurr(AEVK_RCTRL)) {
 					for (int i = 0; i < Config::GRID_WIDTH; ++i) {
-						newMap[gridY][i].type = drawingTileType;
+						newMap[gridY][i].Type(drawingTileType);
 					}
 				}
 
 				if (AEInputCheckCurr(AEVK_LSHIFT) || AEInputCheckCurr(AEVK_RSHIFT)) {
 					for (int i = 0; i < Config::GRID_HEIGHT; ++i) {
-						newMap[i][gridX].type = drawingTileType;
+						newMap[i][gridX].Type(drawingTileType);
 					}
 				}
 			}
 			else if (AEInputCheckCurr(AEVK_RBUTTON)) {
 
-				newMap[gridY][gridX].type = MapManager::TILE_EMPTY;
+				newMap[gridY][gridX].Type(MapManager::TILE_EMPTY);
 
 				if (AEInputCheckCurr(AEVK_LCTRL) || AEInputCheckCurr(AEVK_RCTRL)) {
 					for (int i = 0; i < Config::GRID_WIDTH; ++i) {
-						newMap[gridY][i].type = MapManager::TILE_EMPTY;
+						newMap[gridY][i].Type(MapManager::TILE_EMPTY);
 					}
 				}
 
 				if (AEInputCheckCurr(AEVK_LSHIFT) || AEInputCheckCurr(AEVK_RSHIFT)) {
 					for (int i = 0; i < Config::GRID_HEIGHT; ++i) {
-						newMap[i][gridX].type = MapManager::TILE_EMPTY;
+						newMap[i][gridX].Type(MapManager::TILE_EMPTY);
 					}
 				}
 			}
@@ -242,7 +242,7 @@ namespace MapEditor {
 			Tile& tile = (*currentMap)[gridY][gridX];
 
 			debugText.textContent = "Grid\nIndex X: " + std::to_string(gridX) + " Y: " + std::to_string(gridY)
-				+ "\nTile: " + MapManager::TileTypeToString(tile.type)
+				+ "\nTile: " + MapManager::TileTypeToString(tile.Type())
 				+ "\nPos X: " + Utils::FormatFloat(newMap[gridY][gridX].pos.x, 2) + " Y: " + Utils::FormatFloat(newMap[gridY][gridX].pos.y, 2)
 				+ "\nCamera " + std::to_string(CameraManager::camera.GetState()) +
 				+ "\nPos X:" + Utils::FormatFloat(x, 2) + " Y: " + Utils::FormatFloat(y, 2)

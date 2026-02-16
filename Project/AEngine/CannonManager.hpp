@@ -26,19 +26,20 @@ namespace CannonManager {
 		ProjectileMode mode = IDLE;
 	public:
 		float timer = 0.0f;
-		AEVec2 velocity; // Vector rate of change of displacement (direction * speed)
+		AEVec2 velocity = { 0,0 }; // Vector rate of change of displacement (direction * speed)
 		bool isActive = false, isCollisionDetected = false, isGrounded = false, toBeDestroyed = false;
 
 		Projectile();
 		Projectile(AEVec2 _pos, AEGfxTexture* _texture, AEVec2 _velocity);
 
-		int GetAttackCharges() const;
-		void SetAttackCharges(int value);
-		ProjectileMode GetMode() const;
-		void SetMode(ProjectileMode newMode);
+		int AttackCharges() const;
+		void AttackCharges(int value);
+		ProjectileMode Mode() const;
+		void Mode(ProjectileMode newMode);
 
 		void Render();
 		void MoveProjectile(float dt);
+		void DamageBlocks(int x, int y, int damage, int damageRadiusMultipler);
 		void ConsumeAttackCharge();
 		void Destroy();
 	};
@@ -47,6 +48,7 @@ namespace CannonManager {
 	private:
 		int ammoCount = 0, ammoLimit = 10;
 		bool isShootingRight = true;
+		bool isActive = false; // has projectile has been shot out of the cannon
 		float cannonAngle = 0.0f; // Angle of the cannon for the projectile to shoot from
 
 		float projectileLifespan = 2.0f;
@@ -69,8 +71,8 @@ namespace CannonManager {
 
 		// Getters & Setters
 		
-		int GetDamage() const;
-		void SetDamage(int _damage);
+		int Damage() const;
+		void Damage(int _damage);
 
 		// Reset values of the cannon ammo vectors to be in its default state
 		void Reset();
@@ -78,15 +80,18 @@ namespace CannonManager {
 		// Calculate the charge shot power and update any shot projectiles
 		// map is used to check for collision with the tiles
 		void Update();
+		void Render();
+
 		// Check for left mouse input the shot power will be increased/decreased based on the charge rate
 		void ChargeShot();
-		void Render();
+
 		void ShootProjectile();
 		// Render and move the projectile once it has reach the end of its lifespan it is destroy
 		void UpdateProjectile();
 		// Destroy projectile once it reached the end of its lifespan or out of the map bounds
 		void DestroyProjectile(Projectile& projectile);
 		// UI to display the charging shot power bar */
+
 		void UIChargeShotBar();
 		void SetCamera(bool isFollowingProjectile);
 		void DrawTrajectory();

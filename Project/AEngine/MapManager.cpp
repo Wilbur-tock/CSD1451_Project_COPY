@@ -1,5 +1,4 @@
-﻿#include "pch.hpp"
-#include "MapManager.hpp"
+﻿#include "MapManager.hpp"
 #include "GraphicsManager.hpp"
 #include "AssetsManager.hpp"
 #include "Color.hpp"
@@ -19,22 +18,24 @@ namespace MapManager {
 		: GameObject{ _pos, {defaultSize,defaultSize}, _texture, Color{1,1,1} }, type{ _type }, gridId{ 0,0 } {
 	}
 
-	void Tile::Damage(int damage) {
-		attributes.Damage(damage);
-		if (attributes.GetHealth() <= 0) {
-			type = TILE_EMPTY; //TEMPORARY
-		}
-		//std::cout << "Damaged Tile x: " << id.x << " y: " << id.y << " health: " << health << std::endl;
+	TileType Tile::Type() const { return type; }
+	void Tile::Type(TileType newType) {
+		type = newType;
 	}
 
 	bool Tile::IsGround() const {
 		return type >= TILE_BLOCK_GROUND_0 && type <= TILE_BLOCK_GROUND_2;
 	}
 	bool Tile::IsBlocks() const {
-		return type == TILE_BLOCK_1
-			|| type == TILE_BLOCK_2
-			|| type == TILE_BLOCK_1_TOP
-			|| type == TILE_BLOCK_2_TOP;
+		return type >= TILE_BLOCK_1_TOP && type <= TILE_BLOCK_2;
+	}
+
+	void Tile::Damage(int damage) {
+		attributes.Damage(damage);
+		if (attributes.GetHealth() <= 0) {
+			type = TILE_EMPTY; //TEMPORARY
+		}
+		//std::cout << "Damaged Tile x: " << id.x << " y: " << id.y << " health: " << health << std::endl;
 	}
 
 	// Cached textures
@@ -163,7 +164,7 @@ namespace MapManager {
 				tile.pos = { startX + (x * tileSize), startY - (y * tileSize) };
 				tile.size = { Config::TILE_SIZE,Config::TILE_SIZE };
 				tile.texture = tileTexture;
-				tile.type = static_cast<TileType>(type);
+				tile.Type(static_cast<TileType>(type));
 				tile.gridId.x = static_cast<f32>(x);
 				tile.gridId.y = static_cast<f32>(y);
 			}
@@ -178,9 +179,9 @@ namespace MapManager {
 		for (int y = 0; y < Config::GRID_HEIGHT; ++y) {
 			for (int x = 0; x < Config::GRID_WIDTH; ++x) {
 				const Tile& tile = map[y][x];
-				if (tile.type == TILE_EMPTY) continue;
+				if (tile.Type() == TILE_EMPTY) continue;
 				AEMtx33 transform = GraphicsManager::CreateTransformMatrix(tile.pos.x, tile.pos.y, 0.0f, tile.size.x / 2.0f, tile.size.y / 2.0f);
-				GraphicsManager::DrawGameObject(gTileTex[tile.type], transform, Color{1,1,1,1});
+				GraphicsManager::DrawGameObject(gTileTex[tile.Type()], transform, Color{1,1,1,1});
 			}
 		}
 	}

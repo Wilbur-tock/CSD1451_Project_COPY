@@ -5,10 +5,11 @@ namespace CannonManager {
     Projectile::Projectile(AEVec2 _pos, AEGfxTexture* _texture, AEVec2 _velocity) 
         : GameObject(_pos, defaultSize, _texture), timer{ 0.0f }, velocity(_velocity) {}
 
-    int  Projectile::GetAttackCharges() const { return attackCharges; }
-    void Projectile::SetAttackCharges(int value) { attackCharges = std::clamp(value, 0, 100); }
-    ProjectileMode Projectile::GetMode() const { return mode; }
-    void Projectile::SetMode(ProjectileMode newMode) { mode = newMode; }
+    int  Projectile::AttackCharges() const { return attackCharges; }
+    void Projectile::AttackCharges(int value) { attackCharges = std::clamp(value, 0, 100); }
+
+    ProjectileMode Projectile::Mode() const { return mode; }
+    void Projectile::Mode(ProjectileMode newMode) { mode = newMode; }
 
     void Projectile::Render() {
         AEMtx33 mat = GraphicsManager::CreateTransformMatrix(pos.x, pos.y, 0, size.x, size.y);
@@ -30,7 +31,7 @@ namespace CannonManager {
     }
 
     void Projectile::ConsumeAttackCharge() {
-        if (--attackCharges <= 0) {
+        if (--attackCharges < 0) {
             attackCharges = 0;
             mode = IDLE;
         }
@@ -41,6 +42,8 @@ namespace CannonManager {
         timer = 0.0f;
     }
 
+    //======================================= Cannon ====================================
+
     Cannon::Cannon() : ammoLimit {10} { Reset(); }
     Cannon::Cannon(AEVec2 _pos, AEGfxTexture* _texture, int _ammoLimit, bool _isShootingRight, AEVec2 _size)
         : GameObject(_pos, _size, _texture, Color{ 1,1,1,1 }),
@@ -48,8 +51,8 @@ namespace CannonManager {
         Reset();
     }
 
-    int Cannon::GetDamage() const { return damage; }
-    void Cannon::SetDamage(int _damage) { damage = std::clamp(_damage, minDamage, maxDamage); }
+    int Cannon::Damage() const { return damage; }
+    void Cannon::Damage(int _damage) { damage = std::clamp(_damage, minDamage, maxDamage); }
 
     void Cannon::Reset() {
         // Reset to default
@@ -67,9 +70,10 @@ namespace CannonManager {
     void Cannon::Update() {
         float worldMouseX = 0, worldMouseY = 0;
         Utils::GetWorldMousePos(worldMouseX, worldMouseY);
-
+        
         // Calculate angle toward mouse
         cannonAngle = atan2(worldMouseY - pos.y, worldMouseX - pos.x);
+
         // Add limits so it can only turn facing upwards or downwards limits
         if (isShootingRight) {
             cannonAngle = std::clamp(cannonAngle, -1.5f, 1.5f);
@@ -84,6 +88,7 @@ namespace CannonManager {
             }
         }
 
+        DrawTrajectory();
         ChargeShot();
         UpdateProjectile();
 
@@ -109,7 +114,7 @@ namespace CannonManager {
                     + "\nGrounded: " + std::string(projectile.isGrounded ? "true" : "false")
                     + "\nTo Be Destroyed: " + std::string(projectile.toBeDestroyed ? "true" : "false")
                     + "\nTimer: " + Utils::FormatFloat(projectile.timer,2)
-                    + "\nAttack Charges: " + std::to_string(projectile.GetAttackCharges());
+                    + "\nAttack Charges: " + std::to_string(projectile.AttackCharges());
             }
             
             GraphicsManager::DrawTextUI(txtObj);
@@ -118,7 +123,8 @@ namespace CannonManager {
     }
 
     void Cannon::ChargeShot() {
-        DrawTrajectory();
+        if (isActive == true) return;
+
         if (AEInputCheckCurr(VK_LBUTTON)) {
             float chargeRateWithDT = chargeRate * GameStateManager::dt;
             chargingPower += isPowerIncrease ? chargeRateWithDT : -chargeRateWithDT;
@@ -132,37 +138,72 @@ namespace CannonManager {
                 isPowerIncrease = true;
             }
 
+            // When player press left mouse click, set camera to position the cannon and unable to move the camera
+            CameraManager::camera.SetPosition(pos);
+            CameraManager::camera.SetState(CameraManager::CameraController::CameraState::STATIC);
             UIChargeShotBar();
         }
 
         // Shoot when the button is RELEASED
         if (AEInputCheckReleased(VK_LBUTTON)) {
+            isActive = true;
             shotPower = chargingPower;
-            ShootProjectile(); // Pass the built-up power
+            ShootProjectile();
             chargingPower = minPower; // Reset for next shot
         }
     }
 
+    void Projectile::DamageBlocks(int x, int y, int damage, int damageRadiusMultipler) {
+        if (Mode() == IDLE) return;
+
+        int minDX = x, minDY = y, maxDX = x, maxDY = y;
+        // Increased damage radius
+        if (damageRadiusMultipler > 1) {
+            int addRadius = damageRadiusMultipler - 1;
+            minDX -= addRadius;
+            minDY -= addRadius;
+            maxDX += addRadius;
+            maxDY += addRadius;
+        }
+
+        for (int dY = minDY; dY <= maxDY; ++dY) {
+            for (int dX = minDX; dX <= maxDX; ++dX) {
+                if (Utils::IsGridIndexOutOfBounds(dX, dY)) continue;
+
+                MapManager::Tile& tileToDamage = (*MapManager::currentMap)[dY][dX];
+                // Only damage blocks type
+                if (!tileToDamage.IsBlocks()) continue;
+
+                std::cout << "Damage Tile: " << MapManager::TileTypeToString(tileToDamage.Type())
+                    << " x: " << tileToDamage.gridId.x << " y: " << tileToDamage.gridId.y
+                    << " " << tileToDamage.attributes.GetHealth() << std::endl;
+
+                tileToDamage.Damage(damage);
+                ConsumeAttackCharge();
+            }
+        }
+    }
+
     void Cannon::Render() {
-        // size.x/size.y are your "half-size" scales (same convention as your tiles use tileSize/2)
         AEMtx33 mat = GraphicsManager::CreateTransformMatrix(pos.x, pos.y, cannonAngle, size.x, size.y);
         GraphicsManager::DrawGameObject(texture, mat, textureColor);
     }
 
     void Cannon::ShootProjectile() {
-        // Assign values to an projectile
-        ammo[ammoCount].isActive = true;
-        ammo[ammoCount].id = ammoCount;
-        ammo[ammoCount].SetMode(ATTACK);
+        // Assign values to this active projectile
+        Projectile& projectile = ammo[ammoCount];
+        projectile.isActive = true;
+        projectile.id = ammoCount;
+        projectile.Mode(ATTACK);
 
         // Add offset to ensure that the projectile spawn at the barrel instead of the middle of the cannon
-        ammo[ammoCount].pos.x = pos.x + cos(cannonAngle) * size.x;
-        ammo[ammoCount].pos.y = pos.y + sin(cannonAngle) * size.x;
+        projectile.pos.x = pos.x + (cos(cannonAngle) * size.x);
+        projectile.pos.y = pos.y + (sin(cannonAngle) * size.y);
 
         // Calculate velocity here once only to ensure that gravity has an effect
-        ammo[ammoCount].velocity.x = cos(cannonAngle) * shotPower;
-        ammo[ammoCount].velocity.y = sin(cannonAngle) * shotPower;
-        ammo[ammoCount].timer = projectileLifespan;
+        projectile.velocity.x = cos(cannonAngle) * shotPower;
+        projectile.velocity.y = sin(cannonAngle) * shotPower;
+        projectile.timer = projectileLifespan;
 
         // Add to the vector list
         activeAmmo.push_back(ammo[ammoCount]);
@@ -247,38 +288,40 @@ namespace CannonManager {
                                 }
                                 projectile.isCollisionDetected = true;
 
-                                // Damaged tiles once a collision with a block/ground is detected
-                                if (projectile.isCollisionDetected && projectile.GetMode() == ATTACK) {
-                                    int minDX = x, minDY = y, maxDX = x, maxDY = y;
-                                    // Increased damage radius
-                                    if (damageTileRadiusMultipler > 1) {
-                                        int addRadius = damageTileRadiusMultipler - 1;
-                                        minDX -= addRadius;
-                                        minDY -= addRadius;
-                                        maxDX += addRadius;
-                                        maxDY += addRadius;
-                                    }
-
-                                    for (int dY = minDY; dY <= maxDY; ++dY) {
-                                        for (int dX = minDX; dX <= maxDX; ++dX) {
-                                            if (Utils::IsGridIndexOutOfBounds(dX, dY)) continue;
-
-                                            MapManager::Tile& tileToDamage = (*MapManager::currentMap)[dY][dX];
-                                            // Only damage blocks type
-                                            if (!tileToDamage.IsBlocks()) continue;
-
-                                            tileToDamage.Damage(damage);
-
-                                            std::cout << "Damage Tile: " << MapManager::TileTypeToString(tile.type)
-                                                << " x: " << tile.gridId.x << " y: " << tile.gridId.y
-                                                << " " << tile.attributes.GetHealth() << std::endl;
-                                        }
-                                    }
-
-                                    projectile.ConsumeAttackCharge();
+                                if (projectile.isCollisionDetected) {
+                                    projectile.DamageBlocks(x, y, damage, damageTileRadiusMultipler);
                                 }
-                            }
 
+                                // Damaged tiles once a collision with a block/ground is detected
+                                //if (projectile.isCollisionDetected && projectile.Mode() == ATTACK) {
+                                //    int minDX = x, minDY = y, maxDX = x, maxDY = y;
+                                //    // Increased damage radius
+                                //    if (damageTileRadiusMultipler > 1) {
+                                //        int addRadius = damageTileRadiusMultipler - 1;
+                                //        minDX -= addRadius;
+                                //        minDY -= addRadius;
+                                //        maxDX += addRadius;
+                                //        maxDY += addRadius;
+                                //    }
+                                //
+                                //    for (int dY = minDY; dY <= maxDY; ++dY) {
+                                //        for (int dX = minDX; dX <= maxDX; ++dX) {
+                                //            if (Utils::IsGridIndexOutOfBounds(dX, dY)) continue;
+                                //
+                                //            MapManager::Tile& tileToDamage = (*MapManager::currentMap)[dY][dX];
+                                //            // Only damage blocks type
+                                //            if (!tileToDamage.IsBlocks()) continue;
+                                //
+                                //            tileToDamage.Damage(damage);
+                                //            projectile.ConsumeAttackCharge();
+                                //
+                                //            std::cout << "Damage Tile: " << MapManager::TileTypeToString(tile.type)
+                                //                << " x: " << tile.gridId.x << " y: " << tile.gridId.y
+                                //                << " " << tile.attributes.GetHealth() << std::endl;
+                                //        }
+                                //    }
+                                //}
+                            }
                         }
                     }
                 }
@@ -343,6 +386,8 @@ namespace CannonManager {
                     std::cout << "Removing " << i << " " << "Count " << activeAmmo.size() << std::endl;
                 }
             }
+
+            isActive = false; // reset cannon back to false to allow player to shoot again after projectile been destroyed
         }
     }
 
@@ -387,7 +432,7 @@ namespace CannonManager {
     }
 
     void Cannon::DrawTrajectory() {
-        int numDots = 0; //DON'T DRAW FOR NOW
+        int numDots = 0;
         // Starting position (at the barrel tip, matching ShootProjectile)
         float startX = pos.x + cos(cannonAngle) * size.x;
         float startY = pos.y + sin(cannonAngle) * size.x;

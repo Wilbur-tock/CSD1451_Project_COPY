@@ -30,23 +30,27 @@ namespace MapManager {
 
 	class Tile : public GameObject {
 		float const defaultSize = Config::TILE_SIZE;
+		TileType prevType = TILE_EMPTY; // previous tile type
+		TileType type = TILE_EMPTY; // current tile type
 	public:
-		TileType type = TILE_EMPTY;
 		AEVec2 gridId{0,0}; // Grid index x and y
 		Attributes attributes;
 
 		Tile() = default;
 		Tile(AEVec2 _pos, AEGfxTexture* _texture, TileType _type);
 
-		void Damage(int damage);
+		TileType Type() const;
+		void Type(TileType newType);
 
 		bool IsGround() const;
 		bool IsBlocks() const;
+
+		void Damage(int damage);
 	};
 
-	extern std::vector<std::vector<Tile>> *currentMap; // Current map layout that is being displayed onto the map
 
 	std::string TileTypeToString(int id);
+	extern std::vector<std::vector<Tile>> *currentMap; // Current map layout that is being displayed onto the map
 
 	void Load();
 	// Read map data from txt file and then update the data to 2D vector whatever or not barrier is needed

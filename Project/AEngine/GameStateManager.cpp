@@ -264,6 +264,5 @@ namespace GameStateManager {
         MainMenu::Unload();
         AssetsManager::Unload();
         GraphicsManager::Unload();
-        // Free camera resources if needed
     }
 }
