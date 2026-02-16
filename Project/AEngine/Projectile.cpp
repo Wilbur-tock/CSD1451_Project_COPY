@@ -6,8 +6,8 @@
 #include "Tile.hpp"
 
 Projectile::Projectile() : timer{ 0.0f }, velocity{ 0.0f,0.0f } {}
-Projectile::Projectile(AEVec2 _pos, AEGfxTexture* _texture, AEVec2 _velocity)
-    : GameObject(_pos, defaultSize, _texture), timer{ 0.0f }, velocity(_velocity) {
+Projectile::Projectile(AEGfxTexture* _texture, ProjectileMode _mode, AEVec2 _pos, int _attackCharges, AEVec2 _velocity)
+    : GameObject(_pos, defaultSize, _texture), velocity(_velocity), timer{ 0.0f }, mode(_mode), attackCharges{_attackCharges} {
 }
 
 int  Projectile::AttackCharges() const { return attackCharges; }
@@ -15,6 +15,19 @@ void Projectile::AttackCharges(int value) { attackCharges = std::clamp(value, 0,
 
 ProjectileMode Projectile::Mode() const { return mode; }
 void Projectile::Mode(ProjectileMode newMode) { mode = newMode; }
+
+int Projectile::ProjectileId() const { return projectileId; }
+
+void Projectile::AbilityUpdate() {
+    if (Mode() == IDLE || Mode() == ATTACK) return;
+
+    if (Mode() == BOMB) {
+        if (AEInputCheckTriggered(AEVK_LBUTTON)) {
+            velocity = { 0,0 }; // fall straight down immediately
+            std::cout << "BOMB mode triggered";
+        }
+    }
+}
 
 void Projectile::Render() {
     AEMtx33 mat = GraphicsManager::CreateTransformMatrix(pos.x, pos.y, 0, size.x, size.y);
@@ -36,7 +49,7 @@ void Projectile::MoveProjectile(float dt) {
 }
 
 void Projectile::ConsumeAttackCharge() {
-    if (--attackCharges < 0) {
+    if (--attackCharges <= 0) {
         attackCharges = 0;
         mode = IDLE;
     }
@@ -47,13 +60,15 @@ void Projectile::Destroy() {
     timer = 0.0f;
 }
 
-void Projectile::DamageBlocks(int x, int y, int damage, int blastRadiusMod) {
+void Projectile::DamageBlocks(int x, int y) {
     if (Mode() == IDLE) return;
+
+    int blastRadius = attribute.DamageRadius();
 
     int minDX = x, minDY = y, maxDX = x, maxDY = y;
     // Increased damage radius based on blast radius
-    if (blastRadiusMod > 1) {
-        int addRadius = blastRadiusMod - 1;
+    if (blastRadius > 1) {
+        int addRadius = blastRadius - 1;
         minDX -= addRadius;
         minDY -= addRadius;
         maxDX += addRadius;
@@ -72,7 +87,7 @@ void Projectile::DamageBlocks(int x, int y, int damage, int blastRadiusMod) {
                 << " x: " << tileToDamage.gridId.x << " y: " << tileToDamage.gridId.y
                 << " " << tileToDamage.attributes.Health() << std::endl;
 
-            tileToDamage.Damage(damage);
+            tileToDamage.Damage(attribute.Damage());
             ConsumeAttackCharge();
         }
     }

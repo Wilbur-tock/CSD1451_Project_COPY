@@ -9,7 +9,6 @@
 namespace CannonManager {
 	class Cannon : public GameObject {
 	private:
-		int ammoCount = 0, ammoLimit = 10;
 		bool isShootingRight = true;
 		bool isActive = false; // has projectile has been shot out of the cannon
 		float cannonAngle = 0.0f; // Angle of the cannon for the projectile to shoot from
@@ -17,26 +16,23 @@ namespace CannonManager {
 		// Cannon attributes
 		AEVec2 defaultSize{ 30,10 };
 		float projectileLifespan = 2.0f;
-		int defaultDamage{10}, minDamage{0},maxDamage{100};
-		int damage = 100; // Damage of the projectile shot from the cannon
-		int blastRadiusMod = 2;
+		int selectedProjectileId = 1; // selected projectile index
+		int ammoCount = 10;
+		std::vector<Projectile> ammo;
 
 		// Power charging system (how far the cannon shoots the projectile)
 		float minPower = 100, maxPower = 2500, chargeRate = maxPower * 0.75f;
-		float chargingPower;
-		float shotPower; // The amount of shot power player charged up
+		float chargingPower = 0;
+		float shotPower = 0; // The amount of shot power player charged up
 		bool isPowerIncrease = true;
 	public:
-		std::vector<Projectile> ammo, activeAmmo;
+		std::vector<Projectile> activeAmmo;
 
 		// Constructors
 		Cannon();
-		Cannon(AEVec2 _pos, AEGfxTexture* _texture, int _ammoLimit, bool _isShootingRight = true, AEVec2 _size = {30,10});
+		Cannon(AEVec2 _pos, AEGfxTexture* _texture, bool _isShootingRight = true, AEVec2 _size = {30,10});
 
 		// Getters & Setters
-		
-		int Damage() const;
-		void Damage(int _damage);
 
 		// Reset values of the cannon ammo vectors to be in its default state
 		void Reset();

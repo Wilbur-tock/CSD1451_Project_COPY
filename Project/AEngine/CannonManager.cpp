@@ -9,29 +9,27 @@
 #include "Utils.hpp"
 #include "CollisionManager.hpp"
 #include "Tile.hpp"
+#include "AbilitiesManager.hpp"
 
 namespace CannonManager {
-    //======================================= Cannon ====================================
-
-    Cannon::Cannon() : ammoLimit {10} { Reset(); }
-    Cannon::Cannon(AEVec2 _pos, AEGfxTexture* _texture, int _ammoLimit, bool _isShootingRight, AEVec2 _size)
-        : GameObject(_pos, _size, _texture, Color{ 1,1,1,1 }),
-        ammoLimit{ _ammoLimit }, isShootingRight{_isShootingRight}, cannonAngle{0.0f}, ammoCount{ 0 } {
+    Cannon::Cannon() { Reset(); }
+    Cannon::Cannon(AEVec2 _pos, AEGfxTexture* _texture, bool _isShootingRight, AEVec2 _size)
+        : GameObject(_pos, _size, _texture, Color{ 1,1,1,1 }), isShootingRight{_isShootingRight } {
         Reset();
     }
-
-    int Cannon::Damage() const { return damage; }
-    void Cannon::Damage(int _damage) { damage = std::clamp(_damage, minDamage, maxDamage); }
 
     void Cannon::Reset() {
         // Reset to default
         ammo.clear();
-        ammo.resize(ammoLimit);
+        ammo.resize(ammoCount);
+
         // Initalize all the projectile variables
-        for (Projectile &projectile : ammo) {
-            projectile = { {0,0}, AssetsManager::circleTexture, {0,0} };
-            projectile.size = { 10,10 };
+        for (int i = 0; i < ammoCount; ++i) {
+            Projectile& projectile = ammo[i];
+            projectile = { AssetsManager::circleTexture, static_cast<ProjectileMode>(i + i) };
+            AbilitiesManager::SetProjectileAbility(projectile);
         }
+
         activeAmmo.clear(); // ensure that there should not be any active ammo when cannon is reset
         ammoCount = 0;
     }
@@ -72,18 +70,19 @@ namespace CannonManager {
             
             TextObject txtObj{ "", Utils::debuggerInfo.first * 0.8f, Utils::debuggerInfo.second, {0.5f, 0.99f} };
             txtObj.textContent = "Cannon\nPos X: " + Utils::FormatFloat(pos.x, 2) + " Y: " + Utils::FormatFloat(pos.y, 2)
-                + "\nAngle: " + Utils::FormatFloat(cannonAngle * (180.0f / 3.14159265359), 2) + " " + Utils::FormatFloat(cannonAngle,2)
-                + "\nDamage: " + Utils::FormatFloat(damage,2);
+                + "\nAngle: " + Utils::FormatFloat(cannonAngle * (180.0f / 3.14159265359), 2) + " " + Utils::FormatFloat(cannonAngle, 2);
+                //+ "\nDamage: " + Utils::FormatFloat(damage,2);
             if (activeAmmo.size() > 0) {
                 Projectile& projectile = activeAmmo.back();
-                txtObj.textContent += "\nActive Projectile:\nSize: x: "
+                txtObj.textContent += "\nActive Projectile " + std::to_string(projectile.Mode()) + "\nSize: x: "
                     + Utils::FormatFloat(projectile.size.x, 2) + " y: " + Utils::FormatFloat(projectile.size.y, 2)
                     + "\nPos x: " + Utils::FormatFloat(projectile.pos.x, 2) + " y " + Utils::FormatFloat(projectile.pos.y, 2)
                     + "\nVelocity x: " + Utils::FormatFloat(activeAmmo.back().velocity.x, 2) + " y: " + Utils::FormatFloat(projectile.velocity.y, 2)
                     + "\nGrounded: " + std::string(projectile.isGrounded ? "true" : "false")
                     + "\nTo Be Destroyed: " + std::string(projectile.toBeDestroyed ? "true" : "false")
                     + "\nTimer: " + Utils::FormatFloat(projectile.timer,2)
-                    + "\nAttack Charges: " + std::to_string(projectile.AttackCharges());
+                    + "\nAttack Charges: " + std::to_string(projectile.AttackCharges())
+                    + "\nDamage Radius: " + std::to_string(projectile.attribute.DamageRadius());
             }
             
             GraphicsManager::DrawTextUI(txtObj);
@@ -94,7 +93,7 @@ namespace CannonManager {
     void Cannon::ChargeShot() {
         if (isActive == true) return;
 
-        if (AEInputCheckCurr(VK_LBUTTON)) {
+        if (AEInputCheckCurr(AEVK_LBUTTON)) {
             float chargeRateWithDT = chargeRate * GameStateManager::dt;
             chargingPower += isPowerIncrease ? chargeRateWithDT : -chargeRateWithDT;
 
@@ -114,7 +113,7 @@ namespace CannonManager {
         }
 
         // Shoot when the button is RELEASED
-        if (AEInputCheckReleased(VK_LBUTTON)) {
+        if (AEInputCheckReleased(AEVK_LBUTTON)) {
             isActive = true;
             shotPower = chargingPower;
             ShootProjectile();
@@ -129,10 +128,10 @@ namespace CannonManager {
 
     void Cannon::ShootProjectile() {
         // Assign values to this active projectile
-        Projectile& projectile = ammo[ammoCount];
+        Projectile& projectile = ammo[selectedProjectileId];
+        //Projectile projectile = selectedProjectile;
         projectile.isActive = true;
-        projectile.id = ammoCount;
-        projectile.Mode(ATTACK);
+        projectile.id = static_cast<int>(activeAmmo.size() - 1);
 
         // Add offset to ensure that the projectile spawn at the barrel instead of the middle of the cannon
         projectile.pos.x = pos.x + (cos(cannonAngle) * size.x);
@@ -144,12 +143,7 @@ namespace CannonManager {
         projectile.timer = projectileLifespan;
 
         // Add to the vector list
-        activeAmmo.push_back(ammo[ammoCount]);
-
-        // Once it reach the ammo limit reset the ammo count
-        if (++ammoCount >= ammoLimit) {
-            ammoCount = 0;
-        }
+        activeAmmo.push_back(projectile);
 
         SetCamera(true);
         std::cout << "Projectile Fired!" << " " << ammoCount << std::endl;
@@ -158,6 +152,8 @@ namespace CannonManager {
     void Cannon::UpdateProjectile() {
         for (Projectile& projectile : activeAmmo) {
             if (!projectile.isActive) continue;
+
+            projectile.AbilityUpdate();
 
             float dt = GameStateManager::dt;
             // Increased the frequency of the collision check by using loops
@@ -227,7 +223,7 @@ namespace CannonManager {
                                 projectile.isCollisionDetected = true;
 
                                 if (projectile.isCollisionDetected) {
-                                    projectile.DamageBlocks(x, y, damage, blastRadiusMod);
+                                    projectile.DamageBlocks(x, y);
                                 }
                             }
                         }
