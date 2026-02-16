@@ -3,18 +3,30 @@
 
 #include "pch.hpp"
 
+// Attributes used for projectile, tiles, enemy and player characters
 class Attributes {
 private:
 	int const minValue = 0, maxValue = 100;
-	int health, shield;
-	float damageReduction, critReduction;
+	int maxHealth = maxValue;
+
+	int damage = 10, damageBlastRadius = 1, blastRadiusMod = 1;
+	bool canBeDamaged = true;
+
+	int health = maxValue, shield = 0;
+	float damageReduction = 0, critReduction = 0;
 public:
-	Attributes();
+	Attributes() = default;
 
-	int GetHealth() const;
-	void SetHealth(int newValue);
+	int Health() const;
+	void Health(int value);
 
-	void Damage(int damage);
+	int MaxHealth() const;
+	void MaxHealth(int value);
+
+	int Damage() const;
+	void Damage(int value);
+
+	void TakeDamage(int damage);
 };
 
 #endif // !ATTRIBUTES_HPP

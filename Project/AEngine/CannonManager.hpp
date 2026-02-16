@@ -4,38 +4,9 @@
 #include "pch.hpp"
 
 #include "GameObject.hpp"
+#include "Projectile.hpp"
 
 namespace CannonManager {
-	enum ProjectileMode {
-		IDLE,
-		ATTACK,
-	};
-
-	class Projectile : public GameObject {
-	private:
-		AEVec2 defaultSize{ 10,10 };
-		int attackCharges = 1;
-		ProjectileMode mode = IDLE;
-	public:
-		float timer = 0.0f;
-		AEVec2 velocity = { 0,0 }; // Vector rate of change of displacement (direction * speed)
-		bool isActive = false, isCollisionDetected = false, isGrounded = false, toBeDestroyed = false;
-
-		Projectile();
-		Projectile(AEVec2 _pos, AEGfxTexture* _texture, AEVec2 _velocity);
-
-		int AttackCharges() const;
-		void AttackCharges(int value);
-		ProjectileMode Mode() const;
-		void Mode(ProjectileMode newMode);
-
-		void Render();
-		void MoveProjectile(float dt);
-		void DamageBlocks(int x, int y, int damage, int damageRadiusMultipler);
-		void ConsumeAttackCharge();
-		void Destroy();
-	};
-
 	class Cannon : public GameObject {
 	private:
 		int ammoCount = 0, ammoLimit = 10;
@@ -43,11 +14,12 @@ namespace CannonManager {
 		bool isActive = false; // has projectile has been shot out of the cannon
 		float cannonAngle = 0.0f; // Angle of the cannon for the projectile to shoot from
 
+		// Cannon attributes
+		AEVec2 defaultSize{ 30,10 };
 		float projectileLifespan = 2.0f;
 		int defaultDamage{10}, minDamage{0},maxDamage{100};
 		int damage = 100; // Damage of the projectile shot from the cannon
-		int damageTileRadiusMultipler = 2;
-		AEVec2 defaultSize{ 30,10 };
+		int blastRadiusMod = 2;
 
 		// Power charging system (how far the cannon shoots the projectile)
 		float minPower = 100, maxPower = 2500, chargeRate = maxPower * 0.75f;

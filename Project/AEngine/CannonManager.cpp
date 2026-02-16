@@ -11,47 +11,6 @@
 #include "Tile.hpp"
 
 namespace CannonManager {
-    Projectile::Projectile() : timer{ 0.0f }, velocity{ 0.0f,0.0f } {}
-    Projectile::Projectile(AEVec2 _pos, AEGfxTexture* _texture, AEVec2 _velocity) 
-        : GameObject(_pos, defaultSize, _texture), timer{ 0.0f }, velocity(_velocity) {}
-
-    int  Projectile::AttackCharges() const { return attackCharges; }
-    void Projectile::AttackCharges(int value) { attackCharges = std::clamp(value, 0, 100); }
-
-    ProjectileMode Projectile::Mode() const { return mode; }
-    void Projectile::Mode(ProjectileMode newMode) { mode = newMode; }
-
-    void Projectile::Render() {
-        AEMtx33 mat = GraphicsManager::CreateTransformMatrix(pos.x, pos.y, 0, size.x, size.y);
-        GraphicsManager::DrawGameObject(AssetsManager::circleTexture, mat, Color{ 0.5f, 0.5f, 0, 1 });
-    }
-
-    void Projectile::MoveProjectile(float dt) {
-        if (isGrounded) {
-            velocity.x *= pow(Config::FRICTION, dt);
-            velocity.y = 0; // ensure that the projectile stay on the ground
-            if (std::abs(velocity.x) < Config::MINIMUM_VELOCITY) velocity.x = 0;
-        }
-        else {
-            velocity.y -= Config::GRAVITY * dt;
-        }
-
-        pos.x += velocity.x * dt;
-        pos.y += velocity.y * dt;
-    }
-
-    void Projectile::ConsumeAttackCharge() {
-        if (--attackCharges < 0) {
-            attackCharges = 0;
-            mode = IDLE;
-        }
-    }
-
-    void Projectile::Destroy() {
-        isActive = isCollisionDetected = toBeDestroyed = false;
-        timer = 0.0f;
-    }
-
     //======================================= Cannon ====================================
 
     Cannon::Cannon() : ammoLimit {10} { Reset(); }
@@ -163,37 +122,6 @@ namespace CannonManager {
         }
     }
 
-    void Projectile::DamageBlocks(int x, int y, int damage, int damageRadiusMultipler) {
-        if (Mode() == IDLE) return;
-
-        int minDX = x, minDY = y, maxDX = x, maxDY = y;
-        // Increased damage radius
-        if (damageRadiusMultipler > 1) {
-            int addRadius = damageRadiusMultipler - 1;
-            minDX -= addRadius;
-            minDY -= addRadius;
-            maxDX += addRadius;
-            maxDY += addRadius;
-        }
-
-        for (int dY = minDY; dY <= maxDY; ++dY) {
-            for (int dX = minDX; dX <= maxDX; ++dX) {
-                if (Utils::IsGridIndexOutOfBounds(dX, dY)) continue;
-
-                Tile& tileToDamage = (*MapManager::currentMap)[dY][dX];
-                // Only damage blocks type
-                if (!tileToDamage.IsBlocks()) continue;
-
-                std::cout << "Damage Tile: " << TileTypeToString(tileToDamage.Type())
-                    << " x: " << tileToDamage.gridId.x << " y: " << tileToDamage.gridId.y
-                    << " " << tileToDamage.attributes.GetHealth() << std::endl;
-
-                tileToDamage.Damage(damage);
-                ConsumeAttackCharge();
-            }
-        }
-    }
-
     void Cannon::Render() {
         AEMtx33 mat = GraphicsManager::CreateTransformMatrix(pos.x, pos.y, cannonAngle, size.x, size.y);
         GraphicsManager::DrawGameObject(texture, mat, textureColor);
@@ -299,38 +227,8 @@ namespace CannonManager {
                                 projectile.isCollisionDetected = true;
 
                                 if (projectile.isCollisionDetected) {
-                                    projectile.DamageBlocks(x, y, damage, damageTileRadiusMultipler);
+                                    projectile.DamageBlocks(x, y, damage, blastRadiusMod);
                                 }
-
-                                // Damaged tiles once a collision with a block/ground is detected
-                                //if (projectile.isCollisionDetected && projectile.Mode() == ATTACK) {
-                                //    int minDX = x, minDY = y, maxDX = x, maxDY = y;
-                                //    // Increased damage radius
-                                //    if (damageTileRadiusMultipler > 1) {
-                                //        int addRadius = damageTileRadiusMultipler - 1;
-                                //        minDX -= addRadius;
-                                //        minDY -= addRadius;
-                                //        maxDX += addRadius;
-                                //        maxDY += addRadius;
-                                //    }
-                                //
-                                //    for (int dY = minDY; dY <= maxDY; ++dY) {
-                                //        for (int dX = minDX; dX <= maxDX; ++dX) {
-                                //            if (Utils::IsGridIndexOutOfBounds(dX, dY)) continue;
-                                //
-                                //            MapManager::Tile& tileToDamage = (*MapManager::currentMap)[dY][dX];
-                                //            // Only damage blocks type
-                                //            if (!tileToDamage.IsBlocks()) continue;
-                                //
-                                //            tileToDamage.Damage(damage);
-                                //            projectile.ConsumeAttackCharge();
-                                //
-                                //            std::cout << "Damage Tile: " << MapManager::TileTypeToString(tile.type)
-                                //                << " x: " << tile.gridId.x << " y: " << tile.gridId.y
-                                //                << " " << tile.attributes.GetHealth() << std::endl;
-                                //        }
-                                //    }
-                                //}
                             }
                         }
                     }

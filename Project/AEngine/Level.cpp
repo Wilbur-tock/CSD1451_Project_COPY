@@ -42,7 +42,7 @@ void Level::Load(std::string filePath) {
 	cannon = CannonManager::Cannon(playerCannonStartPos, barrelTex, 10, true, barrelHalfSize);
 	cannon.textureColor = Color{ 1, 1, 1, 1 };   // black barrel
 
-	debugText = { "", Utils::debuggerInfo.first, Utils::debuggerInfo.second, { -1.0f, 0.99f} };
+	debugText = { "", Utils::debuggerInfo.first * 0.8f, Utils::debuggerInfo.second, { -1.0f, 0.99f} };
 }
 
 void Level::Init() {

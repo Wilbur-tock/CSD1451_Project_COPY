@@ -6,6 +6,7 @@ Tile::Tile(AEVec2 _pos, AEGfxTexture* _texture, TileType _type)
 
 TileType Tile::Type() const { return type; }
 void Tile::Type(TileType newType) {
+	prevType = type;
 	type = newType;
 }
 
@@ -17,9 +18,9 @@ bool Tile::IsBlocks() const {
 }
 
 void Tile::Damage(int damage) {
-	attributes.Damage(damage);
-	if (attributes.GetHealth() <= 0) {
-		type = TILE_EMPTY; //TEMPORARY
+	attributes.TakeDamage(damage);
+	if (attributes.Health() <= 0) {
+		Type(TILE_EMPTY);
 	}
 	//std::cout << "Damaged Tile x: " << id.x << " y: " << id.y << " health: " << health << std::endl;
 }

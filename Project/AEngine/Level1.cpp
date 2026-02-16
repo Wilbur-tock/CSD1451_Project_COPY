@@ -42,8 +42,8 @@ namespace Level1 {
 			Tile& tile = (*MapManager::currentMap)[gridY][gridX];
 
 			levelData.debugText.textContent = "Grid:\nIndex X: " + std::to_string(gridX) + " Y: " + std::to_string(gridY)
-				+ "\nTile: " + TileTypeToString(tile.Type()) + " " + Utils::FormatFloat(tile.attributes.GetHealth(), 2) +
-				+"\nPos X: " + Utils::FormatFloat(tile.pos.x, 2) + " Y: " + Utils::FormatFloat(tile.pos.y, 2)
+				+ "\nTile: " + TileTypeToString(tile.Type()) + "\nHP: " + Utils::FormatFloat(tile.attributes.Health(), 2) +
+				+ "\nPos X: " + Utils::FormatFloat(tile.pos.x, 2) + " Y: " + Utils::FormatFloat(tile.pos.y, 2)
 				+ "\nCamera " + std::to_string(CameraManager::camera.GetState()) +
 				+ "\nPos X : " + Utils::FormatFloat(x, 2) + " Y : " + Utils::FormatFloat(y, 2)
 				+ "\nMouse\nScreen Pos X: " + Utils::FormatFloat(mouseX, 2) + " Y: " + Utils::FormatFloat(mouseY, 2)

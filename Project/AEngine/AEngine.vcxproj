@@ -119,6 +119,7 @@ xcopy "$(SolutionDir)Extern\AlphaEngine\lib\fmod.dll" "$(OutDir)" /s /r /y /q</C
     <ClCompile Include="MapEditor.cpp" />
     <ClCompile Include="MapManager.cpp" />
     <ClCompile Include="pch.cpp" />
+    <ClCompile Include="Projectile.cpp" />
     <ClCompile Include="TextObject.cpp" />
     <ClCompile Include="Tile.cpp" />
     <ClCompile Include="Utils.cpp" />
@@ -144,6 +145,7 @@ xcopy "$(SolutionDir)Extern\AlphaEngine\lib\fmod.dll" "$(OutDir)" /s /r /y /q</C
     <ClInclude Include="MapEditor.hpp" />
     <ClInclude Include="MapManager.hpp" />
     <ClInclude Include="pch.hpp" />
+    <ClInclude Include="Projectile.hpp" />
     <ClInclude Include="TextObject.hpp" />
     <ClInclude Include="Tile.hpp" />
     <ClInclude Include="Utils.hpp" />
