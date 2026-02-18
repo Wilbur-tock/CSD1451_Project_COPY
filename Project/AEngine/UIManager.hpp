@@ -5,8 +5,8 @@ namespace UIManager {
 	enum FillType {
 		RIGHT_TO_LEFT,
 		TOP_TO_BOTTOM,
-		LEFT_TO_RIGHT,
-		BOTTOM_TO_TOP,
+		//LEFT_TO_RIGHT,
+		//BOTTOM_TO_TOP,
 	};
 
 	class Bar {

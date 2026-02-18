@@ -5,6 +5,7 @@
 #include "Color.hpp"
 #include "Utils.hpp"
 #include "CollisionManager.hpp"
+#include "CameraManager.hpp"
 
 void Level::Load(std::string filePath) {
 	levelMap.resize(Config::GRID_HEIGHT, std::vector<Tile>(Config::GRID_WIDTH));
@@ -30,8 +31,8 @@ void Level::Load(std::string filePath) {
 
 			// Find enemy position
 			if (tile.Type() == TILE_ENEMY_MINION) {
-				Enemy enemy{ tile.pos, tile.size, AssetsManager::squareTexture };
-				minions.push_back(enemy);
+				Enemy enemy{ tile.pos, tile.size, AssetsManager::squareTexture, {x,y} };
+				enemies.push_back(enemy);
 			}
 		}
 	}
@@ -46,29 +47,36 @@ void Level::Load(std::string filePath) {
 	// Your old barrel used {30,10} (meaning it appears ~60x20 pixels)
 	AEVec2 barrelHalfSize{ 60, 20 };
 
-	cannon = CannonManager::Cannon(playerCannonStartPos, barrelTex, true, barrelHalfSize);
-	cannon.textureColor = Color{ 1, 1, 1, 1 };   // black barrel
+	playerCannon = CannonManager::Cannon(playerCannonStartPos, barrelTex, true, barrelHalfSize);
+	playerCannon.textureColor = Color{ 1, 1, 1, 1 };   // black barrel
 
 	debugText = { "", Utils::debuggerInfo.first * 0.8f, Utils::debuggerInfo.second, { -1.0f, 0.99f} };
 }
 
 void Level::Initalize() {
 	MapManager::currentMap = &levelMap;
+
+	// Set camera position to cannon
+	CameraManager::camera.SetPosition(playerCannon.pos);
+	CameraManager::camera.SetState(CameraManager::CameraController::INPUT);
 }
 
 void Level::Update() {
-	for (Enemy& enemy : minions) {
+	MapManager::RenderMap(levelMap);
+	playerCannon.Update();
+
+	for (Enemy& enemy : enemies) {
 		enemy.HealthBarUI();
 	}
 }
 
 std::string Level::Debugger() {
 	std::string info = "";
-	for (Enemy const& enemy : minions) {
+	for (Enemy const& enemy : enemies) {
 		if (Utils::isDebuggerOn) {
 			if (CollisionManager::IsPointInGameObject(enemy)) {
-				info = "\n\nEnemy Info:\nPos x: "
-					+ Utils::FormatFloat(enemy.pos.x, 2) + " y: " + Utils::FormatFloat(enemy.pos.y, 2)
+				info = "\n\nEnemy Info: ID: x:" + std::to_string(enemy.TileId().first) + " y: " + std::to_string(enemy.TileId().second)
+					+ "\nPos x : " +  Utils::FormatFloat(enemy.pos.x, 2) + " y: " + Utils::FormatFloat(enemy.pos.y, 2)
 					+ "\nHP: " + std::to_string(enemy.attribute.Health());
 				return info;
 			}
@@ -76,4 +84,13 @@ std::string Level::Debugger() {
 	}
 
 	return info;
+}
+
+Enemy* Level::FindEnemyAtGrid(int xId, int yId) {
+	for (Enemy& enemy : enemies) {
+		if (enemy.TileId().first == xId && enemy.TileId().second == yId) {
+			return &enemy;
+		}
+	}
+	return nullptr;
 }

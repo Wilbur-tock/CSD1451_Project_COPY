@@ -139,6 +139,10 @@ namespace MapManager {
 				tile.Type(static_cast<TileType>(type));
 				tile.gridId.x = static_cast<f32>(x);
 				tile.gridId.y = static_cast<f32>(y);
+
+				if (tile.IsBlocks()) {
+					tile.attribute.DamageModifier(5);
+				}
 			}
 		}
 

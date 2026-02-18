@@ -20,6 +20,9 @@ public:
 	int  DamageRadius() const;
 	void DamageRadius(int value);
 
+	int DamageModifier() const;
+	void DamageModifier(int value);
+
 	void TakeDamage(int damage);
 private:
 	int minValue = 0, maxValue = 100, maxHealth = maxValue;
@@ -28,6 +31,7 @@ private:
 	bool canBeDamaged = true;
 
 	int health = maxValue, shield = 0;
+	int damageModifier = 1; // times damage modifier, 1 - normal damage
 	float damageReduction = 0, critReduction = 0;
 };
 

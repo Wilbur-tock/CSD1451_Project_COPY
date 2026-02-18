@@ -5,6 +5,7 @@
 
 #include "GameObject.hpp"
 #include "Attributes.hpp"
+#include "Tile.hpp"
 
 enum ProjectileMode {
 	IDLE,
@@ -20,7 +21,9 @@ private:
 public:
 	AEVec2 velocity = { 0,0 }; // Vector rate of change of displacement (direction * speed)
 	float timer = 0.0f;
-	bool isActive = false, isCollisionDetected = false, isGrounded = false, toBeDestroyed = false;
+	bool isActive = false, isGrounded = false, toBeDestroyed = false;
+	bool isCollisionDetected = false; // collision is detected for the FIRST TIME
+	bool hasCollision = false; // collision has been detected in the past frame
 
 	Attributes attribute;
 
@@ -40,6 +43,8 @@ public:
 	// Member functions
 	void AbilityUpdate();
 	void Render();
+	// Simulate the projectile physics of bouncing off the walls, checking if it is grounded
+	void SimulatePhysics(Tile const& tile);
 	void MoveProjectile(float dt);
 	void DamageBlocks(int x, int y);
 	void ConsumeAttackCharge();

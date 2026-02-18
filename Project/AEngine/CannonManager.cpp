@@ -11,6 +11,7 @@
 #include "Tile.hpp"
 #include "AbilitiesManager.hpp"
 #include "UIManager.hpp"
+#include "LevelManager.hpp"
 
 namespace CannonManager {
     Cannon::Cannon() { Reset(); }
@@ -164,7 +165,7 @@ namespace CannonManager {
             // ensuring faster moving projectiles are check for collision multiple times
             // to ensure that the GHOSTING of block bug does not happen
             // Using sub_steps to ensure that it still moving at a per frame rate time (dt or 1/10 dt but 10 loops) even though it is looping
-            const int SUB_STEPS = 12;
+            const int SUB_STEPS = 10;
             float subDt = dt / SUB_STEPS;
 
             for (int step = 0; step < SUB_STEPS; ++step) {
@@ -185,49 +186,34 @@ namespace CannonManager {
 
                         Tile& tile = (*MapManager::currentMap)[y][x];
 
-                        if (tile.IsBlocks() || tile.IsGround()) {
+                        // Checking collision of the projectile with the tile blocks
+                        if (tile.IsBlocks() || tile.IsGround() || tile.IsEnemy()) {
                             if (CollisionManager::AreCircleSquareIntersecting(
                                 tile.pos.x, tile.pos.y, tile.size.x, tile.size.y,
                                 projectile.pos.x, projectile.pos.y, radius))
                             {
-                                // Bounds
-                                float tileTop = tile.pos.y + (tile.size.y / 2.0f);
-                                float tileBottom = tile.pos.y - (tile.size.y / 2.0f);
-                                float tileLeft = tile.pos.x - (tile.size.x / 2.0f);
-                                float tileRight = tile.pos.x + (tile.size.x / 2.0f);
-
-                                float overlapX = (radius + tile.size.x / 2.0f) - std::abs(projectile.pos.x - tile.pos.x);
-                                float overlapY = (radius + tile.size.y / 2.0f) - std::abs(projectile.pos.y - tile.pos.y);
-
-                                if (overlapX < (overlapY + bias)) {
-                                    float bounce = -0.3f;
-                                    // Resolve X (Wall) - Hit a side wall
-                                    if (projectile.pos.x < tile.pos.x) {
-                                        projectile.pos.x = tileLeft - radius - 0.1f; // Nudge out
-                                        if (projectile.velocity.x > 0) projectile.velocity.x *= bounce;
-                                    }
-                                    else {
-                                        projectile.pos.x = tileRight + radius + 0.1f; // Nudge out
-                                        if (projectile.velocity.x < 0) projectile.velocity.x *= bounce;
-                                    }
-                                }
-                                else {
-                                    // Resolve Y (Floor/Ceiling) - Hit the top or bottom of the block
-                                    if (projectile.pos.y > tile.pos.y) {
-                                        projectile.pos.y = tileTop + radius; // Flush to the tile
-                                        projectile.isGrounded = true;
-                                        projectile.velocity.y *= -0.2f; // Lose 80% of its velocity
-                                        if (std::abs(projectile.velocity.y) < Config::MINIMUM_VELOCITY) projectile.velocity.y = 0; // prevent tiny velocity
-                                    }
-                                    else { // If it hits the celling fall down
-                                        projectile.pos.y = tileBottom - radius;
-                                        projectile.velocity.y *= -0.5f; // Lost 50% of its velocity
-                                    }
-                                }
                                 projectile.isCollisionDetected = true;
+
+                                if (projectile.hasCollision) {
+                                    projectile.SimulatePhysics(tile);
+                                }
 
                                 if (projectile.isCollisionDetected) {
                                     projectile.DamageBlocks(x, y);
+                                    projectile.hasCollision = true;
+                                }
+                            }
+
+                            // Checking for collision with enemies and boss
+                            Enemy* enemyPtr = LevelManager::selectedLevel->FindEnemyAtGrid(x,y);
+                            if (enemyPtr) {
+                                Enemy& enemy = *enemyPtr;
+
+                                if (CollisionManager::AreCircleSquareIntersecting(
+                                    enemy.pos.x, enemy.pos.y, enemy.collider.size.x, enemy.collider.size.y,
+                                    projectile.pos.x, projectile.pos.y, radius)) {
+                                    enemy.attribute.TakeDamage(projectile.attribute.Damage());
+                                    std::cout << "Enemy Damage" << " Id: " << x << " " << y << " HP: " << enemy.attribute.Health() << std::endl;
                                 }
                             }
                         }

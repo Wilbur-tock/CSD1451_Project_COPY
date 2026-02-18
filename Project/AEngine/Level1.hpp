@@ -8,7 +8,7 @@ namespace Level1 {
 	void Load();
 
 	// Initalize level variables and settings
-	void Init();
+	void Initalize();
 
 	// Update Logic
 	void Update();

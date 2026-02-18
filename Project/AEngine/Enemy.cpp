@@ -2,14 +2,14 @@
 
 #include "UIManager.hpp"
 
-Enemy::Enemy(AEVec2 _pos, AEVec2 _size, AEGfxTexture* _texture) 
-	: GameObject{ _pos, _size, _texture, Color{1,1,1} } {
+Enemy::Enemy(AEVec2 _pos, AEVec2 _size, AEGfxTexture* _texture, std::pair<int, int> _tileId)
+	: GameObject{ _pos, _size, _texture, Color{1,1,1} }, attribute{}, type{MINION}, tileId{_tileId} {
 }
 
-void Enemy::HealthBarUI() {
-	attribute.Health(attribute.Health() - 1);
-	if (attribute.Health() <= 0) attribute.Health(100);
+EnemyType Enemy::Type() const { return type; }
+std::pair<int,int> Enemy::TileId() const { return tileId; }
 
+void Enemy::HealthBarUI() {
 	AEVec2 barPos = { pos.x, pos.y + size.y };
 	AEVec2 barSize = { size.x, 10 };
 

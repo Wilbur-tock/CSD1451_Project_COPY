@@ -3,7 +3,6 @@
 #include "MapManager.hpp"
 #include "GraphicsManager.hpp"
 #include "AssetsManager.hpp"
-#include "Tile.hpp"
 
 Projectile::Projectile() : timer{ 0.0f }, velocity{ 0.0f,0.0f } {}
 Projectile::Projectile(AEGfxTexture* _texture, ProjectileMode _mode, AEVec2 _pos, int _attackCharges, AEVec2 _velocity)
@@ -48,6 +47,45 @@ void Projectile::MoveProjectile(float dt) {
     pos.y += velocity.y * dt;
 }
 
+void Projectile::SimulatePhysics(Tile const& tile) {
+    float bias = 0.1f, radius = size.y * 0.5f;
+    // Bounds
+    float tileTop = tile.pos.y + (tile.size.y / 2.0f);
+    float tileBottom = tile.pos.y - (tile.size.y / 2.0f);
+    float tileLeft = tile.pos.x - (tile.size.x / 2.0f);
+    float tileRight = tile.pos.x + (tile.size.x / 2.0f);
+
+    float overlapX = (radius + tile.size.x / 2.0f) - std::abs(pos.x - tile.pos.x);
+    float overlapY = (radius + tile.size.y / 2.0f) - std::abs(pos.y - tile.pos.y);
+
+    if (overlapX < (overlapY + bias)) {
+        float bounce = -0.1f;
+        // Resolve X (Wall) - Hit a side wall
+        if (pos.x < tile.pos.x) {
+            pos.x = tileLeft - radius - 0.1f; // Nudge out
+            if (velocity.x > 0) velocity.x *= bounce;
+        }
+        else {
+            pos.x = tileRight + radius + 0.1f; // Nudge out
+            if (velocity.x < 0) velocity.x *= bounce;
+        }
+    }
+    else {
+        // Resolve Y (Floor/Ceiling) - Hit the top or bottom of the block
+        if (pos.y > tile.pos.y) {
+            pos.y = tileTop + radius; // Flush to the tile
+            isGrounded = true;
+            velocity.y *= -0.1f; // Lose 80% of its velocity
+            velocity.x *= 0.9f; // ADD FRICTION
+            if (std::abs(velocity.y) < Config::MINIMUM_VELOCITY) velocity.y = 0; // prevent tiny velocity
+        }
+        else { // If it hits the celling fall down
+            pos.y = tileBottom - radius;
+            velocity.y *= -0.1f; // Lost 60% of its velocity
+        }
+    }
+}
+
 void Projectile::ConsumeAttackCharge() {
     if (--attackCharges <= 0) {
         attackCharges = 0;
@@ -85,9 +123,9 @@ void Projectile::DamageBlocks(int x, int y) {
 
             std::cout << "Damage Tile: " << TileTypeToString(tileToDamage.Type())
                 << " x: " << tileToDamage.gridId.x << " y: " << tileToDamage.gridId.y
-                << " " << tileToDamage.attributes.Health() << std::endl;
+                << " " << tileToDamage.attribute.Health() << std::endl;
 
-            tileToDamage.Damage(attribute.Damage());
+            tileToDamage.TakeDamage(attribute.Damage());
             ConsumeAttackCharge();
         }
     }

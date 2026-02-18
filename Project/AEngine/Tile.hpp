@@ -29,17 +29,16 @@ enum TileType {
 	TILE_COUNT, // Count of the enum always at the last index
 };
 
-inline std::vector<std::string> tileNames = { "Air", "Grass", "Dirt", "Dirt with Stones", "Block_1_TOP", "Block_1", "Block_2_TOP", "Block_2",
+inline std::vector<std::string> tileNames = { 
+	"Air", "Grass", "Dirt", "Dirt with Stones", "Block_1_TOP", "Block_1", "Block_2_TOP", "Block_2",
 	"Player Cannon", "Player Character",
-	"Enemy Cannon", "Enemy Minion", "Enemy Boss" };
+	"Enemy Cannon", "Enemy Minion", "Enemy Boss" 
+};
 
 class Tile : public GameObject {
-	float const defaultSize = Config::TILE_SIZE;
-	TileType prevType = TILE_EMPTY; // previous tile type
-	TileType type = TILE_EMPTY; // current tile type
 public:
 	AEVec2 gridId{ 0,0 }; // Grid index x and y
-	Attributes attributes;
+	Attributes attribute;
 
 	Tile() = default;
 	Tile(AEVec2 _pos, AEGfxTexture* _texture, TileType _type);
@@ -47,10 +46,17 @@ public:
 	TileType Type() const;
 	void Type(TileType newType);
 
+	// Member functions
+
 	bool IsGround() const;
 	bool IsBlocks() const;
+	bool IsEnemy() const;
 
-	void Damage(int damage);
+	void TakeDamage(int damage);
+private:
+	float const defaultSize = Config::TILE_SIZE;
+	TileType prevType = TILE_EMPTY; // previous tile type
+	TileType type = TILE_EMPTY; // current tile type
 };
 
 

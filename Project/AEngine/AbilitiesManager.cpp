@@ -5,7 +5,7 @@ namespace AbilitiesManager {
 		switch (projectile.Mode()) {
 		case BOMB: // 3 tile radius AOE Instant damage
 			projectile.attribute.DamageRadius(3);
-			projectile.attribute.Damage(100);
+			projectile.attribute.Damage(10);
 			break;
 		}
 	}
