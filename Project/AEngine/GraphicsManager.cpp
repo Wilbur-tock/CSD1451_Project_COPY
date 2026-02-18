@@ -95,7 +95,7 @@ namespace GraphicsManager {
 		AEGfxSetTransparency(1.0f);
 
 		// Change the colour of the sprite
-		AEGfxSetColorToMultiply(color.GetRed(), color.GetGreen(), color.GetBlue(), color.GetAlpha());
+		AEGfxSetColorToMultiply(color.Red(), color.Green(), color.Blue(), color.Alpha());
 		AEGfxSetColorToAdd(0.0f, 0.0f, 0.0f, 0.0f);
 
 		AEGfxTextureSet(pTex, 0, 0);
@@ -156,7 +156,7 @@ namespace GraphicsManager {
 				f32 w, h;
 				AEGfxGetPrintSize(AssetsManager::textFont, pText, textObj.textScale, &w, &h);
 				AEGfxPrint(AssetsManager::textFont, pText, textObj.pos.x, currentY - h, textObj.textScale, 
-					textObj.color.GetRed(), textObj.color.GetGreen(), textObj.color.GetBlue(), textObj.color.GetAlpha());
+					textObj.color.Red(), textObj.color.Green(), textObj.color.Blue(), textObj.color.Alpha());
 			}
 
 			currentY -= lineHeight * 1.5f; // Move down for next line
@@ -166,7 +166,7 @@ namespace GraphicsManager {
 	void DrawButton(Button &btn) {
 		Color btnColor = btn.color;
 		if (btn.isHovered) {
-			btnColor = Color{ btn.color.GetRed(), btn.color.GetGreen(), btn.color.GetBlue(), btn.color.GetAlpha() * 0.5f}; // Assign hovered color
+			btnColor = Color{ btn.color.Red(), btn.color.Green(), btn.color.Blue(), btn.color.Alpha() * 0.5f}; // Assign hovered color
 		}
 		
 		// Draw button object

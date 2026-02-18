@@ -4,6 +4,7 @@
 #include "MapManager.hpp"
 #include "Color.hpp"
 #include "Utils.hpp"
+#include "CollisionManager.hpp"
 
 void Level::Load(std::string filePath) {
 	levelMap.resize(Config::GRID_HEIGHT, std::vector<Tile>(Config::GRID_WIDTH));
@@ -12,7 +13,6 @@ void Level::Load(std::string filePath) {
 	MapManager::ReadMapData(filePath, levelMap);
 
 	float minX = Config::GRID_WIDTH, minY = Config::GRID_WIDTH, maxX = 0, maxY = 0;
-	// Find cannon starting position
 	for (int y = 0; y < Config::GRID_HEIGHT; ++y) {
 		for (int x = 0; x < Config::GRID_WIDTH; ++x) {
 			Tile& tile = levelMap[y][x];
@@ -22,10 +22,17 @@ void Level::Load(std::string filePath) {
 				playerCannonStartPos = { tile.pos.x,tile.pos.y + tile.size.y / 2.0f };
 			}
 
+			// Find ground x and y position
 			minX = tile.IsGround() && x < minX ? x : minX;
 			maxX = tile.IsGround() && x > maxX ? x : maxX;
 			minY = tile.IsGround() && y < minY ? y : minY;
 			maxY = tile.IsGround() && y > maxY ? y : maxY;
+
+			// Find enemy position
+			if (tile.Type() == TILE_ENEMY_MINION) {
+				Enemy enemy{ tile.pos, tile.size, AssetsManager::squareTexture };
+				minions.push_back(enemy);
+			}
 		}
 	}
 
@@ -45,6 +52,28 @@ void Level::Load(std::string filePath) {
 	debugText = { "", Utils::debuggerInfo.first * 0.8f, Utils::debuggerInfo.second, { -1.0f, 0.99f} };
 }
 
-void Level::Init() {
+void Level::Initalize() {
 	MapManager::currentMap = &levelMap;
+}
+
+void Level::Update() {
+	for (Enemy& enemy : minions) {
+		enemy.HealthBarUI();
+	}
+}
+
+std::string Level::Debugger() {
+	std::string info = "";
+	for (Enemy const& enemy : minions) {
+		if (Utils::isDebuggerOn) {
+			if (CollisionManager::IsPointInGameObject(enemy)) {
+				info = "\n\nEnemy Info:\nPos x: "
+					+ Utils::FormatFloat(enemy.pos.x, 2) + " y: " + Utils::FormatFloat(enemy.pos.y, 2)
+					+ "\nHP: " + std::to_string(enemy.attribute.Health());
+				return info;
+			}
+		}
+	}
+
+	return info;
 }

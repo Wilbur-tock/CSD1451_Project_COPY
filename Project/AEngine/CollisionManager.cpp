@@ -41,6 +41,24 @@ namespace CollisionManager {
         return distanceSquared < (r * r);
     }
 
+    bool IsPointInGameObject(GameObject const& obj) {
+        if (obj.collider.type == COLLIDER_BOX) {
+            float mouseX = 0, mouseY = 0;
+            Utils::GetWorldMousePos(mouseX, mouseY);
+
+            // Calculate the bounding box in WORLD COORDINATES ONLY
+            float halfWidth = obj.size.x / 2.0f, halfHeight = obj.size.y / 2.0f;
+            float left = obj.pos.x - halfWidth;
+            float right = obj.pos.x + halfWidth;
+            float top = obj.pos.y + halfHeight;
+            float bottom = obj.pos.y - halfHeight;
+
+            return (mouseX >= left && mouseX <= right && mouseY <= top && mouseY >= bottom);
+        }
+
+        return false;
+    }
+
     bool IsPointInRect(float x, float y, float w, float h) {
         s32 mouseX = 0, mouseY = 0;
         AEInputGetCursorPosition(&mouseX, &mouseY);
@@ -52,7 +70,7 @@ namespace CollisionManager {
         // Calculate Bounding Box
         float left = x;
         float right = x + w;
-        float top = y;        // Y is the top
+        float top = y;           // Y is the top
         float bottom = y - h;    // It grows down, so bottom is Y minus height
 
         return (mouseX >= left && mouseX <= right && mouseY <= top && mouseY >= bottom);

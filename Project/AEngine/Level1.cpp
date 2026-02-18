@@ -20,10 +20,11 @@ namespace Level1 {
 		AEGfxSetBackgroundColor(0.92f, 0.92f, 0.95f);
 		CameraManager::camera.SetPosition(levelData.cannon.pos);
 		CameraManager::camera.SetState(CameraManager::CameraController::INPUT);
-		levelData.Init();
+		levelData.Initalize();
 	}
 
 	void Update() {
+		levelData.Update();
 		MapManager::RenderMap(levelData.levelMap);
 		levelData.cannon.Update();
 
@@ -40,14 +41,18 @@ namespace Level1 {
 			Utils::GetMouseGridIndex(gridX, gridY);
 
 			Tile& tile = (*MapManager::currentMap)[gridY][gridX];
-
-			levelData.debugText.textContent = "Grid:\nIndex X: " + std::to_string(gridX) + " Y: " + std::to_string(gridY)
+			
+			std::string debug = "Grid:\nIndex X: " + std::to_string(gridX) + " Y: " + std::to_string(gridY)
 				+ "\nTile: " + TileTypeToString(tile.Type()) + "\nHP: " + Utils::FormatFloat(tile.attributes.Health(), 2) +
 				+ "\nPos X: " + Utils::FormatFloat(tile.pos.x, 2) + " Y: " + Utils::FormatFloat(tile.pos.y, 2)
 				+ "\nCamera " + std::to_string(CameraManager::camera.GetState()) +
 				+ "\nPos X : " + Utils::FormatFloat(x, 2) + " Y : " + Utils::FormatFloat(y, 2)
 				+ "\nMouse\nScreen Pos X: " + Utils::FormatFloat(mouseX, 2) + " Y: " + Utils::FormatFloat(mouseY, 2)
 				+ "\nWorld Pos X: " + Utils::FormatFloat(mX, 2) + " Y: " + Utils::FormatFloat(mY, 2);
+
+			debug += levelData.Debugger();
+			levelData.debugText.textContent = debug;
+
 			GraphicsManager::DrawTextUI(levelData.debugText);
 		}
 	}

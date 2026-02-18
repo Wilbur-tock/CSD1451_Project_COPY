@@ -6,6 +6,7 @@
 #include "CannonManager.hpp"
 #include "Tile.hpp"
 #include "TextObject.hpp"
+#include "Enemy.hpp"
 
 class Level {
 public:
@@ -22,7 +23,12 @@ public:
 
 	// Read level map data and load level resources
 	void Load(std::string filePath);
-	void Init();
+	void Initalize();
+	void Update();
+
+	std::string Debugger();
+private:
+	std::vector<Enemy> minions;
 };
 
 #endif // !LEVEL_HPP

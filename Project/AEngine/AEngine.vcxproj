@@ -106,10 +106,12 @@ xcopy "$(SolutionDir)Extern\AlphaEngine\lib\fmod.dll" "$(OutDir)" /s /r /y /q</C
     <ClCompile Include="Calculation.cpp" />
     <ClCompile Include="CameraManager.cpp" />
     <ClCompile Include="CannonManager.cpp" />
+    <ClCompile Include="Collider.cpp" />
     <ClCompile Include="CollisionManager.cpp" />
     <ClCompile Include="Color.cpp" />
     <ClCompile Include="Credits.cpp" />
     <ClCompile Include="DebugPrint.cpp" />
+    <ClCompile Include="Enemy.cpp" />
     <ClCompile Include="GameObject.cpp" />
     <ClCompile Include="GameStateManager.cpp" />
     <ClCompile Include="GraphicsManager.cpp" />
@@ -123,6 +125,7 @@ xcopy "$(SolutionDir)Extern\AlphaEngine\lib\fmod.dll" "$(OutDir)" /s /r /y /q</C
     <ClCompile Include="Projectile.cpp" />
     <ClCompile Include="TextObject.cpp" />
     <ClCompile Include="Tile.cpp" />
+    <ClCompile Include="UIManager.cpp" />
     <ClCompile Include="Utils.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -133,11 +136,13 @@ xcopy "$(SolutionDir)Extern\AlphaEngine\lib\fmod.dll" "$(OutDir)" /s /r /y /q</C
     <ClInclude Include="Calculation.hpp" />
     <ClInclude Include="CameraManager.hpp" />
     <ClInclude Include="CannonManager.hpp" />
+    <ClInclude Include="Collider.hpp" />
     <ClInclude Include="CollisionManager.hpp" />
     <ClInclude Include="Color.hpp" />
     <ClInclude Include="Config.hpp" />
     <ClInclude Include="Credits.hpp" />
     <ClInclude Include="DebugPrint.hpp" />
+    <ClInclude Include="Enemy.hpp" />
     <ClInclude Include="GameObject.hpp" />
     <ClInclude Include="GameStateManager.hpp" />
     <ClInclude Include="GraphicsManager.hpp" />
@@ -150,6 +155,7 @@ xcopy "$(SolutionDir)Extern\AlphaEngine\lib\fmod.dll" "$(OutDir)" /s /r /y /q</C
     <ClInclude Include="Projectile.hpp" />
     <ClInclude Include="TextObject.hpp" />
     <ClInclude Include="Tile.hpp" />
+    <ClInclude Include="UIManager.hpp" />
     <ClInclude Include="Utils.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

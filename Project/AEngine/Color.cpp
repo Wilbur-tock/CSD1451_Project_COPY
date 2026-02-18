@@ -14,18 +14,18 @@ void Color::SetColor(float _r, float _g, float _b, float _a) {
 	a = _a < min ? min : _a > max ? max : _a;
 }
 
-float Color::GetRed() {
-	return r;
+void Color::EditColorPercentage(float percentage) {
+	SetColor(
+		r *= percentage,
+		g *= percentage,
+		b *= percentage
+	);
 }
 
-float Color::GetGreen() {
-	return g;
-}
+float Color::Red() const { return r;}
 
-float Color::GetBlue() {
-	return b;
-}
+float Color::Green() const { return g; }
 
-float Color::GetAlpha() {
-	return a;
-}
+float Color::Blue() const { return b;}
+
+float Color::Alpha() const { return a; }

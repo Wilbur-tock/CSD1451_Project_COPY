@@ -11,7 +11,6 @@ class Button {
 public:
 	TextObject textObj;
 	AEVec2 pos{ 0,0 }, size{ 0,0 };
-	//AEVec2 textOffset; // Use range 0.0 - 0.1f to offset the text position according to the button
 	Color color{1,1,1};
 	AEGfxTexture* texture = nullptr;
 	Utils::FuncPtr onClick = nullptr;

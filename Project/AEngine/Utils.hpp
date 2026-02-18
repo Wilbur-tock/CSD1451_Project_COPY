@@ -24,7 +24,7 @@ namespace Utils {
 	// Get world mouse position instead of the screen position due to camera movement
 	void GetWorldMousePos(float& x, float& y);
 	void GetWorldPos(float& x, float& y);
-	void ToNormalize(float& x, float& y);
+	void NormalizeCoordinates(float& x, float& y);
 	// Get the grid index based on mouse position
 	void GetMouseGridIndex(int& x, int& y);
 	void GetGridIndex(int& x, int& y, AEVec2 const worldPos);

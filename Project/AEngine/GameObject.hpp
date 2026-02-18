@@ -4,6 +4,7 @@
 #include "pch.hpp"
 
 #include "Color.hpp"
+#include "Collider.hpp"
 
 class GameObject {
 public:
@@ -12,7 +13,7 @@ public:
 	AEVec2 size{ 0,0 };
 	AEGfxTexture* texture = nullptr; // Image texture to drawn
 	Color textureColor{ 0,0,0 };
-	// Add collider here
+	Collider collider{ COLLIDER_BOX, {0,0} };
 
 	GameObject() = default;
 	GameObject(AEVec2 _pos, AEVec2 _size, AEGfxTexture* _texture, Color _textureColor = Color{0,0,0});

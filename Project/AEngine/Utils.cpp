@@ -28,7 +28,7 @@ namespace Utils {
 		y += camY;
 	}
 
-	void ToNormalize(float& x, float& y) {
+	void NormalizeCoordinates(float& x, float& y) {
 		x /= (Config::SCREEN_WIDTH / 2.0f);
 		y /= (Config::SCREEN_HEIGHT / 2.0f);
 	}

@@ -11,10 +11,11 @@ public:
 	Color();
 	Color(float _r, float _g, float _b, float _a = 1.f);
 	void SetColor(float _r, float _g, float _b, float _a = 1.f);
-	float GetRed();
-	float GetGreen();
-	float GetBlue();
-	float GetAlpha();
+	void EditColorPercentage(float percentage);
+	float Red() const;
+	float Green()const;
+	float Blue()const;
+	float Alpha()const;
 };
 
 #endif // ! COLOR_HPP

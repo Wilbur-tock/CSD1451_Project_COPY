@@ -1,7 +1,7 @@
 #include "GameObject.hpp"
 
 GameObject::GameObject(AEVec2 _pos, AEVec2 _size, AEGfxTexture* _texture, Color _textureColor) 
-	: id{0}, pos {_pos}, size{ _size }, texture{ _texture }, textureColor{ _textureColor } {
+	: id{ 0 }, pos{ _pos }, size{ _size }, texture{ _texture }, textureColor{ _textureColor }, collider{ COLLIDER_BOX, _size } {
 }
 
 bool GameObject::IsInMapBounds() const {

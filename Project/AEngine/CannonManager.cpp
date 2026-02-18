@@ -10,6 +10,7 @@
 #include "CollisionManager.hpp"
 #include "Tile.hpp"
 #include "AbilitiesManager.hpp"
+#include "UIManager.hpp"
 
 namespace CannonManager {
     Cannon::Cannon() { Reset(); }
@@ -109,7 +110,10 @@ namespace CannonManager {
             // When player press left mouse click, set camera to position the cannon and unable to move the camera
             CameraManager::camera.SetPosition(pos);
             CameraManager::camera.SetState(CameraManager::CameraController::CameraState::STATIC);
-            UIChargeShotBar();
+
+            // Render UI
+            UIManager::DrawBar({ {pos.x - (size.x * 1.5f), pos.y + (size.y*1.5f)}, {15,100}, Color{0,1,0}, UIManager::TOP_TO_BOTTOM}, 
+                chargingPower, maxPower);
         }
 
         // Shoot when the button is RELEASED
@@ -160,7 +164,7 @@ namespace CannonManager {
             // ensuring faster moving projectiles are check for collision multiple times
             // to ensure that the GHOSTING of block bug does not happen
             // Using sub_steps to ensure that it still moving at a per frame rate time (dt or 1/10 dt but 10 loops) even though it is looping
-            const int SUB_STEPS = 10;
+            const int SUB_STEPS = 12;
             float subDt = dt / SUB_STEPS;
 
             for (int step = 0; step < SUB_STEPS; ++step) {
@@ -269,13 +273,14 @@ namespace CannonManager {
         float speedSq = (projectile.velocity.x * projectile.velocity.x) + (projectile.velocity.y * projectile.velocity.y);
 
         // Start timer if it going to be destroy and projectile stops moving
-        if (projectile.isCollisionDetected && projectile.toBeDestroyed == false && speedSq <= 0.1f) {
-            projectile.timer = projectileLifespan;
-            projectile.toBeDestroyed = true;
-        }
-
         if (projectile.toBeDestroyed) {
             projectile.timer -= 1.0f * GameStateManager::dt;
+        }
+        else {
+            if (projectile.isGrounded && speedSq <= 0.1f) {
+                projectile.timer = projectileLifespan;
+                projectile.toBeDestroyed = true;
+            }
         }
 
         // Destroy projectile and erase it from vector if the timer runs out or out of bounds
@@ -293,32 +298,6 @@ namespace CannonManager {
 
             isActive = false; // reset cannon back to false to allow player to shoot again after projectile been destroyed
         }
-    }
-
-    void Cannon::UIChargeShotBar() {
-        AEGfxTexture* tex = AssetsManager::squareTexture;
-
-        float x = pos.x - (defaultSize.x * 1.75f), y = pos.y;
-        float w = 20, h = 75, gap = 5;
-
-        // Background Border Bar
-        AEMtx33 mat = GraphicsManager::CreateTransformMatrix(x, y, 0, w, -h);
-        GraphicsManager::DrawUI(tex, mat, Color{ 0, 0, 0, 1 });
-
-        w = w - (gap * 2), h = h - (gap * 2);
-
-        x += gap, y += gap;
-
-        // Lighter background bar
-        AEMtx33 mat2 = GraphicsManager::CreateTransformMatrix(x, y, 0, w, -h);
-        GraphicsManager::DrawUI(tex, mat2, Color{ 0, 0.2f, 0, 1 });
-
-        float percentage = (chargingPower / maxPower);
-        float newH = h * percentage;
-
-        // Bar
-        AEMtx33 mat3 = GraphicsManager::CreateTransformMatrix(x, y, 0, w, -newH);
-        GraphicsManager::DrawUI(tex, mat3, Color{ 0, 0.8f, 0, 1 });
     }
 
     void Cannon::SetCamera(bool isFollowingProjectile) {
