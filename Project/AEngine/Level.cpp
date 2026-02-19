@@ -77,7 +77,8 @@ std::string Level::Debugger() {
 			if (CollisionManager::IsPointInGameObject(enemy)) {
 				info = "\n\nEnemy Info: ID: x:" + std::to_string(enemy.TileId().first) + " y: " + std::to_string(enemy.TileId().second)
 					+ "\nPos x : " +  Utils::FormatFloat(enemy.pos.x, 2) + " y: " + Utils::FormatFloat(enemy.pos.y, 2)
-					+ "\nHP: " + std::to_string(enemy.attribute.Health());
+					+ "\nHP: " + std::to_string(enemy.attribute.Health())
+					+ "\nDamage Multiplier: " + std::to_string(enemy.attribute.DamageMultiplier());
 				return info;
 			}
 		}

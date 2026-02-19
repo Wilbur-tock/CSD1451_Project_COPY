@@ -113,8 +113,8 @@ namespace CannonManager {
             CameraManager::camera.SetState(CameraManager::CameraController::CameraState::STATIC);
 
             // Render UI
-            UIManager::DrawBar({ {pos.x - (size.x * 1.5f), pos.y + (size.y*1.5f)}, {15,100}, Color{0,1,0}, UIManager::TOP_TO_BOTTOM}, 
-                chargingPower, maxPower);
+            UIManager::Bar bar { { pos.x - (size.x * 1.5f), pos.y + (size.y * 1.5f) }, { 15,100 }, Color{ 0,1,0 }, UIManager::TOP_TO_BOTTOM };
+            bar.Draw(chargingPower, maxPower);
         }
 
         // Shoot when the button is RELEASED

@@ -19,7 +19,7 @@ bool Tile::IsBlocks() const {
 bool Tile::IsEnemy() const { return type == TILE_ENEMY_MINION; }
 
 void Tile::TakeDamage(int damage) {
-	attribute.TakeDamage(damage * attribute.DamageModifier());
+	attribute.TakeDamage(damage * attribute.DamageMultiplier());
 	if (attribute.Health() <= 0) {
 		Type(TILE_EMPTY);
 	}

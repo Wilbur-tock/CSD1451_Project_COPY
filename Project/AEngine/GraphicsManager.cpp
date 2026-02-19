@@ -3,20 +3,19 @@
 #include "AssetsManager.hpp"
 
 namespace GraphicsManager {
-
 	enum CoordinateType { WORLD, SCREEN };
 
 	AEGfxVertexList* pMeshMiddle = nullptr, *pMeshCorner = nullptr;
-
-	// Use either WORLD or SCREEN based on which rectMode to use center or corner rectMode, texture to render (image/sprite),
-	// 3x3 matrix created using CreateTransformMatrix
-	// r,g,b,a - colour of the text values of 0.0f - 1.0f 
-	static void DrawTexture(CoordinateType renderMode, AEGfxTexture* pTex, AEMtx33 transform, Color color);
 
 	// Generate the mesh to draw on e.g.paper to draw on. There are TWO mesh, 
 	// pMeshMiddle (RectMode Center) for game objects to draw on,
 	// pMeshCorner (RectMode Corner) for UI to draw on 
 	static void GenerateMesh();
+
+	// Use either WORLD or SCREEN based on which rectMode to use center or corner rectMode, texture to render (image/sprite),
+	// 3x3 matrix created using CreateTransformMatrix
+	// r,g,b,a - colour of the text values of 0.0f - 1.0f 
+	static void DrawTexture(CoordinateType renderMode, AEGfxTexture* pTex, AEMtx33 transform, Color const& color);
 
 	static void GenerateMesh() {
 		AEGfxMeshStart();
@@ -46,6 +45,34 @@ namespace GraphicsManager {
 			0.0f, 0.0f, 0xFFFFFFFF, 0.0f, 0.0f);
 
 		pMeshCorner = AEGfxMeshEnd();
+	}
+
+	static void DrawTexture(CoordinateType mode, AEGfxTexture* pTex, AEMtx33 transform, Color const& color) {
+		// Set the texture and render mode
+		AEGfxVertexList* mesh = pMeshMiddle;
+		if (mode == WORLD) {
+			mesh = pMeshMiddle;
+		}
+		else if (mode == SCREEN) {
+			mesh = pMeshCorner;
+		}
+
+		AEGfxSetRenderMode(AE_GFX_RM_TEXTURE);
+
+		AEGfxSetBlendMode(AE_GFX_BM_BLEND);
+		AEGfxSetTransparency(1.0f);
+
+		// Change the colour of the sprite
+		AEGfxSetColorToMultiply(color.Red(), color.Green(), color.Blue(), color.Alpha());
+		AEGfxSetColorToAdd(0.0f, 0.0f, 0.0f, 0.0f);
+
+		AEGfxTextureSet(pTex, 0, 0);
+
+		// Set the position of the texture
+		AEGfxSetTransform(transform.m);
+
+		// Draw the mesh
+		AEGfxMeshDraw(mesh, AE_GFX_MDM_TRIANGLES);
 	}
 
 	void Load() {
@@ -79,43 +106,15 @@ namespace GraphicsManager {
 		return matResult;
 	}
 
-	static void DrawTexture(CoordinateType mode, AEGfxTexture* pTex, AEMtx33 transform, Color color) {
-		// Set the texture and render mode
-		AEGfxVertexList* mesh = pMeshMiddle;
-		if (mode == WORLD) {
-			mesh = pMeshMiddle;
-		}
-		else if (mode == SCREEN) {
-			mesh = pMeshCorner;
-		}
-
-		AEGfxSetRenderMode(AE_GFX_RM_TEXTURE);
-
-		AEGfxSetBlendMode(AE_GFX_BM_BLEND);
-		AEGfxSetTransparency(1.0f);
-
-		// Change the colour of the sprite
-		AEGfxSetColorToMultiply(color.Red(), color.Green(), color.Blue(), color.Alpha());
-		AEGfxSetColorToAdd(0.0f, 0.0f, 0.0f, 0.0f);
-
-		AEGfxTextureSet(pTex, 0, 0);
-
-		// Set the position of the texture
-		AEGfxSetTransform(transform.m);
-
-		// Draw the mesh
-		AEGfxMeshDraw(mesh, AE_GFX_MDM_TRIANGLES);
-	}
-
-	void DrawGameObject(AEGfxTexture* pTex, AEMtx33 transform, Color color) {
+	void DrawGameObject(AEGfxTexture* pTex, AEMtx33 transform, Color const& color) {
 		DrawTexture(WORLD, pTex, transform, color);
 	}
 
-	void DrawUI(AEGfxTexture* pTex, AEMtx33 transform, Color color) {
+	void DrawUI(AEGfxTexture* pTex, AEMtx33 transform, Color const& color) {
 		DrawTexture(SCREEN, pTex, transform, color);
 	}
 
-	void DrawUIFollowCam(AEGfxTexture* pTex, AEMtx33 transform, Color color) {
+	void DrawUIFollowCam(AEGfxTexture* pTex, AEMtx33 transform, Color const& color) {
 		// Adjust the x and y position of the UI object to adjust based on the camera movement
 		f32 camX = 0, camY = 0;
 		AEGfxGetCamPosition(&camX, &camY);

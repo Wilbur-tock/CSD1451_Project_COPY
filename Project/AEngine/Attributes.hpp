@@ -20,8 +20,8 @@ public:
 	int  DamageRadius() const;
 	void DamageRadius(int value);
 
-	int DamageModifier() const;
-	void DamageModifier(int value);
+	int DamageMultiplier() const;
+	void DamageMultiplier(int value);
 
 	void TakeDamage(int damage);
 private:
@@ -31,7 +31,7 @@ private:
 	bool canBeDamaged = true;
 
 	int health = maxValue, shield = 0;
-	int damageModifier = 1; // times damage modifier, 1 - normal damage
+	int damageMultiplier = 1; // multiply how much damage its taking, 1 - normal damage, 5 - times 5 of damage
 	float damageReduction = 0, critReduction = 0;
 };
 

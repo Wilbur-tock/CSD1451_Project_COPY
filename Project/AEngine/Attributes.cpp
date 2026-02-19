@@ -12,8 +12,8 @@ void Attributes::Damage(int value) { damage = value; }
 int  Attributes::DamageRadius() const { return damageRadius; }
 void Attributes::DamageRadius(int value) { damageRadius = value; }
 
-int Attributes::DamageModifier() const { return damageModifier; }
-void Attributes::DamageModifier(int value){ damageModifier = std::clamp(value, 1, 10); }
+int Attributes::DamageMultiplier() const { return damageMultiplier; }
+void Attributes::DamageMultiplier(int value){ damageMultiplier = std::clamp(value, 1, 10); }
 
 void Attributes::TakeDamage(int damageValue) {
 	if (!canBeDamaged) return;

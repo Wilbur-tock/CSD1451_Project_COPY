@@ -30,7 +30,7 @@ void Projectile::AbilityUpdate() {
 
 void Projectile::Render() {
     AEMtx33 mat = GraphicsManager::CreateTransformMatrix(pos.x, pos.y, 0, size.x, size.y);
-    GraphicsManager::DrawGameObject(AssetsManager::circleTexture, mat, Color{ 0.5f, 0.5f, 0, 1 });
+    GraphicsManager::DrawGameObject(texture, mat, Color{ 0.5f, 0.5f, 0, 1 });
 }
 
 void Projectile::MoveProjectile(float dt) {

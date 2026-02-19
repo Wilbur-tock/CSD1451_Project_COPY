@@ -141,7 +141,7 @@ namespace MapManager {
 				tile.gridId.y = static_cast<f32>(y);
 
 				if (tile.IsBlocks()) {
-					tile.attribute.DamageModifier(5);
+					tile.attribute.DamageMultiplier(5);
 				}
 			}
 		}

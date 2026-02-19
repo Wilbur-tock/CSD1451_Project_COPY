@@ -21,12 +21,12 @@ namespace GraphicsManager {
 	AEMtx33 CreateTransformMatrix(float x, float y, float rot = 0.f, float scaleX = 100.f, float scaleY = 100.f);
 
 	// Draw game object on the map using pMeshMiddle rect mode middle
-	void DrawGameObject(AEGfxTexture* pTex, AEMtx33 transform, Color color);
+	void DrawGameObject(AEGfxTexture* pTex, AEMtx33 transform, Color const& color);
 
-	// Draw UI texture using pMeshCorner rect mode corner
-	void DrawUI(AEGfxTexture* pTex, AEMtx33 transform, Color color);
-
-	void DrawUIFollowCam(AEGfxTexture* pTex, AEMtx33 transform, Color color);
+	// Draw UI texture using pMeshCorner (rect mode corner origin) using WORLD COORDINATES
+	void DrawUI(AEGfxTexture* pTex, AEMtx33 transform, Color const& color);
+	// Draw UI texture using pMeshCorner (rect mode corner origin) using WORLD COORDINATES
+	void DrawUIFollowCam(AEGfxTexture* pTex, AEMtx33 transform, Color const& color);
 
 	// Draw text UI using noramlized coordinates 
 	// x,y, use range from -1.0f to 1.0f

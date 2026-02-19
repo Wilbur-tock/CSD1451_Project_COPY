@@ -10,9 +10,6 @@ EnemyType Enemy::Type() const { return type; }
 std::pair<int,int> Enemy::TileId() const { return tileId; }
 
 void Enemy::HealthBarUI() {
-	AEVec2 barPos = { pos.x, pos.y + size.y };
-	AEVec2 barSize = { size.x, 10 };
-
-	UIManager::DrawBar({ barPos, barSize, Color{1,0,0} },
-		static_cast<float>(attribute.Health()), static_cast<float>(attribute.MaxHealth()));
+	UIManager::Bar bar{ { pos.x, pos.y + size.y }, { size.x, 10 }, Color{1,0,0} };
+	bar.Draw(static_cast<float>(attribute.Health()), static_cast<float>(attribute.MaxHealth()));
 }

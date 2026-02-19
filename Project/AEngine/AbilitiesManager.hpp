@@ -7,6 +7,8 @@
 
 namespace AbilitiesManager {
 	void SetProjectileAbility(Projectile& projectile);
+
+	void RenderUI();
 }
 
 #endif // !ABILITIESMANAGER_HPP

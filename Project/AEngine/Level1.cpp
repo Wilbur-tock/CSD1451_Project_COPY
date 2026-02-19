@@ -9,6 +9,7 @@
 #include "Tile.hpp"
 #include "GraphicsManager.hpp"
 #include "LevelManager.hpp"
+#include "AbilitiesManager.hpp"
 
 namespace Level1 {
 	Level levelData;
@@ -28,6 +29,7 @@ namespace Level1 {
 	void Update() {
 		levelData.Update();
 
+		AbilitiesManager::RenderUI();
 		if (Utils::isDebuggerOn) {
 			f32 x, y;
 			AEGfxGetCamPosition(&x, &y);
@@ -46,7 +48,7 @@ namespace Level1 {
 				+ "\n\nTile: " + TileTypeToString(tile.Type())
 				+ "\nPos X: " + Utils::FormatFloat(tile.pos.x, 2) + " Y: " + Utils::FormatFloat(tile.pos.y, 2)
 				+ "\nHP: " + Utils::FormatFloat(tile.attribute.Health(), 2) 
-				+ "\nDamage Modifier: " + std::to_string(tile.attribute.DamageModifier())
+				+ "\nDamage Multiplier: " + std::to_string(tile.attribute.DamageMultiplier())
 				+ "\n\nCamera " + std::to_string(CameraManager::camera.GetState())
 				+ "\nPos X : " + Utils::FormatFloat(x, 2) + " Y : " + Utils::FormatFloat(y, 2)
 				+ "\nMouse\nScreen Pos X: " + Utils::FormatFloat(mouseX, 2) + " Y: " + Utils::FormatFloat(mouseY, 2)
