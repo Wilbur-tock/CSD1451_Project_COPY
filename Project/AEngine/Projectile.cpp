@@ -3,6 +3,7 @@
 #include "MapManager.hpp"
 #include "GraphicsManager.hpp"
 #include "AssetsManager.hpp"
+#include "Enemy.hpp"
 
 Projectile::Projectile() : timer{ 0.0f }, velocity{ 0.0f,0.0f } {}
 Projectile::Projectile(AEGfxTexture* _texture, ProjectileMode _mode, AEVec2 _pos, int _attackCharges, AEVec2 _velocity)
@@ -98,7 +99,7 @@ void Projectile::Destroy() {
     timer = 0.0f;
 }
 
-void Projectile::DamageBlocks(int x, int y) {
+void Projectile::DamageTile(int x, int y) {
     if (Mode() == IDLE) return;
 
     int blastRadius = attribute.DamageRadius();
@@ -113,20 +114,30 @@ void Projectile::DamageBlocks(int x, int y) {
         maxDY += addRadius;
     }
 
+    // Damage how many number of tile based on the radius using a nested for loop
     for (int dY = minDY; dY <= maxDY; ++dY) {
         for (int dX = minDX; dX <= maxDX; ++dX) {
             if (Utils::IsGridIndexOutOfBounds(dX, dY)) continue;
 
             Tile& tileToDamage = (*MapManager::currentMap)[dY][dX];
-            // Only damage blocks type
-            if (!tileToDamage.IsBlocks()) continue;
+            // Only damage blocks or enemy tile
+            if (tileToDamage.IsGround()) continue;
 
+            // Damage tile blocks
             std::cout << "Damage Tile: " << TileTypeToString(tileToDamage.Type())
                 << " x: " << tileToDamage.gridId.x << " y: " << tileToDamage.gridId.y
                 << " " << tileToDamage.attribute.Health() << std::endl;
 
             tileToDamage.TakeDamage(attribute.Damage());
-            ConsumeAttackCharge();
+
+            // Damage Enemy Object
+            if (tileToDamage.IsEnemy()) {
+                tileToDamage.enemy->attribute.TakeDamage(attribute.Damage());
+
+                std::cout << "Damaged Enemy" << std::endl;
+            }
         }
     }
+
+    ConsumeAttackCharge();
 }

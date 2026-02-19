@@ -199,21 +199,8 @@ namespace CannonManager {
                                 }
 
                                 if (projectile.isCollisionDetected) {
-                                    projectile.DamageBlocks(x, y);
+                                    projectile.DamageTile(x, y);
                                     projectile.hasCollision = true;
-                                }
-                            }
-
-                            // Checking for collision with enemies and boss
-                            Enemy* enemyPtr = LevelManager::selectedLevel->FindEnemyAtGrid(x,y);
-                            if (enemyPtr) {
-                                Enemy& enemy = *enemyPtr;
-
-                                if (CollisionManager::AreCircleSquareIntersecting(
-                                    enemy.pos.x, enemy.pos.y, enemy.collider.size.x, enemy.collider.size.y,
-                                    projectile.pos.x, projectile.pos.y, radius)) {
-                                    enemy.attribute.TakeDamage(projectile.attribute.Damage());
-                                    std::cout << "Enemy Damage" << " Id: " << x << " " << y << " HP: " << enemy.attribute.Health() << std::endl;
                                 }
                             }
                         }

@@ -33,6 +33,7 @@ void Level::Load(std::string filePath) {
 			if (tile.Type() == TILE_ENEMY_MINION) {
 				Enemy enemy{ tile.pos, tile.size, AssetsManager::squareTexture, {x,y} };
 				enemies.push_back(enemy);
+				tile.enemy = &enemies.back();
 			}
 		}
 	}

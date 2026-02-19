@@ -46,7 +46,8 @@ public:
 	// Simulate the projectile physics of bouncing off the walls, checking if it is grounded
 	void SimulatePhysics(Tile const& tile);
 	void MoveProjectile(float dt);
-	void DamageBlocks(int x, int y);
+	// Damage tiles based on projectile damage (Blocks & Enemy included)
+	void DamageTile(int x, int y);
 	void ConsumeAttackCharge();
 	void Destroy();
 };

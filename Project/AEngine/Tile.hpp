@@ -5,6 +5,7 @@
 
 #include "GameObject.hpp"
 #include "Attributes.hpp"
+#include "Enemy.hpp"
 
 enum TileType {
 	TILE_EMPTY,
@@ -39,6 +40,7 @@ class Tile : public GameObject {
 public:
 	AEVec2 gridId{ 0,0 }; // Grid index x and y
 	Attributes attribute;
+	Enemy* enemy = nullptr;
 
 	Tile() = default;
 	Tile(AEVec2 _pos, AEGfxTexture* _texture, TileType _type);
