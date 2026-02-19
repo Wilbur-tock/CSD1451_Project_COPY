@@ -6,6 +6,7 @@
 #include "Utils.hpp"
 #include "CollisionManager.hpp"
 #include "CameraManager.hpp"
+#include "PlayerManager.hpp"
 
 void Level::Load(std::string filePath) {
 	levelMap.resize(Config::GRID_HEIGHT, std::vector<Tile>(Config::GRID_WIDTH));
@@ -50,6 +51,8 @@ void Level::Load(std::string filePath) {
 
 	playerCannon = CannonManager::Cannon(playerCannonStartPos, barrelTex, true, barrelHalfSize);
 	playerCannon.textureColor = Color{ 1, 1, 1, 1 };   // black barrel
+
+	playerCannon.SetAbilityController(&PlayerManager::playerAbilityController);
 
 	debugText = { "", Utils::debuggerInfo.first * 0.8f, Utils::debuggerInfo.second, { -1.0f, 0.99f} };
 }

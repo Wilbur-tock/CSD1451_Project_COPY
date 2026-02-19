@@ -28,7 +28,6 @@ private:
 
 	// min and max position that has ground collision
 	AEVec2 minGround{ 0,0 }, maxGround{ 0,0 };
-
 };
 
 #endif // !LEVEL_HPP

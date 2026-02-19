@@ -14,81 +14,90 @@
 #include "LevelManager.hpp"
 
 namespace CannonManager {
-    Cannon::Cannon() { Reset(); }
     Cannon::Cannon(AEVec2 _pos, AEGfxTexture* _texture, bool _isShootingRight, AEVec2 _size)
         : GameObject(_pos, _size, _texture, Color{ 1,1,1,1 }), isShootingRight{_isShootingRight } {
-        Reset();
+        ProjectileSettings();
     }
 
-    void Cannon::Reset() {
+    void Cannon::SetAbilityController(AbilitiesManager::AbilityController* controller) {
+        abilityController = controller;
+    }
+
+    void Cannon::ProjectileSettings() {
+        ammoCount = 10;
         // Reset to default
-        ammo.clear();
-        ammo.resize(ammoCount);
+        activeAmmo.clear(); // ensure that there should not be any active ammo when cannon is reset
+        projectiles.clear();
+        projectiles.resize(ammoCount);
 
         // Initalize all the projectile variables
         for (int i = 0; i < ammoCount; ++i) {
-            Projectile& projectile = ammo[i];
-            projectile = { AssetsManager::circleTexture, static_cast<ProjectileMode>(i + i) };
+            Projectile& projectile = projectiles[i];
+            projectile = { AssetsManager::circleTexture, static_cast<ProjectileMode>(i+1) };
             AbilitiesManager::SetProjectileAbility(projectile);
         }
-
-        activeAmmo.clear(); // ensure that there should not be any active ammo when cannon is reset
-        ammoCount = 0;
     }
 
     void Cannon::Update() {
-        float worldMouseX = 0, worldMouseY = 0;
-        Utils::GetWorldMousePos(worldMouseX, worldMouseY);
-        
-        // Calculate angle toward mouse
-        cannonAngle = atan2(worldMouseY - pos.y, worldMouseX - pos.x);
+        if (isPlayerControlled) {
+            float worldMouseX = 0, worldMouseY = 0;
+            Utils::GetWorldMousePos(worldMouseX, worldMouseY);
 
-        // Add limits so it can only turn facing upwards or downwards limits
-        if (isShootingRight) {
-            cannonAngle = std::clamp(cannonAngle, -1.5f, 1.5f);
-        }
-        else {
-            // Clamp to left hemisphere
-            if (cannonAngle > 0) {
-                cannonAngle = std::clamp(cannonAngle, 1.5f, 3.5f);   // Upper left: 1.5 to 3.5
+            // Calculate angle toward mouse
+            cannonAngle = atan2(worldMouseY - pos.y, worldMouseX - pos.x);
+
+            // Add limits so it can only turn facing upwards or downwards limits
+            if (isShootingRight) {
+                cannonAngle = std::clamp(cannonAngle, -1.5f, 1.5f);
             }
             else {
-                cannonAngle = std::clamp(cannonAngle, -3.5f, -1.5f); // Lower left: -3.5 to -1.5
+                // Clamp to left hemisphere
+                if (cannonAngle > 0) {
+                    cannonAngle = std::clamp(cannonAngle, 1.5f, 3.5f);   // Upper left: 1.5 to 3.5
+                }
+                else {
+                    cannonAngle = std::clamp(cannonAngle, -3.5f, -1.5f); // Lower left: -3.5 to -1.5
+                }
+            }
+
+            SelectProjectile();
+            DrawTrajectory();
+            ChargeShot();
+            UpdateProjectile();
+
+            // Debugger
+            if (Utils::isDebuggerOn) {
+                float mX = 0, mY = 0;
+                Utils::GetWorldMousePos(mX, mY);
+                float cX = pos.x, cY = pos.y;
+                Utils::GetWorldPos(cX, cY);
+                s32 mouseX, mouseY;
+                AEInputGetCursorPosition(&mouseX, &mouseY);
+
+                Projectile& selectedProjectile = projectiles[selectedProjectileId];
+
+                TextObject txtObj{ "", Utils::debuggerInfo.first * 0.8f, Utils::debuggerInfo.second, {0.5f, 0.99f} };
+                txtObj.textContent = "Cannon\nPos X: " + Utils::FormatFloat(pos.x, 2) + " Y: " + Utils::FormatFloat(pos.y, 2)
+                    + "\nAngle: " + Utils::FormatFloat(cannonAngle * (180.0f / 3.14159265359), 2) + " " + Utils::FormatFloat(cannonAngle, 2)
+                    + "\n\nSelected Projectile: " + std::to_string(selectedProjectileId) + " Mode: " + std::to_string(selectedProjectile.Mode())
+                    + "\nDamage: " + std::to_string(selectedProjectile.attribute.Damage()) + " Radius: " + std::to_string(selectedProjectile.attribute.DamageRadius());
+                if (activeAmmo.size() > 0) {
+                    Projectile& projectile = activeAmmo.back();
+                    txtObj.textContent += "\nActive Projectile " + std::to_string(projectile.Mode()) + "\nSize: x: "
+                        + Utils::FormatFloat(projectile.size.x, 2) + " y: " + Utils::FormatFloat(projectile.size.y, 2)
+                        + "\nPos x: " + Utils::FormatFloat(projectile.pos.x, 2) + " y " + Utils::FormatFloat(projectile.pos.y, 2)
+                        + "\nVelocity x: " + Utils::FormatFloat(activeAmmo.back().velocity.x, 2) + " y: " + Utils::FormatFloat(projectile.velocity.y, 2)
+                        + "\nGrounded: " + std::string(projectile.isGrounded ? "true" : "false")
+                        + "\nTo Be Destroyed: " + std::string(projectile.toBeDestroyed ? "true" : "false")
+                        + "\nTimer: " + Utils::FormatFloat(projectile.timer, 2)
+                        + "\nAttack Charges: " + std::to_string(projectile.AttackCharges())
+                        + "\nDamage Radius: " + std::to_string(projectile.attribute.DamageRadius());
+                }
+
+                GraphicsManager::DrawTextUI(txtObj);
             }
         }
 
-        DrawTrajectory();
-        ChargeShot();
-        UpdateProjectile();
-
-        // Debugger
-        if (Utils::isDebuggerOn) {
-            float mX = 0, mY = 0;
-            Utils::GetWorldMousePos(mX, mY);
-            float cX = pos.x, cY = pos.y;
-            Utils::GetWorldPos(cX, cY);
-            s32 mouseX, mouseY;
-            AEInputGetCursorPosition(&mouseX, &mouseY);
-            
-            TextObject txtObj{ "", Utils::debuggerInfo.first * 0.8f, Utils::debuggerInfo.second, {0.5f, 0.99f} };
-            txtObj.textContent = "Cannon\nPos X: " + Utils::FormatFloat(pos.x, 2) + " Y: " + Utils::FormatFloat(pos.y, 2)
-                + "\nAngle: " + Utils::FormatFloat(cannonAngle * (180.0f / 3.14159265359), 2) + " " + Utils::FormatFloat(cannonAngle, 2);
-                //+ "\nDamage: " + Utils::FormatFloat(damage,2);
-            if (activeAmmo.size() > 0) {
-                Projectile& projectile = activeAmmo.back();
-                txtObj.textContent += "\nActive Projectile " + std::to_string(projectile.Mode()) + "\nSize: x: "
-                    + Utils::FormatFloat(projectile.size.x, 2) + " y: " + Utils::FormatFloat(projectile.size.y, 2)
-                    + "\nPos x: " + Utils::FormatFloat(projectile.pos.x, 2) + " y " + Utils::FormatFloat(projectile.pos.y, 2)
-                    + "\nVelocity x: " + Utils::FormatFloat(activeAmmo.back().velocity.x, 2) + " y: " + Utils::FormatFloat(projectile.velocity.y, 2)
-                    + "\nGrounded: " + std::string(projectile.isGrounded ? "true" : "false")
-                    + "\nTo Be Destroyed: " + std::string(projectile.toBeDestroyed ? "true" : "false")
-                    + "\nTimer: " + Utils::FormatFloat(projectile.timer,2)
-                    + "\nAttack Charges: " + std::to_string(projectile.AttackCharges())
-                    + "\nDamage Radius: " + std::to_string(projectile.attribute.DamageRadius());
-            }
-            
-            GraphicsManager::DrawTextUI(txtObj);
-        }
         Render();
     }
 
@@ -97,15 +106,15 @@ namespace CannonManager {
 
         if (AEInputCheckCurr(AEVK_LBUTTON)) {
             float chargeRateWithDT = chargeRate * GameStateManager::dt;
-            chargingPower += isPowerIncrease ? chargeRateWithDT : -chargeRateWithDT;
+            chargingPower += isPowerIncreasing ? chargeRateWithDT : -chargeRateWithDT;
 
             if (chargingPower > maxPower) {
                 chargingPower = maxPower;
-                isPowerIncrease = false;
+                isPowerIncreasing = false;
             }
             if (chargingPower < minPower) {
                 chargingPower = minPower;
-                isPowerIncrease = true;
+                isPowerIncreasing = true;
             }
 
             // When player press left mouse click, set camera to position the cannon and unable to move the camera
@@ -131,10 +140,19 @@ namespace CannonManager {
         GraphicsManager::DrawGameObject(texture, mat, textureColor);
     }
 
+    void Cannon::SelectProjectile() {
+        for (int i = 0; i < 3; ++i) {
+            if (AEInputCheckTriggered(static_cast<u8>(AEVK_0 + i))) { //TEMPORARY FOR NOW USE NUMBERS INPUT
+                abilityController->ChangeAbility(i);
+            }
+        }
+
+        selectedProjectileId = abilityController->FindProjectileId();
+    }
+
     void Cannon::ShootProjectile() {
         // Assign values to this active projectile
-        Projectile& projectile = ammo[selectedProjectileId];
-        //Projectile projectile = selectedProjectile;
+        Projectile& projectile = projectiles[selectedProjectileId];
         projectile.isActive = true;
         projectile.id = static_cast<int>(activeAmmo.size() - 1);
 
@@ -150,8 +168,10 @@ namespace CannonManager {
         // Add to the vector list
         activeAmmo.push_back(projectile);
 
+        abilityController->UseAbility();
+
         SetCamera(true);
-        std::cout << "Projectile Fired!" << " " << ammoCount << std::endl;
+        std::cout << "[CannonManager] Projectile Fired!" << std::endl;
     }
 
     void Cannon::UpdateProjectile() {
@@ -265,7 +285,7 @@ namespace CannonManager {
                 if (activeAmmo[i].id == projectile.id) {
                     activeAmmo.erase(activeAmmo.begin() + i);
                     SetCamera(false);
-                    std::cout << "Removing " << i << " " << "Count " << activeAmmo.size() << std::endl;
+                    std::cout << "[CannonManager] Remove projectile " << activeAmmo.size() << std::endl;
                 }
             }
 
@@ -274,6 +294,8 @@ namespace CannonManager {
     }
 
     void Cannon::SetCamera(bool isFollowingProjectile) {
+        if (!isPlayerControlled) return;
+
         if (isFollowingProjectile) {
             // Set camera to follow the newly fired projectile
             CameraManager::camera.SetFollowTarget(&activeAmmo.back().pos);

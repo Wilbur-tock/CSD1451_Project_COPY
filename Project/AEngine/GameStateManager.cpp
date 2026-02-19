@@ -1,14 +1,13 @@
-#include "pch.hpp"
+#include "GameStateManager.hpp"
 #include "MapManager.hpp"
 #include "MapEditor.hpp"
 #include "CannonManager.hpp"
 #include "GraphicsManager.hpp"
-#include "GameStateManager.hpp"
 #include "AssetsManager.hpp"
 #include "Level1.hpp"
-#include "CameraManager.hpp"
 #include "MainMenu.hpp"
 #include "Credits.hpp"
+#include "PlayerManager.hpp"
 
 namespace GameStateManager {
     Utils::FuncPtr gsLoad, gsIntialize, gsUpdate, gsDraw, gsFree, gsUnload;
@@ -110,6 +109,9 @@ namespace GameStateManager {
         MainMenu::Load();
         Level1::Load();
         Credits::Load();
+
+        // Load all abilities at the start of the game
+        PlayerManager::playerAbilityController.LoadAllAbilities();
 
         // Initialize camera controller
         CameraManager::camera.Init();

@@ -104,6 +104,8 @@ void Projectile::DamageTile(int x, int y) {
 
     int blastRadius = attribute.DamageRadius();
 
+    std::cout << "[Projectile] Damage Radius: " << blastRadius << " Center: " << x << " " << y << std::endl;
+
     int minDX = x, minDY = y, maxDX = x, maxDY = y;
     // Increased damage radius based on blast radius
     if (blastRadius > 1) {
@@ -119,12 +121,14 @@ void Projectile::DamageTile(int x, int y) {
         for (int dX = minDX; dX <= maxDX; ++dX) {
             if (Utils::IsGridIndexOutOfBounds(dX, dY)) continue;
 
+            std::cout << "[Projectile] Tiles checked " << dX << " " << dY << std::endl;
+
             Tile& tileToDamage = (*MapManager::currentMap)[dY][dX];
             // Only damage blocks or enemy tile
-            if (tileToDamage.IsGround()) continue;
+            if (!tileToDamage.IsBlocks() && !tileToDamage.IsEnemy()) continue;
 
             // Damage tile blocks
-            std::cout << "Damage Tile: " << TileTypeToString(tileToDamage.Type())
+            std::cout << "[Projectile] Damage Tile: " << TileTypeToString(tileToDamage.Type())
                 << " x: " << tileToDamage.gridId.x << " y: " << tileToDamage.gridId.y
                 << " " << tileToDamage.attribute.Health() << std::endl;
 
@@ -134,7 +138,7 @@ void Projectile::DamageTile(int x, int y) {
             if (tileToDamage.IsEnemy()) {
                 tileToDamage.enemy->attribute.TakeDamage(attribute.Damage());
 
-                std::cout << "Damaged Enemy" << std::endl;
+                std::cout << "[Projectile] Damaged Enemy" << std::endl;
             }
         }
     }

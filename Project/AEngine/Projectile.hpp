@@ -11,6 +11,7 @@ enum ProjectileMode {
 	IDLE,
 	ATTACK,
 	BOMB,
+	FAST,
 };
 
 class Projectile : public GameObject {

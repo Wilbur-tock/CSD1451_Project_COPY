@@ -100,6 +100,7 @@ xcopy "$(SolutionDir)Extern\AlphaEngine\lib\fmod.dll" "$(OutDir)" /s /r /y /q</C
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="AbilitiesManager.cpp" />
+    <ClCompile Include="Ability.cpp" />
     <ClCompile Include="AssetsManager.cpp" />
     <ClCompile Include="Attributes.cpp" />
     <ClCompile Include="Button.cpp" />
@@ -124,6 +125,7 @@ xcopy "$(SolutionDir)Extern\AlphaEngine\lib\fmod.dll" "$(OutDir)" /s /r /y /q</C
     <ClCompile Include="MapEditor.cpp" />
     <ClCompile Include="MapManager.cpp" />
     <ClCompile Include="pch.cpp" />
+    <ClCompile Include="PlayerManager.cpp" />
     <ClCompile Include="Projectile.cpp" />
     <ClCompile Include="TextObject.cpp" />
     <ClCompile Include="Tile.cpp" />
@@ -132,6 +134,7 @@ xcopy "$(SolutionDir)Extern\AlphaEngine\lib\fmod.dll" "$(OutDir)" /s /r /y /q</C
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AbilitiesManager.hpp" />
+    <ClInclude Include="Ability.hpp" />
     <ClInclude Include="AssetsManager.hpp" />
     <ClInclude Include="Attributes.hpp" />
     <ClInclude Include="Button.hpp" />
@@ -156,6 +159,7 @@ xcopy "$(SolutionDir)Extern\AlphaEngine\lib\fmod.dll" "$(OutDir)" /s /r /y /q</C
     <ClInclude Include="MapEditor.hpp" />
     <ClInclude Include="MapManager.hpp" />
     <ClInclude Include="pch.hpp" />
+    <ClInclude Include="PlayerManager.hpp" />
     <ClInclude Include="Projectile.hpp" />
     <ClInclude Include="TextObject.hpp" />
     <ClInclude Include="Tile.hpp" />
