@@ -5,6 +5,7 @@
 
 Enemy::Enemy(AEVec2 _pos, AEVec2 _size, AEGfxTexture* _texture, TileIndex _tileId)
 	: GameObject{ _pos, _size, _texture, _tileId, Color{0.5f,1,0.5f} }, type{MINION}{
+	attribute.MaxHealth(100);
 }
 
 EnemyType Enemy::Type() const { return type; }
@@ -31,7 +32,7 @@ void Enemy::DebugInfo(std::string& str) {
 		+ "\nId: x:" + std::to_string(tileId.x) + " y : " + std::to_string(tileId.y)
 		+ "\nPos x : " + Utils::FormatFloat(pos.x, 2) + " y: " + Utils::FormatFloat(pos.y, 2)
 		+ "\nSize x: " + Utils::FormatFloat(size.x, 2) + " y: " + Utils::FormatFloat(size.x, 2)
-		+ "\nHP: " + std::to_string(attribute.Health())
+		+ "\nHP: " + std::to_string(attribute.Health()) + " Max HP: " + std::to_string(attribute.MaxHealth())
 		+ "\nDamage Multiplier: " + std::to_string(attribute.DamageMultiplier())
 		+ "\nIsGrounded: " + std::string(physics.IsGrounded() ? "true" : "false");
 }

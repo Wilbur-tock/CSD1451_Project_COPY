@@ -22,6 +22,7 @@ static std::string FindLevelNumber(std::string filePath) {
 
 void Level::Load(std::string filePath) {
 	levelMap.resize(Config::GRID_HEIGHT, std::vector<Tile>(Config::GRID_WIDTH));
+	enemies.reserve(10);
 
 	// Read map data
 	MapManager::ReadMapData(filePath, levelMap);
@@ -42,11 +43,11 @@ void Level::Load(std::string filePath) {
 			minY = tile.IsGround() && y < minY ? y : minY;
 			maxY = tile.IsGround() && y > maxY ? y : maxY;
 
-			// Find enemy position
+			// Find enemy position and load enemy data
 			if (tile.Type() == TILE_ENEMY_MINION) {
 				Enemy enemy{ tile.pos, tile.size, AssetsManager::squareTexture, {x,y} };
 				enemies.push_back(enemy);
-				tile.enemy = &enemies.back();
+				tile.EnemyId(static_cast<int>(enemies.size() - 1));
 			}
 		}
 	}
@@ -76,7 +77,7 @@ void Level::Initalize() {
 	AEGfxSetBackgroundColor(0.92f, 0.92f, 0.95f);
 
 	MapManager::currentMap = &levelMap;
-	LevelManager::selectedLevel = &*this;
+	LevelManager::selectedLevel = this;
 
 	// Set camera position to cannon
 	CameraManager::camera.SetPosition(playerCannon.pos);
@@ -122,11 +123,7 @@ std::string Level::Debugger() {
 	return info;
 }
 
-Enemy* Level::FindEnemyAtGrid(TileIndex const& id) {
-	for (Enemy& enemy : enemies) {
-		if (enemy.tileId == id) {
-			return &enemy;
-		}
-	}
-	return nullptr;
+Enemy* Level::FindEnemy(int enemyId) {
+	if (enemyId < 0) return nullptr;
+	return &enemies[enemyId];
 }

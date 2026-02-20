@@ -55,7 +55,7 @@ void Physics::Update(GameObject& obj) {
 
         Tile& btmTile = *MapManager::FindTile(btmTileId);
         // Gravity pushing the obj down to the bottom tile (ADDED 0.1f to ensure that is slowly glide down)
-        obj.velocity.y = Config::GRAVITY * PhysicsManager::dt * 0.1f;
+        obj.velocity.y = Config::GRAVITY * PhysicsManager::dt * 0.05f;
         obj.pos.y -= obj.velocity.y;
 
         // Snap to the bottom tile

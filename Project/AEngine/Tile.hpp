@@ -39,7 +39,6 @@ inline std::vector<std::string> tileNames = {
 class Tile : public GameObject {
 public:
 	Attributes attribute;
-	Enemy* enemy = nullptr;
 
 	Tile() = default;
 	Tile(AEVec2 _pos, AEGfxTexture* _texture, TileType _type);
@@ -47,6 +46,9 @@ public:
 	TileType Type() const;
 	void Type(TileType newType);
 	void Type(Tile const& toCopy);
+
+	int EnemyId() const;
+	void EnemyId(int newId);
 
 	// Member functions
 
@@ -60,11 +62,10 @@ private:
 	float const defaultSize = Config::TILE_SIZE;
 	TileType prevType = TILE_EMPTY; // previous tile type
 	TileType type = TILE_EMPTY; // current tile type
+	int enemyId = -1; // index of the enemy object stored in the vector list
 };
-
 
 std::ostream& operator<<(std::ostream& os, Tile const& rhs);
 std::string TileTypeToString(int id);
-
 
 #endif // !TILE_HPP

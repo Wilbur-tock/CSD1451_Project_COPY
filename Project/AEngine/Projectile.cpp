@@ -3,6 +3,7 @@
 #include "MapManager.hpp"
 #include "GraphicsManager.hpp"
 #include "AssetsManager.hpp"
+#include "LevelManager.hpp"
 #include "Enemy.hpp"
 
 Projectile::Projectile() : timer{ 0.0f } {}
@@ -135,7 +136,7 @@ void Projectile::DamageTile(int x, int y) {
 
             // Damage Enemy Object by finding the enemy component using tile
             if (tileToDamage.IsEnemy()) {
-                Enemy& enemy = *(tileToDamage.enemy);
+                Enemy& enemy = *(LevelManager::selectedLevel->FindEnemy(tileToDamage.EnemyId()));
                 enemy.attribute.TakeDamage(attribute.Damage());
 
                 std::cout << "[Projectile] Damaged Enemy new hp: " << enemy.attribute.Health() << std::endl;

@@ -223,7 +223,7 @@ namespace CannonManager {
                                     projectile.hasCollision = true;
 
                                     // If the projectile hit something slow down the velocity by a percentage
-                                    float percentage = 0.5f;
+                                    float percentage = 0.2f;
                                     projectile.velocity.x *= percentage;
                                     projectile.velocity.y *= percentage;
                                 }

@@ -45,7 +45,7 @@ namespace Level1 {
 
 			if (tile.IsEnemy()) {
 				std::stringstream ss;
-				ss << &*tile.enemy;
+				ss << levelData.FindEnemy(tile.EnemyId());
 				debug += " " + ss.str();
 			}
 

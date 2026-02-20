@@ -18,7 +18,7 @@ public:
 	void Update();
 
 	std::string Debugger();
-	Enemy* FindEnemyAtGrid(TileIndex const& id);
+	Enemy* FindEnemy(int enemyId);
 private:
 	std::string levelName;
 	CannonManager::Cannon playerCannon;

@@ -7,15 +7,18 @@ TileType Tile::Type() const { return type; }
 void Tile::Type(TileType newType) {
 	prevType = type;
 	type = newType;
-	if (IsEmpty() && IsEnemy()) enemy = nullptr;
+	if (IsEmpty() && IsEnemy()) enemyId = -1;
 }
 
 void Tile::Type(Tile const& toCopy) {
 	Type(toCopy.type);
 
-	enemy = toCopy.enemy;
+	enemyId = toCopy.EnemyId();
 	attribute = toCopy.attribute;
 }
+
+int  Tile::EnemyId() const { return enemyId; }
+void Tile::EnemyId(int newId) { enemyId = newId; }
 
 bool Tile::IsEmpty() const { return type == TILE_EMPTY; }
 bool Tile::IsGround() const {
@@ -29,10 +32,10 @@ bool Tile::IsEnemy() const { return type == TILE_ENEMY_MINION; }
 
 void Tile::TakeDamage(int damage) {
 	attribute.TakeDamage(damage * attribute.DamageMultiplier());
-	if (attribute.Health() <= 0) {
+
+	if (!attribute.IsActive()) {
 		Type(TILE_EMPTY);
 	}
-	//std::cout << "Damaged Tile x: " << id.x << " y: " << id.y << " health: " << health << std::endl;
 }
 
 std::ostream& operator<<(std::ostream& os, Tile const& rhs) {
