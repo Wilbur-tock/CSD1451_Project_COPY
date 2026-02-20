@@ -14,7 +14,7 @@ namespace CannonManager {
 
 		// Constructors
 		Cannon() = default;
-		Cannon(AEVec2 _pos, AEGfxTexture* _texture, bool _isShootingRight = true, AEVec2 _size = { 30,10 });
+		Cannon(AEVec2 _pos, AEGfxTexture* _texture, TileIndex _tileId, bool _isShootingRight = true, AEVec2 _size = { 30,10 });
 
 		// Getters & Setters
 		void SetAbilityController(AbilitiesManager::AbilityController* controller);

@@ -3,14 +3,15 @@
 
 #include "pch.hpp"
 #include "GameObject.hpp"
+#include "TileIndex.hpp"
 
 class Physics {
 public:
 	bool IsGrounded() const;
 
-	void GroundedChecks(GameObject const& obj, std::pair<int, int>& tileId);
+	void GroundedChecks(GameObject const& obj, TileIndex& tileId);
 
-	void Update(GameObject& obj, std::pair<int, int>& tileId);
+	void Update(GameObject& obj, TileIndex& tileId);
 private:
 	bool isGrounded = false;
 };

@@ -12,10 +12,11 @@
 #include "AbilitiesManager.hpp"
 #include "UIManager.hpp"
 #include "LevelManager.hpp"
+#include "PhysicsManager.hpp"
 
 namespace CannonManager {
-    Cannon::Cannon(AEVec2 _pos, AEGfxTexture* _texture, bool _isShootingRight, AEVec2 _size)
-        : GameObject(_pos, _size, _texture, Color{ 1,1,1,1 }), isShootingRight{_isShootingRight } {
+    Cannon::Cannon(AEVec2 _pos, AEGfxTexture* _texture, TileIndex _tileId, bool _isShootingRight, AEVec2 _size)
+        : GameObject(_pos, _size, _texture, _tileId, Color{ 1,1,1,1 }), isShootingRight{_isShootingRight } {
         ProjectileSettings();
     }
 
@@ -104,7 +105,7 @@ namespace CannonManager {
         if (isActive == true) return;
 
         if (AEInputCheckCurr(AEVK_LBUTTON)) {
-            float chargeRateWithDT = chargeRate * GameStateManager::dt;
+            float chargeRateWithDT = chargeRate * PhysicsManager::dt;
             chargingPower += isPowerIncreasing ? chargeRateWithDT : -chargeRateWithDT;
 
             if (chargingPower > maxPower) {
@@ -179,7 +180,7 @@ namespace CannonManager {
 
             projectile.AbilityUpdate();
 
-            float dt = GameStateManager::dt;
+            float dt = PhysicsManager::dt;
             // Increased the frequency of the collision check by using loops
             // ensuring faster moving projectiles are check for collision multiple times
             // to ensure that the GHOSTING of block bug does not happen
@@ -266,7 +267,7 @@ namespace CannonManager {
 
         // Start timer if it going to be destroy and projectile stops moving
         if (projectile.toBeDestroyed) {
-            projectile.timer -= 1.0f * GameStateManager::dt;
+            projectile.timer -= 1.0f * PhysicsManager::dt;
         }
         else {
             if (projectile.isGrounded && speedSq <= 0.1f) {

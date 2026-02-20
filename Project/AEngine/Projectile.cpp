@@ -124,19 +124,18 @@ void Projectile::DamageTile(int x, int y) {
             if (Utils::IsGridIndexOutOfBounds(dX, dY)) continue;
 
             Tile& tileToDamage = (*MapManager::currentMap)[dY][dX];
-            std::cout << "[Projectile] Checked tile " << TileTypeToString(tileToDamage.Type()) << " x: " << dX << " y: " << dY << std::endl;
+            //std::cout << "[Projectile] Checked tile " << tileToDamage << std::endl;
 
             // Only damage blocks or enemy tile
             if (!tileToDamage.IsBlocks() && !tileToDamage.IsEnemy()) continue;
 
             // Damage tile blocks
-            std::cout << "[Projectile] Damage Tile: " << TileTypeToString(tileToDamage.Type())
-                << " x: " << tileToDamage.gridId.x << " y: " << tileToDamage.gridId.y
+            std::cout << "[Projectile] Damage Tile: " << tileToDamage
                 << " Current hp: " << tileToDamage.attribute.Health() << std::endl;
 
             tileToDamage.TakeDamage(attribute.Damage());
 
-            // Damage Enemy Object
+            // Damage Enemy Object by finding the enemy component using tile
             if (tileToDamage.IsEnemy()) {
                 Enemy& enemy = *(tileToDamage.enemy);
                 enemy.attribute.TakeDamage(attribute.Damage());

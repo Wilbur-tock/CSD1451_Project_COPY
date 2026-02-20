@@ -84,7 +84,7 @@ namespace AbilitiesManager {
 			projectile.attribute.Damage(10);
 			break;
 		case ProjectileMode::FAST:
-			projectile.attribute.DamageRadius(2);
+			projectile.attribute.DamageRadius(5);
 			projectile.attribute.Damage(50);
 			break;
 		}

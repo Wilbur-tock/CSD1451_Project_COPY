@@ -1,12 +1,18 @@
 #include "Tile.hpp"
 
 Tile::Tile(AEVec2 _pos, AEGfxTexture* _texture, TileType _type)
-	: GameObject{ _pos, {defaultSize,defaultSize}, _texture, Color{1,1,1} }, gridId{ 0,0 }, type{ _type } {}
+	: GameObject{ _pos, {defaultSize,defaultSize}, _texture }, type{ _type } {}
 
 TileType Tile::Type() const { return type; }
 void Tile::Type(TileType newType) {
+	if (IsEnemy()) enemy = nullptr;
 	prevType = type;
 	type = newType;
+}
+
+void Tile::Type(Tile const& toCopy) {
+	Type(toCopy.type);
+	if (toCopy.IsEnemy()) enemy = toCopy.enemy;
 }
 
 bool Tile::IsEmpty() const { return type == TILE_EMPTY; }
@@ -25,6 +31,11 @@ void Tile::TakeDamage(int damage) {
 		Type(TILE_EMPTY);
 	}
 	//std::cout << "Damaged Tile x: " << id.x << " y: " << id.y << " health: " << health << std::endl;
+}
+
+std::ostream& operator<<(std::ostream& os, Tile const& rhs) {
+	os << TileTypeToString(rhs.Type()) << " " << rhs.tileId;
+	return os;
 }
 
 std::string TileTypeToString(int id) {

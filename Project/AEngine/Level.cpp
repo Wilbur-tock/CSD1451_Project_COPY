@@ -61,7 +61,7 @@ void Level::Load(std::string filePath) {
 	// Your old barrel used {30,10} (meaning it appears ~60x20 pixels)
 	AEVec2 barrelHalfSize{ 60, 20 };
 
-	playerCannon = CannonManager::Cannon(playerCannonStartPos, barrelTex, true, barrelHalfSize);
+	playerCannon = CannonManager::Cannon(playerCannonStartPos, barrelTex, { 0,0 }, true, barrelHalfSize);
 	playerCannon.textureColor = Color{ 1, 1, 1, 1 };   // black barrel
 
 	playerCannon.SetAbilityController(&PlayerManager::playerAbilityController);
@@ -109,9 +109,9 @@ std::string Level::Debugger() {
 	return info;
 }
 
-Enemy* Level::FindEnemyAtGrid(int xId, int yId) {
+Enemy* Level::FindEnemyAtGrid(TileIndex const& id) {
 	for (Enemy& enemy : enemies) {
-		if (enemy.TileId().first == xId && enemy.TileId().second == yId) {
+		if (enemy.tileId == id) {
 			return &enemy;
 		}
 	}

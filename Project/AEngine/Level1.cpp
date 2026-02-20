@@ -41,8 +41,15 @@ namespace Level1 {
 			Tile& tile = (*MapManager::currentMap)[gridY][gridX];
 			
 			std::string debug = "Grid:\nIndex X: " + std::to_string(gridX) + " Y: " + std::to_string(gridY)
-				+ "\n\nTile: " + TileTypeToString(tile.Type())
-				+ "\nPos X: " + Utils::FormatFloat(tile.pos.x, 2) + " Y: " + Utils::FormatFloat(tile.pos.y, 2)
+				+ "\n\nTile: " + TileTypeToString(tile.Type());
+
+			if (tile.IsEnemy()) {
+				std::stringstream ss;
+				ss << &*tile.enemy;
+				debug += " " + ss.str();
+			}
+
+			debug += "\nPos X: " + Utils::FormatFloat(tile.pos.x, 2) + " Y: " + Utils::FormatFloat(tile.pos.y, 2)
 				+ "\nHP: " + Utils::FormatFloat(tile.attribute.Health(), 2) 
 				+ "\nDamage Multiplier: " + std::to_string(tile.attribute.DamageMultiplier())
 				+ "\n\nCamera " + std::to_string(CameraManager::camera.GetState())

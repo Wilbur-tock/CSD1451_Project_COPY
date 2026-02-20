@@ -15,6 +15,7 @@ namespace MapManager {
 	void ReadMapData(std::string fileName, std::vector<std::vector<Tile>>& map);
 	// Rendering of the map layout
 	void RenderMap(const std::vector<std::vector<Tile>>& map);
+	Tile* FindTile(TileIndex const& tileId);
 }
 
 #endif // !MapManager_HPP

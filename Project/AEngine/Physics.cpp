@@ -6,8 +6,8 @@
 
 bool Physics::IsGrounded() const { return isGrounded; }
 
-void Physics::GroundedChecks(GameObject const& obj,std::pair<int, int>& tileId) {
-    int belowX = tileId.first, belowY = tileId.second + 1;
+void Physics::GroundedChecks(GameObject const& obj, TileIndex& tileId) {
+    int belowX = tileId.x, belowY = tileId.y + 1;
     if (Utils::IsGridIndexOutOfBounds(belowX, belowY)) {
         isGrounded = true;
         return;
@@ -43,16 +43,16 @@ void Physics::GroundedChecks(GameObject const& obj,std::pair<int, int>& tileId) 
     }
 }
 
-void Physics::Update(GameObject& obj, std::pair<int, int>& tileId) {
+void Physics::Update(GameObject& obj, TileIndex& tileId) {
     GroundedChecks(obj, tileId);
 
     if (!isGrounded) {
-        int belowX = tileId.first, belowY = tileId.second + 1;
-        if (Utils::IsGridIndexOutOfBounds(belowX, belowY)) {
+        TileIndex btmTileId = { obj.tileId.x, obj.tileId.y + 1 };
+        if (btmTileId.IsOutOfBounds()) {
             return;
         }
 
-        Tile& btmTile = (*MapManager::currentMap)[belowY][belowX];
+        Tile& btmTile = *MapManager::FindTile(btmTileId);
         // Gravity pushing the obj down to the bottom tile (ADDED 0.1f to ensure that is slowly glide down)
         obj.velocity.y = Config::GRAVITY * PhysicsManager::dt * 0.1f;
         obj.pos.y -= obj.velocity.y;
@@ -60,8 +60,14 @@ void Physics::Update(GameObject& obj, std::pair<int, int>& tileId) {
         // Snap to the bottom tile
         if (obj.pos.y <= btmTile.pos.y) {
             obj.pos.y = btmTile.pos.y;
+            
+            Tile& currTile = *MapManager::FindTile(tileId);
 
-            ++tileId.second; // update to the next tile index
+            btmTile.Type(currTile);
+            std::cout << btmTile.tileId << std::endl;
+            currTile.Type(TILE_EMPTY);
+            std::cout << btmTile.enemy << " " << currTile.enemy << std::endl;
+            obj.tileId = btmTileId;
         }
     }
 }

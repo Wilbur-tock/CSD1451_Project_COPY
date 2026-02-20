@@ -21,8 +21,6 @@ namespace GameStateManager {
 	extern Utils::FuncPtr gsLoad, gsIntialize, gsUpdate, gsDraw, gsFree, gsUnload;
 	extern GameState current, previous, next;
 
-	extern float dt; // delta time
-
 	void Load();
 
 	void Update();

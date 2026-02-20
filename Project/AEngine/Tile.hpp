@@ -38,7 +38,6 @@ inline std::vector<std::string> tileNames = {
 
 class Tile : public GameObject {
 public:
-	AEVec2 gridId{ 0,0 }; // Grid index x and y
 	Attributes attribute;
 	Enemy* enemy = nullptr;
 
@@ -47,6 +46,7 @@ public:
 
 	TileType Type() const;
 	void Type(TileType newType);
+	void Type(Tile const& toCopy);
 
 	// Member functions
 
@@ -63,6 +63,7 @@ private:
 };
 
 
+std::ostream& operator<<(std::ostream& os, Tile const& rhs);
 std::string TileTypeToString(int id);
 
 

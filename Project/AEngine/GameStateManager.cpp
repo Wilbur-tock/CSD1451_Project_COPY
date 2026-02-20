@@ -15,7 +15,6 @@ namespace GameStateManager {
     GameState current, previous, next;
     bool setNewState = false;
     float loadingTimer = 0.0f;
-    float dt = 0.0f;
 
     // Loading screen animation variables
     float dotAnimTimer = 0.0f;
@@ -36,7 +35,7 @@ namespace GameStateManager {
         if (progress > 1.0f) progress = 1.0f;
 
         // Animated dots
-        dotAnimTimer += dt;
+        dotAnimTimer += PhysicsManager::dt;
         if (dotAnimTimer >= 0.3f) {
             dotAnimTimer = 0.0f;
             dotCount = (dotCount + 1) % 4;
@@ -132,7 +131,6 @@ namespace GameStateManager {
     }
 
     void Update() {
-        dt = static_cast<float>(AEFrameRateControllerGetFrameTime());
         PhysicsManager::dt = static_cast<float>(AEFrameRateControllerGetFrameTime());
 
         // Handle quit state
@@ -151,7 +149,7 @@ namespace GameStateManager {
             }
             else {
                 // Is currently Loading
-                loadingTimer -= dt;
+                loadingTimer -= PhysicsManager::dt;
 
                 // Render loading screen during transition
                 RenderLoadingScreen();
@@ -252,7 +250,7 @@ namespace GameStateManager {
             AEGfxGetCamPosition(&camX, &camY);
 
             debugText.textContent = "\n[P] Debugger ON\nFPS: " + Utils::FormatFloat(AEFrameRateControllerGetFrameRate(), 2)
-                + "\nDeltaTime: " + Utils::FormatFloat(dt, 2)
+                + "\nDeltaTime: " + Utils::FormatFloat(PhysicsManager::dt, 2)
                 + "\nCamera Pos:\nX: " + Utils::FormatFloat(camX, 2) + " Y: " + Utils::FormatFloat(camY, 2)
                 + "\n\nControls:\nP - Toggle Debugger\nM - Main Menu";
 
@@ -260,7 +258,7 @@ namespace GameStateManager {
         }
 
         // Update camera (handles movement, clamping, flooring, and setting position)
-        CameraManager::camera.Update(dt);
+        CameraManager::camera.Update(PhysicsManager::dt);
     }
 
     void Exit() {

@@ -137,8 +137,7 @@ namespace MapManager {
 				tile.size = { Config::TILE_SIZE,Config::TILE_SIZE };
 				tile.texture = tileTexture;
 				tile.Type(static_cast<TileType>(type));
-				tile.gridId.x = static_cast<f32>(x);
-				tile.gridId.y = static_cast<f32>(y);
+				tile.tileId = { x,y };
 
 				if (tile.IsBlocks()) {
 					tile.attribute.DamageMultiplier(5);
@@ -160,5 +159,18 @@ namespace MapManager {
 				GraphicsManager::DrawGameObject(gTileTex[tile.Type()], transform, Color{1,1,1,1});
 			}
 		}
+	}
+
+	Tile* FindTile(TileIndex const& tileId) {
+		for (std::vector<Tile>& list : *currentMap) {
+			for (Tile& tile : list) {
+				if (tile.tileId == tileId) {
+					return &tile;
+				}
+			}
+		}
+
+		std::cerr << "[MapManager] Can't find Tile: " << tileId << std::endl;
+		return nullptr;
 	}
 }

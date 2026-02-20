@@ -3,16 +3,11 @@
 #include "UIManager.hpp"
 #include "GraphicsManager.hpp"
 
-Enemy::Enemy(AEVec2 _pos, AEVec2 _size, AEGfxTexture* _texture, std::pair<int, int> _tileId)
-	: GameObject{ _pos, _size, _texture, Color{0.5f,1,0.5f} }, type{MINION}, tileId{_tileId} {
+Enemy::Enemy(AEVec2 _pos, AEVec2 _size, AEGfxTexture* _texture, TileIndex _tileId)
+	: GameObject{ _pos, _size, _texture, _tileId, Color{0.5f,1,0.5f} }, type{MINION}{
 }
 
 EnemyType Enemy::Type() const { return type; }
-std::pair<int,int> Enemy::TileId() const { return tileId; }
-void Enemy::TileId(std::pair<int, int> newId) { 
-	tileId.first  = newId.first; 
-	tileId.second = newId.second;
-}
 
 void Enemy::Update() {
 	physics.Update(*this, tileId);
@@ -28,7 +23,10 @@ void Enemy::Render() {
 }
 
 void Enemy::DebugInfo(std::string& str) {
-	str = "\n\nEnemy Info: ID: x:" + std::to_string(TileId().first) + " y: " + std::to_string(TileId().second)
+	std::stringstream ss;
+	ss << &*this;
+	str = "\n\nEnemy Info: " + ss.str()
+		+ "\nId: x:" + std::to_string(tileId.x) + " y : " + std::to_string(tileId.y)
 		+ "\nPos x : " + Utils::FormatFloat(pos.x, 2) + " y: " + Utils::FormatFloat(pos.y, 2)
 		+ "\nSize x: " + Utils::FormatFloat(size.x, 2) + " y: " + Utils::FormatFloat(size.x, 2)
 		+ "\nHP: " + std::to_string(attribute.Health())
