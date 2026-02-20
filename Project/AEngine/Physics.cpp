@@ -6,13 +6,13 @@
 
 bool Physics::IsGrounded() const { return isGrounded; }
 
-void Physics::GroundedChecks(GameObject const& obj, TileIndex& tileId) {
-    int belowX = tileId.x, belowY = tileId.y + 1;
-    if (Utils::IsGridIndexOutOfBounds(belowX, belowY)) {
+void Physics::GroundedChecks(GameObject const& obj) {
+    TileIndex btmId{ obj.tileId.x, obj.tileId.y + 1 };
+    if (btmId.IsOutOfBounds()) {
         isGrounded = true;
         return;
     }
-    Tile& belowTile = (*MapManager::currentMap)[belowY][belowX];
+    Tile const& belowTile = *MapManager::FindTile(btmId);
 
     // Object Bounds
     float objHalfW = obj.size.x * 0.5f;
@@ -32,6 +32,7 @@ void Physics::GroundedChecks(GameObject const& obj, TileIndex& tileId) {
     float tileMinY = belowTile.pos.y - tileHalfH;
     float tileMaxY = belowTile.pos.y + tileHalfH;
 
+    // AABB collision 
     bool overlapX = (objMaxX > tileMinX) && (objMinX < tileMaxX);
     bool overlapY = (objMaxY > tileMinY) && (objMinY <= tileMaxY);
 
@@ -43,8 +44,8 @@ void Physics::GroundedChecks(GameObject const& obj, TileIndex& tileId) {
     }
 }
 
-void Physics::Update(GameObject& obj, TileIndex& tileId) {
-    GroundedChecks(obj, tileId);
+void Physics::Update(GameObject& obj) {
+    GroundedChecks(obj);
 
     if (!isGrounded) {
         TileIndex btmTileId = { obj.tileId.x, obj.tileId.y + 1 };
@@ -61,7 +62,7 @@ void Physics::Update(GameObject& obj, TileIndex& tileId) {
         if (obj.pos.y <= btmTile.pos.y) {
             obj.pos.y = btmTile.pos.y;
             
-            Tile& currTile = *MapManager::FindTile(tileId);
+            Tile& currTile = *MapManager::FindTile(obj.tileId);
 
             // Swap tiles details
             btmTile.Type(currTile);

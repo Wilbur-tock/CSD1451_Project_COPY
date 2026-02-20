@@ -9,12 +9,8 @@ Enemy::Enemy(AEVec2 _pos, AEVec2 _size, AEGfxTexture* _texture, TileIndex _tileI
 
 EnemyType Enemy::Type() const { return type; }
 
-void Enemy::TakeDamage(int damage) {
-	attribute.TakeDamage(damage);
-}
-
 void Enemy::Update() {
-	physics.Update(*this, tileId);
+	physics.Update(*this);
 
 	Render();
 }

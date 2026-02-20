@@ -5,9 +5,9 @@ Tile::Tile(AEVec2 _pos, AEGfxTexture* _texture, TileType _type)
 
 TileType Tile::Type() const { return type; }
 void Tile::Type(TileType newType) {
-	if (IsEnemy()) enemy = nullptr;
 	prevType = type;
 	type = newType;
+	if (IsEmpty() && IsEnemy()) enemy = nullptr;
 }
 
 void Tile::Type(Tile const& toCopy) {

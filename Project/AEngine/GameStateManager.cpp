@@ -9,6 +9,7 @@
 #include "Credits.hpp"
 #include "PlayerManager.hpp"
 #include "PhysicsManager.hpp"
+#include "UIManager.hpp"
 
 namespace GameStateManager {
     Utils::FuncPtr gsLoad, gsIntialize, gsUpdate, gsDraw, gsFree, gsUnload;
@@ -127,7 +128,7 @@ namespace GameStateManager {
             Config::WORLD_MAX_Y - halfH
         );
 
-        debugText = { "", Utils::debuggerInfo.first, Utils::debuggerInfo.second, {-1.f, -0.75f} };
+        debugText = { "", Utils::debuggerInfo.first * 0.75f, Utils::debuggerInfo.second, {-1.f, -0.8f} };
     }
 
     void Update() {
@@ -177,7 +178,7 @@ namespace GameStateManager {
                         break;
                     case GS_MAP_EDITOR:
                         gsLoad = nullptr;
-                        gsIntialize = MapEditor::Init;
+                        gsIntialize = MapEditor::Initialize;
                         gsUpdate = MapEditor::MapEditor;
                         gsDraw = nullptr;
                         gsFree = MapEditor::Exit;
@@ -246,13 +247,15 @@ namespace GameStateManager {
 
         // Debugger display
         if (Utils::isDebuggerOn) {
+            UIManager::Panel panel{ {250, 75}, {1.0f,1.0f,1.0f, 0.75f}, Utils::RECT_BOTTOM_LEFT };
+            panel.Draw();
+
             f32 camX, camY;
             AEGfxGetCamPosition(&camX, &camY);
 
             debugText.textContent = "\n[P] Debugger ON\nFPS: " + Utils::FormatFloat(AEFrameRateControllerGetFrameRate(), 2)
                 + "\nDeltaTime: " + Utils::FormatFloat(PhysicsManager::dt, 2)
-                + "\nCamera Pos:\nX: " + Utils::FormatFloat(camX, 2) + " Y: " + Utils::FormatFloat(camY, 2)
-                + "\n\nControls:\nP - Toggle Debugger\nM - Main Menu";
+                + "\n[M] Main Menu";
 
             GraphicsManager::DrawTextUI(debugText);
         }

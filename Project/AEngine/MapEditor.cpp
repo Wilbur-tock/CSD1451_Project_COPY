@@ -106,9 +106,9 @@ namespace MapEditor {
 		}
 	}
 
-	void Init() {
-		helpText =  { "",  Utils::debuggerInfo.first, Utils::debuggerInfo.second,{-1.0f,.99f} };
-		debugText = { "",  Utils::debuggerInfo.first, Utils::debuggerInfo.second, { 0.5f, 0.99f} };
+	void Initialize() {
+		helpText =  { "",  Utils::debuggerInfo.first * 0.8f, Utils::debuggerInfo.second,{-1.0f,.99f} };
+		debugText = { "",  Utils::debuggerInfo.first * 0.8f, Utils::debuggerInfo.second, { 0.5f, 0.99f} };
 
 		CameraManager::camera.SetPosition({ 0, 0 });
 		CameraManager::camera.SetState(CameraManager::CameraController::INPUT);

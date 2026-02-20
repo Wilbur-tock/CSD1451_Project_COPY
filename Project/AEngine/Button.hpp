@@ -9,13 +9,6 @@
 
 class Button {
 public:
-	TextObject textObj;
-	AEVec2 pos{ 0,0 }, size{ 0,0 };
-	Color color{1,1,1};
-	AEGfxTexture* texture = nullptr;
-	Utils::FuncPtr onClick = nullptr;
-	bool isHovered = false;
-
 	Button() = default;
 	Button(AEVec2 _pos, AEVec2 _size, Color _color, AEGfxTexture* _texture, Utils::FuncPtr _onClick = nullptr);
 	// Create a button with text
@@ -28,6 +21,14 @@ public:
 
 	// Check for player hover and whatever or not it is clicked
 	void Update();
+	void Draw();
+private:
+	TextObject textObj;
+	AEVec2 pos{ 0,0 }, size{ 0,0 };
+	Color color{ 1,1,1 };
+	AEGfxTexture* texture = nullptr;
+	Utils::FuncPtr onClick = nullptr;
+	bool isHovered = false;
 };
 
 #endif // !BUTTON_HPP

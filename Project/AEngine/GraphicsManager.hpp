@@ -35,9 +35,6 @@ namespace GraphicsManager {
 	// x,y, use range from -1.0f to 1.0f
 	// textScale, use range from 0.0 to 1.0f
 	void DrawTextUI(TextObject& textObj);
-
-	// Button class to store all the button information (string text, position, texture, color)
-	void DrawButton(Button& btn);
 }
 
 #endif // !GRAPHICSMANAGER_HPP

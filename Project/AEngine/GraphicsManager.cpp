@@ -130,55 +130,40 @@ namespace GraphicsManager {
 	}
 
 	void DrawTextUI(TextObject& textObj) {
-		//Utils::Limit(textObj.textScale, 0.0f, 1.0f);
+		if (textObj.textContent.empty()) return;
 
-		std::string text = textObj.textContent;
+		// Use a stringstream to handle newline parsing automatically
+		std::stringstream ss(textObj.textContent);
+		std::string line;
 
-		// Get line height and print size with a default text
-		f32 charWidth, lineHeight, currentY = textObj.pos.y;
-		AEGfxGetPrintSize(AssetsManager::textFont, "A", textObj.textScale, &charWidth, &lineHeight);
+		// Initial setup
+		f32 charW, charH;
+		AEGfxGetPrintSize(AssetsManager::textFont, "A", textObj.textScale, &charW, &charH);
 
-		size_t start = 0;
-		size_t end = text.find('\n');
+		f32 currentY = textObj.pos.y;
+		const f32 lineSpacing = 1.5f; // Adjust vertical gap between lines
 
-		while (end != std::string::npos || start < text.length()) {
-			// Extract line
-			std::string line;
-			if (end != std::string::npos) {
-				line = text.substr(start, end - start);
-				start = end + 1;
-				end = text.find('\n', start);
-			}
-			else {
-				line = text.substr(start);
-				start = text.length();
-			}
-
-			// Draw the line if not empty
+		// Iterate through each line delimited by '\n'
+		while (std::getline(ss, line)) {
+			// Only render if the line isn't just whitespace or empty
 			if (!line.empty()) {
-				char const* pText = line.c_str();
-				f32 w, h;
-				AEGfxGetPrintSize(AssetsManager::textFont, pText, textObj.textScale, &w, &h);
-				AEGfxPrint(AssetsManager::textFont, pText, textObj.pos.x, currentY - h, textObj.textScale, 
-					textObj.color.Red(), textObj.color.Green(), textObj.color.Blue(), textObj.color.Alpha());
+				f32 lineW, lineH;
+				AEGfxGetPrintSize(AssetsManager::textFont, line.c_str(), textObj.textScale, &lineW, &lineH);
+
+				// currentY - lineH ensures the text is drawn relative to its baseline
+				AEGfxPrint(AssetsManager::textFont,
+					line.c_str(),
+					textObj.pos.x,
+					currentY - lineH,
+					textObj.textScale,
+					textObj.color.Red(),
+					textObj.color.Green(),
+					textObj.color.Blue(),
+					textObj.color.Alpha());
 			}
 
-			currentY -= lineHeight * 1.5f; // Move down for next line
-		}
-	}
-
-	void DrawButton(Button &btn) {
-		Color btnColor = btn.color;
-		if (btn.isHovered) {
-			btnColor = Color{ btn.color.Red(), btn.color.Green(), btn.color.Blue(), btn.color.Alpha() * 0.5f}; // Assign hovered color
-		}
-		
-		// Draw button object
-		DrawUIFollowCam(btn.texture, CreateTransformMatrix(btn.pos.x, btn.pos.y, 0, btn.size.x, btn.size.y), btnColor);
-
-		// Draw text if the string is not a empty string
-		if (!btn.textObj.textContent.empty()) {
-			DrawTextUI(btn.textObj);
+			// Move the cursor down for the next line regardless of whether this line was empty
+			currentY -= (charH * lineSpacing);
 		}
 	}
 }

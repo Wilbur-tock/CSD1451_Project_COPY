@@ -125,21 +125,9 @@ namespace MainMenu {
 
         // Draw subtitle or instructions
         GraphicsManager::DrawTextUI(instructions);
-
-        // Draw buttons using GraphicsManager
-        Color buttonTextColor(1.0f, 1.0f, 1.0f, 1.0f);  // White text
-        GraphicsManager::DrawButton(playButton);
-        GraphicsManager::DrawButton(mapEditorButton);
-        GraphicsManager::DrawButton(creditsButton);
-        GraphicsManager::DrawButton(quitButton);
     }
 
     void Update() {
-        playButton.Update();
-        mapEditorButton.Update();
-        creditsButton.Update();
-        quitButton.Update();
-
         // Keyboard shortcuts
         if (AEInputCheckTriggered(AEVK_1)) {
             OnPlayClicked();
@@ -155,6 +143,11 @@ namespace MainMenu {
         }
 
         Draw();
+
+        playButton.Update();
+        mapEditorButton.Update();
+        creditsButton.Update();
+        quitButton.Update();
     }
 
     void Free() {

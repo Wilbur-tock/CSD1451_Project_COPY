@@ -1,6 +1,7 @@
 #include "Button.hpp"
 #include "AssetsManager.hpp"
 #include "CollisionManager.hpp"
+#include "GraphicsManager.hpp"
 
 Button::Button(AEVec2 _pos, AEVec2 _size, Color _color, AEGfxTexture* _texture, Utils::FuncPtr _onClick)
     : pos{ _pos }, size{_size}, color{_color}, texture{_texture}, onClick{_onClick} {
@@ -94,4 +95,21 @@ void Button::Update() {
              onClick();
          }
      }
+
+     Draw();
+}
+
+void Button::Draw() {
+    Color btnColor = color;
+    if (isHovered) {
+        btnColor = Color{ color.Red(), color.Green(), color.Blue(), color.Alpha() * 0.5f }; // Assign hovered color
+    }
+
+    // Draw button object
+    GraphicsManager::DrawUIFollowCam(texture, GraphicsManager::CreateTransformMatrix(pos.x, pos.y, 0, size.x, size.y), btnColor);
+
+    // Draw text if the string is not a empty string
+    if (!textObj.textContent.empty()) {
+        GraphicsManager::DrawTextUI(textObj);
+    }
 }
