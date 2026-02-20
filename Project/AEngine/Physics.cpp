@@ -63,10 +63,9 @@ void Physics::Update(GameObject& obj, TileIndex& tileId) {
             
             Tile& currTile = *MapManager::FindTile(tileId);
 
+            // Swap tiles details
             btmTile.Type(currTile);
-            std::cout << btmTile.tileId << std::endl;
             currTile.Type(TILE_EMPTY);
-            std::cout << btmTile.enemy << " " << currTile.enemy << std::endl;
             obj.tileId = btmTileId;
         }
     }

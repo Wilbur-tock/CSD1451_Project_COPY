@@ -23,12 +23,14 @@ public:
 	int DamageMultiplier() const;
 	void DamageMultiplier(int value);
 
+	bool IsActive() const;
+
 	void TakeDamage(int damage);
 private:
 	int minValue = 0, maxValue = 100, maxHealth = maxValue;
 
 	int damage = 10, damageRadius = 1;
-	bool canBeDamaged = true;
+	bool canBeDamaged = true, isActive = true;
 
 	int health = maxValue, shield = 0;
 	int damageMultiplier = 1; // multiply how much damage its taking, 1 - normal damage, 5 - times 5 of damage

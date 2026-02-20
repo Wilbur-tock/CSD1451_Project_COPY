@@ -15,11 +15,15 @@ void Attributes::DamageRadius(int value) { damageRadius = value; }
 int Attributes::DamageMultiplier() const { return damageMultiplier; }
 void Attributes::DamageMultiplier(int value){ damageMultiplier = std::clamp(value, 1, 10); }
 
+bool Attributes::IsActive() const { return isActive; }
+
 void Attributes::TakeDamage(int damageValue) {
 	if (!canBeDamaged) return;
 
 	if (shield <= 0) {
 		Health(health - damageValue);
+
+		if (health <= 0) { isActive = false; }
 	}
 	else {
 

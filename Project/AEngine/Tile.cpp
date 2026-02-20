@@ -12,7 +12,9 @@ void Tile::Type(TileType newType) {
 
 void Tile::Type(Tile const& toCopy) {
 	Type(toCopy.type);
-	if (toCopy.IsEnemy()) enemy = toCopy.enemy;
+
+	enemy = toCopy.enemy;
+	attribute = toCopy.attribute;
 }
 
 bool Tile::IsEmpty() const { return type == TILE_EMPTY; }

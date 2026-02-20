@@ -23,6 +23,8 @@ public:
 
 	EnemyType Type() const;
 
+	void TakeDamage(int damage);
+
 	void Update();
 	void Render();
 	void DebugInfo(std::string &str);

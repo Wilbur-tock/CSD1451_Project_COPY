@@ -92,6 +92,19 @@ void Level::Update() {
 	for (Enemy& enemy : enemies) {
 		enemy.Update();
 	}
+
+	if (Utils::isDebuggerOn) {
+		int gridX = 0, gridY = 0;
+		Utils::GetMouseGridIndex(gridX, gridY);
+
+		// Removal of tile blocks during in game
+		Tile& tile = *(MapManager::FindTile({ gridX, gridY }));
+		if (CollisionManager::IsPointInGameObject(tile)) {
+			if (AEInputCheckCurr(AEVK_RBUTTON) && tile.IsBlocks()) {
+				tile.Type(TILE_EMPTY);
+			}
+		}
+	}
 }
 
 std::string Level::Debugger() {

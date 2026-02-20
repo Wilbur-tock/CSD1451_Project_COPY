@@ -133,8 +133,6 @@ void Projectile::DamageTile(int x, int y) {
             std::cout << "[Projectile] Damage Tile: " << tileToDamage
                 << " Current hp: " << tileToDamage.attribute.Health() << std::endl;
 
-            tileToDamage.TakeDamage(attribute.Damage());
-
             // Damage Enemy Object by finding the enemy component using tile
             if (tileToDamage.IsEnemy()) {
                 Enemy& enemy = *(tileToDamage.enemy);
@@ -142,6 +140,9 @@ void Projectile::DamageTile(int x, int y) {
 
                 std::cout << "[Projectile] Damaged Enemy new hp: " << enemy.attribute.Health() << std::endl;
             }
+
+            // Damage tile after it has damage the enemy compononent first
+            tileToDamage.TakeDamage(attribute.Damage());
 
             hasDamagedTile = true;
         }

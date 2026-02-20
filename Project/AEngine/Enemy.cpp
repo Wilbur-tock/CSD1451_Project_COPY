@@ -9,6 +9,10 @@ Enemy::Enemy(AEVec2 _pos, AEVec2 _size, AEGfxTexture* _texture, TileIndex _tileI
 
 EnemyType Enemy::Type() const { return type; }
 
+void Enemy::TakeDamage(int damage) {
+	attribute.TakeDamage(damage);
+}
+
 void Enemy::Update() {
 	physics.Update(*this, tileId);
 
@@ -16,6 +20,8 @@ void Enemy::Update() {
 }
 
 void Enemy::Render() {
+	if (!attribute.IsActive()) return;
+
 	GraphicsManager::DrawGameObject(*this);
 	// UI
 	UIManager::Bar bar{ { pos.x, pos.y + size.y }, { size.x, 10 }, Color{1,0,0} };
