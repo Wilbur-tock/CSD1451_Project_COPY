@@ -6,6 +6,7 @@
 #include "Color.hpp"
 #include "Button.hpp"
 #include "TextObject.hpp"
+#include "GameObject.hpp"
 
 namespace GraphicsManager {
 	extern AEGfxVertexList *pMeshMiddle, *pMeshCorner;
@@ -22,6 +23,8 @@ namespace GraphicsManager {
 
 	// Draw game object on the map using pMeshMiddle rect mode middle
 	void DrawGameObject(AEGfxTexture* pTex, AEMtx33 transform, Color const& color);
+	// Draw game object on the map using pMeshMiddle rect mode middle
+	void DrawGameObject(GameObject const& gameObject);
 
 	// Draw UI texture using pMeshCorner (rect mode corner origin) using WORLD COORDINATES
 	void DrawUI(AEGfxTexture* pTex, AEMtx33 transform, Color const& color);

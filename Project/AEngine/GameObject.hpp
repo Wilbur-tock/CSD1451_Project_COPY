@@ -11,6 +11,8 @@ public:
 	int id = 0; // index of the object
 	AEVec2 pos{ 0,0 };
 	AEVec2 size{ 0,0 };
+	AEVec2 velocity = { 0,0 }; // Vector rate of change of displacement (direction * speed)
+
 	AEGfxTexture* texture = nullptr; // Image texture to drawn
 	Color textureColor{ 0,0,0 };
 	Collider collider{ COLLIDER_BOX, {0,0} };

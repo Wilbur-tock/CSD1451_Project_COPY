@@ -110,6 +110,11 @@ namespace GraphicsManager {
 		DrawTexture(WORLD, pTex, transform, color);
 	}
 
+	void DrawGameObject(GameObject const& gameObject) {
+		AEMtx33 mat = CreateTransformMatrix(gameObject.pos.x, gameObject.pos.y, 0, gameObject.size.x *0.5f, gameObject.size.y * 0.5f);
+		DrawTexture(WORLD, gameObject.texture, mat, gameObject.textureColor);
+	}
+
 	void DrawUI(AEGfxTexture* pTex, AEMtx33 transform, Color const& color) {
 		DrawTexture(SCREEN, pTex, transform, color);
 	}

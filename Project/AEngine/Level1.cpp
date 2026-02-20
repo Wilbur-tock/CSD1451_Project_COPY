@@ -16,14 +16,10 @@ namespace Level1 {
 
 	void Load() {
 		levelData.Load("Assets/Map/level1.txt");
-		std::cout << "Load level 1" << std::endl;
 	}
 
 	void Initalize() {
-		AEGfxSetBackgroundColor(0.92f, 0.92f, 0.95f);
 		levelData.Initalize();
-		LevelManager::selectedLevel = &levelData;
-		std::cout << "Initialize level 1" << std::endl;
 	}
 
 	void Update() {

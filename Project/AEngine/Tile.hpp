@@ -50,6 +50,7 @@ public:
 
 	// Member functions
 
+	bool IsEmpty() const;
 	bool IsGround() const;
 	bool IsBlocks() const;
 	bool IsEnemy() const;

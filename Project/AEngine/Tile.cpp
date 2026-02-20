@@ -9,6 +9,7 @@ void Tile::Type(TileType newType) {
 	type = newType;
 }
 
+bool Tile::IsEmpty() const { return type == TILE_EMPTY; }
 bool Tile::IsGround() const {
 	return type >= TILE_BLOCK_GROUND_0 && type <= TILE_BLOCK_GROUND_2;
 }

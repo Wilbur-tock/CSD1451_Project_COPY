@@ -20,7 +20,6 @@ private:
 	int projectileId = 0, attackCharges = 1;
 	ProjectileMode mode = ATTACK;
 public:
-	AEVec2 velocity = { 0,0 }; // Vector rate of change of displacement (direction * speed)
 	float timer = 0.0f;
 	bool isActive = false, isGrounded = false, toBeDestroyed = false;
 	bool isCollisionDetected = false; // collision is detected for the FIRST TIME
@@ -29,7 +28,7 @@ public:
 	Attributes attribute;
 
 	Projectile();
-	Projectile(AEGfxTexture* _texture, ProjectileMode _mode = ATTACK, AEVec2 _pos = {0,0}, int _attackCharges = 1, AEVec2 _velocity = {0,0});
+	Projectile(AEGfxTexture* _texture, ProjectileMode _mode = ATTACK, AEVec2 _pos = {0,0}, int _attackCharges = 1);
 
 	// Accessors
 

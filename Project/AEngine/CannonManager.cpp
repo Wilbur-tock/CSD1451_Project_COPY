@@ -24,7 +24,6 @@ namespace CannonManager {
     }
 
     void Cannon::ProjectileSettings() {
-        ammoCount = 10;
         // Reset to default
         activeAmmo.clear(); // ensure that there should not be any active ammo when cannon is reset
         projectiles.clear();

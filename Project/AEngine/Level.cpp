@@ -7,6 +7,18 @@
 #include "CollisionManager.hpp"
 #include "CameraManager.hpp"
 #include "PlayerManager.hpp"
+#include "LevelManager.hpp"
+
+static std::string FindLevelNumber(std::string filePath) {
+	std::string key = "level";
+	size_t pos = filePath.find(key);
+
+	if (pos != std::string::npos) {
+		return filePath.substr(pos+key.size(), 1);
+	}
+
+	return "-1"; // Return -1 if "level" wasn't found
+}
 
 void Level::Load(std::string filePath) {
 	levelMap.resize(Config::GRID_HEIGHT, std::vector<Tile>(Config::GRID_WIDTH));
@@ -55,14 +67,22 @@ void Level::Load(std::string filePath) {
 	playerCannon.SetAbilityController(&PlayerManager::playerAbilityController);
 
 	debugText = { "", Utils::debuggerInfo.first * 0.8f, Utils::debuggerInfo.second, { -1.0f, 0.99f} };
+
+	levelName = "Level " + FindLevelNumber(filePath);
+	std::cout << "[Level] Load " + levelName << std::endl;
 }
 
 void Level::Initalize() {
+	AEGfxSetBackgroundColor(0.92f, 0.92f, 0.95f);
+
 	MapManager::currentMap = &levelMap;
+	LevelManager::selectedLevel = &*this;
 
 	// Set camera position to cannon
 	CameraManager::camera.SetPosition(playerCannon.pos);
 	CameraManager::camera.SetState(CameraManager::CameraController::INPUT);
+
+	std::cout << "[Level] Initialize " + levelName << std::endl;
 }
 
 void Level::Update() {
@@ -70,19 +90,17 @@ void Level::Update() {
 	playerCannon.Update();
 
 	for (Enemy& enemy : enemies) {
-		enemy.HealthBarUI();
+		enemy.Update();
 	}
 }
 
 std::string Level::Debugger() {
 	std::string info = "";
-	for (Enemy const& enemy : enemies) {
-		if (Utils::isDebuggerOn) {
+
+	if (Utils::isDebuggerOn) {
+		for (Enemy& enemy : enemies) {
 			if (CollisionManager::IsPointInGameObject(enemy)) {
-				info = "\n\nEnemy Info: ID: x:" + std::to_string(enemy.TileId().first) + " y: " + std::to_string(enemy.TileId().second)
-					+ "\nPos x : " +  Utils::FormatFloat(enemy.pos.x, 2) + " y: " + Utils::FormatFloat(enemy.pos.y, 2)
-					+ "\nHP: " + std::to_string(enemy.attribute.Health())
-					+ "\nDamage Multiplier: " + std::to_string(enemy.attribute.DamageMultiplier());
+				enemy.DebugInfo(info);
 				return info;
 			}
 		}

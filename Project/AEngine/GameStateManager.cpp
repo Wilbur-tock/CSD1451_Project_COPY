@@ -8,6 +8,7 @@
 #include "MainMenu.hpp"
 #include "Credits.hpp"
 #include "PlayerManager.hpp"
+#include "PhysicsManager.hpp"
 
 namespace GameStateManager {
     Utils::FuncPtr gsLoad, gsIntialize, gsUpdate, gsDraw, gsFree, gsUnload;
@@ -132,6 +133,7 @@ namespace GameStateManager {
 
     void Update() {
         dt = static_cast<float>(AEFrameRateControllerGetFrameTime());
+        PhysicsManager::dt = static_cast<float>(AEFrameRateControllerGetFrameTime());
 
         // Handle quit state
         if (current == GS_QUIT) {

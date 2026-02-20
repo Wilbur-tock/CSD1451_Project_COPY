@@ -5,9 +5,9 @@
 #include "AssetsManager.hpp"
 #include "Enemy.hpp"
 
-Projectile::Projectile() : timer{ 0.0f }, velocity{ 0.0f,0.0f } {}
-Projectile::Projectile(AEGfxTexture* _texture, ProjectileMode _mode, AEVec2 _pos, int _attackCharges, AEVec2 _velocity)
-    : GameObject(_pos, defaultSize, _texture), velocity(_velocity), timer{ 0.0f }, mode(_mode), attackCharges{_attackCharges} {
+Projectile::Projectile() : timer{ 0.0f } {}
+Projectile::Projectile(AEGfxTexture* _texture, ProjectileMode _mode, AEVec2 _pos, int _attackCharges)
+    : GameObject(_pos, defaultSize, _texture), timer{ 0.0f }, mode(_mode), attackCharges{_attackCharges} {
 }
 
 int  Projectile::AttackCharges() const { return attackCharges; }
@@ -116,32 +116,40 @@ void Projectile::DamageTile(int x, int y) {
         maxDY += addRadius;
     }
 
+    bool hasDamagedTile = false;
+
     // Damage how many number of tile based on the radius using a nested for loop
     for (int dY = minDY; dY <= maxDY; ++dY) {
         for (int dX = minDX; dX <= maxDX; ++dX) {
             if (Utils::IsGridIndexOutOfBounds(dX, dY)) continue;
 
-            std::cout << "[Projectile] Tiles checked " << dX << " " << dY << std::endl;
-
             Tile& tileToDamage = (*MapManager::currentMap)[dY][dX];
+            std::cout << "[Projectile] Checked tile " << TileTypeToString(tileToDamage.Type()) << " x: " << dX << " y: " << dY << std::endl;
+
             // Only damage blocks or enemy tile
             if (!tileToDamage.IsBlocks() && !tileToDamage.IsEnemy()) continue;
 
             // Damage tile blocks
             std::cout << "[Projectile] Damage Tile: " << TileTypeToString(tileToDamage.Type())
                 << " x: " << tileToDamage.gridId.x << " y: " << tileToDamage.gridId.y
-                << " " << tileToDamage.attribute.Health() << std::endl;
+                << " Current hp: " << tileToDamage.attribute.Health() << std::endl;
 
             tileToDamage.TakeDamage(attribute.Damage());
 
             // Damage Enemy Object
             if (tileToDamage.IsEnemy()) {
-                tileToDamage.enemy->attribute.TakeDamage(attribute.Damage());
+                Enemy& enemy = *(tileToDamage.enemy);
+                enemy.attribute.TakeDamage(attribute.Damage());
 
-                std::cout << "[Projectile] Damaged Enemy" << std::endl;
+                std::cout << "[Projectile] Damaged Enemy new hp: " << enemy.attribute.Health() << std::endl;
             }
+
+            hasDamagedTile = true;
         }
     }
 
-    ConsumeAttackCharge();
+    // Consume 1 attack charge if projectile has damaged a tile 
+    if (hasDamagedTile) {
+        ConsumeAttackCharge();
+    }
 }
