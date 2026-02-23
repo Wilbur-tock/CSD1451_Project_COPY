@@ -25,11 +25,8 @@ namespace CollisionManager {
         float maxY = sY + halfH;
 
         // Find the closest point on the AABB to the circle center
-        float closestX = cX;
-        float closestY = cY;
-
-        Utils::Limit(closestX, minX, maxX);
-        Utils::Limit(closestY, minY, maxY);
+        float closestX = std::clamp(cX, minX, maxX);;
+        float closestY = std::clamp(cY, minY, maxY);;
 
         // Calculate the distance from the circle center to this closest point
         float distanceX = cX - closestX;
