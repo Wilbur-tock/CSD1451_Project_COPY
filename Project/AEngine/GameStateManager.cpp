@@ -255,7 +255,7 @@ namespace GameStateManager {
 
             debugText.textContent = "\n[P] Debugger ON\nFPS: " + Utils::FormatFloat(AEFrameRateControllerGetFrameRate(), 2)
                 + "\nDeltaTime: " + Utils::FormatFloat(PhysicsManager::dt, 2)
-                + "\n[M] Main Menu";
+                + "\n[M] Main Menu" + "\nCamera State: " + CameraManager::camera.PrintState();
 
             GraphicsManager::DrawTextUI(debugText);
         }

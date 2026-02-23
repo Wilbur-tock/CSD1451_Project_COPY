@@ -25,6 +25,7 @@ namespace CameraManager
 
         AEVec2 GetPosition() const;
         CameraState GetState() const;
+		std::string PrintState() const;
 
         void SetMoveSpeed(float speed);
 

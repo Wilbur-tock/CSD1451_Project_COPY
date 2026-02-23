@@ -153,6 +153,17 @@ namespace CameraManager
         return currentState;
     }
 
+    std::string CameraController::PrintState() const
+    {
+        switch (currentState)
+        {
+        case CameraState::STATIC: return "STATIC";
+        case CameraState::INPUT: return "INPUT";
+        case CameraState::FOLLOW: return "FOLLOW";
+        default: return "UNKNOWN";
+        }
+	}
+
     void CameraController::SetMoveSpeed(float speed)
     {
         moveSpeed = speed;
