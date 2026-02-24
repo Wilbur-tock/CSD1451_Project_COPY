@@ -78,7 +78,7 @@ void Projectile::SimulatePhysics(Tile const& tile) {
             transform.pos.y = tileTop + radius; // Flush to the tile
             isGrounded = true;
             velocity.y *= -0.1f; // Lose 80% of its velocity
-            velocity.x *= 0.9f; // ADD FRICTION
+            velocity.x *= 0.75f; // ADD FRICTION
             if (std::abs(velocity.y) < Config::MINIMUM_VELOCITY) velocity.y = 0; // prevent tiny velocity
         }
         else { // If it hits the celling fall down

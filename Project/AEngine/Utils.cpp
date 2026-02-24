@@ -55,9 +55,9 @@ namespace Utils {
 	}
 
 	std::string FormatFloat(double value, int precision) {
-		std::stringstream ss;
-		ss << std::fixed << std::setprecision(precision) << value;
-		return ss.str();
+		char buf[64];
+		std::snprintf(buf, sizeof(buf), "%.*f", precision, value);
+		return std::string(buf);
 	}
 
 	void Wrap(int& val, int min, int max) {
