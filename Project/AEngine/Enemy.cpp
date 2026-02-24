@@ -4,7 +4,7 @@
 #include "GraphicsManager.hpp"
 
 Enemy::Enemy(AEVec2 _pos, AEVec2 _size, AEGfxTexture* _texture, TileIndex _tileId)
-	: GameObject{ _pos, _size, _texture, _tileId, Color{0.5f,1,0.5f} }, type{MINION}{
+	: GameObject{ _pos, _size, _texture, _tileId, Color{0.5f,1,0.5f} }, type{EnemyType::MINION}{
 	attribute.MaxHealth(100);
 }
 
@@ -21,7 +21,7 @@ void Enemy::Render() {
 
 	GraphicsManager::DrawGameObject(*this);
 	// UI
-	UIManager::Bar bar{ { pos.x, pos.y + size.y }, { size.x, 10 }, Color{1,0,0} };
+	UIManager::Bar bar{ { transform.pos.x, transform.pos.y + transform.size.y }, { transform.size.x, 10 }, Color{1,0,0} };
 	bar.Draw(static_cast<float>(attribute.Health()), static_cast<float>(attribute.MaxHealth()));
 }
 
@@ -30,8 +30,8 @@ void Enemy::DebugInfo(std::string& str) {
 	ss << &*this;
 	str = "\n\nEnemy Info: " + ss.str()
 		+ "\nId: x:" + std::to_string(tileId.x) + " y : " + std::to_string(tileId.y)
-		+ "\nPos x : " + Utils::FormatFloat(pos.x, 2) + " y: " + Utils::FormatFloat(pos.y, 2)
-		+ "\nSize x: " + Utils::FormatFloat(size.x, 2) + " y: " + Utils::FormatFloat(size.x, 2)
+		+ "\nPos x : " + Utils::FormatFloat(transform.pos.x, 2) + " y: " + Utils::FormatFloat(transform.pos.y, 2)
+		+ "\nSize x: " + Utils::FormatFloat(transform.size.x, 2) + " y: " + Utils::FormatFloat(transform.size.x, 2)
 		+ "\nHP: " + std::to_string(attribute.Health()) + " Max HP: " + std::to_string(attribute.MaxHealth())
 		+ "\nDamage Multiplier: " + std::to_string(attribute.DamageMultiplier())
 		+ "\nIsGrounded: " + std::string(physics.IsGrounded() ? "true" : "false");

@@ -100,8 +100,8 @@ namespace GameStateManager {
 
     void Load() {
         // Start with main menu
-        current = previous = GS_INIT;
-        next = GS_MAIN_MENU;
+        current = previous = GameState::INITIALIZE;
+        next = GameState::MAIN_MENU;
 
         // Load all resources
         MapManager::Load();
@@ -135,7 +135,7 @@ namespace GameStateManager {
         PhysicsManager::dt = static_cast<float>(AEFrameRateControllerGetFrameTime());
 
         // Handle quit state
-        if (current == GS_QUIT) {
+        if (current == GameState::QUIT) {
             // This will cause the game loop to exit
             return;
         }
@@ -168,7 +168,7 @@ namespace GameStateManager {
 
                     // Update Game state function pointers based on current state
                     switch (current) {
-                    case GS_MAIN_MENU:
+                    case GameState::MAIN_MENU:
                         gsLoad = MainMenu::Load;
                         gsIntialize = MainMenu::Initialize;
                         gsUpdate = MainMenu::Update;
@@ -176,7 +176,7 @@ namespace GameStateManager {
                         gsFree = MainMenu::Free;
                         gsUnload = MainMenu::Unload;
                         break;
-                    case GS_MAP_EDITOR:
+                    case GameState::MAP_EDITOR:
                         gsLoad = nullptr;
                         gsIntialize = MapEditor::Initialize;
                         gsUpdate = MapEditor::MapEditor;
@@ -184,7 +184,7 @@ namespace GameStateManager {
                         gsFree = MapEditor::Exit;
                         gsUnload = nullptr;
                         break;
-                    case GS_LEVEL_1:
+                    case GameState::LEVEL_1:
                         gsLoad = Level1::Load;
                         gsIntialize = Level1::Initalize;
                         gsUpdate = Level1::Update;
@@ -192,10 +192,10 @@ namespace GameStateManager {
                         gsFree = nullptr;
                         gsUnload = nullptr;
                         break;
-                    case GS_LEVEL_2:
+                    case GameState::LEVEL_2:
                         // TODO: Implement Level 2
                         break;
-                    case GS_CREDITS:
+                    case GameState::CREDITS:
                         gsLoad = Credits::Load;
                         gsIntialize = Credits::Initialize;
                         gsUpdate = Credits::Update;
@@ -203,13 +203,13 @@ namespace GameStateManager {
                         gsFree = Credits::Free;
                         gsUnload = Credits::Unload;
                         break;
-                    case GS_RESTART:
+                    case GameState::RESTART:
                         // Restart current level
                         next = previous;
                         break;
-                    case GS_EXIT:
+                    case GameState::EXIT:
                         // Return to main menu
-                        next = GS_MAIN_MENU;
+                        next = GameState::MAIN_MENU;
                         break;
                     }
 
@@ -235,7 +235,7 @@ namespace GameStateManager {
 
         // Return to main menu with ESC (except when already in main menu)
         if (AEInputCheckTriggered(AEVK_M)) {
-            next = GS_MAIN_MENU;
+            next = GameState::MAIN_MENU;
         }
 
         // Reload assets

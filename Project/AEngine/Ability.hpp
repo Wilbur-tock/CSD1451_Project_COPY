@@ -3,7 +3,7 @@
 
 #include "pch.hpp"
 
-enum AbilityType {
+enum class AbilityType {
 	OFFENSIVE_PROJECTILE,
 	OFFENSIVE,
 	DEFENSIVE,

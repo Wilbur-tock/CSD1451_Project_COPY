@@ -9,7 +9,7 @@
 #include "PlayerManager.hpp"
 #include "LevelManager.hpp"
 
-static std::string FindLevelNumber(std::string filePath) {
+static std::string FindLevelNumber(std::string const& filePath) {
 	std::string key = "level";
 	size_t pos = filePath.find(key);
 
@@ -20,7 +20,7 @@ static std::string FindLevelNumber(std::string filePath) {
 	return "-1"; // Return -1 if "level" wasn't found
 }
 
-void Level::Load(std::string filePath) {
+void Level::Load(std::string const& filePath) {
 	levelMap.resize(Config::GRID_HEIGHT, std::vector<Tile>(Config::GRID_WIDTH));
 	enemies.reserve(10);
 
@@ -34,7 +34,7 @@ void Level::Load(std::string filePath) {
 
 			// Find cannon starting position
 			if (tile.Type() == TILE_PLAYER_CANNON) {
-				playerCannonStartPos = { tile.pos.x,tile.pos.y + tile.size.y / 2.0f };
+				playerCannonStartPos = { tile.transform.pos.x,tile.transform.pos.y + tile.transform.size.y *0.5f};
 			}
 
 			// Find ground x and y position
@@ -45,7 +45,7 @@ void Level::Load(std::string filePath) {
 
 			// Find enemy position and load enemy data
 			if (tile.Type() == TILE_ENEMY_MINION) {
-				Enemy enemy{ tile.pos, tile.size, AssetsManager::squareTexture, {x,y} };
+				Enemy enemy{ tile.transform.pos, tile.transform.size, AssetsManager::squareTexture, {x,y} };
 				enemies.push_back(enemy);
 				tile.EnemyId(static_cast<int>(enemies.size() - 1));
 			}
@@ -80,7 +80,7 @@ void Level::Initalize() {
 	LevelManager::selectedLevel = this;
 
 	// Set camera position to cannon
-	CameraManager::camera.SetPosition(playerCannon.pos);
+	CameraManager::camera.SetPosition(playerCannon.transform.pos);
 	CameraManager::camera.SetState(CameraManager::CameraController::INPUT);
 
 	std::cout << "[Level] Initialize " + levelName << std::endl;
@@ -108,7 +108,11 @@ void Level::Update() {
 	}
 }
 
-std::string Level::Debugger() {
+void Level::Free() {
+	LevelManager::selectedLevel = nullptr;
+}
+
+std::string Level::DebugInfo() {
 	std::string info = "";
 
 	if (Utils::isDebuggerOn) {

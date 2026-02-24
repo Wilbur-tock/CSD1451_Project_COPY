@@ -106,30 +106,31 @@ namespace GraphicsManager {
 		return matResult;
 	}
 
-	void DrawGameObject(AEGfxTexture* pTex, AEMtx33 transform, Color const& color) {
+	void DrawGameObject(AEGfxTexture* pTex, AEMtx33 const& transform, Color const& color) {
 		DrawTexture(WORLD, pTex, transform, color);
 	}
 
 	void DrawGameObject(GameObject const& gameObject) {
-		AEMtx33 mat = CreateTransformMatrix(gameObject.pos.x, gameObject.pos.y, 0, gameObject.size.x *0.5f, gameObject.size.y * 0.5f);
+		AEMtx33 mat = CreateTransformMatrix(gameObject.transform.pos.x, gameObject.transform.pos.y, 0, gameObject.transform.size.x *0.5f, gameObject.transform.size.y * 0.5f);
 		DrawTexture(WORLD, gameObject.texture, mat, gameObject.textureColor);
 	}
 
-	void DrawUI(AEGfxTexture* pTex, AEMtx33 transform, Color const& color) {
+	void DrawUI(AEGfxTexture* pTex, AEMtx33 const& transform, Color const& color) {
 		DrawTexture(SCREEN, pTex, transform, color);
 	}
 
-	void DrawUIFollowCam(AEGfxTexture* pTex, AEMtx33 transform, Color const& color) {
+	void DrawUIFollowCam(AEGfxTexture* pTex, AEMtx33 const& transform, Color const& color) {
+		AEMtx33 newTrans = transform;
 		// Adjust the x and y position of the UI object to adjust based on the camera movement
 		f32 camX = 0, camY = 0;
 		AEGfxGetCamPosition(&camX, &camY);
-		transform.m[0][2] += floorf(camX);
-		transform.m[1][2] += floorf(camY);
+		newTrans.m[0][2] += floorf(camX);
+		newTrans.m[1][2] += floorf(camY);
 
-		DrawUI(pTex, transform, color);
+		DrawUI(pTex, newTrans, color);
 	}
 
-	void DrawTextUI(TextObject& textObj) {
+	void DrawTextUI(TextObject const& textObj) {
 		if (textObj.textContent.empty()) return;
 
 		// Use a stringstream to handle newline parsing automatically

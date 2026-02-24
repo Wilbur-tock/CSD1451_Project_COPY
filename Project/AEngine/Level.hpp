@@ -13,11 +13,14 @@ public:
 	TextObject debugText;
 
 	// Read level map data and load level resources
-	void Load(std::string filePath);
+	void Load(std::string const& filePath);
 	void Initalize();
 	void Update();
+	void Free();
 
-	std::string Debugger();
+	// Member functions
+
+	std::string DebugInfo();
 	Enemy* FindEnemy(int enemyId);
 private:
 	std::string levelName;

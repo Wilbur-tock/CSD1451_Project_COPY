@@ -6,16 +6,16 @@
 #include "CameraManager.hpp"
 
 namespace GameStateManager {
-	enum GameState {
-		GS_INIT,
-		GS_MAIN_MENU,
-		GS_MAP_EDITOR,
-		GS_LEVEL_1,
-		GS_LEVEL_2,
-		GS_CREDITS,
-		GS_RESTART,
-		GS_EXIT,
-		GS_QUIT,
+	enum class GameState {
+		INITIALIZE,
+		MAIN_MENU,
+		MAP_EDITOR,
+		LEVEL_1,
+		LEVEL_2,
+		CREDITS,
+		RESTART,
+		EXIT,
+		QUIT,
 	};
 
 	extern Utils::FuncPtr gsLoad, gsIntialize, gsUpdate, gsDraw, gsFree, gsUnload;

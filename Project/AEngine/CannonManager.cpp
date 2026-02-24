@@ -44,7 +44,7 @@ namespace CannonManager {
             Utils::GetWorldMousePos(worldMouseX, worldMouseY);
 
             // Calculate angle toward mouse
-            cannonAngle = atan2(worldMouseY - pos.y, worldMouseX - pos.x);
+            cannonAngle = atan2(worldMouseY - transform.pos.y, worldMouseX - transform.pos.x);
 
             // Add limits so it can only turn facing upwards or downwards limits
             if (isShootingRight) {
@@ -69,7 +69,7 @@ namespace CannonManager {
             if (Utils::isDebuggerOn) {
                 float mX = 0, mY = 0;
                 Utils::GetWorldMousePos(mX, mY);
-                float cX = pos.x, cY = pos.y;
+                float cX = transform.pos.x, cY = transform.pos.y;
                 Utils::GetWorldPos(cX, cY);
                 s32 mouseX, mouseY;
                 AEInputGetCursorPosition(&mouseX, &mouseY);
@@ -77,15 +77,15 @@ namespace CannonManager {
                 Projectile& selectedProjectile = projectiles[selectedProjectileId];
 
                 TextObject txtObj{ "", Utils::debuggerInfo.first * 0.8f, Utils::debuggerInfo.second, {0.5f, 0.99f} };
-                txtObj.textContent = "Cannon\nPos X: " + Utils::FormatFloat(pos.x, 2) + " Y: " + Utils::FormatFloat(pos.y, 2)
+                txtObj.textContent = "Cannon\nPos X: " + Utils::FormatFloat(transform.pos.x, 2) + " Y: " + Utils::FormatFloat(transform.pos.y, 2)
                     + "\nAngle: " + Utils::FormatFloat(cannonAngle * (180.0f / 3.14159265359), 2) + " " + Utils::FormatFloat(cannonAngle, 2)
-                    + "\n\nSelected Projectile: " + std::to_string(selectedProjectileId) + " Mode: " + std::to_string(selectedProjectile.Mode())
+                    + "\n\nSelected Projectile: " + std::to_string(selectedProjectileId) + " Mode: " + std::to_string(static_cast<int>(selectedProjectile.Mode()))
                     + "\nDamage: " + std::to_string(selectedProjectile.attribute.Damage()) + " Radius: " + std::to_string(selectedProjectile.attribute.DamageRadius());
                 if (activeAmmo.size() > 0) {
                     Projectile& projectile = activeAmmo.back();
-                    txtObj.textContent += "\nActive Projectile " + std::to_string(projectile.Mode()) + "\nSize: x: "
-                        + Utils::FormatFloat(projectile.size.x, 2) + " y: " + Utils::FormatFloat(projectile.size.y, 2)
-                        + "\nPos x: " + Utils::FormatFloat(projectile.pos.x, 2) + " y " + Utils::FormatFloat(projectile.pos.y, 2)
+                    txtObj.textContent += "\n\nActive Projectile " + std::to_string(static_cast<int>(projectile.Mode())) + "\nSize: x: "
+                        + Utils::FormatFloat(projectile.transform.size.x, 2) + " y: " + Utils::FormatFloat(projectile.transform.size.y, 2)
+                        + "\nPos x: " + Utils::FormatFloat(projectile.transform.pos.x, 2) + " y " + Utils::FormatFloat(projectile.transform.pos.y, 2)
                         + "\nVelocity x: " + Utils::FormatFloat(activeAmmo.back().velocity.x, 2) + " y: " + Utils::FormatFloat(projectile.velocity.y, 2)
                         + "\nGrounded: " + std::string(projectile.isGrounded ? "true" : "false")
                         + "\nTo Be Destroyed: " + std::string(projectile.toBeDestroyed ? "true" : "false")
@@ -118,11 +118,11 @@ namespace CannonManager {
             }
 
             // When player press left mouse click, set camera to position the cannon and unable to move the camera
-            CameraManager::camera.SetPosition(pos);
+            CameraManager::camera.SetPosition(transform.pos);
             CameraManager::camera.SetState(CameraManager::CameraController::CameraState::STATIC);
 
             // Render UI
-            UIManager::Bar bar { { pos.x - (size.x * 1.5f), pos.y + (size.y * 1.5f) }, { 15,100 }, Color{ 0,1,0 }, UIManager::TOP_TO_BOTTOM };
+            UIManager::Bar bar { { transform.pos.x - (transform.size.x * 1.5f), transform.pos.y + (transform.size.y * 1.5f) }, { 15,100 }, Color{ 0,1,0 }, UIManager::TOP_TO_BOTTOM };
             bar.Draw(chargingPower, maxPower);
         }
 
@@ -136,7 +136,7 @@ namespace CannonManager {
     }
 
     void Cannon::Render() {
-        AEMtx33 mat = GraphicsManager::CreateTransformMatrix(pos.x, pos.y, cannonAngle, size.x, size.y);
+        AEMtx33 mat = GraphicsManager::CreateTransformMatrix(transform.pos.x, transform.pos.y, cannonAngle, transform.size.x, transform.size.y);
         GraphicsManager::DrawGameObject(texture, mat, textureColor);
     }
 
@@ -157,8 +157,8 @@ namespace CannonManager {
         projectile.id = static_cast<int>(activeAmmo.size() - 1);
 
         // Add offset to ensure that the projectile spawn at the barrel instead of the middle of the cannon
-        projectile.pos.x = pos.x + (cos(cannonAngle) * size.x);
-        projectile.pos.y = pos.y + (sin(cannonAngle) * size.y);
+        projectile.transform.pos.x = transform.pos.x + (cos(cannonAngle) * transform.size.x);
+        projectile.transform.pos.y = transform.pos.y + (sin(cannonAngle) * transform.size.y);
 
         // Calculate velocity here once only to ensure that gravity has an effect
         projectile.velocity.x = cos(cannonAngle) * shotPower;
@@ -195,9 +195,9 @@ namespace CannonManager {
 
                 // Check for collision in a 3x3 area with the projectile
                 int gridX = 0, gridY = 0;
-                Utils::GetGridIndex(gridX, gridY, projectile.pos);
+                Utils::GetGridIndex(gridX, gridY, projectile.transform.pos);
 
-                float radius = projectile.size.x / 2.0f;
+                float radius = projectile.transform.size.x / 2.0f;
                 float bias = 0.25f;
                 int minX = gridX - 1, minY = gridY - 1, maxX = gridX + 1, maxY = gridY + 1;
                 for (int y = minY; y <= maxY; ++y) {
@@ -209,18 +209,18 @@ namespace CannonManager {
                         // Checking collision of the projectile with the tile blocks
                         if (tile.IsBlocks() || tile.IsGround() || tile.IsEnemy()) {
                             if (CollisionManager::AreCircleSquareIntersecting(
-                                tile.pos.x, tile.pos.y, tile.size.x, tile.size.y,
-                                projectile.pos.x, projectile.pos.y, radius))
+                                tile.transform.pos.x, tile.transform.pos.y, tile.transform.size.x, tile.transform.size.y,
+                                projectile.transform.pos.x, projectile.transform.pos.y, radius))
                             {
-                                projectile.isCollisionDetected = true;
+                                projectile.collisionTriggered = true;
 
-                                if (projectile.hasCollision) {
+                                if (projectile.isCollisionActive) {
                                     projectile.SimulatePhysics(tile);
                                 }
 
-                                if (projectile.isCollisionDetected) {
+                                if (projectile.collisionTriggered) {
                                     projectile.DamageTile(x, y);
-                                    projectile.hasCollision = true;
+                                    projectile.isCollisionActive = true;
 
                                     // If the projectile hit something slow down the velocity by a percentage
                                     float percentage = 0.2f;
@@ -240,17 +240,18 @@ namespace CannonManager {
                             if (Utils::IsGridIndexOutOfBounds(x, y)) continue;
 
                             Tile& tile = (*MapManager::currentMap)[y][x];
+                            float halfW = tile.transform.size.x * 0.5f, halfH = tile.transform.size.y * 0.5f;
 
                             if (tile.IsBlocks() || tile.IsGround()) {
-                                float tileTop = tile.pos.y + (tile.size.y / 2.0f);
-                                float tileLeft = tile.pos.x - (tile.size.x / 2.0f);
-                                float tileRight = tile.pos.x + (tile.size.x / 2.0f);
+                                float tileTop = tile.transform.pos.y + halfH;
+                                float tileLeft = tile.transform.pos.x - halfW;
+                                float tileRight = tile.transform.pos.x + halfW;
 
                                 // Check if projectile is resting on top of this tile by checking the projectile x-axis is within the tile x-axis
                                 // and its y-axis is the same +- bias as the tile + projectile radius
-                                if (projectile.pos.x >= tileLeft - radius &&
-                                    projectile.pos.x <= tileRight + radius &&
-                                    std::abs(projectile.pos.y - (tileTop + radius)) < bias) {
+                                if (projectile.transform.pos.x >= tileLeft - radius &&
+                                    projectile.transform.pos.x <= tileRight + radius &&
+                                    std::abs(projectile.transform.pos.y - (tileTop + radius)) < bias) {
                                     projectile.isGrounded = true;
                                     projectile.velocity.y = 0;
                                     break;
@@ -303,22 +304,22 @@ namespace CannonManager {
 
         if (isFollowingProjectile) {
             // Set camera to follow the newly fired projectile
-            CameraManager::camera.SetFollowTarget(&activeAmmo.back().pos);
+            CameraManager::camera.SetFollowTarget(&activeAmmo.back().transform.pos);
             CameraManager::camera.SetState(CameraManager::CameraController::CameraState::FOLLOW);
         }
         else {
             // Return camera to input control
             CameraManager::camera.SetFollowTarget(nullptr);
             CameraManager::camera.SetState(CameraManager::CameraController::CameraState::INPUT);
-            CameraManager::camera.SetPosition(pos);
+            CameraManager::camera.SetPosition(transform.pos);
         }
     }
 
     void Cannon::DrawTrajectory() {
         int numDots = 0;
         // Starting position (at the barrel tip, matching ShootProjectile)
-        float startX = pos.x + cos(cannonAngle) * size.x;
-        float startY = pos.y + sin(cannonAngle) * size.x;
+        float startX = transform.pos.x + cos(cannonAngle) * transform.size.x;
+        float startY = transform.pos.y + sin(cannonAngle) * transform.size.x;
 
         // Initial velocity components
         float vx = cos(cannonAngle) * maxPower;

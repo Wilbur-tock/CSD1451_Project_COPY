@@ -130,28 +130,31 @@ namespace MapEditor {
 			if (AEInputCheckCurr(AEVK_LBUTTON)) {
 				newMap[gridY][gridX].Type(drawingTileType);
 
+				// Input to draw a column
 				if (AEInputCheckCurr(AEVK_LCTRL) || AEInputCheckCurr(AEVK_RCTRL)) {
 					for (int i = 0; i < Config::GRID_WIDTH; ++i) {
 						newMap[gridY][i].Type(drawingTileType);
 					}
 				}
 
+				// Input to draw a row
 				if (AEInputCheckCurr(AEVK_LSHIFT) || AEInputCheckCurr(AEVK_RSHIFT)) {
 					for (int i = 0; i < Config::GRID_HEIGHT; ++i) {
 						newMap[i][gridX].Type(drawingTileType);
 					}
 				}
 			}
-			else if (AEInputCheckCurr(AEVK_RBUTTON)) {
+			else if (AEInputCheckCurr(AEVK_RBUTTON)) { // Input to erase tile
 
 				newMap[gridY][gridX].Type(TILE_EMPTY);
-
+				// Input to erase a column
 				if (AEInputCheckCurr(AEVK_LCTRL) || AEInputCheckCurr(AEVK_RCTRL)) {
 					for (int i = 0; i < Config::GRID_WIDTH; ++i) {
 						newMap[gridY][i].Type(TILE_EMPTY);
 					}
 				}
 
+				// Input to erase a row
 				if (AEInputCheckCurr(AEVK_LSHIFT) || AEInputCheckCurr(AEVK_RSHIFT)) {
 					for (int i = 0; i < Config::GRID_HEIGHT; ++i) {
 						newMap[i][gridX].Type(TILE_EMPTY);
@@ -160,6 +163,7 @@ namespace MapEditor {
 			}
 		}
 
+		// Input to reset map layout
 		if (AEInputCheckTriggered(AEVK_R)) {
 			ResetMap();
 		}
@@ -173,11 +177,12 @@ namespace MapEditor {
 			drawingTileType = static_cast<TileType>(tileId);
 		}
 
+		// Input to toggle drawing tile list
 		if (AEInputCheckTriggered(AEVK_T)) {
 			isShowingTileList = !isShowingTileList;
 		}
 
-		// Checking for input CTRL + {NUMBER} to load a new LEVEL MAP to edit
+		// Input CTRL + {NUMBER} to load a new LEVEL MAP to edit
 		if (AEInputCheckCurr(AEVK_LCTRL) || AEInputCheckCurr(AEVK_RCTRL)) {
 			for (int i = 1; i <= totalLevelMap; ++i) {
 				if (AEInputCheckCurr(static_cast<u8>(AEVK_0 + i))) {
@@ -189,7 +194,7 @@ namespace MapEditor {
 		}
 
 		if (AEInputCheckTriggered(AEVK_Q)) {
-			GameStateManager::next = GameStateManager::GS_MAIN_MENU;
+			GameStateManager::next = GameStateManager::GameState::MAIN_MENU;
 		}
 
 		// Save file on both BIN folder and my project folder if debugger is on
@@ -218,8 +223,8 @@ namespace MapEditor {
 			"\n[T] Tile List ";
 
 		if (isShowingTileList) {
-			helpStr += "[SHOWING]\n[SCROLL]";
-			helpStr += "\nSelected: " + TileTypeToString(tileId) + " (" + std::to_string(tileId) + ")";
+			helpStr += "[SHOWING]\n[SCROLL]\nSelected: "
+				+ GetTileName(tileId) + " (" + std::to_string(tileId) + ")";
 			// List out the type of tiles able to be drawn
 			for (int i = 0; i < TILE_COUNT - 1; ++i) {
 				int id = i + 1;
@@ -227,7 +232,7 @@ namespace MapEditor {
 				if (tileId == id) {
 					str = "[O] ";
 				}
-				helpStr += "\n" + str + TileTypeToString(id);
+				helpStr += "\n" + str + GetTileName(id);
 			}
 		}
 		else {
@@ -249,8 +254,8 @@ namespace MapEditor {
 			Tile& tile = (*currentMap)[gridY][gridX];
 
 			debugText.textContent = "Grid\nIndex X: " + std::to_string(gridX) + " Y: " + std::to_string(gridY)
-				+ "\nTile: " + TileTypeToString(tile.Type())
-				+ "\nPos X: " + Utils::FormatFloat(newMap[gridY][gridX].pos.x, 2) + " Y: " + Utils::FormatFloat(newMap[gridY][gridX].pos.y, 2)
+				+ "\nTile: " + GetTileName(tile.Type())
+				+ "\nPos X: " + Utils::FormatFloat(newMap[gridY][gridX].transform.pos.x, 2) + " Y: " + Utils::FormatFloat(newMap[gridY][gridX].transform.pos.y, 2)
 				+ "\nCamera " + std::to_string(CameraManager::camera.GetState()) +
 				+ "\nPos X:" + Utils::FormatFloat(x, 2) + " Y: " + Utils::FormatFloat(y, 2)
 				+ "\nMouse\nScreen Pos X: " + Utils::FormatFloat(mouseX, 2) + " Y: " + Utils::FormatFloat(mouseY, 2)

@@ -2,6 +2,7 @@
 
 #include "Utils.hpp"
 #include "Color.hpp"
+#include "BaseTypes.hpp"
 
 namespace UIManager {
 	enum FillType {
@@ -9,10 +10,6 @@ namespace UIManager {
 		TOP_TO_BOTTOM,
 		//LEFT_TO_RIGHT,
 		//BOTTOM_TO_TOP,
-	};
-
-	struct Transform {
-		AEVec2 pos, size;
 	};
 
 	class Bar {

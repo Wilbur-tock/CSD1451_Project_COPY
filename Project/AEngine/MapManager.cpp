@@ -97,7 +97,7 @@ namespace MapManager {
 			<< CANNON_BASE_PATH << "\n";
 	}
 
-	void ReadMapData(std::string fileName, std::vector<std::vector<Tile>> &map) {
+	void ReadMapData(std::string const& fileName, std::vector<std::vector<Tile>> &map) {
 		std::ifstream ifs{fileName};
 		if (!ifs) {
 			std::cerr << "Error: Could not open map data file at " << fileName << std::endl;
@@ -132,9 +132,11 @@ namespace MapManager {
 					tileTexture = gTileTex[type];
 				}
 
+				// Initialize each tile object here
+
 				Tile& tile = map[y][x];
-				tile.pos = { startX + (x * tileSize), startY - (y * tileSize) };
-				tile.size = { Config::TILE_SIZE,Config::TILE_SIZE };
+				tile.transform.pos = { startX + (x * tileSize), startY - (y * tileSize) };
+				tile.transform.size = { Config::TILE_SIZE,Config::TILE_SIZE };
 				tile.texture = tileTexture;
 				tile.Type(static_cast<TileType>(type));
 				tile.tileId = { x,y };
@@ -150,12 +152,13 @@ namespace MapManager {
 		ifs.close();
 	}
 
-	void RenderMap(const std::vector<std::vector<Tile>>& map) {
+	void RenderMap(std::vector<std::vector<Tile>> const& map) {
 		for (int y = 0; y < Config::GRID_HEIGHT; ++y) {
 			for (int x = 0; x < Config::GRID_WIDTH; ++x) {
 				const Tile& tile = map[y][x];
 				if (tile.Type() == TILE_EMPTY) continue;
-				AEMtx33 transform = GraphicsManager::CreateTransformMatrix(tile.pos.x, tile.pos.y, 0.0f, tile.size.x / 2.0f, tile.size.y / 2.0f);
+				AEMtx33 transform = GraphicsManager::CreateTransformMatrix(
+					tile.transform.pos.x, tile.transform.pos.y, 0.0f, tile.transform.size.x / 2.0f, tile.transform.size.y / 2.0f);
 				GraphicsManager::DrawGameObject(gTileTex[tile.Type()], transform, Color{1,1,1,1});
 			}
 		}

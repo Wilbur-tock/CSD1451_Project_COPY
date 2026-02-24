@@ -34,16 +34,16 @@ void Tile::TakeDamage(int damage) {
 	attribute.TakeDamage(damage * attribute.DamageMultiplier());
 
 	if (!attribute.IsActive()) {
-		Type(TILE_EMPTY);
+		Type(TileType::TILE_EMPTY);
 	}
 }
 
 std::ostream& operator<<(std::ostream& os, Tile const& rhs) {
-	os << TileTypeToString(rhs.Type()) << " " << rhs.tileId;
+	os << GetTileName(rhs.Type()) << " " << rhs.tileId;
 	return os;
 }
 
-std::string TileTypeToString(int id) {
+std::string GetTileName(int id) {
 	if (id < 0 || id >= static_cast<int>(tileNames.size())) return "INVALID";
 	return tileNames[id];
 }

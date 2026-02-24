@@ -4,11 +4,10 @@
 #include "pch.hpp"
 
 #include "Attributes.hpp"
-#include "GameObject.hpp"
+#include "GameObject.hpp" // Using GameObject and TileIndex.hpp
 #include "Physics.hpp"
-#include "TileIndex.hpp"
 
-enum EnemyType
+enum class EnemyType
 {
 	MINION,
 	BOSS,

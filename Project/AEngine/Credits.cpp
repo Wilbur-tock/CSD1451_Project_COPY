@@ -85,7 +85,7 @@ namespace Credits {
 
         // Return to main menu with ESC or BACKSPACE
         if (AEInputCheckTriggered(AEVK_ESCAPE) || AEInputCheckTriggered(AEVK_BACK)) {
-            GameStateManager::next = GameStateManager::GS_MAIN_MENU;
+            GameStateManager::next = GameStateManager::GameState::MAIN_MENU;
         }
 
         // Skip to end of credits with SPACE
@@ -99,7 +99,7 @@ namespace Credits {
             // scrollOffset = -1.0f;
 
             // Option 2: Return to menu
-            GameStateManager::next = GameStateManager::GS_MAIN_MENU;
+            GameStateManager::next = GameStateManager::GameState::MAIN_MENU;
         }
 
         Draw();

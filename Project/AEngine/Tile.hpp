@@ -45,12 +45,12 @@ public:
 
 	TileType Type() const;
 	void Type(TileType newType);
+
+	// Copy another type data
 	void Type(Tile const& toCopy);
 
 	int EnemyId() const;
 	void EnemyId(int newId);
-
-	// Member functions
 
 	bool IsEmpty() const;
 	bool IsGround() const;
@@ -60,12 +60,12 @@ public:
 	void TakeDamage(int damage);
 private:
 	float const defaultSize = Config::TILE_SIZE;
-	TileType prevType = TILE_EMPTY; // previous tile type
-	TileType type = TILE_EMPTY; // current tile type
+	TileType prevType = TileType::TILE_EMPTY; // previous tile type
+	TileType type = TileType::TILE_EMPTY; // current tile type
 	int enemyId = -1; // index of the enemy object stored in the vector list
 };
 
 std::ostream& operator<<(std::ostream& os, Tile const& rhs);
-std::string TileTypeToString(int id);
+std::string GetTileName(int id);
 
 #endif // !TILE_HPP

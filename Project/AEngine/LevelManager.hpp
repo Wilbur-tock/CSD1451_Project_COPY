@@ -5,6 +5,7 @@
 #include "Level.hpp"
 
 namespace LevelManager {
+	// current selected level
 	extern Level* selectedLevel;
 }
 

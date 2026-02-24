@@ -17,7 +17,7 @@ namespace AbilitiesManager {
 		currentAbility->Charges(-1);
 
 		// Update projectile to DEFAULT projectile once this ability charges is all used up
-		if (currentAbility->Type() == OFFENSIVE_PROJECTILE && currentAbility->Charges() <= 0) {
+		if (currentAbility->Type() == AbilityType::OFFENSIVE_PROJECTILE && currentAbility->Charges() <= 0) {
 			ChangeAbility(0);
 		}
 
@@ -44,24 +44,24 @@ namespace AbilitiesManager {
 	}
 
 	int AbilityController::FindProjectileId() {
-		if (currentAbility->Type() != OFFENSIVE_PROJECTILE) return 0;
+		if (currentAbility->Type() != AbilityType::OFFENSIVE_PROJECTILE) return 0;
 		return currentAbility->ProjectileId();
 	}
 
 	void AbilityController::LoadAllAbilities() {
 		int count = 3;
 		for (int i = 0; i < count; ++i) {
-			Ability ability{ i, abilitiesName[i], OFFENSIVE_PROJECTILE, 0};
+			Ability ability{ i, abilitiesName[i], AbilityType::OFFENSIVE_PROJECTILE, 0};
 
 			switch (i) {
 			case 0:
 				ability.UnlimitedCharges(true);
 				break;
 			case 1:
-				ability = { i, abilitiesName[i], OFFENSIVE_PROJECTILE, 1};
+				ability = { i, abilitiesName[i], AbilityType::OFFENSIVE_PROJECTILE, 1};
 				break;
 			case 2:
-				ability = { i, abilitiesName[i], OFFENSIVE_PROJECTILE, 2 };
+				ability = { i, abilitiesName[i], AbilityType::OFFENSIVE_PROJECTILE, 2 };
 				break;
 			}
 

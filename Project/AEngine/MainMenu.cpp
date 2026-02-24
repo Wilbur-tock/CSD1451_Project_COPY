@@ -163,22 +163,22 @@ namespace MainMenu {
     // Button callback functions
     void OnPlayClicked() {
         // Transition to Level 1
-        GameStateManager::next = GameStateManager::GS_LEVEL_1;
+        GameStateManager::next = GameStateManager::GameState::LEVEL_1;
     }
 
     void OnMapEditorClicked() {
         // Transition to Map Editor
-        GameStateManager::next = GameStateManager::GS_MAP_EDITOR;
+        GameStateManager::next = GameStateManager::GameState::MAP_EDITOR;
     }
 
     void OnCreditsClicked() {
         // Transition to Credits screen
-        GameStateManager::next = GameStateManager::GS_CREDITS;
+        GameStateManager::next = GameStateManager::GameState::CREDITS;
     }
 
     void OnQuitClicked() {
         // Quit the game
-        GameStateManager::next = GameStateManager::GS_QUIT;
+        GameStateManager::next = GameStateManager::GameState::QUIT;
     }
 }
 

@@ -39,16 +39,16 @@ namespace CollisionManager {
     }
 
     bool IsPointInGameObject(GameObject const& obj) {
-        if (obj.collider.type == COLLIDER_BOX) {
+        if (obj.collider.type == CollisionType::COLLIDER_BOX) {
             float mouseX = 0, mouseY = 0;
             Utils::GetWorldMousePos(mouseX, mouseY);
 
             // Calculate the bounding box in WORLD COORDINATES ONLY
-            float halfWidth = obj.size.x / 2.0f, halfHeight = obj.size.y / 2.0f;
-            float left = obj.pos.x - halfWidth;
-            float right = obj.pos.x + halfWidth;
-            float top = obj.pos.y + halfHeight;
-            float bottom = obj.pos.y - halfHeight;
+            float halfWidth = obj.transform.size.x / 2.0f, halfHeight = obj.transform.size.y / 2.0f;
+            float left = obj.transform.pos.x - halfWidth;
+            float right = obj.transform.pos.x + halfWidth;
+            float top = obj.transform.pos.y + halfHeight;
+            float bottom = obj.transform.pos.y - halfHeight;
 
             return (mouseX >= left && mouseX <= right && mouseY <= top && mouseY >= bottom);
         }
