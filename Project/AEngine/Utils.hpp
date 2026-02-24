@@ -9,7 +9,7 @@ namespace Utils {
 	extern std::pair<float, Color> debuggerInfo; // Store the text scale and color
 	typedef std::function<void()> FuncPtr;
 
-	enum RectMode {
+	enum class RectMode {
 		RECT_TOP_LEFT,
 		RECT_TOP_CENTER,
 		RECT_TOP_RIGHT,

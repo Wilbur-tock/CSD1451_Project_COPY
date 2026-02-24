@@ -1,8 +1,6 @@
 #ifndef COLOR_HPP
 #define COLOR_HPP
 
-#include "pch.hpp"
-
 class Color {
 private:
 	float r, g, b, a;

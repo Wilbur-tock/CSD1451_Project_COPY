@@ -6,8 +6,6 @@
 
 namespace EnemyManager {
 	extern std::vector<Enemy>* enemies;
-
-	void LoadEnemies(std::vector<Enemy>* list);
 }
 
 #endif // !1

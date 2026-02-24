@@ -240,7 +240,7 @@ namespace MapEditor {
 		}
 
 		helpText.textContent = helpStr;
-		GraphicsManager::DrawTextUI(helpText);
+		helpText.Draw();
 
 		// Print out debugger information about the map editor
 		if (Utils::isDebuggerOn) {
@@ -260,7 +260,8 @@ namespace MapEditor {
 				+ "\nPos X:" + Utils::FormatFloat(x, 2) + " Y: " + Utils::FormatFloat(y, 2)
 				+ "\nMouse\nScreen Pos X: " + Utils::FormatFloat(mouseX, 2) + " Y: " + Utils::FormatFloat(mouseY, 2)
 				+ "\nWorld Pos X: " + Utils::FormatFloat(mX, 2) + " Y: " + Utils::FormatFloat(mY, 2);
-			GraphicsManager::DrawTextUI(debugText);
+
+			debugText.Draw();
 		}
 	}
 

@@ -23,8 +23,8 @@ namespace UIManager {
 
         float percentage = (currValue / maxValue);
         float newW = w, newH = h;
-        if (type == RIGHT_TO_LEFT) { newW *= percentage; }
-        else if (type == TOP_TO_BOTTOM) { 
+        if (type == FillType::RIGHT_TO_LEFT) { newW *= percentage; }
+        else if (type == FillType::TOP_TO_BOTTOM) {
             y -= h; // change origin point to BOTTOM LEFT of the bar
             newH *= -percentage; 
         }
@@ -44,39 +44,39 @@ namespace UIManager {
 
         // Set position based on rect mode
         switch (rectMode) {
-        case Utils::RECT_TOP_LEFT:
+        case Utils::RectMode::RECT_TOP_LEFT:
             x = -halfScreenW;
             y = halfScreenH;
             break;
-        case Utils::RECT_TOP_CENTER:
+        case Utils::RectMode::RECT_TOP_CENTER:
             x = -halfW;
             y = halfScreenH;
             break;
-        case Utils::RECT_TOP_RIGHT:
+        case Utils::RectMode::RECT_TOP_RIGHT:
             x = halfScreenW - width;
             y = halfScreenH;
             break;
-        case Utils::RECT_CENTER_LEFT:
+        case Utils::RectMode::RECT_CENTER_LEFT:
             x = -halfScreenW;
             y = halfH;
             break;
-        case Utils::RECT_CENTER:
+        case Utils::RectMode::RECT_CENTER:
             x = -halfW;
             y = halfH;
             break;
-        case Utils::RECT_CENTER_RIGHT:
+        case Utils::RectMode::RECT_CENTER_RIGHT:
             x = halfScreenW - width;
             y = halfH;
             break;
-        case Utils::RECT_BOTTOM_LEFT:
+        case Utils::RectMode::RECT_BOTTOM_LEFT:
             x = -halfScreenW;
             y = -halfScreenH + height;
             break;
-        case Utils::RECT_BOTTOM_CENTER:
+        case Utils::RectMode::RECT_BOTTOM_CENTER:
             x = -halfW;
             y = -halfScreenH + height;
             break;
-        case Utils::RECT_BOTTOM_RIGHT:
+        case Utils::RectMode::RECT_BOTTOM_RIGHT:
             x = halfScreenW - width;
             y = -halfScreenH + height;
             break;

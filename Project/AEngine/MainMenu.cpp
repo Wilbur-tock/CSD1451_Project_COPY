@@ -42,7 +42,7 @@ namespace MainMenu {
         AEVec2 playPos = { centerX - btnWidth / 2.0f, startY };
         playButton = Button(
             TextObject{ "PLAY" },
-            Utils::RECT_CENTER,
+            Utils::RectMode::RECT_CENTER,
             playPos,
             { btnWidth, btnHeight },
             Color(0.2f, 0.6f, 0.9f, 1.0f),  // Blue color
@@ -54,7 +54,7 @@ namespace MainMenu {
         AEVec2 editorPos = { centerX - btnWidth / 2.0f, startY - btnSpacing };
         mapEditorButton = Button(
             TextObject{ "MAP EDITOR" },
-            Utils::RECT_CENTER,
+            Utils::RectMode::RECT_CENTER,
             editorPos,
             { btnWidth, btnHeight },
             Color(0.3f, 0.7f, 0.3f, 1.0f),  // Green color
@@ -66,7 +66,7 @@ namespace MainMenu {
         AEVec2 creditsPos = { centerX - btnWidth / 2.0f, startY - btnSpacing * 2 };
         creditsButton = Button(
             TextObject{ "CREDITS" },
-            Utils::RECT_CENTER,
+            Utils::RectMode::RECT_CENTER,
             creditsPos,
             { btnWidth, btnHeight },
             Color(0.7f, 0.5f, 0.9f, 1.0f),  // Purple color
@@ -78,7 +78,7 @@ namespace MainMenu {
         AEVec2 quitPos = { centerX - btnWidth / 2.0f, startY - btnSpacing * 3 };
         quitButton = Button(
             TextObject{ "QUIT" },
-            Utils::RECT_CENTER,
+            Utils::RectMode::RECT_CENTER,
             quitPos,
             { btnWidth, btnHeight },
             Color(0.8f, 0.2f, 0.2f, 1.0f),  // Red color
@@ -121,10 +121,10 @@ namespace MainMenu {
         }
 
         // Draw title
-        GraphicsManager::DrawTextUI(gameTitle);
+        gameTitle.Draw();
 
         // Draw subtitle or instructions
-        GraphicsManager::DrawTextUI(instructions);
+        instructions.Draw();
     }
 
     void Update() {

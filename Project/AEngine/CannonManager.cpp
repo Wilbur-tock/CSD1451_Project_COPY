@@ -76,14 +76,13 @@ namespace CannonManager {
 
                 Projectile& selectedProjectile = projectiles[selectedProjectileId];
 
-                TextObject txtObj{ "", Utils::debuggerInfo.first * 0.8f, Utils::debuggerInfo.second, {0.5f, 0.99f} };
-                txtObj.textContent = "Cannon\nPos X: " + Utils::FormatFloat(transform.pos.x, 2) + " Y: " + Utils::FormatFloat(transform.pos.y, 2)
+                std::string debugStr = "Cannon\nPos X: " + Utils::FormatFloat(transform.pos.x, 2) + " Y: " + Utils::FormatFloat(transform.pos.y, 2)
                     + "\nAngle: " + Utils::FormatFloat(cannonAngle * (180.0f / 3.14159265359), 2) + " " + Utils::FormatFloat(cannonAngle, 2)
                     + "\n\nSelected Projectile: " + std::to_string(selectedProjectileId) + " Mode: " + std::to_string(static_cast<int>(selectedProjectile.Mode()))
                     + "\nDamage: " + std::to_string(selectedProjectile.attribute.Damage()) + " Radius: " + std::to_string(selectedProjectile.attribute.DamageRadius());
                 if (activeAmmo.size() > 0) {
                     Projectile& projectile = activeAmmo.back();
-                    txtObj.textContent += "\n\nActive Projectile " + std::to_string(static_cast<int>(projectile.Mode())) + "\nSize: x: "
+                    debugStr += "\n\nActive Projectile " + std::to_string(static_cast<int>(projectile.Mode())) + "\nSize: x: "
                         + Utils::FormatFloat(projectile.transform.size.x, 2) + " y: " + Utils::FormatFloat(projectile.transform.size.y, 2)
                         + "\nPos x: " + Utils::FormatFloat(projectile.transform.pos.x, 2) + " y " + Utils::FormatFloat(projectile.transform.pos.y, 2)
                         + "\nVelocity x: " + Utils::FormatFloat(activeAmmo.back().velocity.x, 2) + " y: " + Utils::FormatFloat(projectile.velocity.y, 2)
@@ -94,7 +93,8 @@ namespace CannonManager {
                         + "\nDamage Radius: " + std::to_string(projectile.attribute.DamageRadius());
                 }
 
-                GraphicsManager::DrawTextUI(txtObj);
+                TextObject textObj{ debugStr, Utils::debuggerInfo.first * 0.8f, Utils::debuggerInfo.second, {0.5f, 0.99f} };
+                textObj.Draw();
             }
         }
 
@@ -122,7 +122,8 @@ namespace CannonManager {
             CameraManager::camera.SetState(CameraManager::CameraController::CameraState::STATIC);
 
             // Render UI
-            UIManager::Bar bar { { transform.pos.x - (transform.size.x * 1.5f), transform.pos.y + (transform.size.y * 1.5f) }, { 15,100 }, Color{ 0,1,0 }, UIManager::TOP_TO_BOTTOM };
+            UIManager::Bar bar { { transform.pos.x - (transform.size.x * 1.5f), transform.pos.y + (transform.size.y * 1.5f) }, 
+                { 15,100 }, Color{ 0,1,0 }, UIManager::FillType::TOP_TO_BOTTOM };
             bar.Draw(chargingPower, maxPower);
         }
 

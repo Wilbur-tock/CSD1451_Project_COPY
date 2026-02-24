@@ -19,34 +19,34 @@ Button::Button(TextObject _textObj, Utils::RectMode _rectMode, AEVec2 _pos, AEVe
     float x = pos.x, y = pos.y, borderGap = 0.01f;
 
     switch (_rectMode) {
-        case Utils::RECT_TOP_LEFT: {
+        case Utils::RectMode::RECT_TOP_LEFT: {
             Utils::NormalizeCoordinates(x, y);
             textObj.pos.x = x + borderGap;
             textObj.pos.y = y - borderGap;
             break;
         }
-        case Utils::RECT_TOP_CENTER: {
+        case Utils::RectMode::RECT_TOP_CENTER: {
             x += (size.x / 2.0f);
             Utils::NormalizeCoordinates(x, y);
             textObj.pos.x = x - (textW / 2.0f);
             textObj.pos.y = y ;
             break;
         }
-        case Utils::RECT_TOP_RIGHT: {
+        case Utils::RectMode::RECT_TOP_RIGHT: {
             x += size.x;
             Utils::NormalizeCoordinates(x, y);
             textObj.pos.x = x - (textW) - borderGap;
             textObj.pos.y = y - borderGap;
             break;
         }
-        case Utils::RECT_CENTER_LEFT: {
+        case Utils::RectMode::RECT_CENTER_LEFT: {
             y -= (size.y / 2.0f);
             Utils::NormalizeCoordinates(x, y);
             textObj.pos.x = x + borderGap;
             textObj.pos.y = y + (textH / 2.0f);
             break;
         }
-        case Utils::RECT_CENTER: {
+        case Utils::RectMode::RECT_CENTER: {
             // Convert button position from corner rectmode to middle rectmode (world pos)
             // then convert to normalized position 
             // then minus half of the text width and height
@@ -56,28 +56,28 @@ Button::Button(TextObject _textObj, Utils::RectMode _rectMode, AEVec2 _pos, AEVe
             textObj.pos.y = y + (textH / 2.0f);
             break;
         }
-        case Utils::RECT_CENTER_RIGHT: {
+        case Utils::RectMode::RECT_CENTER_RIGHT: {
             x += size.x, y -= (size.y / 2.0f);
             Utils::NormalizeCoordinates(x, y);
             textObj.pos.x = x - (textW) - borderGap;
             textObj.pos.y = y + (textH / 2.0f);
             break;
         }
-        case Utils::RECT_BOTTOM_LEFT: {
+        case Utils::RectMode::RECT_BOTTOM_LEFT: {
             y -= (size.y);
             Utils::NormalizeCoordinates(x, y);
             textObj.pos.x = x + borderGap;
             textObj.pos.y = y + textH + borderGap;
             break;
         }
-        case Utils::RECT_BOTTOM_CENTER: {
+        case Utils::RectMode::RECT_BOTTOM_CENTER: {
             x += (size.x / 2.0f), y -= (size.y);
             Utils::NormalizeCoordinates(x, y);
             textObj.pos.x = x - (textW / 2.0f);
             textObj.pos.y = y + textH + borderGap;
             break;
         }
-        case Utils::RECT_BOTTOM_RIGHT: {
+        case Utils::RectMode::RECT_BOTTOM_RIGHT: {
             x += size.x, y -= (size.y);
             Utils::NormalizeCoordinates(x, y);
             textObj.pos.x = x - textW - borderGap;
@@ -110,6 +110,6 @@ void Button::Draw() {
 
     // Draw text if the string is not a empty string
     if (!textObj.textContent.empty()) {
-        GraphicsManager::DrawTextUI(textObj);
+        textObj.Draw();
     }
 }

@@ -63,8 +63,7 @@ namespace Level1 {
 
 			debug += levelData.DebugInfo();
 			levelData.debugText.textContent = debug;
-
-			GraphicsManager::DrawTextUI(levelData.debugText);
+			levelData.debugText.Draw();
 		}
 	}
 

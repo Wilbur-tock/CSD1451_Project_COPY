@@ -125,10 +125,10 @@ namespace Credits {
 
         // Draw credits text with scroll offset
         creditsText.pos = { -0.3f, scrollOffset };
-        GraphicsManager::DrawTextUI(creditsText);
+        creditsText.Draw();
 
-        // Draw hint at bottom
-        GraphicsManager::DrawTextUI(hintText);
+        // Draw hint at 
+        hintText.Draw();
     }
 
     void Free() {

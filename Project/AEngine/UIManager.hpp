@@ -5,7 +5,7 @@
 #include "BaseTypes.hpp"
 
 namespace UIManager {
-	enum FillType {
+	enum class FillType {
 		RIGHT_TO_LEFT,
 		TOP_TO_BOTTOM,
 		//LEFT_TO_RIGHT,
@@ -15,7 +15,7 @@ namespace UIManager {
 	class Bar {
 	public:
 		// Filltype RTL - normal health bar
-		Bar(AEVec2 _pos, AEVec2 _size, Color _color, FillType _type = RIGHT_TO_LEFT);
+		Bar(AEVec2 _pos, AEVec2 _size, Color _color, FillType _type = FillType::RIGHT_TO_LEFT);
 
 		void Draw(float currValue, float maxValue);
 	private:
@@ -27,7 +27,7 @@ namespace UIManager {
 	class Panel {
 	public:
 		// Draw a panel based on the rect mode with the the WORLD COORDINATES (0,0) as origin
-		Panel(AEVec2 _size, Color _color = { 1,1,1 }, Utils::RectMode _rectMode = Utils::RECT_CENTER);
+		Panel(AEVec2 _size, Color _color = { 1,1,1 }, Utils::RectMode _rectMode = Utils::RectMode::RECT_CENTER);
 
 		AEVec2 Pos() const;
 

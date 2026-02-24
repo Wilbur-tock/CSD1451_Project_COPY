@@ -54,7 +54,7 @@ namespace GameStateManager {
             Color(1.0f, 1.0f, 1.0f, 1.0f),
             { -0.15f, 0.2f }
         };
-        GraphicsManager::DrawTextUI(loadingTextObj);
+        loadingTextObj.Draw();
 
         // Loading bar dimensions (in screen pixels)
         float barWidth = 600.0f;
@@ -95,7 +95,7 @@ namespace GameStateManager {
             Color(1.0f, 1.0f, 1.0f, 1.0f),
             { -0.03f, -0.15f }
         };
-        GraphicsManager::DrawTextUI(percentText);
+        percentText.Draw();
     }
 
     void Load() {
@@ -247,7 +247,7 @@ namespace GameStateManager {
 
         // Debugger display
         if (Utils::isDebuggerOn) {
-            UIManager::Panel panel{ {250, 75}, {1.0f,1.0f,1.0f, 0.75f}, Utils::RECT_BOTTOM_LEFT };
+            UIManager::Panel panel{ {250, 75}, {1.0f,1.0f,1.0f, 0.75f}, Utils::RectMode::RECT_BOTTOM_LEFT };
             panel.Draw();
 
             f32 camX, camY;
@@ -257,7 +257,7 @@ namespace GameStateManager {
                 + "\nDeltaTime: " + Utils::FormatFloat(PhysicsManager::dt, 2)
                 + "\n[M] Main Menu" + "\nCamera State: " + CameraManager::camera.PrintState();
 
-            GraphicsManager::DrawTextUI(debugText);
+            debugText.Draw();
         }
 
         // Update camera (handles movement, clamping, flooring, and setting position)

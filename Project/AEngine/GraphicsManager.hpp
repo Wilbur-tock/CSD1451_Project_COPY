@@ -31,17 +31,6 @@ namespace GraphicsManager {
 	void DrawUI(AEGfxTexture* pTex, AEMtx33 const& transform, Color const& color);
 	// Draw UI texture using pMeshCorner (rect mode corner origin) using WORLD COORDINATES
 	void DrawUIFollowCam(AEGfxTexture* pTex, AEMtx33 const& transform, Color const& color);
-
-	/*!***********************************************************************
-	\brief
-	Draw text UI object using noramlized coordinates
-	\param[in] textObj
-	std::string text text content
-	textScale, use range from 0.0 to 1.0f
-	color
-	x,y, use range from -1.0f to 1.0f
-	*************************************************************************/
-	void DrawTextUI(TextObject const& textObj);
 }
 
 #endif // !GRAPHICSMANAGER_HPP
