@@ -23,8 +23,8 @@ public:
 	bool UnlimitedCharges() const;
 	void UnlimitedCharges(bool val);
 private:
-	int id;
-	int projectileId; // which projectile this ability is affecting based on the index
+	int id; // To determind what type of ability it is (Bomb projectile, stats ability, etc)
+	int projectileId; // To determined what type of projectiile ability it is
 	std::string name;
 	AbilityType type;
 	int charges, cost;

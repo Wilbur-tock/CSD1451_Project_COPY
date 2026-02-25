@@ -73,6 +73,12 @@
     <Filter Include="Header Files\Game">
       <UniqueIdentifier>{61fb8fbe-ca91-4f38-b1c6-f026160535c8}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Graphics">
+      <UniqueIdentifier>{64dd3167-48be-43db-9a2e-e42b12ce85c3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Graphics">
+      <UniqueIdentifier>{85626eaa-e982-45e4-bc30-a5139e55b31f}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Main.cpp">
@@ -162,9 +168,6 @@
     <ClCompile Include="PlayerManager.cpp">
       <Filter>Source Files\Game</Filter>
     </ClCompile>
-    <ClCompile Include="AssetsManager.cpp">
-      <Filter>Source Files\Game</Filter>
-    </ClCompile>
     <ClCompile Include="Calculation.cpp">
       <Filter>Source Files\Game</Filter>
     </ClCompile>
@@ -178,7 +181,10 @@
       <Filter>Source Files\Game</Filter>
     </ClCompile>
     <ClCompile Include="GraphicsManager.cpp">
-      <Filter>Source Files\Game</Filter>
+      <Filter>Source Files\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="AssetsManager.cpp">
+      <Filter>Source Files\Graphics</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -263,9 +269,6 @@
     <ClInclude Include="Ability.hpp">
       <Filter>Header Files\Game</Filter>
     </ClInclude>
-    <ClInclude Include="AssetsManager.hpp">
-      <Filter>Header Files\Game</Filter>
-    </ClInclude>
     <ClInclude Include="Calculation.hpp">
       <Filter>Header Files\Game</Filter>
     </ClInclude>
@@ -278,14 +281,17 @@
     <ClInclude Include="GameStateManager.hpp">
       <Filter>Header Files\Game</Filter>
     </ClInclude>
-    <ClInclude Include="GraphicsManager.hpp">
-      <Filter>Header Files\Game</Filter>
-    </ClInclude>
     <ClInclude Include="MainMenu.hpp">
       <Filter>Header Files\Game</Filter>
     </ClInclude>
     <ClInclude Include="PlayerManager.hpp">
       <Filter>Header Files\Game</Filter>
+    </ClInclude>
+    <ClInclude Include="AssetsManager.hpp">
+      <Filter>Header Files\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="GraphicsManager.hpp">
+      <Filter>Header Files\Graphics</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

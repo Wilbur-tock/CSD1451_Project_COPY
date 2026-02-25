@@ -7,7 +7,7 @@ namespace AbilitiesManager {
 		currentAbility = FindAbility(id);
 
 		std::cout << "[AbilitiesManager] Current ability: " + abilitiesName[currentAbility->Id()]
-			+ " Charges Remaining: " + std::to_string(currentAbility->Charges()) << std::endl;
+			+ " Charges Remaining: " + std::to_string(currentAbility->Charges()) << '\n';
 	}
 
 	bool AbilityController::UseAbility() {
@@ -22,7 +22,7 @@ namespace AbilitiesManager {
 		}
 
 		std::cout << "[AbilitiesManager] Ability used: " + abilitiesName[currentAbility->Id()] 
-			+ " Charges Remaining: " + std::to_string(currentAbility->Charges()) << std::endl;
+			+ " Charges Remaining: " + std::to_string(currentAbility->Charges()) << '\n';
 
 		return true;
 	}
@@ -39,7 +39,7 @@ namespace AbilitiesManager {
 			}
 		}
 
-		std::cerr << "[AbilitiesManager] Can't find " + std::to_string(id) + " in the abilities list" << std::endl;
+		std::cerr << "[AbilitiesManager] Can't find " + std::to_string(id) + " in the abilities list\n";
 		return nullptr;
 	}
 

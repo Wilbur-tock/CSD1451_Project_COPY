@@ -3,9 +3,10 @@
 #include "AssetsManager.hpp"
 
 namespace GraphicsManager {
-	enum CoordinateType { WORLD, SCREEN };
-
-	AEGfxVertexList* pMeshMiddle = nullptr, *pMeshCorner = nullptr;
+	enum class CoordinateType { WORLD, SCREEN };
+	
+	// pMeshMiddle - mesh for the map, pMeshCorner - mesh for the UI
+	AEGfxVertexList* pMeshMiddle = nullptr,*pMeshCorner = nullptr;
 
 	// Generate the mesh to draw on e.g.paper to draw on. There are TWO mesh, 
 	// pMeshMiddle (RectMode Center) for game objects to draw on,
@@ -50,10 +51,10 @@ namespace GraphicsManager {
 	static void DrawTexture(CoordinateType mode, AEGfxTexture* pTex, AEMtx33 transform, Color const& color) {
 		// Set the texture and render mode
 		AEGfxVertexList* mesh = pMeshMiddle;
-		if (mode == WORLD) {
+		if (mode == CoordinateType::WORLD) {
 			mesh = pMeshMiddle;
 		}
-		else if (mode == SCREEN) {
+		else if (mode == CoordinateType::SCREEN) {
 			mesh = pMeshCorner;
 		}
 
@@ -107,16 +108,16 @@ namespace GraphicsManager {
 	}
 
 	void DrawGameObject(AEGfxTexture* pTex, AEMtx33 const& transform, Color const& color) {
-		DrawTexture(WORLD, pTex, transform, color);
+		DrawTexture(CoordinateType::WORLD, pTex, transform, color);
 	}
 
 	void DrawGameObject(GameObject const& gameObject) {
 		AEMtx33 mat = CreateTransformMatrix(gameObject.transform.pos.x, gameObject.transform.pos.y, 0, gameObject.transform.size.x *0.5f, gameObject.transform.size.y * 0.5f);
-		DrawTexture(WORLD, gameObject.texture, mat, gameObject.textureColor);
+		DrawTexture(CoordinateType::WORLD, gameObject.texture, mat, gameObject.textureColor);
 	}
 
 	void DrawUI(AEGfxTexture* pTex, AEMtx33 const& transform, Color const& color) {
-		DrawTexture(SCREEN, pTex, transform, color);
+		DrawTexture(CoordinateType::SCREEN, pTex, transform, color);
 	}
 
 	void DrawUIFollowCam(AEGfxTexture* pTex, AEMtx33 const& transform, Color const& color) {

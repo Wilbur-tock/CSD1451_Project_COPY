@@ -172,7 +172,7 @@ namespace CannonManager {
         abilityController->UseAbility();
 
         SetCamera(true);
-        std::cout << "[CannonManager] Projectile Fired!" << std::endl;
+        std::cout << "[CannonManager] Projectile Fired!\n";
     }
 
     void Cannon::UpdateProjectile() {
@@ -223,7 +223,7 @@ namespace CannonManager {
                                     projectile.DamageTile(x, y);
                                     projectile.isCollisionActive = true;
 
-                                    // If the projectile hit something slow down the velocity by a percentage
+                                    // If the projectile hit something, REDUCE the velocity by a percentage
                                     float percentage = 0.2f;
                                     projectile.velocity.x *= percentage;
                                     projectile.velocity.y *= percentage;

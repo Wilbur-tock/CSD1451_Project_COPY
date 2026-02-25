@@ -105,7 +105,7 @@ void Projectile::DamageTile(int x, int y) {
 
     int blastRadius = attribute.DamageRadius();
 
-    std::cout << "[Projectile] Damage Radius: " << blastRadius << " Center: " << x << " " << y << std::endl;
+    std::cout << "[Projectile] Damage Radius: " << blastRadius << " Center: " << x << " " << y << '\n';
 
     int minDX = x, minDY = y, maxDX = x, maxDY = y;
     // Increased damage radius based on blast radius
@@ -132,14 +132,14 @@ void Projectile::DamageTile(int x, int y) {
 
             // Damage tile blocks
             std::cout << "[Projectile] Damage Tile: " << tileToDamage
-                << " Current hp: " << tileToDamage.attribute.Health() << std::endl;
+                << " Current hp: " << tileToDamage.attribute.Health() << '\n';
 
             // Damage Enemy Object by finding the enemy component using tile
             if (tileToDamage.IsEnemy()) {
                 Enemy& enemy = *(LevelManager::selectedLevel->FindEnemy(tileToDamage.EnemyId()));
                 enemy.attribute.TakeDamage(attribute.Damage());
 
-                std::cout << "[Projectile] Damaged Enemy new hp: " << enemy.attribute.Health() << std::endl;
+                std::cout << "[Projectile] Damaged Enemy new hp: " << enemy.attribute.Health() << '\n';
             }
 
             // Damage tile after it has damage the enemy compononent first
