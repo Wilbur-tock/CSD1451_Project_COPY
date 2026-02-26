@@ -17,6 +17,10 @@ namespace CameraManager
         , useBounds(false)
         , currentState(CameraState::INPUT)
         , followTarget(nullptr)
+        , zoomLevel(1.0f)
+        , zoomSpeed(1.0f)
+        , zoomMin(0.25f)
+        , zoomMax(3.0f)
     {
     }
 
@@ -38,6 +42,10 @@ namespace CameraManager
         {
         case CameraState::STATIC:
             // Camera doesn't move, do nothing
+
+			// Set camera zoom to default when in static mode
+            zoomLevel = 1.0f;
+
             break;
 
         case CameraState::INPUT:
@@ -45,23 +53,34 @@ namespace CameraManager
             AEVec2 movement = { 0.0f, 0.0f };
 
             // WASD movement
-            if (AEInputCheckCurr(AEVK_W))
-                movement.y += 1.0f;
-            if (AEInputCheckCurr(AEVK_S))
-                movement.y -= 1.0f;
-            if (AEInputCheckCurr(AEVK_A))
-                movement.x -= 1.0f;
-            if (AEInputCheckCurr(AEVK_D))
-                movement.x += 1.0f;
+            if (AEInputCheckCurr(AEVK_W)) movement.y += 1.0f;
+            if (AEInputCheckCurr(AEVK_S)) movement.y -= 1.0f;
+            if (AEInputCheckCurr(AEVK_A)) movement.x -= 1.0f;
+            if (AEInputCheckCurr(AEVK_D)) movement.x += 1.0f;
 
             // Normalize diagonal movement
             float length = AEVec2Length(&movement);
             if (length > 0.0f)
             {
                 AEVec2Scale(&movement, &movement, 1.0f / length);
-                AEVec2Scale(&movement, &movement, moveSpeed * dt);
+                // AEVec2Scale(&movement, &movement, moveSpeed * dt);
+				AEVec2Scale(&movement, &movement, (moveSpeed / zoomLevel) * dt); // Scale movement by zoom level 
                 AEVec2Add(&position, &position, &movement);
             }
+
+            //if (AEInputCheckCurr(AEVK_Q))  // Zoom out
+            //    ZoomOut(dt);
+            //if (AEInputCheckCurr(AEVK_E))  // Zoom in
+            //    ZoomIn(dt);
+
+            // Zoom with mouse scroll wheel
+            s32 scrollDelta = 0;
+            AEInputMouseWheelDelta(&scrollDelta);
+            if (scrollDelta > 0)          // Scroll away from user = zoom in
+                ZoomIn(dt * static_cast<float>(scrollDelta));
+            else if (scrollDelta < 0)     // Scroll towards user = zoom out
+                ZoomOut(dt * static_cast<float>(-scrollDelta));
+
             break;
         }
 
@@ -167,5 +186,40 @@ namespace CameraManager
     void CameraController::SetMoveSpeed(float speed)
     {
         moveSpeed = speed;
+    }
+
+    // ===== ZOOM FUNCTION =====
+
+    float CameraController::GetZoom() const
+    {
+        return zoomLevel;
+    }
+
+    void CameraController::SetZoom(float zoom)
+    {
+        zoomLevel = std::clamp(zoom, zoomMin, zoomMax);
+    }
+
+    void CameraController::SetZoomSpeed(float speed)
+    {
+        zoomSpeed = speed;
+    }
+
+    void CameraController::SetZoomBounds(float minZoom, float maxZoom)
+    {
+        zoomMin = minZoom;
+        zoomMax = maxZoom;
+    }
+
+    void CameraController::ZoomIn(float dt)
+    {
+        zoomLevel += zoomSpeed * dt;
+        if (zoomLevel > zoomMax) zoomLevel = zoomMax;
+    }
+
+    void CameraController::ZoomOut(float dt)
+    {
+        zoomLevel -= zoomSpeed * dt;
+        if (zoomLevel < zoomMin) zoomLevel = zoomMin;
     }
 }

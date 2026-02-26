@@ -23,11 +23,20 @@ namespace CameraManager
         void SetFollowTarget(const AEVec2* target);
         void SetFollowSpeed(float speed);
 
+		// ===== GETTERS =====
         AEVec2 GetPosition() const;
         CameraState GetState() const;
 		std::string PrintState() const;
 
         void SetMoveSpeed(float speed);
+
+        // ===== ZOOM FUNCTIONS =====
+        float GetZoom() const;
+        void  SetZoom(float zoom);
+        void  SetZoomSpeed(float speed);
+        void  SetZoomBounds(float minZoom, float maxZoom);
+        void  ZoomIn(float dt);
+        void  ZoomOut(float dt);
 
     private:
         AEVec2 position;
@@ -44,6 +53,12 @@ namespace CameraManager
         // Camera state
         CameraState currentState;
         const AEVec2* followTarget;
+
+		// Zoom Members
+        float zoomLevel;      
+        float zoomSpeed;      
+        float zoomMin;        
+        float zoomMax;        
     };
 
     // Global camera instance

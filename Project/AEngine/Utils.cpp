@@ -1,6 +1,7 @@
 #include "Utils.hpp"
 
 #include "GraphicsManager.hpp"
+#include "CameraManager.hpp"
 
 namespace Utils {
 	bool isDebuggerOn = true;
@@ -14,6 +15,11 @@ namespace Utils {
 
 		x = static_cast<float>(mouseX - (Config::SCREEN_WIDTH / 2.0f));
 		y = static_cast<float>((Config::SCREEN_HEIGHT / 2.0f) - mouseY);
+
+		// Divide by zoom so screen coords map to correct world coords
+		float zoom = CameraManager::camera.GetZoom();
+		x /= zoom;
+		y /= zoom;
 
 		GetWorldPos(x, y);
 	}

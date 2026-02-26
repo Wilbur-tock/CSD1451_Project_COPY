@@ -1,6 +1,7 @@
 #include "GraphicsManager.hpp"
 #include "CollisionManager.hpp"
 #include "AssetsManager.hpp"
+#include "CameraManager.hpp"
 
 namespace GraphicsManager {
 	enum class CoordinateType { WORLD, SCREEN };
@@ -52,6 +53,13 @@ namespace GraphicsManager {
 		// Set the texture and render mode
 		AEGfxVertexList* mesh = pMeshMiddle;
 		if (mode == CoordinateType::WORLD) {
+
+			// Apply camera zoom
+			float zoom = CameraManager::camera.GetZoom();
+			AEMtx33 zoomMat;
+			AEMtx33Scale(&zoomMat, zoom, zoom);
+			AEMtx33Concat(&transform, &zoomMat, &transform);
+
 			mesh = pMeshMiddle;
 		}
 		else if (mode == CoordinateType::SCREEN) {
