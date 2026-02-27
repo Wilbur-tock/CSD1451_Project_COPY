@@ -28,9 +28,9 @@ namespace GraphicsManager {
 	void DrawGameObject(GameObject const& gameObject);
 
 	// Draw UI texture using pMeshCorner (rect mode corner origin) using WORLD COORDINATES
-	void DrawUI(AEGfxTexture* pTex, AEMtx33 const& transform, Color const& color);
+	void DrawWorldUI(AEGfxTexture* pTex, AEMtx33 const& transform, Color const& color);
 	// Draw UI texture using pMeshCorner (rect mode corner origin) using WORLD COORDINATES
-	void DrawUIFollowCam(AEGfxTexture* pTex, AEMtx33 const& transform, Color const& color);
+	void DrawScreenOverlay(AEGfxTexture* pTex, AEMtx33 const& transform, Color const& color);
 }
 
 #endif // !GRAPHICSMANAGER_HPP

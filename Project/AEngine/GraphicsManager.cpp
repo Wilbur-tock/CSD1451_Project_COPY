@@ -4,10 +4,17 @@
 #include "CameraManager.hpp"
 
 namespace GraphicsManager {
-	enum class CoordinateType { WORLD, SCREEN };
+	// WORLD_CENTER = world coordinates and origin point is center (E.g: Tile, enemy, blocks)
+	// WORLD_TOP_LEFT_CORNER = world coordinates, origin point top left corner (E.g: Cannon charging bar, Enemy health bar)
+	// SCREEN_TOP_LEFT_CORNER = world coordinates, origin point top left corner (E.g: UI panels)
+	enum class CoordinateType { 
+		WORLD_CENTER, 
+		WORLD_TOP_LEFT_CORNER, 
+		SCREEN_TOP_LEFT_CORNER
+	};
 	
 	// pMeshMiddle - mesh for the map, pMeshCorner - mesh for the UI
-	AEGfxVertexList* pMeshMiddle = nullptr,*pMeshCorner = nullptr;
+	AEGfxVertexList* pMeshMiddle = nullptr,*pMeshCorner = nullptr, *pMeshCornerUI;
 
 	// Generate the mesh to draw on e.g.paper to draw on. There are TWO mesh, 
 	// pMeshMiddle (RectMode Center) for game objects to draw on,
@@ -47,23 +54,39 @@ namespace GraphicsManager {
 			0.0f, 0.0f, 0xFFFFFFFF, 0.0f, 0.0f);
 
 		pMeshCorner = AEGfxMeshEnd();
+
+		AEGfxMeshStart();
+
+		AEGfxTriAdd(0.0f, -meshSize, 0xFFFFFFFF, 0.0f, 1.0f,
+			meshSize, -meshSize, 0xFFFFFFFF, 1.0f, 1.0f,
+			0.0f, 0.0f, 0xFFFFFFFF, 0.0f, 0.0f);
+
+		AEGfxTriAdd(meshSize, -meshSize, 0xFFFFFFFF, 1.0f, 1.0f,
+			meshSize, 0.0f, 0xFFFFFFFF, 1.0f, 0.0f,
+			0.0f, 0.0f, 0xFFFFFFFF, 0.0f, 0.0f);
+
+		pMeshCornerUI = AEGfxMeshEnd();
 	}
 
 	static void DrawTexture(CoordinateType mode, AEGfxTexture* pTex, AEMtx33 transform, Color const& color) {
 		// Set the texture and render mode
 		AEGfxVertexList* mesh = pMeshMiddle;
-		if (mode == CoordinateType::WORLD) {
+		if (mode == CoordinateType::WORLD_CENTER) {
+			mesh = pMeshMiddle;
+		}
+		else if (mode == CoordinateType::WORLD_TOP_LEFT_CORNER) {
+			mesh = pMeshCorner;
+		}
+		else if(mode == CoordinateType::SCREEN_TOP_LEFT_CORNER) {
+			mesh = pMeshCornerUI;
+		}
 
+		if (mode != CoordinateType::SCREEN_TOP_LEFT_CORNER) {
 			// Apply camera zoom
 			float zoom = CameraManager::camera.GetZoom();
 			AEMtx33 zoomMat;
 			AEMtx33Scale(&zoomMat, zoom, zoom);
 			AEMtx33Concat(&transform, &zoomMat, &transform);
-
-			mesh = pMeshMiddle;
-		}
-		else if (mode == CoordinateType::SCREEN) {
-			mesh = pMeshCorner;
 		}
 
 		AEGfxSetRenderMode(AE_GFX_RM_TEXTURE);
@@ -98,6 +121,10 @@ namespace GraphicsManager {
 			AEGfxMeshFree(pMeshCorner);
 			pMeshCorner = nullptr;
 		}
+		if (pMeshCornerUI) {
+			AEGfxMeshFree(pMeshCornerUI);
+			pMeshCornerUI = nullptr;
+		}
 	}
 
 	AEMtx33 CreateTransformMatrix(float x, float y, float rot, float scaleX, float scaleY) {
@@ -116,19 +143,19 @@ namespace GraphicsManager {
 	}
 
 	void DrawGameObject(AEGfxTexture* pTex, AEMtx33 const& transform, Color const& color) {
-		DrawTexture(CoordinateType::WORLD, pTex, transform, color);
+		DrawTexture(CoordinateType::WORLD_CENTER, pTex, transform, color);
 	}
 
 	void DrawGameObject(GameObject const& gameObject) {
 		AEMtx33 mat = CreateTransformMatrix(gameObject.transform.pos.x, gameObject.transform.pos.y, 0, gameObject.transform.size.x *0.5f, gameObject.transform.size.y * 0.5f);
-		DrawTexture(CoordinateType::WORLD, gameObject.texture, mat, gameObject.textureColor);
+		DrawTexture(CoordinateType::WORLD_CENTER, gameObject.texture, mat, gameObject.textureColor);
 	}
 
-	void DrawUI(AEGfxTexture* pTex, AEMtx33 const& transform, Color const& color) {
-		DrawTexture(CoordinateType::SCREEN, pTex, transform, color);
+	void DrawWorldUI(AEGfxTexture* pTex, AEMtx33 const& transform, Color const& color) {
+		DrawTexture(CoordinateType::WORLD_TOP_LEFT_CORNER, pTex, transform, color);
 	}
 
-	void DrawUIFollowCam(AEGfxTexture* pTex, AEMtx33 const& transform, Color const& color) {
+	void DrawScreenOverlay(AEGfxTexture* pTex, AEMtx33 const& transform, Color const& color) {
 		AEMtx33 newTrans = transform;
 		// Adjust the x and y position of the UI object to adjust based on the camera movement
 		f32 camX = 0, camY = 0;
@@ -136,6 +163,6 @@ namespace GraphicsManager {
 		newTrans.m[0][2] += floorf(camX);
 		newTrans.m[1][2] += floorf(camY);
 
-		DrawUI(pTex, newTrans, color);
+		DrawTexture(CoordinateType::SCREEN_TOP_LEFT_CORNER, pTex, newTrans, color);
 	}
 }

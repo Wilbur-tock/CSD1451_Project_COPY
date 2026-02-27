@@ -65,19 +65,4 @@ namespace Utils {
 		std::snprintf(buf, sizeof(buf), "%.*f", precision, value);
 		return std::string(buf);
 	}
-
-	void Wrap(int& val, int min, int max) {
-		if (val < min) val = max;
-		if (val > max) val = min;
-	}
-
-	void Wrap(float& val, float min, float max) {
-		if (val < min) val = max;
-		if (val > max) val = min;
-	}
-
-	void Wrap(double& val, double min, double max) {
-		if (val < min) val = max;
-		if (val > max) val = min;
-	}
 }

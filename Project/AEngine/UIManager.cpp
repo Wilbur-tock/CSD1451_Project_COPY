@@ -19,7 +19,7 @@ namespace UIManager {
         // Lighter background bar
         Color bgColor = { color.Red(), color.Green(), color.Blue() };
         bgColor.EditColorPercentage(0.8f);
-        GraphicsManager::DrawUI(tex, GraphicsManager::CreateTransformMatrix(x, y, 0, w, h), bgColor);
+        GraphicsManager::DrawWorldUI(tex, GraphicsManager::CreateTransformMatrix(x, y, 0, w, h), bgColor);
 
         float percentage = (currValue / maxValue);
         float newW = w, newH = h;
@@ -30,7 +30,7 @@ namespace UIManager {
         }
 
         // Bar
-        GraphicsManager::DrawUI(tex, GraphicsManager::CreateTransformMatrix(x, y, 0, newW, newH), color);
+        GraphicsManager::DrawWorldUI(tex, GraphicsManager::CreateTransformMatrix(x, y, 0, newW, newH), color);
 	}
 
     Panel::Panel(AEVec2 _size, Color _color, Utils::RectMode _rectMode)
@@ -93,6 +93,6 @@ namespace UIManager {
 
     void Panel::Draw() {
         AEMtx33 mat = GraphicsManager::CreateTransformMatrix(transform.pos.x, transform.pos.y, 0, transform.size.x, transform.size.y);
-        GraphicsManager::DrawUIFollowCam(AssetsManager::squareTexture, mat, color);
+        GraphicsManager::DrawScreenOverlay(AssetsManager::squareTexture, mat, color);
     }
 }

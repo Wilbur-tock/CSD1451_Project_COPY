@@ -72,7 +72,7 @@ namespace GameStateManager {
             barWidth,
             barHeight
         );
-        GraphicsManager::DrawUIFollowCam(AssetsManager::squareTexture, bgMat, Color(0.2f, 0.2f, 0.2f, 1.0f));
+        GraphicsManager::DrawScreenOverlay(AssetsManager::squareTexture, bgMat, Color(0.2f, 0.2f, 0.2f, 1.0f));
 
         // Progress bar (fills from left to right)
         float progressWidth = barWidth * progress;
@@ -84,7 +84,7 @@ namespace GameStateManager {
                 progressWidth,  // Only the progress portion
                 barHeight
             );
-            GraphicsManager::DrawUIFollowCam(AssetsManager::squareTexture, progressMat, Color(0.3f, 0.7f, 1.0f, 1.0f));
+            GraphicsManager::DrawScreenOverlay(AssetsManager::squareTexture, progressMat, Color(0.3f, 0.7f, 1.0f, 1.0f));
         }
 
         // Percentage text (centered below bar)

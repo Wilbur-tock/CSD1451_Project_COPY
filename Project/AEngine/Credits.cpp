@@ -108,7 +108,7 @@ namespace Credits {
     void Draw() {
         // Draw background
         if (bgTexture != nullptr) {
-            GraphicsManager::DrawUI(
+            GraphicsManager::DrawWorldUI(
                 bgTexture,
                 GraphicsManager::CreateTransformMatrix(
                     0, 0, 0,

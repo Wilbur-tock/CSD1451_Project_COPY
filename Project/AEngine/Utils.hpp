@@ -32,12 +32,13 @@ namespace Utils {
 	bool IsGridIndexOutOfBounds(int x, int y);
 
 	std::string FormatFloat(double value, int precision);
+
+	template <typename T>
 	// Set val to wrap to max if it go below min and vice versa
-	void Wrap(int& val, int min, int max);
-	// Set val to wrap to max if it go below min and vice versa
-	void Wrap(float& val, float min, float max);
-	// Set val to wrap to max if it go below min and vice versa
-	void Wrap(double& val, double min, double max);
+	void Wrap(T& val, T min, T max) {
+		if (val < min) val = max;
+		if (val > max) val = min;
+	}
 }
 
 #endif // !UTILS_HPP

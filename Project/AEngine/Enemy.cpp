@@ -21,7 +21,8 @@ void Enemy::Render() {
 
 	GraphicsManager::DrawGameObject(*this);
 	// UI
-	UIManager::Bar bar{ { transform.pos.x, transform.pos.y + transform.size.y }, { transform.size.x, 10 }, Color{1,0,0} };
+	float x = transform.pos.x, y = transform.pos.y + transform.size.y;
+	UIManager::Bar bar{ { x, y}, { transform.size.x, 10 }, Color{1,0,0} };
 	bar.Draw(static_cast<float>(attribute.Health()), static_cast<float>(attribute.MaxHealth()));
 }
 

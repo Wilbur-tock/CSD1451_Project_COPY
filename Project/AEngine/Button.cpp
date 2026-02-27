@@ -106,7 +106,7 @@ void Button::Draw() {
     }
 
     // Draw button object
-    GraphicsManager::DrawUIFollowCam(texture, GraphicsManager::CreateTransformMatrix(pos.x, pos.y, 0, size.x, size.y), btnColor);
+    GraphicsManager::DrawScreenOverlay(texture, GraphicsManager::CreateTransformMatrix(pos.x, pos.y, 0, size.x, size.y), btnColor);
 
     // Draw text if the string is not a empty string
     if (!textObj.textContent.empty()) {
