@@ -2,7 +2,7 @@
 #define PHYSICSMANAGER_HPP
 
 namespace PhysicsManager {
-	extern float dt; // Delta time
+	extern float g_dt; // Delta time
 }
 
 #endif // !PHYSICSMANAGER_HPP

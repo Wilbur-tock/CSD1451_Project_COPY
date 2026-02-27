@@ -7,8 +7,7 @@
 #include "GameObject.hpp" // Using GameObject and TileIndex.hpp
 #include "Physics.hpp"
 
-enum class EnemyType
-{
+enum class EnemyType {
 	MINION,
 	BOSS,
 };

@@ -36,7 +36,7 @@ namespace GameStateManager {
         if (progress > 1.0f) progress = 1.0f;
 
         // Animated dots
-        dotAnimTimer += PhysicsManager::dt;
+        dotAnimTimer += PhysicsManager::g_dt;
         if (dotAnimTimer >= 0.3f) {
             dotAnimTimer = 0.0f;
             dotCount = (dotCount + 1) % 4;
@@ -132,7 +132,7 @@ namespace GameStateManager {
     }
 
     void Update() {
-        PhysicsManager::dt = static_cast<float>(AEFrameRateControllerGetFrameTime());
+        PhysicsManager::g_dt = static_cast<float>(AEFrameRateControllerGetFrameTime());
 
         // Handle quit state
         if (current == GameState::QUIT) {
@@ -150,7 +150,7 @@ namespace GameStateManager {
             }
             else {
                 // Is currently Loading
-                loadingTimer -= PhysicsManager::dt;
+                loadingTimer -= PhysicsManager::g_dt;
 
                 // Render loading screen during transition
                 RenderLoadingScreen();
@@ -254,14 +254,14 @@ namespace GameStateManager {
             AEGfxGetCamPosition(&camX, &camY);
 
             debugText.textContent = "\n[P] Debugger ON\nFPS: " + Utils::FormatFloat(AEFrameRateControllerGetFrameRate(), 2)
-                + "\nDeltaTime: " + Utils::FormatFloat(PhysicsManager::dt, 2)
+                + "\nDeltaTime: " + Utils::FormatFloat(PhysicsManager::g_dt, 2)
                 + "\n[M] Main Menu" + "\nCamera State: " + CameraManager::camera.PrintState();
 
             debugText.Draw();
         }
 
         // Update camera (handles movement, clamping, flooring, and setting position)
-        CameraManager::camera.Update(PhysicsManager::dt);
+        CameraManager::camera.Update(PhysicsManager::g_dt);
     }
 
     void Exit() {

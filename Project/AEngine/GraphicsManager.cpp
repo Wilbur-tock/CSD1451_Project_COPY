@@ -13,8 +13,10 @@ namespace GraphicsManager {
 		SCREEN_TOP_LEFT_CORNER
 	};
 	
-	// pMeshMiddle - mesh for the map, pMeshCorner - mesh for the UI
-	AEGfxVertexList* pMeshMiddle = nullptr,*pMeshCorner = nullptr;
+	// Mesh for WORLD environment instance such as tiles, blocks and character objects
+	AEGfxVertexList* pMeshMiddle = nullptr;
+	// Mesh for UI screen overlay and UI in the WORLD environment
+	AEGfxVertexList*pMeshCorner = nullptr;
 
 	// Generate the mesh to draw on e.g.paper to draw on. There are TWO mesh, 
 	// pMeshMiddle (RectMode Center) for game objects to draw on,

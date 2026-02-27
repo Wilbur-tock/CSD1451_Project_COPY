@@ -24,11 +24,11 @@ public:
 	Enemy* FindEnemy(int enemyId);
 private:
 	std::string levelName;
-	CannonManager::Cannon playerCannon;
+	CannonManager::Cannon playerCannon; // instance of the player cannon
 	AEVec2 playerCannonStartPos{ 0,0 };
 
 	std::vector<std::vector<Tile>> levelMap; // Level map
-	std::vector<Enemy> enemies;
+	std::vector<Enemy> enemies; // contains all instance of the Enemy Object in the level
 
 	// min and max position that has ground collision
 	AEVec2 minGround{ 0,0 }, maxGround{ 0,0 };

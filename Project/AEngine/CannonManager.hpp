@@ -10,8 +10,6 @@
 namespace CannonManager {
 	class Cannon : public GameObject {
 	public:
-		std::vector<Projectile> activeAmmo;
-
 		// Constructors
 		Cannon() = default;
 		Cannon(AEVec2 _pos, AEGfxTexture* _texture, TileIndex _tileId, bool _isShootingRight = true, AEVec2 _size = { 30,10 });
@@ -50,11 +48,12 @@ namespace CannonManager {
 		// Cannon attributes
 		AEVec2 defaultSize{ 30,10 };
 		float projectileLifespan = 2.0f;
-		int selectedProjectileId = 0; // selected projectile index
-		int ammoCount = 10;
-		std::vector<Projectile> projectiles; // Projectile vector of all the different projectile ability
+		int projectileCount = 10;
+		int selectedProjectileId = 0; // index of the selected projectile from the vector list of all the different type of projectiles
+		std::vector<Projectile> projectiles; // vector containing all the different type of projectiles (Default, bomb , etc)
+		std::vector<Projectile> activeProjectiles; // vector of all the active projectiles (Projectiles that have been shot out of the cannon)
 
-		// Power charging system (how far the cannon shoots the projectile)
+		// Shot power charging system (how far the cannon shoots the projectile)
 		float minPower = 100, maxPower = 2500, chargeRate = maxPower * 0.75f;
 		float chargingPower = 0;
 		float shotPower = 0; // The amount of shot power player charged up

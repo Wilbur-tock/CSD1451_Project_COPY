@@ -1,5 +1,5 @@
 #include "PhysicsManager.hpp"
 
 namespace PhysicsManager {
-	float dt = 0.0f;
+	float g_dt = 0.0f;
 }

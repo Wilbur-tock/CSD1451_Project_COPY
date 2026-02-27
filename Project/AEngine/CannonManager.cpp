@@ -26,12 +26,12 @@ namespace CannonManager {
 
     void Cannon::ProjectileSettings() {
         // Reset to default
-        activeAmmo.clear(); // ensure that there should not be any active ammo when cannon is reset
+        activeProjectiles.clear(); // ensure that there should not be any active ammo when cannon is reset
         projectiles.clear();
-        projectiles.resize(ammoCount);
+        projectiles.resize(projectileCount);
 
         // Initalize all the projectile variables
-        for (int i = 0; i < ammoCount; ++i) {
+        for (int i = 0; i < projectileCount; ++i) {
             Projectile& projectile = projectiles[i];
             projectile = { AssetsManager::circleTexture, static_cast<ProjectileMode>(i+1) };
             AbilitiesManager::SetProjectileAbility(projectile);
@@ -80,12 +80,12 @@ namespace CannonManager {
                     + "\nAngle: " + Utils::FormatFloat(cannonAngle * (180.0f / 3.14159265359), 2) + " " + Utils::FormatFloat(cannonAngle, 2)
                     + "\n\nSelected Projectile: " + std::to_string(selectedProjectileId) + " Mode: " + std::to_string(static_cast<int>(selectedProjectile.Mode()))
                     + "\nDamage: " + std::to_string(selectedProjectile.attribute.Damage()) + " Radius: " + std::to_string(selectedProjectile.attribute.DamageRadius());
-                if (activeAmmo.size() > 0) {
-                    Projectile& projectile = activeAmmo.back();
+                if (activeProjectiles.size() > 0) {
+                    Projectile& projectile = activeProjectiles.back();
                     debugStr += "\n\nActive Projectile " + std::to_string(static_cast<int>(projectile.Mode())) + "\nSize: x: "
                         + Utils::FormatFloat(projectile.transform.size.x, 2) + " y: " + Utils::FormatFloat(projectile.transform.size.y, 2)
                         + "\nPos x: " + Utils::FormatFloat(projectile.transform.pos.x, 2) + " y " + Utils::FormatFloat(projectile.transform.pos.y, 2)
-                        + "\nVelocity x: " + Utils::FormatFloat(activeAmmo.back().velocity.x, 2) + " y: " + Utils::FormatFloat(projectile.velocity.y, 2)
+                        + "\nVelocity x: " + Utils::FormatFloat(activeProjectiles.back().velocity.x, 2) + " y: " + Utils::FormatFloat(projectile.velocity.y, 2)
                         + "\nGrounded: " + std::string(projectile.isGrounded ? "true" : "false")
                         + "\nTo Be Destroyed: " + std::string(projectile.toBeDestroyed ? "true" : "false")
                         + "\nTimer: " + Utils::FormatFloat(projectile.timer, 2)
@@ -105,7 +105,7 @@ namespace CannonManager {
         if (isActive == true) return;
 
         if (AEInputCheckCurr(AEVK_LBUTTON)) {
-            float chargeRateWithDT = chargeRate * PhysicsManager::dt;
+            float chargeRateWithDT = chargeRate * PhysicsManager::g_dt;
             chargingPower += isPowerIncreasing ? chargeRateWithDT : -chargeRateWithDT;
 
             if (chargingPower > maxPower) {
@@ -157,7 +157,7 @@ namespace CannonManager {
         // Assign values to this active projectile
         Projectile& projectile = projectiles[selectedProjectileId];
         projectile.isActive = true;
-        projectile.id = static_cast<int>(activeAmmo.size() - 1);
+        projectile.id = static_cast<int>(activeProjectiles.size() - 1);
 
         // Add offset to ensure that the projectile spawn at the barrel instead of the middle of the cannon
         projectile.transform.pos.x = transform.pos.x + (cos(cannonAngle) * transform.size.x);
@@ -169,7 +169,7 @@ namespace CannonManager {
         projectile.timer = projectileLifespan;
 
         // Add to the vector list
-        activeAmmo.push_back(projectile);
+        activeProjectiles.push_back(projectile);
 
         abilityController->UseAbility();
 
@@ -178,12 +178,12 @@ namespace CannonManager {
     }
 
     void Cannon::UpdateProjectile() {
-        for (Projectile& projectile : activeAmmo) {
+        for (Projectile& projectile : activeProjectiles) {
             if (!projectile.isActive) continue;
 
             projectile.AbilityUpdate();
 
-            float dt = PhysicsManager::dt;
+            float dt = PhysicsManager::g_dt;
             // Increased the frequency of the collision check by using loops
             // ensuring faster moving projectiles are check for collision multiple times
             // to ensure that the GHOSTING of block bug does not happen
@@ -276,7 +276,7 @@ namespace CannonManager {
 
         // Start timer if it going to be destroy and projectile stops moving
         if (projectile.toBeDestroyed) {
-            projectile.timer -= 1.0f * PhysicsManager::dt;
+            projectile.timer -= 1.0f * PhysicsManager::g_dt;
         }
         else {
             if (projectile.isGrounded && speedSq <= 0.1f) {
@@ -290,11 +290,11 @@ namespace CannonManager {
             projectile.Destroy();
 
             // Find the index containing the projectile and erase from the active ammo vector
-            for (int i = 0; i < activeAmmo.size(); i++) {
-                if (activeAmmo[i].id == projectile.id) {
-                    activeAmmo.erase(activeAmmo.begin() + i);
+            for (int i = 0; i < activeProjectiles.size(); i++) {
+                if (activeProjectiles[i].id == projectile.id) {
+                    activeProjectiles.erase(activeProjectiles.begin() + i);
                     SetCamera(false);
-                    std::cout << "[CannonManager] Remove projectile " << activeAmmo.size() << std::endl;
+                    std::cout << "[CannonManager] Remove projectile " << activeProjectiles.size() << std::endl;
                 }
             }
 
@@ -307,7 +307,7 @@ namespace CannonManager {
 
         if (isFollowingProjectile) {
             // Set camera to follow the newly fired projectile
-            CameraManager::camera.SetFollowTarget(&activeAmmo.back().transform.pos);
+            CameraManager::camera.SetFollowTarget(&activeProjectiles.back().transform.pos);
             CameraManager::camera.SetState(CameraManager::CameraController::CameraState::FOLLOW);
         }
         else {
