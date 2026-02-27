@@ -118,8 +118,10 @@ namespace CannonManager {
             }
 
             // When player press left mouse click, set camera to position the cannon and unable to move the camera
-            //CameraManager::camera.SetPosition(transform.pos);
-            //CameraManager::camera.SetState(CameraManager::CameraController::CameraState::STATIC);
+            if (resetCamWhenShooting) {
+                CameraManager::camera.SetPosition(transform.pos);
+                CameraManager::camera.SetState(CameraManager::CameraController::CameraState::STATIC);
+            }
 
             // Render UI
             UIManager::Bar bar { { transform.pos.x - (transform.size.x * 1.5f), transform.pos.y + (transform.size.y * 1.5f) }, 

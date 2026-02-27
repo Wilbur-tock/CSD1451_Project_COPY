@@ -45,6 +45,8 @@ namespace CannonManager {
 		bool isActive = false; // has projectile has been shot out of the cannon
 		float cannonAngle = 0.0f; // Angle of the cannon for the projectile to shoot from
 
+		bool resetCamWhenShooting = false; // When player press left mouse click, reset camera to position the cannon and unable to move the camera or not
+
 		// Cannon attributes
 		AEVec2 defaultSize{ 30,10 };
 		float projectileLifespan = 2.0f;

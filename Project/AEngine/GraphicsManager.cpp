@@ -14,7 +14,7 @@ namespace GraphicsManager {
 	};
 	
 	// pMeshMiddle - mesh for the map, pMeshCorner - mesh for the UI
-	AEGfxVertexList* pMeshMiddle = nullptr,*pMeshCorner = nullptr, *pMeshCornerUI;
+	AEGfxVertexList* pMeshMiddle = nullptr,*pMeshCorner = nullptr;
 
 	// Generate the mesh to draw on e.g.paper to draw on. There are TWO mesh, 
 	// pMeshMiddle (RectMode Center) for game objects to draw on,
@@ -54,31 +54,13 @@ namespace GraphicsManager {
 			0.0f, 0.0f, 0xFFFFFFFF, 0.0f, 0.0f);
 
 		pMeshCorner = AEGfxMeshEnd();
-
-		AEGfxMeshStart();
-
-		AEGfxTriAdd(0.0f, -meshSize, 0xFFFFFFFF, 0.0f, 1.0f,
-			meshSize, -meshSize, 0xFFFFFFFF, 1.0f, 1.0f,
-			0.0f, 0.0f, 0xFFFFFFFF, 0.0f, 0.0f);
-
-		AEGfxTriAdd(meshSize, -meshSize, 0xFFFFFFFF, 1.0f, 1.0f,
-			meshSize, 0.0f, 0xFFFFFFFF, 1.0f, 0.0f,
-			0.0f, 0.0f, 0xFFFFFFFF, 0.0f, 0.0f);
-
-		pMeshCornerUI = AEGfxMeshEnd();
 	}
 
 	static void DrawTexture(CoordinateType mode, AEGfxTexture* pTex, AEMtx33 transform, Color const& color) {
 		// Set the texture and render mode
 		AEGfxVertexList* mesh = pMeshMiddle;
-		if (mode == CoordinateType::WORLD_CENTER) {
-			mesh = pMeshMiddle;
-		}
-		else if (mode == CoordinateType::WORLD_TOP_LEFT_CORNER) {
+		if (mode == CoordinateType::WORLD_TOP_LEFT_CORNER || mode == CoordinateType::SCREEN_TOP_LEFT_CORNER) {
 			mesh = pMeshCorner;
-		}
-		else if(mode == CoordinateType::SCREEN_TOP_LEFT_CORNER) {
-			mesh = pMeshCornerUI;
 		}
 
 		if (mode != CoordinateType::SCREEN_TOP_LEFT_CORNER) {
@@ -120,10 +102,6 @@ namespace GraphicsManager {
 		if (pMeshCorner) {
 			AEGfxMeshFree(pMeshCorner);
 			pMeshCorner = nullptr;
-		}
-		if (pMeshCornerUI) {
-			AEGfxMeshFree(pMeshCornerUI);
-			pMeshCornerUI = nullptr;
 		}
 	}
 
