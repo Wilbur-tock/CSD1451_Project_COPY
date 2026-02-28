@@ -37,6 +37,7 @@ namespace CameraManager
         void  SetZoomBounds(float minZoom, float maxZoom);
         void  ZoomIn(float dt);
         void  ZoomOut(float dt);
+        void  SetZoomAllow(bool isAllow);
 
     private:
         AEVec2 position;
@@ -59,6 +60,7 @@ namespace CameraManager
         float zoomSpeed;      
         float zoomMin;        
         float zoomMax;        
+        float isZoomAllow = true;
     };
 
     // Global camera instance

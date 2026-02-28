@@ -118,6 +118,7 @@ void Projectile::DamageTile(int x, int y) {
     }
 
     bool hasDamagedTile = false;
+    int projDamage = attribute.Damage();
 
     // Damage how many number of tile based on the radius using a nested for loop
     for (int dY = minDY; dY <= maxDY; ++dY) {
@@ -134,16 +135,19 @@ void Projectile::DamageTile(int x, int y) {
             std::cout << "[Projectile] Damage Tile: " << tileToDamage
                 << " Current hp: " << tileToDamage.attribute.Health() << '\n';
 
-            // Damage Enemy Object by finding the enemy component using tile
-            if (tileToDamage.IsEnemy()) {
-                Character& enemy = *(LevelManager::selectedLevel->FindEnemy(tileToDamage.EnemyId()));
-                enemy.attribute.TakeDamage(attribute.Damage());
+            // Damage Tiles that contain a character object
+            if (tileToDamage.ContainCharacter()) {
+                Character* character = nullptr;
+                if(tileToDamage.IsEnemy()) character = LevelManager::selectedLevel->FindEnemy(tileToDamage.CharacterId());
+                else character = LevelManager::selectedLevel->FindPlayer(tileToDamage.CharacterId());
 
-                std::cout << "[Projectile] Damaged Enemy new hp: " << enemy.attribute.Health() << '\n';
+                character->attribute.TakeDamage(projDamage);
+
+                std::cout << "[Projectile] Damaged Enemy " << character->TypeName() <<  " new hp: " << character->attribute.Health() << '\n';
             }
 
             // Damage tile after it has damage the enemy compononent first
-            tileToDamage.TakeDamage(attribute.Damage());
+            tileToDamage.TakeDamage(projDamage);
 
             hasDamagedTile = true;
         }

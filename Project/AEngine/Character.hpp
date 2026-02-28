@@ -18,7 +18,7 @@ public:
 	Attributes attribute;
 	Physics physics;
 
-	Character(AEVec2 _pos, AEVec2 _size, AEGfxTexture* _texture, TileIndex _tileId);
+	Character(AEVec2 _pos, AEVec2 _size, AEGfxTexture* _texture, TileIndex _tileId, CharacterType _type);
 
 	CharacterType Type() const;
 

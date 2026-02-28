@@ -21,6 +21,7 @@ namespace CameraManager
         , zoomSpeed(1.0f)
         , zoomMin(0.25f)
         , zoomMax(3.0f)
+        , isZoomAllow(true)
     {
     }
 
@@ -67,6 +68,8 @@ namespace CameraManager
 				AEVec2Scale(&movement, &movement, (moveSpeed / zoomLevel) * dt); // Scale movement by zoom level 
                 AEVec2Add(&position, &position, &movement);
             }
+
+            if (!isZoomAllow) break;
 
             //if (AEInputCheckCurr(AEVK_Q))  // Zoom out
             //    ZoomOut(dt);
@@ -221,5 +224,9 @@ namespace CameraManager
     {
         zoomLevel -= zoomSpeed * dt;
         if (zoomLevel < zoomMin) zoomLevel = zoomMin;
+    }
+
+    void CameraController::SetZoomAllow(bool isAllow) {
+        isZoomAllow = isAllow;
     }
 }

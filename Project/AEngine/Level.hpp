@@ -27,9 +27,10 @@ public:
 	void SwitchCannon();
 	std::string DebugInfo();
 	Character* FindEnemy(int enemyId);
+	Character* FindPlayer(int id);
 private:
 	std::string levelName;
-	CannonManager::Cannon *activeCannon; // pointer to the active instance of the cannon object 
+	CannonManager::Cannon *activeCannon = nullptr; // pointer to the active instance of the cannon object 
 	CannonManager::Cannon playerCannon; // instance of the player cannon
 	CannonManager::Cannon enemyCannon; // instance of the enemy cannon
 

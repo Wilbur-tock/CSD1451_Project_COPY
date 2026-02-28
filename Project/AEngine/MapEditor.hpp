@@ -6,7 +6,7 @@
 namespace MapEditor {
 	void Initialize();
 	// Map editor containing all the functions to edit the map and save/load files
-	void MapEditor();
+	void Update();
 	void Exit();
 }
 

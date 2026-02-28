@@ -48,13 +48,16 @@ public:
 	// Copy another type data
 	void Type(Tile const& toCopy);
 
-	int EnemyId() const;
-	void EnemyId(int newId);
+	int CharacterId() const;
+	void CharacterId(int newId);
 
 	bool IsEmpty() const;
 	bool IsGround() const;
 	bool IsBlocks() const;
+
 	bool IsEnemy() const;
+	bool IsPlayer() const;
+	bool ContainCharacter() const;
 
 	void TakeDamage(int damage);
 private:

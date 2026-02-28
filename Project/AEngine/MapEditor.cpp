@@ -112,9 +112,10 @@ namespace MapEditor {
 
 		CameraManager::camera.SetPosition({ 0, 0 });
 		CameraManager::camera.SetState(CameraManager::CameraController::INPUT);
+		CameraManager::camera.SetZoomAllow(false);
 	}
 
-	void MapEditor() {
+	void Update() {
 		if (isDrawingNewMap) {
 			ResetEditor();
 			isDrawingNewMap = false;
@@ -204,7 +205,7 @@ namespace MapEditor {
 				SaveNewFile(DebugFilePath(savePath));
 			}
 
-			GameStateManager::Load(); // Reload all the assets
+			//GameStateManager::Load(); // Reload all the assets
 			isDrawingNewMap = true;
 		}
 
@@ -251,8 +252,10 @@ namespace MapEditor {
 			AEInputGetCursorPosition(&mouseX, &mouseY);
 			float mX = 0, mY = 0;
 			Utils::GetWorldMousePos(mX, mY);
-			Tile& tile = (*currentMap)[gridY][gridX];
 
+			// TOFIX: something wrong with the currentMap
+			//std::cout << (*currentMap).size() << ' ' << (*currentMap)[0].size() << '\n';
+			Tile& tile = (*currentMap)[gridY][gridX];
 			debugText.textContent = "Grid\nIndex X: " + std::to_string(gridX) + " Y: " + std::to_string(gridY)
 				+ "\nTile: " + GetTileName(tile.Type())
 				+ "\nPos X: " + Utils::FormatFloat(newMap[gridY][gridX].transform.pos.x, 2) + " Y: " + Utils::FormatFloat(newMap[gridY][gridX].transform.pos.y, 2)
@@ -267,5 +270,6 @@ namespace MapEditor {
 
 	void Exit() {
 		isDrawingNewMap = true;
+		CameraManager::camera.SetZoomAllow(true);
 	}
 }

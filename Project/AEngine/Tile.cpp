@@ -13,12 +13,12 @@ void Tile::Type(TileType newType) {
 void Tile::Type(Tile const& toCopy) {
 	Type(toCopy.type);
 
-	enemyId = toCopy.EnemyId();
+	enemyId = toCopy.CharacterId();
 	attribute = toCopy.attribute;
 }
 
-int  Tile::EnemyId() const { return enemyId; }
-void Tile::EnemyId(int newId) { enemyId = newId; }
+int  Tile::CharacterId() const { return enemyId; }
+void Tile::CharacterId(int newId) { enemyId = newId; }
 
 bool Tile::IsEmpty() const { return type == TILE_EMPTY; }
 bool Tile::IsGround() const {
@@ -28,7 +28,9 @@ bool Tile::IsBlocks() const {
 	return type >= TILE_BLOCK_1_TOP && type <= TILE_BLOCK_2;
 }
 
-bool Tile::IsEnemy() const { return type == TILE_ENEMY_MINION; }
+bool Tile::IsEnemy() const { return type == TILE_ENEMY_MINION || type == TILE_ENEMY_BOSS; }
+bool Tile::IsPlayer() const { return type == TILE_PLAYER_CHARACTER; }
+bool Tile::ContainCharacter() const { return IsEnemy() || IsPlayer(); }
 
 void Tile::TakeDamage(int damage) {
 	attribute.TakeDamage(damage * attribute.DamageMultiplier());

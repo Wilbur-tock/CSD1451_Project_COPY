@@ -179,7 +179,7 @@ namespace GameStateManager {
                     case GameState::MAP_EDITOR:
                         gsLoad = nullptr;
                         gsIntialize = MapEditor::Initialize;
-                        gsUpdate = MapEditor::MapEditor;
+                        gsUpdate = MapEditor::Update;
                         gsDraw = nullptr;
                         gsFree = MapEditor::Exit;
                         gsUnload = nullptr;

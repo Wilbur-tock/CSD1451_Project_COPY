@@ -34,6 +34,12 @@ void Level::Load() {
 				playerCannonStartPos = { tile.transform.pos.x,tile.transform.pos.y + tile.transform.size.y *0.5f};
 			}
 
+			if (tile.Type() == TILE_PLAYER_CHARACTER) {
+				Character playerChar{ tile.transform.pos, tile.transform.size, AssetsManager::squareTexture, {x,y}, CharacterType::PLAYER };
+				playerCharacters.push_back(playerChar);
+				tile.CharacterId(static_cast<int>(playerCharacters.size() - 1));
+			}
+
 			// Find enemy cannon starting position
 			if (tile.Type() == TILE_ENEMY_CANNON) {
 				enemyCannonStartPos = { tile.transform.pos.x,tile.transform.pos.y + tile.transform.size.y * 0.5f };
@@ -41,9 +47,9 @@ void Level::Load() {
 
 			// Find enemy position and load enemy data into the enemies vector
 			if (tile.Type() == TILE_ENEMY_MINION) {
-				Character enemy{ tile.transform.pos, tile.transform.size, AssetsManager::squareTexture, {x,y} };
+				Character enemy{ tile.transform.pos, tile.transform.size, AssetsManager::squareTexture, {x,y}, CharacterType::ENEMY_MINION };
 				enemies.push_back(enemy);
-				tile.EnemyId(static_cast<int>(enemies.size() - 1));
+				tile.CharacterId(static_cast<int>(enemies.size() - 1));
 			}
 		}
 	}
@@ -94,6 +100,11 @@ void Level::Update() {
 		activeCannon->EnemyAI(playerCannon.transform.pos);
 	}
 	ToggleTurn();
+
+	// Update all Player character instance
+	for (Character& playerChar : playerCharacters) {
+		playerChar.Update();
+	}
 
 	// Update all enemy instance
 	for (Character& enemy : enemies) {
@@ -146,9 +157,10 @@ void Level::Update() {
 		std::string debug = "Grid:\nIndex X: " + std::to_string(gridX) + " Y: " + std::to_string(gridY)
 			+ "\n\nTile: " + GetTileName(tile.Type());
 
-		if (tile.IsEnemy()) {
+		if (tile.ContainCharacter()) {
 			std::stringstream ss;
-			ss << FindEnemy(tile.EnemyId());
+			if (tile.IsEnemy()) ss << FindEnemy(tile.CharacterId());
+			else ss << FindPlayer(tile.CharacterId());
 			debug += " " + ss.str();
 		}
 
@@ -210,6 +222,13 @@ std::string Level::DebugInfo() {
 				return info;
 			}
 		}
+
+		for (Character& characters : playerCharacters) {
+			if (CollisionManager::IsPointInGameObject(characters)) {
+				characters.DebugInfo(info);
+				return info;
+			}
+		}
 	}
 
 	return info;
@@ -218,4 +237,9 @@ std::string Level::DebugInfo() {
 Character* Level::FindEnemy(int enemyId) {
 	if (enemyId < 0) return nullptr;
 	return &enemies[enemyId];
+}
+
+Character* Level::FindPlayer(int id) {
+	if (id < 0) return nullptr;
+	return &playerCharacters[id];
 }
