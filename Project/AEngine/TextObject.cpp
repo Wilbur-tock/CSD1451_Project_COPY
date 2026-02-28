@@ -2,8 +2,8 @@
 
 #include "AssetsManager.hpp"
 
-TextObject::TextObject(std::string _textContent, float _scale, Color _color, AEVec2 _pos)
-	: textContent{ _textContent }, textScale{ _scale }, color{ _color }, pos{ _pos } {}
+TextObject::TextObject(std::string _textContent, float _scale, Color _color, AEVec2 _pos, Utils::RectMode _rectMode)
+	: textContent{ _textContent }, textScale{ _scale }, color{ _color }, pos{ _pos }, rectMode{ _rectMode } {}
 
 void TextObject::Draw() {
 	if (textContent.empty()) return;
@@ -16,6 +16,7 @@ void TextObject::Draw() {
 	f32 charW, charH;
 	AEGfxGetPrintSize(AssetsManager::textFont, "A", textScale, &charW, &charH);
 
+	// Set position y
 	f32 currentY = pos.y;
 	const f32 lineSpacing = 1.5f; // Adjust vertical gap between lines
 
@@ -40,5 +41,55 @@ void TextObject::Draw() {
 
 		// Move the cursor down for the next line regardless of whether this line was empty
 		currentY -= (charH * lineSpacing);
+	}
+}
+
+void TextObject::SetPos(AEVec2 panelPos, AEVec2 panelSize) {
+	f32 lineW, lineH;
+	AEGfxGetPrintSize(AssetsManager::textFont, textContent.c_str(), textScale, &lineW, &lineH);
+
+	float halfLineW = static_cast<float>(lineW * 0.5f);
+	float halfLineH = static_cast<float>(lineH * 0.5f);
+
+	float halfPanelW = panelSize.x * 0.5f;
+	float halfPanelH = panelSize.y * 0.5f;
+	Utils::NormalizeCoordinates(halfPanelW, halfPanelH);
+
+	float x = panelPos.x;
+	float y = panelPos.y;
+	Utils::NormalizeCoordinates(x, y);
+
+	// Set position x
+	switch (rectMode) {
+	case Utils::RectMode::RECT_TOP_LEFT:
+		break;
+	case Utils::RectMode::RECT_TOP_CENTER:
+		pos.x = x + halfPanelW - halfLineW;
+		break;
+	case Utils::RectMode::RECT_TOP_RIGHT:
+		pos.x = x + (halfPanelW * 2.0f) - lineW;
+		break;
+	case Utils::RectMode::RECT_CENTER_LEFT:
+		pos.y = y - halfPanelH + halfLineH;
+		break;
+	case Utils::RectMode::RECT_CENTER:
+		pos.y = y - halfPanelH + halfLineH;
+		pos.x = x + halfPanelW - halfLineW;
+		break;
+	case Utils::RectMode::RECT_CENTER_RIGHT:
+		pos.y = y - halfPanelH + halfLineH;
+		pos.x = x + (halfPanelW * 2.0f) - lineW;
+		break;
+	case Utils::RectMode::RECT_BOTTOM_LEFT:
+		pos.y = y - (halfPanelH * 2.0f) + lineH;
+		break;
+	case Utils::RectMode::RECT_BOTTOM_CENTER:
+		pos.y = y - (halfPanelH * 2.0f) + lineH;
+		pos.x = x + halfPanelW - halfLineW;
+		break;
+	case Utils::RectMode::RECT_BOTTOM_RIGHT:
+		pos.y = y - (halfPanelH * 2.0f) + lineH;
+		pos.x = x + (halfPanelW * 2.0f) - lineW;
+		break;
 	}
 }

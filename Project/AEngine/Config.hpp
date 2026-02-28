@@ -18,6 +18,9 @@ namespace Config {
 
 	// PHYSICS
 	constexpr float GRAVITY = 1500.0f, FRICTION = 0.25f, MINIMUM_VELOCITY = 5.0f;
+
+	// CANNON
+	constexpr float CANNON_SWITCH_TURN_TIMER = 1.5f, PROJECTILE_LIFESPAN = 2.0f;
 }
 
 #endif // !CONFIG_HPP

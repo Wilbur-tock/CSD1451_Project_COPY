@@ -30,6 +30,7 @@ namespace UIManager {
 		Panel(AEVec2 _size, Color _color = { 1,1,1 }, Utils::RectMode _rectMode = Utils::RectMode::RECT_CENTER);
 
 		AEVec2 Pos() const;
+		AEVec2 Size() const;
 
 		void SetChildPanelPos(AEVec2 const& parentPos, AEVec2 const& offset);
 		void Draw();

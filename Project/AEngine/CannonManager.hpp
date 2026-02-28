@@ -12,10 +12,12 @@ namespace CannonManager {
 	public:
 		// Constructors
 		Cannon() = default;
-		Cannon(AEVec2 _pos, AEGfxTexture* _texture, TileIndex _tileId, bool _isShootingRight = true, AEVec2 _size = { 30,10 });
+		Cannon(AEVec2 _pos, AEGfxTexture* _texture, TileIndex _tileId, AEVec2 _size = { 30,10 }, bool _isShootingRight = true, bool _isPlayerControlled = true);
 
 		// Getters & Setters
 		void SetAbilityController(AbilitiesManager::AbilityController* controller);
+		// return true if projectile has been shoot out of the cannon and be destroyed
+		bool HasShot() const;
 
 		// Reset values of the cannon ammo vectors to be in its default state
 		void ProjectileSettings();
@@ -24,10 +26,12 @@ namespace CannonManager {
 		// map is used to check for collision with the tiles
 		void Update();
 		void Render();
+		void EnemyAI();
 
 		// Check for left mouse input the shot power will be increased/decreased based on the charge rate
 		void ChargeShot();
 
+		void ResetTurn();
 		void SelectProjectile();
 		void ShootProjectile();
 		// Render and move the projectile once it has reach the end of its lifespan it is destroy
@@ -40,14 +44,13 @@ namespace CannonManager {
 		void DrawTrajectory();
 	private:
 		bool isPlayerControlled = true, isShootingRight = true;
-		bool isActive = false; // has projectile has been shot out of the cannon
+		bool isActive = false; // has projectile has been shot out of the cannon return true if yes
 		float cannonAngle = 0.0f; // Angle of the cannon for the projectile to shoot from
-
+		bool hasShot = false; // projectile has been shot out and destroyed
 		bool resetCamWhenShooting = false; // When player press left mouse click, reset camera to position the cannon and unable to move the camera or not
 
 		// Cannon attributes
 		AEVec2 defaultSize{ 30,10 };
-		float projectileLifespan = 2.0f;
 		int projectileCount = 10;
 		int selectedProjectileId = 0; // index of the selected projectile from the vector list of all the different type of projectiles
 		std::vector<Projectile> projectiles; // vector containing all the different type of projectiles (Default, bomb , etc)

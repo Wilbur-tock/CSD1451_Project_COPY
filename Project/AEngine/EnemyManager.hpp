@@ -6,6 +6,12 @@
 
 namespace EnemyManager {
 	extern std::vector<Enemy>* enemies;
+
+	class EnemyController {
+	public:
+	private:
+		bool isEnemyTurn = false;
+	};
 }
 
 #endif // !1

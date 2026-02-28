@@ -20,18 +20,22 @@ public:
 
 	// Member functions
 
+	// Toggle turns between player and enemy once they have shot and a timer has been set and reduced to 0
+	void ToggleTurn();
+	void SwitchCannon();
 	std::string DebugInfo();
 	Enemy* FindEnemy(int enemyId);
 private:
 	std::string levelName;
+	CannonManager::Cannon *activeCannon; // pointer to the active instance of the cannon object 
 	CannonManager::Cannon playerCannon; // instance of the player cannon
-	AEVec2 playerCannonStartPos{ 0,0 };
+	CannonManager::Cannon enemyCannon; // instance of the enemy cannon
+
+	bool isPlayerTurn = true; // is player or enemy turn to shoot
+	float turnTimer = 0.0f;
 
 	std::vector<std::vector<Tile>> levelMap; // Level map
 	std::vector<Enemy> enemies; // contains all instance of the Enemy Object in the level
-
-	// min and max position that has ground collision
-	AEVec2 minGround{ 0,0 }, maxGround{ 0,0 };
 };
 
 #endif // !LEVEL_HPP

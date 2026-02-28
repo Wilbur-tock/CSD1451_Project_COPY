@@ -87,6 +87,8 @@ namespace UIManager {
 
     AEVec2 Panel::Pos() const { return transform.pos; }
 
+    AEVec2 Panel::Size() const { return transform.size; }
+
     void Panel::SetChildPanelPos(AEVec2 const& parentPos, AEVec2 const& offset) {
         transform.pos = { parentPos.x + offset.x, parentPos.y + offset.y };
     }

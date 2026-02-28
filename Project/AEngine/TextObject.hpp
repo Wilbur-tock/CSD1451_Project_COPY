@@ -4,6 +4,7 @@
 #include "pch.hpp"
 
 #include "Color.hpp"
+#include "Utils.hpp"
 
 class TextObject {
 public:
@@ -23,11 +24,22 @@ public:
 	\param[in] color
 	- color of the text to be displayed
 	\param[in] pos
-	- use range from -1.0f to 1.0f
+	- use NORMALIZED COORDINATES range from -1.0f to 1.0f
 	*************************************************************************/
-	TextObject(std::string _text, float _scale = 1.0f, Color _color = Color{ 1,1,1 }, AEVec2 _pos = {0,0});
+	TextObject(std::string _text, float _scale = 1.0f, Color _color = Color{ 1,1,1 }, AEVec2 _pos = { 0,0 }, Utils::RectMode _rectMode = Utils::RectMode::RECT_TOP_LEFT);
 
+	/*!***********************************************************************
+	\brief
+	Set text object position according to the parent panel
+	\param[in] panelPos
+	- position of the parent panel
+	\param[in] panelSize
+	- size of the panel
+	*************************************************************************/
+	void SetPos(AEVec2 panelPos, AEVec2 panelSize);
 	void Draw();
+private:
+	Utils::RectMode rectMode;
 };
 
 #endif // !TEXTOBJECT_HPP

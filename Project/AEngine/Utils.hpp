@@ -25,6 +25,7 @@ namespace Utils {
 	void GetWorldMousePos(float& x, float& y);
 	void GetWorldPos(float& x, float& y);
 	void NormalizeCoordinates(float& x, float& y);
+	AEVec2 NormalizeCoordinates(AEVec2 vec2);
 	// Get the grid index based on mouse position
 	void GetMouseGridIndex(int& x, int& y);
 	void GetGridIndex(int& x, int& y, AEVec2 const worldPos);

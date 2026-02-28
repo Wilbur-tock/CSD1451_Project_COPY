@@ -39,6 +39,11 @@ namespace Utils {
 		y /= (Config::SCREEN_HEIGHT / 2.0f);
 	}
 
+	AEVec2 NormalizeCoordinates(AEVec2 vec2) {
+		NormalizeCoordinates(vec2.x, vec2.y);
+		return vec2;
+	}
+
 	void GetMouseGridIndex(int& x, int& y) {
 		// Calculate Grid x and y index
 		float worldMouseX = 0, worldMouseY = 0;
