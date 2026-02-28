@@ -11,6 +11,7 @@ namespace MapManager {
 	extern std::vector<std::vector<Tile>> *currentMap; // Current map layout that is being displayed onto the map
 
 	void Load();
+	void Unload();
 	// Read map data from txt file and then update the data to 2D vector whatever or not barrier is needed
 	void ReadMapData(std::string const& fileName, std::vector<std::vector<Tile>>& map);
 	// Rendering of the map layout

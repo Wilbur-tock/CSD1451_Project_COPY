@@ -238,11 +238,11 @@ namespace GameStateManager {
         }
 
         // Reload assets
-        if (AEInputCheckCurr(AEVK_LCTRL)) {
-            if (AEInputCheckCurr(AEVK_R)) {
-                Load();
-            }
-        }
+        //if (AEInputCheckCurr(AEVK_LCTRL)) {
+        //    if (AEInputCheckCurr(AEVK_R)) {
+        //        Load();
+        //    }
+        //}
 
         // Debugger display
         if (Utils::isDebuggerOn) {
@@ -268,5 +268,6 @@ namespace GameStateManager {
         MainMenu::Unload();
         AssetsManager::Unload();
         GraphicsManager::Unload();
+        MapManager::Unload();
     }
 }

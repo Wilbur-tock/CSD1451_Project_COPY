@@ -107,7 +107,7 @@ namespace MapEditor {
 	}
 
 	void Initialize() {
-		helpText =  { "",  Utils::debuggerInfo.first * 0.8f, Utils::debuggerInfo.second,{-1.0f,.99f} };
+		helpText =  { "",  Utils::debuggerInfo.first * 0.9f, Utils::debuggerInfo.second,{-1.0f,.99f} };
 		debugText = { "",  Utils::debuggerInfo.first * 0.8f, Utils::debuggerInfo.second, { 0.5f, 0.99f} };
 
 		CameraManager::camera.SetPosition({ 0, 0 });
@@ -205,7 +205,8 @@ namespace MapEditor {
 				SaveNewFile(DebugFilePath(savePath));
 			}
 
-			//GameStateManager::Load(); // Reload all the assets
+			// Reload all the assets
+			//GameStateManager::Load(); 
 			isDrawingNewMap = true;
 		}
 

@@ -18,6 +18,7 @@ public:
 	void Load();
 	void Initalize();
 	void Update();
+	void Draw();
 	void Free();
 
 	// Member functions
@@ -26,8 +27,9 @@ public:
 	void ToggleTurn();
 	void SwitchCannon();
 	std::string DebugInfo();
-	Character* FindEnemy(int enemyId);
-	Character* FindPlayer(int id);
+
+	Character* FindEnemyCharacterObj(int characterId);
+	Character* FindPlayerCharacterObj(int characterId);
 private:
 	std::string levelName;
 	CannonManager::Cannon *activeCannon = nullptr; // pointer to the active instance of the cannon object 
@@ -35,6 +37,7 @@ private:
 	CannonManager::Cannon enemyCannon; // instance of the enemy cannon
 
 	bool isPlayerTurn = true; // is player or enemy turn to shoot
+	bool autoPlayOn = false; // used for debugging let enemy play ONLY
 	float turnTimer = 0.0f;
 
 	std::vector<std::vector<Tile>> levelMap; // Level map

@@ -126,10 +126,10 @@ void Projectile::DamageTile(int x, int y) {
             if (Utils::IsGridIndexOutOfBounds(dX, dY)) continue;
 
             Tile& tileToDamage = (*MapManager::currentMap)[dY][dX];
-            //std::cout << "[Projectile] Checked tile " << tileToDamage << std::endl;
+            //std::cout << "[Projectile] Checked tile " << tileToDamage << '\n';
 
-            // Only damage blocks or enemy tile
-            if (!tileToDamage.IsBlocks() && !tileToDamage.IsEnemy()) continue;
+            // Only damage blocks or character tile
+            if (!tileToDamage.IsBlocks() && !tileToDamage.ContainCharacter()) continue;
 
             // Damage tile blocks
             std::cout << "[Projectile] Damage Tile: " << tileToDamage
@@ -138,12 +138,22 @@ void Projectile::DamageTile(int x, int y) {
             // Damage Tiles that contain a character object
             if (tileToDamage.ContainCharacter()) {
                 Character* character = nullptr;
-                if(tileToDamage.IsEnemy()) character = LevelManager::selectedLevel->FindEnemy(tileToDamage.CharacterId());
-                else character = LevelManager::selectedLevel->FindPlayer(tileToDamage.CharacterId());
+                if (tileToDamage.IsEnemy()) {
+                    character = LevelManager::selectedLevel->FindEnemyCharacterObj(tileToDamage.CharacterId());
+                }
+                else{
+                    character = LevelManager::selectedLevel->FindPlayerCharacterObj(tileToDamage.CharacterId());
+                }
 
-                character->attribute.TakeDamage(projDamage);
+                if (!character) {
+                    std::cerr << "[Projectile] Can't find " << tileToDamage.CharacterId() << '\n';
+                    continue;
+                }
+                else {
+                    character->attribute.TakeDamage(projDamage);
 
-                std::cout << "[Projectile] Damaged Enemy " << character->TypeName() <<  " new hp: " << character->attribute.Health() << '\n';
+                    std::cout << "[Projectile] Damaged character " << character->TypeName() <<  " new hp: " << character->attribute.Health() << '\n';
+                }
             }
 
             // Damage tile after it has damage the enemy compononent first

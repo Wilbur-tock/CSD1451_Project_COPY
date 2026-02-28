@@ -64,7 +64,7 @@ private:
 	float const defaultSize = Config::TILE_SIZE;
 	TileType prevType = TileType::TILE_EMPTY; // previous tile type
 	TileType type = TileType::TILE_EMPTY; // current tile type
-	int enemyId = -1; // index of the enemy object stored in the vector list
+	int characterId = -1; // index of the character object stored in the vector list
 };
 
 std::ostream& operator<<(std::ostream& os, Tile const& rhs);

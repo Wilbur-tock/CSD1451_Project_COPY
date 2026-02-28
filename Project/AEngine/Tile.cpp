@@ -7,18 +7,18 @@ TileType Tile::Type() const { return type; }
 void Tile::Type(TileType newType) {
 	prevType = type;
 	type = newType;
-	if (IsEmpty() && IsEnemy()) enemyId = -1;
+	if (IsEmpty() && ContainCharacter()) characterId = -1;
 }
 
 void Tile::Type(Tile const& toCopy) {
 	Type(toCopy.type);
 
-	enemyId = toCopy.CharacterId();
+	characterId = toCopy.CharacterId();
 	attribute = toCopy.attribute;
 }
 
-int  Tile::CharacterId() const { return enemyId; }
-void Tile::CharacterId(int newId) { enemyId = newId; }
+int  Tile::CharacterId() const { return characterId; }
+void Tile::CharacterId(int newId) { characterId = newId; }
 
 bool Tile::IsEmpty() const { return type == TILE_EMPTY; }
 bool Tile::IsGround() const {

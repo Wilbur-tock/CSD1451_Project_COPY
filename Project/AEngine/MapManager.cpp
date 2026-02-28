@@ -97,6 +97,10 @@ namespace MapManager {
 			<< CANNON_BASE_PATH << "\n";
 	}
 
+	void Unload() {
+		currentMap = nullptr;
+	}
+
 	void ReadMapData(std::string const& fileName, std::vector<std::vector<Tile>> &map) {
 		std::ifstream ifs{fileName};
 		if (!ifs) {
@@ -153,6 +157,15 @@ namespace MapManager {
 	}
 
 	void RenderMap(std::vector<std::vector<Tile>> const& map) {
+		int mapHeight = static_cast<int>(map.size());
+		int mapWidth = static_cast<int>(map[0].size());
+
+		if (mapHeight < 0 || mapHeight > Config::GRID_HEIGHT || mapWidth < 0 || mapWidth > Config::GRID_WIDTH) {
+			std::cout << "[MapManager] Map out of bounds width: " << mapWidth << " height: " << mapHeight << '\n';
+			return;
+		}
+
+
 		for (int y = 0; y < Config::GRID_HEIGHT; ++y) {
 			for (int x = 0; x < Config::GRID_WIDTH; ++x) {
 				const Tile& tile = map[y][x];

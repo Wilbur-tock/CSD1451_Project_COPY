@@ -67,6 +67,7 @@ namespace AbilitiesManager {
 			abilities.push_back(ability);
 		}
 
+		// Testing add bomb projectile with 10 charges
 		AddAbility(1, 10);
 
 		currentAbility = &abilities[0];

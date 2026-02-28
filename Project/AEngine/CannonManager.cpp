@@ -156,7 +156,8 @@ namespace CannonManager {
         cannonAngle = launchAngle;
         shotPower = std::clamp(neededVelocity * (1.0f + randomOffset), minPower, maxPower);
 
-        std::cout << "[CannonManager] Enemy AI Ideal: angle: " << launchAngle << " shot power: " << neededVelocity << '\n'
+        std::cout << "======================= [CannonManager] Enemy AI Shot ========================\n"
+            << "[CannonManager] Enemy AI Ideal: angle: " << launchAngle << " shot power: " << neededVelocity << '\n'
             << "[CannonManager] Enemy AI Actual: angle: " << cannonAngle << " shot power: " << shotPower << '\n';
     }
 

@@ -34,22 +34,36 @@ void Level::Load() {
 				playerCannonStartPos = { tile.transform.pos.x,tile.transform.pos.y + tile.transform.size.y *0.5f};
 			}
 
-			if (tile.Type() == TILE_PLAYER_CHARACTER) {
-				Character playerChar{ tile.transform.pos, tile.transform.size, AssetsManager::squareTexture, {x,y}, CharacterType::PLAYER };
-				playerCharacters.push_back(playerChar);
-				tile.CharacterId(static_cast<int>(playerCharacters.size() - 1));
-			}
-
 			// Find enemy cannon starting position
 			if (tile.Type() == TILE_ENEMY_CANNON) {
 				enemyCannonStartPos = { tile.transform.pos.x,tile.transform.pos.y + tile.transform.size.y * 0.5f };
 			}
 
-			// Find enemy position and load enemy data into the enemies vector
-			if (tile.Type() == TILE_ENEMY_MINION) {
-				Character enemy{ tile.transform.pos, tile.transform.size, AssetsManager::squareTexture, {x,y}, CharacterType::ENEMY_MINION };
-				enemies.push_back(enemy);
-				tile.CharacterId(static_cast<int>(enemies.size() - 1));
+			// Find all instance of player and enemy character objects
+			if (tile.Type() == TILE_PLAYER_CHARACTER || tile.Type() == TILE_ENEMY_MINION || tile.Type() == TILE_ENEMY_BOSS) {
+				Character characterObj{ tile.transform.pos, tile.transform.size, AssetsManager::squareTexture, {x,y}, CharacterType::PLAYER };
+				int listId = 0;
+				switch (tile.Type()) {
+				case TILE_PLAYER_CHARACTER:
+					playerCharacters.push_back(characterObj);
+					listId = static_cast<int>(playerCharacters.size() - 1);
+					playerCharacters[listId].id = listId; // assign the character id to the character component itself
+					break;
+				case TILE_ENEMY_MINION:
+					characterObj = { tile.transform.pos, tile.transform.size, AssetsManager::squareTexture, {x,y}, CharacterType::ENEMY_MINION };
+					enemies.push_back(characterObj);
+					listId = static_cast<int>(enemies.size() - 1);
+					enemies[listId].id = listId; // assign the character id to the character component itself
+					break;
+				case TILE_ENEMY_BOSS:
+					characterObj = { tile.transform.pos, tile.transform.size, AssetsManager::squareTexture, {x,y}, CharacterType::ENEMY_BOSS };
+					enemies.push_back(characterObj);
+					listId = static_cast<int>(enemies.size() - 1);
+					enemies[listId].id = listId; // assign the character id to the character component itself
+					break;
+				}
+
+				tile.CharacterId(listId); // assign the character id to the tile component
 			}
 		}
 	}
@@ -94,10 +108,16 @@ void Level::Initalize() {
 void Level::Update() {
 	MapManager::RenderMap(levelMap);
 
+	if (autoPlayOn && isPlayerTurn) {
+		isPlayerTurn = false;
+		SwitchCannon();
+	}
+
 	activeCannon->Update();
 	if (!isPlayerTurn) {
-		// TODO: CHANGE TARGET POSITION to the player character
-		activeCannon->EnemyAI(playerCannon.transform.pos);
+		AEVec2 targetPos = { 0,0 };
+		if (playerCharacters.size() > 0) targetPos = playerCharacters[0].transform.pos;
+		activeCannon->EnemyAI(targetPos);
 	}
 	ToggleTurn();
 
@@ -111,27 +131,19 @@ void Level::Update() {
 		enemy.Update();
 	}
 
-	// Rendering of assets and UI
-	playerCannon.Render();
-	enemyCannon.Render();
-
-	// UI to display whose turn it is
-	UIManager::Panel turnStatusPanel{ {150,50}, {1,1,1}, Utils::RectMode::RECT_TOP_CENTER};
-	turnStatusPanel.Draw();
-
-	TextObject turnText = { "PLAYER TURN", 0.75f,{0,0.75f,0}, Utils::NormalizeCoordinates(turnStatusPanel.Pos()), Utils::RectMode::RECT_CENTER};
-	if (!isPlayerTurn) {
-		turnText.textContent = "ENEMY TURN";
-		turnText.color = { 0.75f,0,0 };
-	}
-	turnText.SetPos(turnStatusPanel.Pos(), turnStatusPanel.Size());
-	turnText.Draw();
+	Draw();
 
 	if (Utils::isDebuggerOn) {
 		// Input R to change whose turn it is
 		if (AEInputCheckTriggered(AEVK_R)) {
 			isPlayerTurn = !isPlayerTurn;
 			SwitchCannon();
+		}
+		// Input CTRL + R to turn autoPlayOn on/off
+		if (AEInputCheckCurr(AEVK_LCTRL) || AEInputCheckCurr(AEVK_RCTRL)) {
+			if (AEInputCheckTriggered(AEVK_R)) {
+				autoPlayOn = !autoPlayOn;
+			}
 		}
 
 		int gridX = 0, gridY = 0;
@@ -154,13 +166,14 @@ void Level::Update() {
 		float mX = 0, mY = 0;
 		Utils::GetWorldMousePos(mX, mY);
 
-		std::string debug = "Grid:\nIndex X: " + std::to_string(gridX) + " Y: " + std::to_string(gridY)
+		std::string debug = "Auto play " + static_cast<std::string>(autoPlayOn ? "ON" : "OFF")
+			+ "\nGrid:\nIndex X: " + std::to_string(gridX) + " Y: " + std::to_string(gridY)
 			+ "\n\nTile: " + GetTileName(tile.Type());
-
+		// Display which character is currently at this tile type
 		if (tile.ContainCharacter()) {
 			std::stringstream ss;
-			if (tile.IsEnemy()) ss << FindEnemy(tile.CharacterId());
-			else ss << FindPlayer(tile.CharacterId());
+			if (tile.IsEnemy()) ss << FindEnemyCharacterObj(tile.CharacterId());
+			else ss << FindPlayerCharacterObj(tile.CharacterId());
 			debug += " " + ss.str();
 		}
 
@@ -176,6 +189,24 @@ void Level::Update() {
 		debugText.textContent = debug;
 		debugText.Draw();
 	}
+}
+
+void Level::Draw() {
+	// Rendering of assets and UI
+	playerCannon.Render();
+	enemyCannon.Render();
+
+	// UI to display whose turn it is
+	UIManager::Panel turnStatusPanel{ {150,50}, {1,1,1}, Utils::RectMode::RECT_TOP_CENTER };
+	turnStatusPanel.Draw();
+
+	TextObject turnText = { "PLAYER TURN", 0.75f,{0,0.75f,0}, Utils::NormalizeCoordinates(turnStatusPanel.Pos()), Utils::RectMode::RECT_CENTER };
+	if (!isPlayerTurn) {
+		turnText.textContent = "ENEMY TURN";
+		turnText.color = { 0.75f,0,0 };
+	}
+	turnText.SetPos(turnStatusPanel.Pos(), turnStatusPanel.Size());
+	turnText.Draw();
 }
 
 void Level::Free() {
@@ -197,7 +228,6 @@ void Level::ToggleTurn() {
 			// Switch active cannon
 			isPlayerTurn = !isPlayerTurn;
 			SwitchCannon();
-			std::cout << "[Level] Toggled cannon turn" << '\n';
 		}
 	}
 }
@@ -210,6 +240,8 @@ void Level::SwitchCannon() {
 		activeCannon = &enemyCannon;
 	}
 	activeCannon->ResetTurn();
+
+	std::cout << "[Level] Toggle to " << std::string(isPlayerTurn ? "PLAYER" : "ENEMY") << " turn" << '\n';
 }
 
 std::string Level::DebugInfo() {
@@ -234,12 +266,12 @@ std::string Level::DebugInfo() {
 	return info;
 }
 
-Character* Level::FindEnemy(int enemyId) {
-	if (enemyId < 0) return nullptr;
-	return &enemies[enemyId];
+Character* Level::FindEnemyCharacterObj(int characterId) {
+	if (characterId < 0) return nullptr;
+	return &enemies[characterId];
 }
 
-Character* Level::FindPlayer(int id) {
-	if (id < 0) return nullptr;
-	return &playerCharacters[id];
+Character* Level::FindPlayerCharacterObj(int characterId) {
+	if (characterId < 0) return nullptr;
+	return &playerCharacters[characterId];
 }

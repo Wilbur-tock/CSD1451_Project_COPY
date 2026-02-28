@@ -13,7 +13,6 @@ CharacterType Character::Type() const { return type; }
 
 void Character::Update() {
 	physics.Update(*this);
-
 	Render();
 }
 
@@ -29,13 +28,14 @@ void Character::Render() {
 
 void Character::DebugInfo(std::string& str) {
 	std::stringstream ss;
-	ss << &*this;
-	str = "\nCharacter Info: "  + ss.str()
+	ss << &*this; // Display address of the character object
+	str = "\n\nCharacter Info: " + ss.str()
 		+ "\nType: " + TypeName()
-		+ "\nId: x: " + std::to_string(tileId.x) + " y : " + std::to_string(tileId.y)
+		+ "\nCharacter Id: " + std::to_string(id)
+		+ "\nTile Id x: " + std::to_string(tileId.x) + " y : " + std::to_string(tileId.y)
 		+ "\nPos x: " + Utils::FormatFloat(transform.pos.x, 2) + " y: " + Utils::FormatFloat(transform.pos.y, 2)
 		+ "\nSize x: " + Utils::FormatFloat(transform.size.x, 2) + " y: " + Utils::FormatFloat(transform.size.x, 2)
-		+ "\nHP: " + std::to_string(attribute.Health()) + " Max HP: " + std::to_string(attribute.MaxHealth())
-		+ "\nDamage Multiplier: " + std::to_string(attribute.DamageMultiplier())
-		+ "\nIsGrounded: " + std::string(physics.IsGrounded() ? "true" : "false");
+		+ "\nIsGrounded: " + static_cast<std::string>(physics.IsGrounded() ? "true" : "false")
+		+ "\n\nStats:\nHP: " + std::to_string(attribute.Health()) + " Max HP: " + std::to_string(attribute.MaxHealth())
+		+ "\nDamage Multiplier: " + std::to_string(attribute.DamageMultiplier());
 }
