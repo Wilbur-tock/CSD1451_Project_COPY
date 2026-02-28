@@ -39,7 +39,7 @@ public:
 	void SetPos(AEVec2 panelPos, AEVec2 panelSize);
 	void Draw();
 private:
-	Utils::RectMode rectMode;
+	Utils::RectMode rectMode = Utils::RectMode::RECT_CENTER;
 };
 
 #endif // !TEXTOBJECT_HPP

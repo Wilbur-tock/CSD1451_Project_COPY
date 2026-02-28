@@ -6,14 +6,16 @@
 #include "CannonManager.hpp"
 #include "Tile.hpp"
 #include "TextObject.hpp"
-#include "Enemy.hpp"
+#include "Character.hpp"
 
 class Level {
 public:
 	TextObject debugText;
 
+	Level(std::string levelName);
+
 	// Read level map data and load level resources
-	void Load(std::string const& filePath);
+	void Load();
 	void Initalize();
 	void Update();
 	void Free();
@@ -24,7 +26,7 @@ public:
 	void ToggleTurn();
 	void SwitchCannon();
 	std::string DebugInfo();
-	Enemy* FindEnemy(int enemyId);
+	Character* FindEnemy(int enemyId);
 private:
 	std::string levelName;
 	CannonManager::Cannon *activeCannon; // pointer to the active instance of the cannon object 
@@ -35,7 +37,8 @@ private:
 	float turnTimer = 0.0f;
 
 	std::vector<std::vector<Tile>> levelMap; // Level map
-	std::vector<Enemy> enemies; // contains all instance of the Enemy Object in the level
+	std::vector<Character> enemies; // contains all instance of the Enemy Character Object in the level
+	std::vector<Character> playerCharacters; // contains all instance of the Player Character Object in the level
 };
 
 #endif // !LEVEL_HPP

@@ -5,7 +5,6 @@
 
 #include "GameObject.hpp"
 #include "Attributes.hpp"
-#include "Enemy.hpp"
 
 enum TileType {
 	TILE_EMPTY,

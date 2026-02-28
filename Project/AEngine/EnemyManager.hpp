@@ -2,10 +2,10 @@
 #define ENEMYMANAGER_HPP
 
 #include "pch.hpp"
-#include "Enemy.hpp"
+#include "Character.hpp"
 
 namespace EnemyManager {
-	extern std::vector<Enemy>* enemies;
+	extern std::vector<Character>* enemies;
 
 	class EnemyController {
 	public:

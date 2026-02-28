@@ -13,22 +13,14 @@
 #include "UIManager.hpp"
 #include "TextObject.hpp"
 
-static std::string FindLevelNumber(std::string const& filePath) {
-	std::string key = "level";
-	size_t pos = filePath.find(key);
+Level::Level(std::string _levelName) : levelName{ _levelName } {}
 
-	if (pos != std::string::npos) {
-		return filePath.substr(pos+key.size(), 1);
-	}
-
-	return "-1"; // Return -1 if "level" wasn't found
-}
-
-void Level::Load(std::string const& filePath) {
+void Level::Load() {
 	levelMap.resize(Config::GRID_HEIGHT, std::vector<Tile>(Config::GRID_WIDTH));
 	enemies.reserve(10);
 
 	// Read map data
+	std::string filePath = "Assets/Map/" + levelName + ".txt";
 	MapManager::ReadMapData(filePath, levelMap);
 
 	AEVec2 playerCannonStartPos = { 0,0 }, enemyCannonStartPos = {0, 0};
@@ -49,7 +41,7 @@ void Level::Load(std::string const& filePath) {
 
 			// Find enemy position and load enemy data into the enemies vector
 			if (tile.Type() == TILE_ENEMY_MINION) {
-				Enemy enemy{ tile.transform.pos, tile.transform.size, AssetsManager::squareTexture, {x,y} };
+				Character enemy{ tile.transform.pos, tile.transform.size, AssetsManager::squareTexture, {x,y} };
 				enemies.push_back(enemy);
 				tile.EnemyId(static_cast<int>(enemies.size() - 1));
 			}
@@ -70,12 +62,11 @@ void Level::Load(std::string const& filePath) {
 
 	// Initialize Enemy instance
 	// TODO: add a texture for the enemy cannon (flip the player cannon texture from facing right to facing left)
-	enemyCannon = CannonManager::Cannon(enemyCannonStartPos, barrelTex, { 0,0 }, barrelHalfSize, false, true);
+	enemyCannon = CannonManager::Cannon(enemyCannonStartPos, barrelTex, { 0,0 }, barrelHalfSize, false, false);
 	enemyCannon.SetAbilityController(&PlayerManager::playerAbilityController);
 
 	debugText = { "", Utils::debuggerInfo.first * 0.8f, Utils::debuggerInfo.second, { -1.0f, 0.99f} };
 
-	levelName = "Level " + FindLevelNumber(filePath);
 	std::cout << "[Level] Load " + levelName << '\n';
 }
 
@@ -83,7 +74,6 @@ void Level::Initalize() {
 	AEGfxSetBackgroundColor(0.92f, 0.92f, 0.95f);
 
 	MapManager::currentMap = &levelMap;
-	LevelManager::selectedLevel = this;
 
 	// Always start with player first
 	activeCannon = &playerCannon;
@@ -99,10 +89,14 @@ void Level::Update() {
 	MapManager::RenderMap(levelMap);
 
 	activeCannon->Update();
+	if (!isPlayerTurn) {
+		// TODO: CHANGE TARGET POSITION to the player character
+		activeCannon->EnemyAI(playerCannon.transform.pos);
+	}
 	ToggleTurn();
 
 	// Update all enemy instance
-	for (Enemy& enemy : enemies) {
+	for (Character& enemy : enemies) {
 		enemy.Update();
 	}
 
@@ -123,6 +117,7 @@ void Level::Update() {
 	turnText.Draw();
 
 	if (Utils::isDebuggerOn) {
+		// Input R to change whose turn it is
 		if (AEInputCheckTriggered(AEVK_R)) {
 			isPlayerTurn = !isPlayerTurn;
 			SwitchCannon();
@@ -138,6 +133,36 @@ void Level::Update() {
 				tile.Type(TILE_EMPTY);
 			}
 		}
+
+		// Debug text
+		f32 x, y;
+		AEGfxGetCamPosition(&x, &y);
+
+		s32 mouseX, mouseY;
+		AEInputGetCursorPosition(&mouseX, &mouseY);
+		float mX = 0, mY = 0;
+		Utils::GetWorldMousePos(mX, mY);
+
+		std::string debug = "Grid:\nIndex X: " + std::to_string(gridX) + " Y: " + std::to_string(gridY)
+			+ "\n\nTile: " + GetTileName(tile.Type());
+
+		if (tile.IsEnemy()) {
+			std::stringstream ss;
+			ss << FindEnemy(tile.EnemyId());
+			debug += " " + ss.str();
+		}
+
+		debug += "\nPos X: " + Utils::FormatFloat(tile.transform.pos.x, 2) + " Y: " + Utils::FormatFloat(tile.transform.pos.y, 2)
+			+ "\nHP: " + Utils::FormatFloat(tile.attribute.Health(), 2)
+			+ "\nDamage Multiplier: " + std::to_string(tile.attribute.DamageMultiplier())
+			+ "\n\nCamera " + std::to_string(CameraManager::camera.GetState())
+			+ "\nPos X : " + Utils::FormatFloat(x, 2) + " Y : " + Utils::FormatFloat(y, 2)
+			+ "\nMouse\nScreen Pos X: " + Utils::FormatFloat(mouseX, 2) + " Y: " + Utils::FormatFloat(mouseY, 2)
+			+ "\nWorld Pos X: " + Utils::FormatFloat(mX, 2) + " Y: " + Utils::FormatFloat(mY, 2);
+
+		debug += DebugInfo();
+		debugText.textContent = debug;
+		debugText.Draw();
 	}
 }
 
@@ -160,8 +185,6 @@ void Level::ToggleTurn() {
 			// Switch active cannon
 			isPlayerTurn = !isPlayerTurn;
 			SwitchCannon();
-
-			activeCannon->ResetTurn();
 			std::cout << "[Level] Toggled cannon turn" << '\n';
 		}
 	}
@@ -174,14 +197,14 @@ void Level::SwitchCannon() {
 	else {
 		activeCannon = &enemyCannon;
 	}
-	activeCannon->SetCamera(false);
+	activeCannon->ResetTurn();
 }
 
 std::string Level::DebugInfo() {
 	std::string info = "";
 
 	if (Utils::isDebuggerOn) {
-		for (Enemy& enemy : enemies) {
+		for (Character& enemy : enemies) {
 			if (CollisionManager::IsPointInGameObject(enemy)) {
 				enemy.DebugInfo(info);
 				return info;
@@ -192,7 +215,7 @@ std::string Level::DebugInfo() {
 	return info;
 }
 
-Enemy* Level::FindEnemy(int enemyId) {
+Character* Level::FindEnemy(int enemyId) {
 	if (enemyId < 0) return nullptr;
 	return &enemies[enemyId];
 }

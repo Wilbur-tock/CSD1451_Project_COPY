@@ -1,5 +1,5 @@
 #include "EnemyManager.hpp"
 
 namespace EnemyManager {
-	std::vector<Enemy>* enemies;
+	std::vector<Character>* enemies;
 }

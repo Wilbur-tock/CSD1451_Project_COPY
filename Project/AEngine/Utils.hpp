@@ -35,6 +35,11 @@ namespace Utils {
 	std::string FormatFloat(double value, int precision);
 
 	template <typename T>
+	T RandomValue(T min, T max) {
+		return static_cast<T>(min + (AERandFloat() * (max - min)));
+	}
+
+	template <typename T>
 	// Set val to wrap to max if it go below min and vice versa
 	void Wrap(T& val, T min, T max) {
 		if (val < min) val = max;

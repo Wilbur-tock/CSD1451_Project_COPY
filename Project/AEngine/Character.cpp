@@ -1,22 +1,22 @@
-#include "Enemy.hpp"
+#include "Character.hpp"
 
 #include "UIManager.hpp"
 #include "GraphicsManager.hpp"
 
-Enemy::Enemy(AEVec2 _pos, AEVec2 _size, AEGfxTexture* _texture, TileIndex _tileId)
-	: GameObject{ _pos, _size, _texture, _tileId, Color{0.5f,1,0.5f} }, type{EnemyType::MINION}{
+Character::Character(AEVec2 _pos, AEVec2 _size, AEGfxTexture* _texture, TileIndex _tileId)
+	: GameObject{ _pos, _size, _texture, _tileId, Color{0.5f,1,0.5f} }, type{CharacterType::ENEMY_MINION}{
 	attribute.MaxHealth(100);
 }
 
-EnemyType Enemy::Type() const { return type; }
+CharacterType Character::Type() const { return type; }
 
-void Enemy::Update() {
+void Character::Update() {
 	physics.Update(*this);
 
 	Render();
 }
 
-void Enemy::Render() {
+void Character::Render() {
 	if (!attribute.IsActive()) return;
 
 	GraphicsManager::DrawGameObject(*this);
@@ -26,10 +26,10 @@ void Enemy::Render() {
 	bar.Draw(static_cast<float>(attribute.Health()), static_cast<float>(attribute.MaxHealth()));
 }
 
-void Enemy::DebugInfo(std::string& str) {
+void Character::DebugInfo(std::string& str) {
 	std::stringstream ss;
 	ss << &*this;
-	str = "\n\nEnemy Info: " + ss.str()
+	str = "\nCharacter Info: " + TypeName()  + ss.str()
 		+ "\nId: x:" + std::to_string(tileId.x) + " y : " + std::to_string(tileId.y)
 		+ "\nPos x : " + Utils::FormatFloat(transform.pos.x, 2) + " y: " + Utils::FormatFloat(transform.pos.y, 2)
 		+ "\nSize x: " + Utils::FormatFloat(transform.size.x, 2) + " y: " + Utils::FormatFloat(transform.size.x, 2)

@@ -1,7 +1,7 @@
 #include "Ability.hpp"
 
-Ability::Ability(int _id, std::string _name, AbilityType _type, int _projectileId)
-	: id{ _id }, projectileId{_projectileId}, name{ _name }, type{ _type }, charges{ 0 }, cost{0} {
+Ability::Ability(int _id, std::string _name, AbilityType _type, int _projectileId, bool _unlimitedCharges)
+	: id{ _id }, projectileId{ _projectileId }, name{ _name }, type{ _type }, charges{ 0 }, cost{ 0 }, unlimitedCharges{ _unlimitedCharges } {
 }
 
 int Ability::Id() const { return id; }
@@ -15,4 +15,3 @@ void Ability::Charges(int toAdd) {
 }
 
 bool Ability::UnlimitedCharges() const { return unlimitedCharges; }
-void Ability::UnlimitedCharges(bool val) { unlimitedCharges = val; }

@@ -4,7 +4,7 @@
 #include "GraphicsManager.hpp"
 #include "AssetsManager.hpp"
 #include "LevelManager.hpp"
-#include "Enemy.hpp"
+#include "Character.hpp"
 
 Projectile::Projectile(AEGfxTexture* _texture, ProjectileMode _mode, AEVec2 _pos, int _attackCharges)
     : GameObject(_pos, defaultSize, _texture), timer{ 0.0f }, mode(_mode), attackCharges{_attackCharges} {
@@ -136,7 +136,7 @@ void Projectile::DamageTile(int x, int y) {
 
             // Damage Enemy Object by finding the enemy component using tile
             if (tileToDamage.IsEnemy()) {
-                Enemy& enemy = *(LevelManager::selectedLevel->FindEnemy(tileToDamage.EnemyId()));
+                Character& enemy = *(LevelManager::selectedLevel->FindEnemy(tileToDamage.EnemyId()));
                 enemy.attribute.TakeDamage(attribute.Damage());
 
                 std::cout << "[Projectile] Damaged Enemy new hp: " << enemy.attribute.Health() << '\n';
@@ -152,5 +152,15 @@ void Projectile::DamageTile(int x, int y) {
     // Consume 1 attack charge if projectile has damaged a tile 
     if (hasDamagedTile) {
         ConsumeAttackCharge();
+
+        // Damage effect
+        Tile& tileToDamage = (*MapManager::currentMap)[y][x];
+
+        GraphicsManager::DrawGameObject(
+            AssetsManager::circleTexture,
+            GraphicsManager::CreateTransformMatrix(tileToDamage.transform.pos.x, tileToDamage.transform.pos.y, 0,
+                (tileToDamage.transform.size.x * 0.5f) * blastRadius, (tileToDamage.transform.size.y * 0.5f) * blastRadius),
+            { 0.75,0.0f,0 }
+        );
     }
 }

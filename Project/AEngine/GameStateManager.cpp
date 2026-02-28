@@ -4,7 +4,7 @@
 #include "CannonManager.hpp"
 #include "GraphicsManager.hpp"
 #include "AssetsManager.hpp"
-#include "Level1.hpp"
+#include "LevelManager.hpp"
 #include "MainMenu.hpp"
 #include "Credits.hpp"
 #include "PlayerManager.hpp"
@@ -108,7 +108,7 @@ namespace GameStateManager {
         AssetsManager::Load();
         GraphicsManager::Load();
         MainMenu::Load();
-        Level1::Load();
+        LevelManager::Load();
         Credits::Load();
 
         // Load all abilities at the start of the game
@@ -185,15 +185,14 @@ namespace GameStateManager {
                         gsUnload = nullptr;
                         break;
                     case GameState::LEVEL_1:
-                        gsLoad = Level1::Load;
-                        gsIntialize = Level1::Initalize;
-                        gsUpdate = Level1::Update;
-                        gsDraw = nullptr;
-                        gsFree = nullptr;
-                        gsUnload = nullptr;
-                        break;
                     case GameState::LEVEL_2:
-                        // TODO: Implement Level 2
+                        LevelManager::SelectLevel(static_cast<int>(current) - static_cast<int>(GameState::LEVEL_1));
+                        gsLoad = LevelManager::LoadLevel;
+                        gsIntialize = LevelManager::InitializeLevel;
+                        gsUpdate = LevelManager::UpdateLevel;
+                        gsDraw = nullptr;
+                        gsFree = LevelManager::FreeLevel;
+                        gsUnload = nullptr;
                         break;
                     case GameState::CREDITS:
                         gsLoad = Credits::Load;

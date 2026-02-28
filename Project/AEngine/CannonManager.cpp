@@ -49,27 +49,12 @@ namespace CannonManager {
             cannonAngle = atan2(worldMouseY - transform.pos.y, worldMouseX - transform.pos.x);
 
             // Add limits so it can only turn facing upwards or downwards limits
-            if (isShootingRight) {
-                cannonAngle = std::clamp(cannonAngle, -1.5f, 1.5f);
-            }
-            else {
-                // Clamp to left hemisphere
-                if (cannonAngle > 0) {
-                    cannonAngle = std::clamp(cannonAngle, 1.5f, 3.5f);   // Upper left: 1.5 to 3.5
-                }
-                else {
-                    cannonAngle = std::clamp(cannonAngle, -3.5f, -1.5f); // Lower left: -3.5 to -1.5
-                }
-            }
-
-            SelectProjectile();
+            ClampAngle(cannonAngle);
             DrawTrajectory();
-            ChargeShot();
-            UpdateProjectile();
+            SelectProjectile();
         }
-        else { // Enemy Control AI
-            EnemyAI();
-        }
+        ChargeShot();
+        UpdateProjectile();
 
         // Debugger
         if (Utils::isDebuggerOn) {
@@ -82,12 +67,16 @@ namespace CannonManager {
 
             Projectile& selectedProjectile = projectiles[selectedProjectileId];
 
-            std::string debugStr = "Cannon [Is Player:" + std::string(isPlayerControlled ? "true" : "false")
-                + "] [Is Active: " + std::string(isActive ? "true" : "false")
-                + "]\nPos X: " + Utils::FormatFloat(transform.pos.x, 2) + " Y: " + Utils::FormatFloat(transform.pos.y, 2)
+            std::string debugStr = "Cannon Is Player:" + std::string(isPlayerControlled ? "true" : "false")
+                + "\nIs Active: " + std::string(isActive ? "true" : "false") + "\nHas Shot : " + std::string(hasShot ? "true" : "false")
+                + "\nPos X: " + Utils::FormatFloat(transform.pos.x, 2) + " Y: " + Utils::FormatFloat(transform.pos.y, 2)
                 + "\nAngle: " + Utils::FormatFloat(cannonAngle * (180.0f / 3.14159265359), 2) + " " + Utils::FormatFloat(cannonAngle, 2)
                 + "\n\nSelected Projectile: " + std::to_string(selectedProjectileId) + " Mode: " + std::to_string(static_cast<int>(selectedProjectile.Mode()))
                 + "\nDamage: " + std::to_string(selectedProjectile.attribute.Damage()) + " Radius: " + std::to_string(selectedProjectile.attribute.DamageRadius());
+            if (!isPlayerControlled) {
+                debugStr += "\nShoot Timer: " + Utils::FormatFloat(aiShootTimer, 2);
+            }
+
             if (activeProjectiles.size() > 0) {
                 Projectile& projectile = activeProjectiles.back();
                 debugStr += "\n\nActive Projectile " + std::to_string(static_cast<int>(projectile.Mode())) + "\nSize: x: "
@@ -106,14 +95,75 @@ namespace CannonManager {
         }
     }
 
-    void Cannon::EnemyAI() {
+    void Cannon::Render() {
+        AEMtx33 mat = GraphicsManager::CreateTransformMatrix(transform.pos.x, transform.pos.y, cannonAngle, transform.size.x, transform.size.y);
+        GraphicsManager::DrawGameObject(texture, mat, textureColor);
+    }
 
+    void Cannon::ResetTurn() {
+        hasShot = false;
+        SetCamera(false);
+    }
+
+    void Cannon::EnemyAI(AEVec2 const targetPos) {
+        if (isActive || hasShot) return; // return if the cannon has shot something out or the projectile has already been shot out and destroyed
+
+        if (!canAIShoot) {
+            // Calculate angle and shot power first
+            EnemyAICalculation(targetPos);
+
+            // Set shoot timer to add a delay between the start of the enemy turn and enemy shooting the projectile out
+            float minTimer = 1.5f;
+            float maxTimer = 3.0f;
+
+            aiShootTimer = Utils::RandomValue(minTimer, maxTimer);
+            canAIShoot = true;
+        }
+        else {
+            aiShootTimer -= PhysicsManager::g_dt;
+
+            if (aiShootTimer <= 0.0f) {
+                ShootProjectile();
+                canAIShoot = false;
+            }
+        }
+    }
+
+    void Cannon::EnemyAICalculation(AEVec2 const targetPos) {
+        float dx = targetPos.x - transform.pos.x;
+        //float dy = targetPos.y - transform.pos.y;
+        //float distance = sqrt(dx * dx + dy * dy);
+
+        // Randomise angle between the min and max radian
+        float min = 30 * (PI / 180.0f);
+        float max = 60 * (PI / 180.0f);
+        float randomAngleBase = Utils::RandomValue(min, max);
+
+        // Adjust for direction (Shooting left or right)
+        float launchAngle = (dx > 0) ? randomAngleBase : (PI - randomAngleBase);
+
+        // Calculate required Power (Initial Velocity)
+        // Basic range formula: v = sqrt( (g * d) / sin(2 * theta) )
+        // We use absolute distance for the calculation
+        float neededVelocity = sqrt((Config::GRAVITY * abs(dx)) / sin(2 * randomAngleBase));
+
+        // Randomise offset to add a variance to 
+        float difficulty = 1.0f; // TODO: Adjust difficulty based on levels
+        float inaccuracy = (1.0f - difficulty) + 0.05f; // add a variance value to it
+        float randomOffset = Utils::RandomValue(-inaccuracy, inaccuracy);
+
+        // Apply the variables to the cannon
+        cannonAngle = launchAngle;
+        shotPower = std::clamp(neededVelocity * (1.0f + randomOffset), minPower, maxPower);
+
+        std::cout << "[CannonManager] Enemy AI Ideal: angle: " << launchAngle << " shot power: " << neededVelocity << '\n'
+            << "[CannonManager] Enemy AI Actual: angle: " << cannonAngle << " shot power: " << shotPower << '\n';
     }
 
     void Cannon::ChargeShot() {
         if (isActive == true) return;
 
-        if (AEInputCheckCurr(AEVK_LBUTTON)) {
+        if (AEInputCheckCurr(AEVK_LBUTTON) || canAIShoot == true) {
             float chargeRateWithDT = chargeRate * PhysicsManager::g_dt;
             chargingPower += isPowerIncreasing ? chargeRateWithDT : -chargeRateWithDT;
 
@@ -141,21 +191,26 @@ namespace CannonManager {
         }
 
         // Shoot when the button is RELEASED
-        if (AEInputCheckReleased(AEVK_LBUTTON)) {
-            isActive = true;
+        if (isPlayerControlled && AEInputCheckReleased(AEVK_LBUTTON)) {
             shotPower = chargingPower;
             ShootProjectile();
             chargingPower = minPower; // Reset for next shot
         }
     }
 
-    void Cannon::Render() {
-        AEMtx33 mat = GraphicsManager::CreateTransformMatrix(transform.pos.x, transform.pos.y, cannonAngle, transform.size.x, transform.size.y);
-        GraphicsManager::DrawGameObject(texture, mat, textureColor);
-    }
-
-    void Cannon::ResetTurn() {
-        hasShot = false;
+    void Cannon::ClampAngle(float &angle) {
+        if (isShootingRight) {
+            angle = std::clamp(angle, -1.5f, 1.5f);
+        }
+        else {
+            // Clamp to left hemisphere
+            if (angle > 0) {
+                angle = std::clamp(angle, 1.5f, 3.5f);   // Upper left: 1.5 to 3.5
+            }
+            else {
+                angle = std::clamp(angle, -3.5f, -1.5f); // Lower left: -3.5 to -1.5
+            }
+        }
     }
 
     void Cannon::SelectProjectile() {
@@ -169,6 +224,9 @@ namespace CannonManager {
     }
 
     void Cannon::ShootProjectile() {
+        if (isActive) return;
+
+        isActive = true;
         // Assign values to this active projectile
         Projectile& projectile = projectiles[selectedProjectileId];
         projectile.isActive = true;
@@ -319,8 +377,6 @@ namespace CannonManager {
     }
 
     void Cannon::SetCamera(bool isFollowingProjectile) {
-        if (!isPlayerControlled) return;
-
         if (isFollowingProjectile) {
             // Set camera to follow the newly fired projectile
             CameraManager::camera.SetFollowTarget(&activeProjectiles.back().transform.pos);
@@ -331,6 +387,7 @@ namespace CannonManager {
             CameraManager::camera.SetFollowTarget(nullptr);
             CameraManager::camera.SetState(CameraManager::CameraController::CameraState::INPUT);
             CameraManager::camera.SetPosition(transform.pos);
+            // TODO: RESET ZOOM back to default
         }
     }
 

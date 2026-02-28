@@ -79,6 +79,12 @@
     <Filter Include="Header Files\Graphics">
       <UniqueIdentifier>{85626eaa-e982-45e4-bc30-a5139e55b31f}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Player">
+      <UniqueIdentifier>{5dd8402a-ef68-4b88-a9e1-5d7a5ad92c13}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Player">
+      <UniqueIdentifier>{1a7a328b-6d4f-4a6a-8e24-0eae78703190}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Main.cpp">
@@ -114,9 +120,6 @@
     <ClCompile Include="GameObject.cpp">
       <Filter>Source Files\Components</Filter>
     </ClCompile>
-    <ClCompile Include="Enemy.cpp">
-      <Filter>Source Files\Enemy</Filter>
-    </ClCompile>
     <ClCompile Include="EnemyManager.cpp">
       <Filter>Source Files\Enemy</Filter>
     </ClCompile>
@@ -127,9 +130,6 @@
       <Filter>Source Files\Map</Filter>
     </ClCompile>
     <ClCompile Include="Level.cpp">
-      <Filter>Source Files\Level</Filter>
-    </ClCompile>
-    <ClCompile Include="Level1.cpp">
       <Filter>Source Files\Level</Filter>
     </ClCompile>
     <ClCompile Include="LevelManager.cpp">
@@ -165,12 +165,6 @@
     <ClCompile Include="Ability.cpp">
       <Filter>Source Files\Game</Filter>
     </ClCompile>
-    <ClCompile Include="PlayerManager.cpp">
-      <Filter>Source Files\Game</Filter>
-    </ClCompile>
-    <ClCompile Include="Calculation.cpp">
-      <Filter>Source Files\Game</Filter>
-    </ClCompile>
     <ClCompile Include="Credits.cpp">
       <Filter>Source Files\Game</Filter>
     </ClCompile>
@@ -185,6 +179,12 @@
     </ClCompile>
     <ClCompile Include="AssetsManager.cpp">
       <Filter>Source Files\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="PlayerManager.cpp">
+      <Filter>Source Files\Player</Filter>
+    </ClCompile>
+    <ClCompile Include="Character.cpp">
+      <Filter>Source Files\Components</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -221,9 +221,6 @@
     <ClInclude Include="TileIndex.hpp">
       <Filter>Header Files\Components</Filter>
     </ClInclude>
-    <ClInclude Include="Enemy.hpp">
-      <Filter>Header Files\Enemy</Filter>
-    </ClInclude>
     <ClInclude Include="EnemyManager.hpp">
       <Filter>Header Files\Enemy</Filter>
     </ClInclude>
@@ -234,9 +231,6 @@
       <Filter>Header Files\Map</Filter>
     </ClInclude>
     <ClInclude Include="Level.hpp">
-      <Filter>Header Files\Level</Filter>
-    </ClInclude>
-    <ClInclude Include="Level1.hpp">
       <Filter>Header Files\Level</Filter>
     </ClInclude>
     <ClInclude Include="LevelManager.hpp">
@@ -269,9 +263,6 @@
     <ClInclude Include="Ability.hpp">
       <Filter>Header Files\Game</Filter>
     </ClInclude>
-    <ClInclude Include="Calculation.hpp">
-      <Filter>Header Files\Game</Filter>
-    </ClInclude>
     <ClInclude Include="CannonManager.hpp">
       <Filter>Header Files\Game</Filter>
     </ClInclude>
@@ -284,14 +275,17 @@
     <ClInclude Include="MainMenu.hpp">
       <Filter>Header Files\Game</Filter>
     </ClInclude>
-    <ClInclude Include="PlayerManager.hpp">
-      <Filter>Header Files\Game</Filter>
-    </ClInclude>
     <ClInclude Include="AssetsManager.hpp">
       <Filter>Header Files\Graphics</Filter>
     </ClInclude>
     <ClInclude Include="GraphicsManager.hpp">
       <Filter>Header Files\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="PlayerManager.hpp">
+      <Filter>Header Files\Player</Filter>
+    </ClInclude>
+    <ClInclude Include="Character.hpp">
+      <Filter>Header Files\Components</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

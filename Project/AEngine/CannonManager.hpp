@@ -19,6 +19,8 @@ namespace CannonManager {
 		// return true if projectile has been shoot out of the cannon and be destroyed
 		bool HasShot() const;
 
+		// Member Functions
+
 		// Reset values of the cannon ammo vectors to be in its default state
 		void ProjectileSettings();
 		// Calculate the angle of the cannon based on the mouse position, render the cannon sprite
@@ -26,12 +28,17 @@ namespace CannonManager {
 		// map is used to check for collision with the tiles
 		void Update();
 		void Render();
-		void EnemyAI();
+		void ResetTurn();
+
+		void EnemyAI(AEVec2 const targetPos);
+		// Calculate the ideal cannonAngle and shotPower to hit the target,
+		// add some variance to it to ensure the AI aim and shot feels "human"
+		void EnemyAICalculation(AEVec2 const targetPos);
 
 		// Check for left mouse input the shot power will be increased/decreased based on the charge rate
 		void ChargeShot();
-
-		void ResetTurn();
+		void ClampAngle(float &angle);
+		// Select the type of projectile ability based on the ability chosen by the player or ENEMY
 		void SelectProjectile();
 		void ShootProjectile();
 		// Render and move the projectile once it has reach the end of its lifespan it is destroy
@@ -63,6 +70,10 @@ namespace CannonManager {
 		bool isPowerIncreasing = true;
 
 		AbilitiesManager::AbilityController* abilityController = nullptr;
+
+		// Enemy AI variables
+		float aiShootTimer = 0.0f; // randomise timer to visualise a delay for when the enemy when shoot out the prorjectile
+		bool canAIShoot = false;
 	};
 }
 
