@@ -3,8 +3,36 @@
 #include "UIManager.hpp"
 
 namespace AbilitiesManager {
-	void AbilityController::ChangeAbility(int id) {
-		currentAbility = FindAbility(id);
+	AbilityController playerAbilityController;
+	AbilityController enemyAbilityController;
+
+	void AbilityController::LoadAllAbilities() {
+		int count = 3;
+		for (int i = 0; i < count; ++i) {
+			Ability ability{ i, abilitiesName[i], AbilityType::OFFENSIVE, 0, true };
+
+			switch (i) {
+			case 0: // Default Projectile
+				break;
+			case 1: // Bomb Projectile
+				ability = { i, abilitiesName[i], AbilityType::OFFENSIVE, 1 };
+				break;
+			case 2:
+				ability = { i, abilitiesName[i], AbilityType::OFFENSIVE, 2 };
+				break;
+			}
+
+			abilities.push_back(ability);
+		}
+
+		// Testing add bomb projectile with 10 charges
+		AddAbility(1, 10);
+		// Set current ability to be the default projectile ability
+		currentAbility = &abilities[0];
+	}
+
+	void AbilityController::ChangeAbility(int abilityId) {
+		currentAbility = FindAbility(abilityId);
 
 		std::cout << "[AbilitiesManager] Current ability: " + abilitiesName[currentAbility->Id()]
 			+ " Charges Remaining: " + std::to_string(currentAbility->Charges()) << '\n';
@@ -27,50 +55,25 @@ namespace AbilitiesManager {
 		return true;
 	}
 
-	void AbilityController::AddAbility(int id, int chargesToAdd) {
-		Ability& ability = *FindAbility(id);
+	void AbilityController::AddAbility(int abilityId, int chargesToAdd) {
+		Ability& ability = *FindAbility(abilityId);
 		ability.Charges(chargesToAdd);
 	}
 
-	Ability* AbilityController::FindAbility(int id) {
+	Ability* AbilityController::FindAbility(int abilityId) {
 		for (Ability& ab : abilities) {
-			if (ab.Id() == id) {
+			if (ab.Id() == abilityId) {
 				return &ab;
 			}
 		}
 
-		std::cerr << "[AbilitiesManager] Can't find " + std::to_string(id) + " in the abilities list\n";
+		std::cerr << "[AbilitiesManager] Can't find " + std::to_string(abilityId) + " in the abilities list\n";
 		return nullptr;
 	}
 
 	int AbilityController::FindProjectileId() {
 		if (currentAbility->Type() != AbilityType::OFFENSIVE) return 0;
 		return currentAbility->ProjectileId();
-	}
-
-	void AbilityController::LoadAllAbilities() {
-		int count = 3;
-		for (int i = 0; i < count; ++i) {
-			Ability ability{ i, abilitiesName[i], AbilityType::OFFENSIVE, 0, true};
-
-			switch (i) {
-			case 0: // Default Projectile
-				break;
-			case 1: // Bomb Projectile
-				ability = { i, abilitiesName[i], AbilityType::OFFENSIVE, 1};
-				break;
-			case 2:
-				ability = { i, abilitiesName[i], AbilityType::OFFENSIVE, 2};
-				break;
-			}
-
-			abilities.push_back(ability);
-		}
-
-		// Testing add bomb projectile with 10 charges
-		AddAbility(1, 10);
-
-		currentAbility = &abilities[0];
 	}
 
 	void SetProjectileAbility(Projectile& projectile) {
@@ -88,13 +91,5 @@ namespace AbilitiesManager {
 			projectile.attribute.Damage(50);
 			break;
 		}
-	}
-
-	void RenderUI() {
-		UIManager::Panel panel = { {450,100}, {0.9f,0.9f,0.9f}, Utils::RectMode::RECT_BOTTOM_CENTER };
-		panel.Draw();
-		UIManager::Panel subPanel = { {50,50}, {0,1,0} };
-		subPanel.SetChildPanelPos(panel.Pos(), { 5,-5 });
-		subPanel.Draw();
 	}
 }

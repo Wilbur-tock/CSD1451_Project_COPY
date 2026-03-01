@@ -7,7 +7,6 @@
 #include "LevelManager.hpp"
 #include "MainMenu.hpp"
 #include "Credits.hpp"
-#include "PlayerManager.hpp"
 #include "PhysicsManager.hpp"
 #include "UIManager.hpp"
 
@@ -110,9 +109,6 @@ namespace GameStateManager {
         MapManager::Load();
         MainMenu::Load();
         Credits::Load();
-
-        // Load all abilities at the start of the game
-        PlayerManager::playerAbilityController.LoadAllAbilities();
 
         // Initialize camera controller
         CameraManager::camera.Init();

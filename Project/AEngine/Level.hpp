@@ -8,10 +8,12 @@
 #include "TextObject.hpp"
 #include "Character.hpp"
 
+// Class that contains all the level information 
+// Level tile map data,
+// instances of ALL player and enemy object, 
+// instance of ALL player and enemy cannon objects
 class Level {
 public:
-	TextObject debugText;
-
 	Level(std::string levelName);
 
 	// Read level map data and load level resources
@@ -32,6 +34,7 @@ public:
 	Character* FindPlayerCharacterObj(int characterId);
 private:
 	std::string levelName;
+	TextObject debugText;
 	CannonManager::Cannon *activeCannon = nullptr; // pointer to the active instance of the cannon object 
 	CannonManager::Cannon playerCannon; // instance of the player cannon
 	CannonManager::Cannon enemyCannon; // instance of the enemy cannon
@@ -40,7 +43,7 @@ private:
 	bool autoPlayOn = false; // used for debugging let enemy play ONLY
 	float turnTimer = 0.0f;
 
-	std::vector<std::vector<Tile>> levelMap; // Level map
+	std::vector<std::vector<Tile>> levelMap; // Level tile map
 	std::vector<Character> enemies; // contains all instance of the Enemy Character Object in the level
 	std::vector<Character> playerCharacters; // contains all instance of the Player Character Object in the level
 };

@@ -31,7 +31,7 @@ namespace CannonManager {
         projectiles.clear();
         projectiles.resize(projectileCount);
 
-        // Initalize all the projectile variables
+        // Initalize all instance of all the different type of projectile
         for (int i = 0; i < projectileCount; ++i) {
             Projectile& projectile = projectiles[i];
             projectile = { AssetsManager::circleTexture, static_cast<ProjectileMode>(i+1) };
@@ -66,6 +66,7 @@ namespace CannonManager {
 
             Projectile& selectedProjectile = projectiles[selectedProjectileId];
 
+            // Show cannon information
             std::string debugStr = "Cannon Is Player:" + std::string(isPlayerControlled ? "true" : "false")
                 + "\nIs Active: " + std::string(isActive ? "true" : "false") + "\nHas Shot : " + std::string(hasShot ? "true" : "false")
                 + "\nPos X: " + Utils::FormatFloat(transform.pos.x, 2) + " Y: " + Utils::FormatFloat(transform.pos.y, 2)
@@ -76,6 +77,7 @@ namespace CannonManager {
                 debugStr += "\nShoot Timer: " + Utils::FormatFloat(aiShootTimer, 2);
             }
 
+            // Show projectile that is shoot out information
             if (activeProjectiles.size() > 0) {
                 Projectile& projectile = activeProjectiles.back();
                 debugStr += "\n\nActive Projectile " + std::to_string(static_cast<int>(projectile.Mode())) + "\nSize: x: "
@@ -213,6 +215,11 @@ namespace CannonManager {
     }
 
     void Cannon::SelectProjectile() {
+        if (!abilityController) {
+            std::cerr << "[CannonManager] Can't find any abilityController" << '\n';
+            return;
+        }
+
         for (int i = 0; i < 3; ++i) {
             if (AEInputCheckTriggered(static_cast<u8>(AEVK_0 + i))) { //TEMPORARY FOR NOW USE NUMBERS INPUT
                 abilityController->ChangeAbility(i);

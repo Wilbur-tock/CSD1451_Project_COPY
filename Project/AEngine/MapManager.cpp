@@ -151,6 +151,7 @@ namespace MapManager {
 			}
 		}
 
+		// Assign currentMap to point to the map
 		currentMap = &map;
 
 		ifs.close();

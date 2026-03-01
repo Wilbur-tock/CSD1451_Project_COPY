@@ -17,14 +17,17 @@ Level::Level(std::string _levelName) : levelName{ _levelName } {}
 
 void Level::Load() {
 	levelMap.resize(Config::GRID_HEIGHT, std::vector<Tile>(Config::GRID_WIDTH));
-	enemies.reserve(10);
+	int reserveCount = 5;
+	enemies.reserve(reserveCount);
+	playerCharacters.reserve(reserveCount);
 
-	// Read map data
+	// Read the map data
 	std::string filePath = "Assets/Map/" + levelName + ".txt";
 	MapManager::ReadMapData(filePath, levelMap);
 
 	AEVec2 playerCannonStartPos = { 0,0 }, enemyCannonStartPos = {0, 0};
 
+	// Loop through each tile block to find the position of the character objects, cannons, etc
 	for (int y = 0; y < Config::GRID_HEIGHT; ++y) {
 		for (int x = 0; x < Config::GRID_WIDTH; ++x) {
 			Tile& tile = levelMap[y][x];
@@ -78,12 +81,17 @@ void Level::Load() {
 	playerCannon = CannonManager::Cannon(playerCannonStartPos, barrelTex, { 0,0 }, barrelHalfSize, true, true);
 	playerCannon.textureColor = Color{ 1, 1, 1, 1 };   // black barrel
 
-	playerCannon.SetAbilityController(&PlayerManager::playerAbilityController);
+	AbilitiesManager::AbilityController& playerController = AbilitiesManager::playerAbilityController;
+	playerController.LoadAllAbilities();
+	playerCannon.SetAbilityController(&playerController);
 
 	// Initialize Enemy instance
 	// TODO: add a texture for the enemy cannon (flip the player cannon texture from facing right to facing left)
 	enemyCannon = CannonManager::Cannon(enemyCannonStartPos, barrelTex, { 0,0 }, barrelHalfSize, false, false);
-	enemyCannon.SetAbilityController(&PlayerManager::playerAbilityController);
+	// Set enemy ability controller
+	AbilitiesManager::AbilityController& enemyController = AbilitiesManager::enemyAbilityController;
+	enemyController.LoadAllAbilities();
+	enemyCannon.SetAbilityController(&enemyController);
 
 	debugText = { "", Utils::debuggerInfo.first * 0.8f, Utils::debuggerInfo.second, { -1.0f, 0.99f} };
 
@@ -209,8 +217,7 @@ void Level::Draw() {
 	turnText.Draw();
 }
 
-void Level::Free() {
-}
+void Level::Free() {}
 
 void Level::ToggleTurn() {
 	if (!activeCannon->HasShot()) return;
@@ -239,7 +246,6 @@ void Level::SwitchCannon() {
 		activeCannon = &enemyCannon;
 	}
 	activeCannon->ResetTurn();
-
 	std::cout << "[Level] Toggle to " << std::string(isPlayerTurn ? "PLAYER" : "ENEMY") << " turn" << '\n';
 }
 
@@ -247,6 +253,7 @@ std::string Level::DebugInfo() {
 	std::string info = "";
 
 	if (Utils::isDebuggerOn) {
+		// Display the character object information (All the stats, position , etc)
 		for (Character& enemy : enemies) {
 			if (CollisionManager::IsPointInGameObject(enemy)) {
 				enemy.DebugInfo(info);

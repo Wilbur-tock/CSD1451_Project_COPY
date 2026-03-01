@@ -1,17 +1,10 @@
 #ifndef ENEMYMANAGER_HPP
 #define ENEMYMANAGER_HPP
 
-#include "pch.hpp"
-#include "Character.hpp"
+#include "AbilitiesManager.hpp"
 
 namespace EnemyManager {
-	extern std::vector<Character>* enemies;
-
-	class EnemyController {
-	public:
-	private:
-		bool isEnemyTurn = false;
-	};
+	extern AbilitiesManager::AbilityController enemyAbilityController;
 }
 
 #endif // !1

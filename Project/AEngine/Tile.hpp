@@ -48,7 +48,9 @@ public:
 	// Copy another type data
 	void Type(Tile const& toCopy);
 
+	// To retrive the character object found in this tile block
 	int CharacterId() const;
+	// To retrive the character object found in this tile block
 	void CharacterId(int newId);
 
 	bool IsEmpty() const;

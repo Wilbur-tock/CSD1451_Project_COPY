@@ -6,8 +6,8 @@ Tile::Tile(AEVec2 _pos, AEGfxTexture* _texture, TileType _type)
 TileType Tile::Type() const { return type; }
 void Tile::Type(TileType newType) {
 	prevType = type;
+	if (IsEmpty() && ContainCharacter()) characterId = -1; // reset characterId
 	type = newType;
-	if (IsEmpty() && ContainCharacter()) characterId = -1;
 }
 
 void Tile::Type(Tile const& toCopy) {

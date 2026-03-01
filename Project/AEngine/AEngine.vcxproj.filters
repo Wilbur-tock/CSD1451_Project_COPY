@@ -25,12 +25,6 @@
     <Filter Include="Header Files\Common">
       <UniqueIdentifier>{f401ccd9-53ce-487b-8b2b-f3a01c4285ab}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\Enemy">
-      <UniqueIdentifier>{c849f83a-49b1-4804-aa33-48a17f3cfd6b}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Header Files\Enemy">
-      <UniqueIdentifier>{096c29f2-7c66-4133-a9cf-e8c8ee4fc0ad}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source Files\Map">
       <UniqueIdentifier>{4b1bf7ed-ea62-4078-a35a-e140b6d08ab5}</UniqueIdentifier>
     </Filter>
@@ -79,11 +73,11 @@
     <Filter Include="Header Files\Graphics">
       <UniqueIdentifier>{85626eaa-e982-45e4-bc30-a5139e55b31f}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files\Player">
-      <UniqueIdentifier>{5dd8402a-ef68-4b88-a9e1-5d7a5ad92c13}</UniqueIdentifier>
+    <Filter Include="Source Files\Game States">
+      <UniqueIdentifier>{6cc49f51-7ac9-42c1-8d50-18df08bbea0a}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\Player">
-      <UniqueIdentifier>{1a7a328b-6d4f-4a6a-8e24-0eae78703190}</UniqueIdentifier>
+    <Filter Include="Header Files\Game States">
+      <UniqueIdentifier>{c6a5c1de-465e-43d8-a13a-900e230bc954}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -119,9 +113,6 @@
     </ClCompile>
     <ClCompile Include="GameObject.cpp">
       <Filter>Source Files\Components</Filter>
-    </ClCompile>
-    <ClCompile Include="EnemyManager.cpp">
-      <Filter>Source Files\Enemy</Filter>
     </ClCompile>
     <ClCompile Include="MapEditor.cpp">
       <Filter>Source Files\Map</Filter>
@@ -165,26 +156,23 @@
     <ClCompile Include="Ability.cpp">
       <Filter>Source Files\Game</Filter>
     </ClCompile>
-    <ClCompile Include="Credits.cpp">
-      <Filter>Source Files\Game</Filter>
-    </ClCompile>
-    <ClCompile Include="GameStateManager.cpp">
-      <Filter>Source Files\Game</Filter>
-    </ClCompile>
-    <ClCompile Include="MainMenu.cpp">
-      <Filter>Source Files\Game</Filter>
-    </ClCompile>
     <ClCompile Include="GraphicsManager.cpp">
       <Filter>Source Files\Graphics</Filter>
     </ClCompile>
     <ClCompile Include="AssetsManager.cpp">
       <Filter>Source Files\Graphics</Filter>
     </ClCompile>
-    <ClCompile Include="PlayerManager.cpp">
-      <Filter>Source Files\Player</Filter>
-    </ClCompile>
     <ClCompile Include="Character.cpp">
       <Filter>Source Files\Components</Filter>
+    </ClCompile>
+    <ClCompile Include="GameStateManager.cpp">
+      <Filter>Source Files\Game States</Filter>
+    </ClCompile>
+    <ClCompile Include="MainMenu.cpp">
+      <Filter>Source Files\Game States</Filter>
+    </ClCompile>
+    <ClCompile Include="Credits.cpp">
+      <Filter>Source Files\Game States</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -220,9 +208,6 @@
     </ClInclude>
     <ClInclude Include="TileIndex.hpp">
       <Filter>Header Files\Components</Filter>
-    </ClInclude>
-    <ClInclude Include="EnemyManager.hpp">
-      <Filter>Header Files\Enemy</Filter>
     </ClInclude>
     <ClInclude Include="MapManager.hpp">
       <Filter>Header Files\Map</Filter>
@@ -266,26 +251,23 @@
     <ClInclude Include="CannonManager.hpp">
       <Filter>Header Files\Game</Filter>
     </ClInclude>
-    <ClInclude Include="Credits.hpp">
-      <Filter>Header Files\Game</Filter>
-    </ClInclude>
-    <ClInclude Include="GameStateManager.hpp">
-      <Filter>Header Files\Game</Filter>
-    </ClInclude>
-    <ClInclude Include="MainMenu.hpp">
-      <Filter>Header Files\Game</Filter>
-    </ClInclude>
     <ClInclude Include="AssetsManager.hpp">
       <Filter>Header Files\Graphics</Filter>
     </ClInclude>
     <ClInclude Include="GraphicsManager.hpp">
       <Filter>Header Files\Graphics</Filter>
     </ClInclude>
-    <ClInclude Include="PlayerManager.hpp">
-      <Filter>Header Files\Player</Filter>
-    </ClInclude>
     <ClInclude Include="Character.hpp">
       <Filter>Header Files\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="GameStateManager.hpp">
+      <Filter>Header Files\Game States</Filter>
+    </ClInclude>
+    <ClInclude Include="Credits.hpp">
+      <Filter>Header Files\Game States</Filter>
+    </ClInclude>
+    <ClInclude Include="MainMenu.hpp">
+      <Filter>Header Files\Game States</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
