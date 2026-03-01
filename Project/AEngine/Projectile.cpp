@@ -105,7 +105,8 @@ void Projectile::DamageTile(int x, int y) {
 
     int blastRadius = attribute.DamageRadius();
 
-    std::cout << "[Projectile] Damage Radius: " << blastRadius << " Center: " << x << " " << y << '\n';
+    std::cout << "===================== [Projectile] Damaging tiles ====================="
+        << "\nDamage Radius: " << blastRadius << " Center: " << x << " " << y << '\n';
 
     int minDX = x, minDY = y, maxDX = x, maxDY = y;
     // Increased damage radius based on blast radius

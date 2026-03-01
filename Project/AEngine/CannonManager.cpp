@@ -50,8 +50,8 @@ namespace CannonManager {
             // Add limits so it can only turn facing upwards or downwards limits
             ClampAngle(cannonAngle);
             DrawTrajectory();
-            SelectProjectile();
         }
+        SelectProjectileAbility();
         ChargeShot();
         UpdateProjectile();
 
@@ -67,8 +67,8 @@ namespace CannonManager {
             Projectile& selectedProjectile = projectiles[selectedProjectileId];
 
             // Show cannon information
-            std::string debugStr = "Cannon Is Player:" + std::string(isPlayerControlled ? "true" : "false")
-                + "\nIs Active: " + std::string(isActive ? "true" : "false") + "\nHas Shot : " + std::string(hasShot ? "true" : "false")
+            std::string debugStr = "Cannon Manager\nIs Player:" + static_cast<std::string>(isPlayerControlled ? "true" : "false")
+                + "\nIs Active: " + std::string(isActive ? "true" : "false") + "\nHas Shot : " + static_cast<std::string>(hasShot ? "true" : "false")
                 + "\nPos X: " + Utils::FormatFloat(transform.pos.x, 2) + " Y: " + Utils::FormatFloat(transform.pos.y, 2)
                 + "\nAngle: " + Utils::FormatFloat(cannonAngle * (180.0f / 3.14159265359), 2) + " " + Utils::FormatFloat(cannonAngle, 2)
                 + "\n\nSelected Projectile: " + std::to_string(selectedProjectileId) + " Mode: " + std::to_string(static_cast<int>(selectedProjectile.Mode()))
@@ -103,13 +103,20 @@ namespace CannonManager {
 
     void Cannon::ResetTurn() {
         hasShot = false;
-        SetCamera(false);
+        SetCamera(false); // Reset camera back to the cannon
+
+        if (!isPlayerControlled) {
+            abilityController->ResetAbilitySelection();
+        }
     }
 
     void Cannon::EnemyAI(AEVec2 const targetPos) {
         if (isActive || hasShot) return; // return if the cannon has shot something out or the projectile has already been shot out and destroyed
 
         if (!canAIShoot) {
+            // Select Ability first
+            abilityController->AIAbilitySelection();
+
             // Calculate angle and shot power first
             EnemyAICalculation(targetPos);
 
@@ -132,8 +139,8 @@ namespace CannonManager {
 
     void Cannon::EnemyAICalculation(AEVec2 const targetPos) {
         float dx = targetPos.x - transform.pos.x;
-        //float dy = targetPos.y - transform.pos.y;
-        //float distance = sqrt(dx * dx + dy * dy);
+        float dy = targetPos.y - transform.pos.y;
+        float distance = sqrt(dx * dx + dy * dy);
 
         // Randomise angle between the min and max radian
         float min = 30 * (PI / 180.0f);
@@ -145,11 +152,11 @@ namespace CannonManager {
 
         // Calculate required Power (Initial Velocity)
         // Basic range formula: v = sqrt( (g * d) / sin(2 * theta) )
-        float neededVelocity = sqrt((Config::GRAVITY * abs(dx)) / sin(2 * randomAngleBase));
+        float neededVelocity = sqrt((Config::GRAVITY * abs(distance)) / sin(2 * randomAngleBase));
 
         // Randomise offset to add a variance to 
         float difficulty = 1.0f; // TODO: Adjust difficulty based on levels
-        float inaccuracy = (1.0f - difficulty) + 0.05f; // add a variance value to it
+        float inaccuracy = (1.0f - difficulty) + 0.01f;
         float randomOffset = Utils::RandomValue(-inaccuracy, inaccuracy);
 
         // Apply the variables to the cannon
@@ -214,15 +221,17 @@ namespace CannonManager {
         }
     }
 
-    void Cannon::SelectProjectile() {
+    void Cannon::SelectProjectileAbility() {
         if (!abilityController) {
             std::cerr << "[CannonManager] Can't find any abilityController" << '\n';
             return;
         }
 
-        for (int i = 0; i < 3; ++i) {
-            if (AEInputCheckTriggered(static_cast<u8>(AEVK_0 + i))) { //TEMPORARY FOR NOW USE NUMBERS INPUT
-                abilityController->ChangeAbility(i);
+        if (isPlayerControlled) {
+            for (int i = 0; i < 3; ++i) {
+                if (AEInputCheckTriggered(static_cast<u8>(AEVK_0 + i))) { //TEMPORARY FOR NOW USE NUMBERS INPUT
+                    abilityController->ChangeAbility(i);
+                }
             }
         }
 
@@ -257,6 +266,8 @@ namespace CannonManager {
     }
 
     void Cannon::UpdateProjectile() {
+        if (activeProjectiles.empty()) return;
+
         for (Projectile& projectile : activeProjectiles) {
             if (!projectile.isActive) continue;
 
@@ -345,8 +356,8 @@ namespace CannonManager {
                 }
             }
 
-            DestroyProjectile(projectile);
             projectile.Render();
+            DestroyProjectile(projectile);
         }
     }
 
@@ -358,21 +369,24 @@ namespace CannonManager {
             projectile.timer -= 1.0f * PhysicsManager::g_dt;
         }
         else {
+            // Set to be destroyed to be true and set the timer to activated the destruction time
             if (projectile.isGrounded && speedSq <= 0.1f) {
                 projectile.timer = Config::PROJECTILE_LIFESPAN;
                 projectile.toBeDestroyed = true;
             }
         }
 
-        // Destroy projectile and erase it from vector if the timer runs out or out of bounds
-        if (projectile.timer <= 0.0f || !projectile.IsInMapBounds()) {
+        // Destroy projectile and erase it from vector if the timer runs out or out of map bounds X 
+        if (projectile.timer <= 0.0f || !projectile.IsInMapBoundsX()) {
             projectile.Destroy();
 
             // Find the index containing the projectile and erase from the active ammo vector
             for (int i = 0; i < activeProjectiles.size(); i++) {
                 if (activeProjectiles[i].id == projectile.id) {
                     activeProjectiles.erase(activeProjectiles.begin() + i);
-                    //SetCamera(false);
+                    // Reset camera back to input
+                    CameraManager::camera.SetFollowTarget(nullptr);
+                    CameraManager::camera.SetState(CameraManager::CameraController::CameraState::INPUT);
                     std::cout << "[CannonManager] Remove projectile " << activeProjectiles.size() << std::endl;
                 }
             }

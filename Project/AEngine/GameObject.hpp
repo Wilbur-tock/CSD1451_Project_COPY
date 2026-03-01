@@ -23,6 +23,8 @@ public:
 	GameObject(AEVec2 _pos, AEVec2 _size, AEGfxTexture* _texture, TileIndex _tileId = { 0,0 }, Color _textureColor = Color{ 0,0,0 });
 
 	bool IsInMapBounds() const;
+	bool IsInMapBoundsX() const;
+	bool IsInMapBoundsY() const;
 };
 
 #endif // GAMEOBJECT_HPP

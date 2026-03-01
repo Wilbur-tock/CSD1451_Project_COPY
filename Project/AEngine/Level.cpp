@@ -6,7 +6,6 @@
 #include "Utils.hpp"
 #include "CollisionManager.hpp"
 #include "CameraManager.hpp"
-#include "PlayerManager.hpp"
 #include "LevelManager.hpp"
 #include "PhysicsManager.hpp"
 
@@ -174,8 +173,8 @@ void Level::Update() {
 		float mX = 0, mY = 0;
 		Utils::GetWorldMousePos(mX, mY);
 
-		std::string debug = "Auto play " + static_cast<std::string>(autoPlayOn ? "ON" : "OFF")
-			+ "\nGrid:\nIndex X: " + std::to_string(gridX) + " Y: " + std::to_string(gridY)
+		std::string debug = "Shortcuts:\n[CTRL + R] Auto play " + static_cast<std::string>(autoPlayOn ? "ON" : "OFF")
+			+ "\n\nTile Map\nIndex X: " + std::to_string(gridX) + " Y: " + std::to_string(gridY)
 			+ "\n\nTile: " + GetTileName(tile.Type());
 		// Display which character is currently at this tile type
 		if (tile.ContainCharacter()) {

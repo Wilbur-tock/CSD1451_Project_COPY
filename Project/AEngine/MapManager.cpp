@@ -166,14 +166,15 @@ namespace MapManager {
 			return;
 		}
 
-
-		for (int y = 0; y < Config::GRID_HEIGHT; ++y) {
-			for (int x = 0; x < Config::GRID_WIDTH; ++x) {
-				const Tile& tile = map[y][x];
+		for (std::vector<Tile> const& row : map) {
+			for (Tile const& tile : row) {
 				if (tile.Type() == TILE_EMPTY) continue;
-				AEMtx33 transform = GraphicsManager::CreateTransformMatrix(
-					tile.transform.pos.x, tile.transform.pos.y, 0.0f, tile.transform.size.x / 2.0f, tile.transform.size.y / 2.0f);
-				GraphicsManager::DrawGameObject(gTileTex[tile.Type()], transform, Color{1,1,1,1});
+				GraphicsManager::DrawGameObject(
+					gTileTex[tile.Type()], 
+					GraphicsManager::CreateTransformMatrix(
+					tile.transform.pos.x, tile.transform.pos.y, 0.0f, tile.transform.size.x / 2.0f, tile.transform.size.y / 2.0f), 
+					Color{ 1,1,1,1 }
+				);
 			}
 		}
 	}

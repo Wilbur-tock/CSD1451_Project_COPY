@@ -39,7 +39,7 @@ namespace CannonManager {
 		void ChargeShot();
 		void ClampAngle(float &angle);
 		// Select the type of projectile ability based on the ability chosen by the player or ENEMY
-		void SelectProjectile();
+		void SelectProjectileAbility();
 		void ShootProjectile();
 		// Render and move the projectile once it has reach the end of its lifespan it is destroy
 		void UpdateProjectile();
@@ -69,6 +69,7 @@ namespace CannonManager {
 		float shotPower = 0; // The amount of shot power player charged up
 		bool isPowerIncreasing = true;
 
+		// Abilities variables
 		AbilitiesManager::AbilityController* abilityController = nullptr;
 
 		// Enemy AI variables
