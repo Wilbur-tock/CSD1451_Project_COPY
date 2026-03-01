@@ -1,5 +1,6 @@
 #include "Level.hpp"
 
+#include "AEInput.h"
 #include "AssetsManager.hpp"
 #include "MapManager.hpp"
 #include "Color.hpp"
@@ -113,7 +114,7 @@ void Level::Initalize() {
 }
 
 void Level::Update() {
-	MapManager::RenderMap(levelMap);
+	MapManager::RenderMap(levelMap, false);
 
 	if (autoPlayOn && isPlayerTurn) {
 		isPlayerTurn = false;
@@ -136,7 +137,10 @@ void Level::Update() {
 	ToggleTurn();
 
 	// Update all Player character instance
+	bool squatNow = isPlayerTurn && AEInputCheckCurr(AEVK_LBUTTON);
+
 	for (Character& playerChar : playerCharacters) {
+		playerChar.SetSquatAnimation(squatNow);
 		playerChar.Update();
 	}
 

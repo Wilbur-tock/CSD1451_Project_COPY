@@ -25,6 +25,7 @@ public:
 	void Update();
 	void Render();
 	void DebugInfo(std::string &str);
+	void SetSquatAnimation(bool enabled); // Player only: toggles idle <-> squat animation
 
 	inline std::string TypeName() {
 		switch (type) {
@@ -39,7 +40,14 @@ public:
 		return "NULL";
 	}
 private:
+	void UpdateSprite(); // Select correct sprite based on HP / animation state
+
 	CharacterType type;
+
+	// Player squat animation state
+	bool squatAnimEnabled = false;
+	float squatAnimTimer = 0.0f;
+	bool squatAnimShowSquat = false;
 };
 
 #endif // !CHARACTER_HPP

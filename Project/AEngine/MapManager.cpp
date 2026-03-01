@@ -7,6 +7,7 @@
 namespace MapManager {
 	std::vector<std::vector<Tile>> *currentMap;
 
+
 	static const char* FLOOR_TOP_PATH = "Assets/floorTop.png";  // top layer floor
 	static const char* FLOOR_FILL_PATH = "Assets/floorBody.png";  // underground fill of floor
 	static const char* TOWER_BLOCK_TOP_1_PATH = "Assets/towerBlockTop1.png"; // Tower Block Top (1)
@@ -14,6 +15,8 @@ namespace MapManager {
 	static const char* TOWER_BLOCK_TOP_2_PATH = "Assets/towerBlockTop2.png"; // Tower Block Top (2)
 	static const char* TOWER_BLOCK_2_PATH = "Assets/towerBlockBody2.png"; // Tower Block Body (2)
 	static const char* CANNON_BASE_PATH = "Assets/cannonBase.png"; //Cannon (for testing now, not actual sprite)
+	static const char* PLAYER_IDLE_PATH = "Assets/playerIdle.png";      //player
+	static const char* ENEMY_100_PATH = "Assets/enemy100.png";        //enemy (full hp)
 
 	// Cached textures
 	static AEGfxTexture* gTileTex[TILE_COUNT] = { nullptr };
@@ -25,6 +28,8 @@ namespace MapManager {
 	static AEGfxTexture* gTower2BodyTex = nullptr;
 	static AEGfxTexture* gCannonBaseTex = nullptr;
 	static AEGfxTexture* gFallbackTex = nullptr;
+	static AEGfxTexture* gPlayerIdleTex = nullptr;
+	static AEGfxTexture* gEnemy100Tex = nullptr;
 
 	void Load() {
 		if (gTileTex[TILE_BLOCK_GROUND_0]) return;	
@@ -37,6 +42,8 @@ namespace MapManager {
 		gTower2TopTex = AssetsManager::GetTexture(TOWER_BLOCK_TOP_2_PATH);
 		gTower2BodyTex = AssetsManager::GetTexture(TOWER_BLOCK_2_PATH);
 		gCannonBaseTex = AssetsManager::GetTexture(CANNON_BASE_PATH);
+		gPlayerIdleTex = AssetsManager::GetTexture(PLAYER_IDLE_PATH);
+		gEnemy100Tex = AssetsManager::GetTexture(ENEMY_100_PATH);
 
 		// Safety Fallback
 		if (!gFloorTopTex)  gFloorTopTex = gFallbackTex;
@@ -46,6 +53,8 @@ namespace MapManager {
 		if (!gTower2TopTex)  gTower2TopTex = gFallbackTex;
 		if (!gTower2BodyTex)  gTower2BodyTex = gFallbackTex;
 		if (!gCannonBaseTex) gCannonBaseTex = gFallbackTex;
+		if (!gPlayerIdleTex) gPlayerIdleTex = gFallbackTex;
+		if (!gEnemy100Tex)   gEnemy100Tex = gFallbackTex;
 
 		gTileTex[TILE_EMPTY] = nullptr;
 		// ground uses top/fill selection in RenderMap (this just marks “loaded”)
@@ -63,8 +72,8 @@ namespace MapManager {
 		gTileTex[TILE_PLAYER_CANNON] = gCannonBaseTex;
 
 		// other types can stay fallback for now
-		gTileTex[TILE_PLAYER_CHARACTER] = gFallbackTex;
-		gTileTex[TILE_ENEMY_MINION] = gFallbackTex;
+		gTileTex[TILE_PLAYER_CHARACTER] = gPlayerIdleTex;
+		gTileTex[TILE_ENEMY_MINION] = gEnemy100Tex;
 		gTileTex[TILE_ENEMY_BOSS] = gFallbackTex;
 
 		// Debug prints if missing
@@ -157,7 +166,7 @@ namespace MapManager {
 		ifs.close();
 	}
 
-	void RenderMap(std::vector<std::vector<Tile>> const& map) {
+	void RenderMap(std::vector<std::vector<Tile>> const& map, bool drawCharacters) {
 		int mapHeight = static_cast<int>(map.size());
 		int mapWidth = static_cast<int>(map[0].size());
 
@@ -169,6 +178,8 @@ namespace MapManager {
 		for (std::vector<Tile> const& row : map) {
 			for (Tile const& tile : row) {
 				if (tile.Type() == TILE_EMPTY) continue;
+				if (!drawCharacters && tile.ContainCharacter()) continue;
+				AEGfxTexture* tex = gTileTex[tile.Type()]; if (!tex) continue;
 				GraphicsManager::DrawGameObject(
 					gTileTex[tile.Type()], 
 					GraphicsManager::CreateTransformMatrix(
