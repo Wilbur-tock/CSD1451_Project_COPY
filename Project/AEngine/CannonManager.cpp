@@ -51,6 +51,9 @@ namespace CannonManager {
             ClampAngle(cannonAngle);
             DrawTrajectory();
         }
+        else {
+            EnemyAI();
+        }
         SelectProjectileAbility();
         ChargeShot();
         UpdateProjectile();
@@ -69,7 +72,7 @@ namespace CannonManager {
             // Show cannon information
             std::string debugStr = "Cannon Manager\nIs Player:" + static_cast<std::string>(isPlayerControlled ? "true" : "false")
                 + "\nIs Active: " + std::string(isActive ? "true" : "false") + "\nHas Shot : " + static_cast<std::string>(hasShot ? "true" : "false")
-                + "\nPos X: " + Utils::FormatFloat(transform.pos.x, 2) + " Y: " + Utils::FormatFloat(transform.pos.y, 2)
+                + "\nPos x: " + Utils::FormatFloat(transform.pos.x, 2) + " y: " + Utils::FormatFloat(transform.pos.y, 2)
                 + "\nAngle: " + Utils::FormatFloat(cannonAngle * (180.0f / 3.14159265359), 2) + " " + Utils::FormatFloat(cannonAngle, 2)
                 + "\n\nSelected Projectile: " + std::to_string(selectedProjectileId) + " Mode: " + std::to_string(static_cast<int>(selectedProjectile.Mode()))
                 + "\nDamage: " + std::to_string(selectedProjectile.attribute.Damage()) + " Radius: " + std::to_string(selectedProjectile.attribute.DamageRadius());
@@ -110,15 +113,36 @@ namespace CannonManager {
         }
     }
 
-    void Cannon::EnemyAI(AEVec2 const targetPos) {
+    void Cannon::SetTarget(Character* _target) {
+        target = _target;
+        std::cout << "[CannonManager] Set Target" << '\n';
+    }
+
+    bool Cannon::IsTargetAlive() {
+        if (!target) return false;
+
+        // Remove target ptr if current target has been destroyed
+        if (!target->attribute.IsActive()) {
+            target = nullptr;
+            return false;
+        }
+
+        return true;
+    }
+
+    void Cannon::EnemyAI() {
         if (isActive || hasShot) return; // return if the cannon has shot something out or the projectile has already been shot out and destroyed
+        if (!target) {
+            std::cout << "[CannonManager] Can't find any player character targets for the enemy to shoot!";
+            return;
+        }
 
         if (!canAIShoot) {
             // Select Ability first
             abilityController->AIAbilitySelection();
 
             // Calculate angle and shot power first
-            EnemyAICalculation(targetPos);
+            EnemyAICalculation(target->transform.pos);
 
             // Set shoot timer to add a delay between the start of the enemy turn and enemy shooting the projectile out
             float minTimer = 1.5f;
@@ -164,6 +188,7 @@ namespace CannonManager {
         shotPower = std::clamp(neededVelocity * (1.0f + randomOffset), minPower, maxPower);
 
         std::cout << "======================= [CannonManager] Enemy AI Shot ========================\n"
+            << "[CannonManager] Enemy AI Target pos x: " << targetPos.x << " y: " << targetPos.y << '\n'
             << "[CannonManager] Enemy AI Ideal: angle: " << launchAngle << " shot power: " << neededVelocity << '\n'
             << "[CannonManager] Enemy AI Actual: angle: " << cannonAngle << " shot power: " << shotPower << '\n';
     }

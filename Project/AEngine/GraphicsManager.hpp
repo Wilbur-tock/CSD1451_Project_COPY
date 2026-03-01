@@ -3,9 +3,8 @@
 
 #include "pch.hpp"
 
-// Foward declaration
-class Color;
-class GameObject;
+#include "Color.hpp"
+#include "GameObject.hpp"
 
 // Contains all the drawing of graphics/UI functions in here
 namespace GraphicsManager {

@@ -23,6 +23,7 @@ public:
 	int DamageMultiplier() const;
 	void DamageMultiplier(int value);
 
+	// return true if attribute health is more than 0 otherwise false
 	bool IsActive() const;
 
 	void TakeDamage(int damage);

@@ -120,12 +120,19 @@ void Level::Update() {
 		SwitchCannon();
 	}
 
-	activeCannon->Update();
 	if (!isPlayerTurn) {
-		AEVec2 targetPos = { 0,0 };
-		if (playerCharacters.size() > 0) targetPos = playerCharacters[0].transform.pos;
-		activeCannon->EnemyAI(targetPos);
+		if(!enemyCannon.IsTargetAlive()) {
+			// Find new target
+			for (Character& playerChars : playerCharacters) {
+				if (playerChars.attribute.IsActive()) {
+					enemyCannon.SetTarget(&playerChars);
+					break;
+				}
+			}
+		}
 	}
+
+	activeCannon->Update();
 	ToggleTurn();
 
 	// Update all Player character instance
