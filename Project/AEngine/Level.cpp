@@ -210,7 +210,6 @@ void Level::Draw() {
 }
 
 void Level::Free() {
-	LevelManager::selectedLevel = nullptr;
 }
 
 void Level::ToggleTurn() {

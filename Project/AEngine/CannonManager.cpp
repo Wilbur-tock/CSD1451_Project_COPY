@@ -3,7 +3,6 @@
 #include "MapManager.hpp"
 #include "GraphicsManager.hpp"
 #include "AssetsManager.hpp"
-#include "Color.hpp"
 #include "CameraManager.hpp"
 #include "GameStateManager.hpp"
 #include "Utils.hpp"
@@ -144,7 +143,6 @@ namespace CannonManager {
 
         // Calculate required Power (Initial Velocity)
         // Basic range formula: v = sqrt( (g * d) / sin(2 * theta) )
-        // We use absolute distance for the calculation
         float neededVelocity = sqrt((Config::GRAVITY * abs(dx)) / sin(2 * randomAngleBase));
 
         // Randomise offset to add a variance to 

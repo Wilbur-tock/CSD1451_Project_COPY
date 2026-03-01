@@ -2,10 +2,12 @@
 
 namespace LevelManager {
 	Level* selectedLevel = nullptr;
-	std::vector<Level> levelDatas;
 
 	void Load() {
 		int levelCount = 1;
+		levelDatas.clear();
+		levelDatas.reserve(levelCount);
+
 		for (int i = 0; i < levelCount; ++i) {
 			std::string levelName = "level" + std::to_string(i + 1);
 			Level data{ levelName };
@@ -15,7 +17,7 @@ namespace LevelManager {
 	}
 
 	void SelectLevel(int levelId) {
-		selectedLevel = &levelDatas[levelId];
+		selectedLevel = &(levelDatas[levelId]);
 	}
 
 	void LoadLevel() {
@@ -32,6 +34,6 @@ namespace LevelManager {
 	}
 
 	void Unload() {
-
+		selectedLevel = nullptr;
 	}
 }

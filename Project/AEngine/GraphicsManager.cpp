@@ -3,6 +3,9 @@
 #include "AssetsManager.hpp"
 #include "CameraManager.hpp"
 
+#include "Color.hpp"
+#include "GameObject.hpp"
+
 namespace GraphicsManager {
 	// WORLD_CENTER = world coordinates and origin point is center (E.g: Tile, enemy, blocks)
 	// WORLD_TOP_LEFT_CORNER = world coordinates, origin point top left corner (E.g: Cannon charging bar, Enemy health bar)

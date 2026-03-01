@@ -104,11 +104,11 @@ namespace GameStateManager {
         next = GameState::MAIN_MENU;
 
         // Load all resources
-        MapManager::Load();
         AssetsManager::Load();
         GraphicsManager::Load();
-        MainMenu::Load();
         LevelManager::Load();
+        MapManager::Load();
+        MainMenu::Load();
         Credits::Load();
 
         // Load all abilities at the start of the game
@@ -236,13 +236,6 @@ namespace GameStateManager {
         if (AEInputCheckTriggered(AEVK_M)) {
             next = GameState::MAIN_MENU;
         }
-
-        // Reload assets
-        //if (AEInputCheckCurr(AEVK_LCTRL)) {
-        //    if (AEInputCheckCurr(AEVK_R)) {
-        //        Load();
-        //    }
-        //}
 
         // Debugger display
         if (Utils::isDebuggerOn) {

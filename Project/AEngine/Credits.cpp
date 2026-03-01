@@ -4,6 +4,8 @@
 #include "AssetsManager.hpp"
 #include "Utils.hpp"
 
+#include "TextObject.hpp"
+
 namespace Credits {
     TextObject creditsText, hintText;
 

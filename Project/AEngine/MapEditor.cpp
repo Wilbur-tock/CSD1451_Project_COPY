@@ -6,6 +6,7 @@
 #include "Utils.hpp"
 #include "Tile.hpp"
 #include "GameStateManager.hpp"
+#include "LevelManager.hpp"
 
 using namespace MapManager;
 
@@ -205,8 +206,7 @@ namespace MapEditor {
 				SaveNewFile(DebugFilePath(savePath));
 			}
 
-			// Reload all the assets
-			//GameStateManager::Load(); 
+			LevelManager::Load(); // Reload the map data for each level
 			isDrawingNewMap = true;
 		}
 
