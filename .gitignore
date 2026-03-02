@@ -16,3 +16,5 @@
 bin
 Debug
 Release
+/Project/Assets.zip
+/.gitignore
