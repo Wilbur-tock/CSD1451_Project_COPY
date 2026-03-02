@@ -87,8 +87,8 @@ namespace CameraManager
             else {
                 s32 scrollDelta = 0;
                 AEInputMouseWheelDelta(&scrollDelta);
-                if (scrollDelta > 0)        ZoomIn(dt * static_cast<float>(scrollDelta));
-                else if (scrollDelta < 0)   ZoomOut(dt * static_cast<float>(-scrollDelta));
+                if (scrollDelta > 0)        ZoomIn(dt);
+                else if (scrollDelta < 0)   ZoomOut(dt);
                 break;
             }
         }
