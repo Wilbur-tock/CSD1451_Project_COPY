@@ -6,6 +6,7 @@
 
 namespace Utils {
 	extern bool isDebuggerOn;
+	extern bool isInstructionOn;
 	extern std::pair<float, Color> debuggerInfo; // Store the text scale and color
 	typedef std::function<void()> FuncPtr;
 

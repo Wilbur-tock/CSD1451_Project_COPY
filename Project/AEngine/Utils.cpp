@@ -5,6 +5,7 @@
 
 namespace Utils {
 	bool isDebuggerOn = true;
+	bool isInstructionOn = false;
 	Color debuggerColor = Color{ 0,1.f,0 };
 
 	std::pair<float, Color> debuggerInfo = { 0.75f, Color{0, 0.8f, 0 }};
