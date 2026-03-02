@@ -70,9 +70,31 @@ namespace GraphicsManager {
 
 		if (mode != CoordinateType::SCREEN_TOP_LEFT_CORNER) {
 			// Apply camera zoom
+			// 
+			// AFTER (zooms toward screen/camera center):
 			float zoom = CameraManager::camera.GetZoom();
+
+			// Get camera position (the world point at the center of the screen)
+			AEVec2 camPos = CameraManager::camera.GetPosition();
+
+			// Step 1: Translate so camera center is at origin
+			AEMtx33 matTransToOrigin;
+			AEMtx33Trans(&matTransToOrigin, -camPos.x, -camPos.y);
+
+			// Step 2: Apply zoom scale
+			AEMtx33 matScale;
+			AEMtx33Scale(&matScale, zoom, zoom);
+
+			// Step 3: Translate back
+			AEMtx33 matTransBack;
+			AEMtx33Trans(&matTransBack, camPos.x, camPos.y);
+
+			// Combine: T(back) * Scale * T(-center)
 			AEMtx33 zoomMat;
-			AEMtx33Scale(&zoomMat, zoom, zoom);
+			AEMtx33Concat(&zoomMat, &matScale, &matTransToOrigin);
+			AEMtx33Concat(&zoomMat, &matTransBack, &zoomMat);
+
+			// Apply zoom transform to object transform
 			AEMtx33Concat(&transform, &zoomMat, &transform);
 		}
 
