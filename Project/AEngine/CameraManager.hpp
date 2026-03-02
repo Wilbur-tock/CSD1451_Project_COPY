@@ -61,7 +61,9 @@ namespace CameraManager
         float zoomSpeed;      
         float zoomMin;        
         float zoomMax;        
-        float isZoomAllow = true;
+        bool isZoomAllow = true;
+
+        void ClampPosition();
     };
 
     // Global camera instance

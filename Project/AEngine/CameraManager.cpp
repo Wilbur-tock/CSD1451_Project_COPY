@@ -26,6 +26,21 @@ namespace CameraManager
     {
     }
 
+    void CameraController::ClampPosition()
+    {
+        if (!useBounds) return;
+
+        // Half screen in world units depends on current zoom.
+        // As zoom decreases (zoomed out), halfW/halfH grow, shrinking the
+        // allowed camera center range and pushing the camera inward so that
+        // screen edges never exceed the world bounds.
+        float halfW = (Config::SCREEN_WIDTH * 0.5f) / zoomLevel;
+        float halfH = (Config::SCREEN_HEIGHT * 0.5f) / zoomLevel;
+
+        position.x = std::clamp(position.x, boundMinX + halfW, boundMaxX - halfW);
+        position.y = std::clamp(position.y, boundMinY + halfH, boundMaxY - halfH);
+    }
+
     void CameraController::Init()
     {
         position = { 0.0f, 0.0f };
@@ -43,62 +58,45 @@ namespace CameraManager
         switch (currentState)
         {
         case CameraState::STATIC:
-            // Camera doesn't move, do nothing
-
-			// Set camera zoom to default when in static mode
             zoomLevel = 1.0f;
-
             break;
 
         case CameraState::INPUT:
         {
             AEVec2 movement = { 0.0f, 0.0f };
 
-            // WASD movement
             if (AEInputCheckCurr(AEVK_W)) movement.y += 1.0f;
             if (AEInputCheckCurr(AEVK_S)) movement.y -= 1.0f;
             if (AEInputCheckCurr(AEVK_A)) movement.x -= 1.0f;
             if (AEInputCheckCurr(AEVK_D)) movement.x += 1.0f;
 
-            // Normalize diagonal movement
             float length = AEVec2Length(&movement);
             if (length > 0.0f)
             {
                 AEVec2Scale(&movement, &movement, 1.0f / length);
-                // AEVec2Scale(&movement, &movement, moveSpeed * dt);
-				AEVec2Scale(&movement, &movement, (moveSpeed / zoomLevel) * dt); // Scale movement by zoom level 
+                AEVec2Scale(&movement, &movement, (moveSpeed / zoomLevel) * dt);
                 AEVec2Add(&position, &position, &movement);
             }
 
             if (!isZoomAllow) break;
 
             if (GameStateManager::current == GameStateManager::GameState::MAP_EDITOR) {
-                if (AEInputCheckCurr(AEVK_UP))  // Zoom out
-                    ZoomOut(dt);
-                if (AEInputCheckCurr(AEVK_DOWN))  // Zoom in
-                    ZoomIn(dt);
+                if (AEInputCheckCurr(AEVK_UP))   ZoomOut(dt);  // ZoomOut already calls ClampPosition()
+                if (AEInputCheckCurr(AEVK_DOWN))  ZoomIn(dt);  // ZoomIn  already calls ClampPosition()
             }
             else {
-                // Zoom with mouse scroll wheel
                 s32 scrollDelta = 0;
                 AEInputMouseWheelDelta(&scrollDelta);
-                if (scrollDelta > 0)          // Scroll away from user = zoom in
-                    ZoomIn(dt * static_cast<float>(scrollDelta));
-                else if (scrollDelta < 0)     // Scroll towards user = zoom out
-                    ZoomOut(dt * static_cast<float>(-scrollDelta));
-
+                if (scrollDelta > 0)        ZoomIn(dt * static_cast<float>(scrollDelta));
+                else if (scrollDelta < 0)   ZoomOut(dt * static_cast<float>(-scrollDelta));
                 break;
             }
-
-            
-
         }
 
         case CameraState::FOLLOW:
         {
             if (followTarget != nullptr)
             {
-                // Smooth lerp towards target
                 AEVec2 targetPos = *followTarget;
                 AEVec2 direction;
                 AEVec2Sub(&direction, &targetPos, &position);
@@ -111,20 +109,13 @@ namespace CameraManager
         }
         }
 
-        // Apply boundary clamping if enabled
-        if (useBounds)
-        {
-            if (position.x < boundMinX) position.x = boundMinX;
-            if (position.x > boundMaxX) position.x = boundMaxX;
-            if (position.y < boundMinY) position.y = boundMinY;
-            if (position.y > boundMaxY) position.y = boundMaxY;
-        }
+        // Clamp position after ALL movement (WASD, follow lerp) using zoom-aware bounds
+        ClampPosition();
 
         // Floor position for pixel-perfect rendering
         position.x = floorf(position.x);
         position.y = floorf(position.y);
 
-        // Apply camera transformation to Alpha Engine
         AEGfxSetCamPosition(position.x, position.y);
     }
 
@@ -234,17 +225,18 @@ namespace CameraManager
     {
         zoomLevel += zoomSpeed * dt;
         if (zoomLevel > zoomMax) zoomLevel = zoomMax;
+        ClampPosition();
     }
 
     void CameraController::ZoomOut(float dt)
     {
         zoomLevel -= zoomSpeed * dt;
         if (zoomLevel < zoomMin) zoomLevel = zoomMin;
+        ClampPosition();
     }
 
     void CameraController::SetZoomAllow(bool isAllow) {
         isZoomAllow = isAllow;
     }
-
 
 }
