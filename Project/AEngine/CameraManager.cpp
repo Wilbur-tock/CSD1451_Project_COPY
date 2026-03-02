@@ -90,6 +90,8 @@ namespace CameraManager
                 break;
             }
 
+            
+
         }
 
         case CameraState::FOLLOW:
@@ -191,6 +193,15 @@ namespace CameraManager
         }
 	}
 
+    std::string CameraController::PrintVisibleTiles() const
+    {
+        float visibleW = static_cast<float>(Config::SCREEN_WIDTH) / (static_cast<float>(Config::TILE_SIZE) * zoomLevel);
+        float visibleH = static_cast<float>(Config::SCREEN_HEIGHT) / (static_cast<float>(Config::TILE_SIZE) * zoomLevel);
+
+        return "Visible Tiles Width: " + Utils::FormatFloat(visibleW, 2)
+            + " Height: " + Utils::FormatFloat(visibleH, 2);
+	}
+
     void CameraController::SetMoveSpeed(float speed)
     {
         moveSpeed = speed;
@@ -234,4 +245,6 @@ namespace CameraManager
     void CameraController::SetZoomAllow(bool isAllow) {
         isZoomAllow = isAllow;
     }
+
+
 }
