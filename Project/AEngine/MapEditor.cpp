@@ -113,7 +113,7 @@ namespace MapEditor {
 
 		CameraManager::camera.SetPosition({ 0, 0 });
 		CameraManager::camera.SetState(CameraManager::CameraController::INPUT);
-		CameraManager::camera.SetZoomAllow(false);
+		CameraManager::camera.SetZoomAllow(true);
 	}
 
 	void Update() {

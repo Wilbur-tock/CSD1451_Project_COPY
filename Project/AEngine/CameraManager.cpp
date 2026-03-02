@@ -1,5 +1,6 @@
 #include "pch.hpp"
 #include "CameraManager.hpp"
+#include "GameStateManager.hpp"
 
 namespace CameraManager
 {
@@ -19,8 +20,8 @@ namespace CameraManager
         , followTarget(nullptr)
         , zoomLevel(1.0f)
         , zoomSpeed(1.0f)
-        , zoomMin(0.25f)
-        , zoomMax(3.0f)
+        , zoomMin(0.5f)
+        , zoomMax(2.0f)
         , isZoomAllow(true)
     {
     }
@@ -71,20 +72,24 @@ namespace CameraManager
 
             if (!isZoomAllow) break;
 
-            //if (AEInputCheckCurr(AEVK_Q))  // Zoom out
-            //    ZoomOut(dt);
-            //if (AEInputCheckCurr(AEVK_E))  // Zoom in
-            //    ZoomIn(dt);
+            if (GameStateManager::current == GameStateManager::GameState::MAP_EDITOR) {
+                if (AEInputCheckCurr(AEVK_UP))  // Zoom out
+                    ZoomOut(dt);
+                if (AEInputCheckCurr(AEVK_DOWN))  // Zoom in
+                    ZoomIn(dt);
+            }
+            else {
+                // Zoom with mouse scroll wheel
+                s32 scrollDelta = 0;
+                AEInputMouseWheelDelta(&scrollDelta);
+                if (scrollDelta > 0)          // Scroll away from user = zoom in
+                    ZoomIn(dt * static_cast<float>(scrollDelta));
+                else if (scrollDelta < 0)     // Scroll towards user = zoom out
+                    ZoomOut(dt * static_cast<float>(-scrollDelta));
 
-            // Zoom with mouse scroll wheel
-            s32 scrollDelta = 0;
-            AEInputMouseWheelDelta(&scrollDelta);
-            if (scrollDelta > 0)          // Scroll away from user = zoom in
-                ZoomIn(dt * static_cast<float>(scrollDelta));
-            else if (scrollDelta < 0)     // Scroll towards user = zoom out
-                ZoomOut(dt * static_cast<float>(-scrollDelta));
+                break;
+            }
 
-            break;
         }
 
         case CameraState::FOLLOW:
