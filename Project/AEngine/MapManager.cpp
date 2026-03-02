@@ -7,7 +7,6 @@
 namespace MapManager {
 	std::vector<std::vector<Tile>> *currentMap;
 
-
 	static const char* FLOOR_TOP_PATH = "Assets/floorTop.png";  // top layer floor
 	static const char* FLOOR_FILL_PATH = "Assets/floorBody.png";  // underground fill of floor
 	static const char* TOWER_BLOCK_TOP_1_PATH = "Assets/towerBlockTop1.png"; // Tower Block Top (1)
@@ -180,6 +179,7 @@ namespace MapManager {
 				if (tile.Type() == TILE_EMPTY) continue;
 				if (!drawCharacters && tile.ContainCharacter()) continue;
 				AEGfxTexture* tex = gTileTex[tile.Type()]; if (!tex) continue;
+
 				GraphicsManager::DrawGameObject(
 					gTileTex[tile.Type()], 
 					GraphicsManager::CreateTransformMatrix(

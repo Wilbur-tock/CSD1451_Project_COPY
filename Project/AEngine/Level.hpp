@@ -20,16 +20,17 @@ public:
 	void Load();
 	void Initalize();
 	void Update();
-	void Draw();
+	void DrawLevel();
 	void Free();
 
 	// Member functions
 
 	// Toggle turns between player and enemy once they have shot and a timer has been set and reduced to 0
 	void ToggleTurn();
-	void SwitchCannon();
-	std::string DebugInfo();
+	void SwitchCannon(bool _isPlayerTurn);
+	void Debugger();
 
+	Character* FindCharacterObj(Tile const& tile);
 	Character* FindEnemyCharacterObj(int characterId);
 	Character* FindPlayerCharacterObj(int characterId);
 private:
@@ -41,6 +42,7 @@ private:
 
 	bool isPlayerTurn = true; // is player or enemy turn to shoot
 	bool autoPlayOn = false; // used for debugging let enemy play ONLY
+	bool skipEnemyTurn = false;
 	float turnTimer = 0.0f;
 
 	std::vector<std::vector<Tile>> levelMap; // Level tile map

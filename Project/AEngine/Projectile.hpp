@@ -33,6 +33,15 @@ public:
 
 	ProjectileMode Mode() const;
 	void Mode(ProjectileMode newMode);
+	inline std::string ModeName() const {
+		switch (mode) {
+		case ProjectileMode::IDLE:		return "IDLE";
+		case ProjectileMode::ATTACK:	return "Attack Projectile";
+		case ProjectileMode::BOMB:		return "Bomb Projectile";
+		case ProjectileMode::FAST:		return "Fast Projectile";
+		default:						return "YOU NEED TO ADD A PROJECTILE NAME";
+		}
+	}
 
 	int ProjectileId() const;
 

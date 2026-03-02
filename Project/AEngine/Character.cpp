@@ -78,7 +78,7 @@ CharacterType Character::Type() const { return type; }
 
 void Character::Update() {
 	physics.Update(*this);
-	UpdateSprite();
+	UpdateSprite(); // Drawing of character sprite
 	Render();
 }
 

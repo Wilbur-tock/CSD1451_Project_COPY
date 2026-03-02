@@ -54,10 +54,13 @@ namespace CannonManager {
 
 		void SetCamera(bool isFollowingProjectile);
 		void DrawTrajectory();
+		void Debugger();
 	private:
 		bool isPlayerControlled = true, isShootingRight = true;
 		bool isActive = false; // has projectile has been shot out of the cannon return true if yes
 		float cannonAngle = 0.0f; // Angle of the cannon for the projectile to shoot from
+		bool isHoldingLeftClick = false; // player is holding left mouse click
+		bool canPlayerShoot = true; // can player shoot
 		bool hasShot = false; // projectile has been shot out and destroyed
 		bool resetCamWhenShooting = false; // When player press left mouse click, reset camera to position the cannon and unable to move the camera or not
 

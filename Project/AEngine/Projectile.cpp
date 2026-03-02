@@ -138,13 +138,7 @@ void Projectile::DamageTile(int x, int y) {
 
             // Damage Tiles that contain a character object
             if (tileToDamage.ContainCharacter()) {
-                Character* character = nullptr;
-                if (tileToDamage.IsEnemy()) {
-                    character = LevelManager::selectedLevel->FindEnemyCharacterObj(tileToDamage.CharacterId());
-                }
-                else{
-                    character = LevelManager::selectedLevel->FindPlayerCharacterObj(tileToDamage.CharacterId());
-                }
+                Character* character = LevelManager::selectedLevel->FindCharacterObj(tileToDamage);
 
                 if (!character) {
                     std::cerr << "[Projectile] Can't find " << tileToDamage.CharacterId() << '\n';

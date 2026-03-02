@@ -57,46 +57,7 @@ namespace CannonManager {
         SelectProjectileAbility();
         ChargeShot();
         UpdateProjectile();
-
-        // Debugger
-        if (Utils::isDebuggerOn) {
-            float mX = 0, mY = 0;
-            Utils::GetWorldMousePos(mX, mY);
-            float cX = transform.pos.x, cY = transform.pos.y;
-            Utils::GetWorldPos(cX, cY);
-            s32 mouseX, mouseY;
-            AEInputGetCursorPosition(&mouseX, &mouseY);
-
-            Projectile& selectedProjectile = projectiles[selectedProjectileId];
-
-            // Show cannon information
-            std::string debugStr = "Cannon Manager\nIs Player:" + static_cast<std::string>(isPlayerControlled ? "true" : "false")
-                + "\nIs Active: " + std::string(isActive ? "true" : "false") + "\nHas Shot : " + static_cast<std::string>(hasShot ? "true" : "false")
-                + "\nPos x: " + Utils::FormatFloat(transform.pos.x, 2) + " y: " + Utils::FormatFloat(transform.pos.y, 2)
-                + "\nAngle: " + Utils::FormatFloat(cannonAngle * (180.0f / 3.14159265359), 2) + " " + Utils::FormatFloat(cannonAngle, 2)
-                + "\n\nSelected Projectile: " + std::to_string(selectedProjectileId) + " Mode: " + std::to_string(static_cast<int>(selectedProjectile.Mode()))
-                + "\nDamage: " + std::to_string(selectedProjectile.attribute.Damage()) + " Radius: " + std::to_string(selectedProjectile.attribute.DamageRadius());
-            if (!isPlayerControlled) {
-                debugStr += "\nShoot Timer: " + Utils::FormatFloat(aiShootTimer, 2);
-            }
-
-            // Show projectile that is shoot out information
-            if (activeProjectiles.size() > 0) {
-                Projectile& projectile = activeProjectiles.back();
-                debugStr += "\n\nActive Projectile " + std::to_string(static_cast<int>(projectile.Mode())) + "\nSize: x: "
-                    + Utils::FormatFloat(projectile.transform.size.x, 2) + " y: " + Utils::FormatFloat(projectile.transform.size.y, 2)
-                    + "\nPos x: " + Utils::FormatFloat(projectile.transform.pos.x, 2) + " y " + Utils::FormatFloat(projectile.transform.pos.y, 2)
-                    + "\nVelocity x: " + Utils::FormatFloat(activeProjectiles.back().velocity.x, 2) + " y: " + Utils::FormatFloat(projectile.velocity.y, 2)
-                    + "\nGrounded: " + std::string(projectile.isGrounded ? "true" : "false")
-                    + "\nTo Be Destroyed: " + std::string(projectile.toBeDestroyed ? "true" : "false")
-                    + "\nTimer: " + Utils::FormatFloat(projectile.timer, 2)
-                    + "\nAttack Charges: " + std::to_string(projectile.AttackCharges())
-                    + "\nDamage Radius: " + std::to_string(projectile.attribute.DamageRadius());
-            }
-
-            TextObject textObj{ debugStr, Utils::debuggerInfo.first * 0.8f, Utils::debuggerInfo.second, {0.5f, 0.99f} };
-            textObj.Draw();
-        }
+        Debugger();
     }
 
     void Cannon::Render() {
@@ -133,7 +94,7 @@ namespace CannonManager {
     void Cannon::EnemyAI() {
         if (isActive || hasShot) return; // return if the cannon has shot something out or the projectile has already been shot out and destroyed
         if (!target) {
-            std::cout << "[CannonManager] Can't find any player character targets for the enemy to shoot!";
+            std::cout << "[CannonManager] Can't find any player character targets for the enemy to shoot!" << '\n';
             return;
         }
 
@@ -196,7 +157,28 @@ namespace CannonManager {
     void Cannon::ChargeShot() {
         if (isActive == true) return;
 
+        // Shoot when the button is RELEASED
+        if (isPlayerControlled && AEInputCheckReleased(AEVK_LBUTTON)) {
+            if (isHoldingLeftClick) {
+                shotPower = chargingPower;
+                ShootProjectile();
+            }
+
+            // Reset for next shot
+            chargingPower = minPower;
+            canPlayerShoot = true;
+        }
+
+        // Cancel player shooting if right mouse click is input
+        if (isHoldingLeftClick && AEInputCheckTriggered(AEVK_RBUTTON)) {
+            canPlayerShoot = isHoldingLeftClick = false;
+        }
+
+        if (isPlayerControlled && !canPlayerShoot) return;
+
         if (AEInputCheckCurr(AEVK_LBUTTON) || canAIShoot == true) {
+            isHoldingLeftClick = canPlayerShoot = true;
+
             float chargeRateWithDT = chargeRate * PhysicsManager::g_dt;
             chargingPower += isPowerIncreasing ? chargeRateWithDT : -chargeRateWithDT;
 
@@ -221,13 +203,6 @@ namespace CannonManager {
             UIManager::Bar bar { { x, transform.pos.y + (transform.size.y * 1.5f) }, 
                 { 15,100 }, Color{ 0,1,0 }, UIManager::FillType::TOP_TO_BOTTOM };
             bar.Draw(chargingPower, maxPower);
-        }
-
-        // Shoot when the button is RELEASED
-        if (isPlayerControlled && AEInputCheckReleased(AEVK_LBUTTON)) {
-            shotPower = chargingPower;
-            ShootProjectile();
-            chargingPower = minPower; // Reset for next shot
         }
     }
 
@@ -458,6 +433,49 @@ namespace CannonManager {
 
             float alpha = 1.0f - static_cast<float>(i / numDots);
             GraphicsManager::DrawGameObject(AssetsManager::circleTexture, GraphicsManager::CreateTransformMatrix(drawX, drawY, 0, 10, 10), { 1,1,1, alpha });
+        }
+    }
+
+    void Cannon::Debugger() {
+        // Debugger
+        if (Utils::isDebuggerOn) {
+            float mX = 0, mY = 0;
+            Utils::GetWorldMousePos(mX, mY);
+            float cX = transform.pos.x, cY = transform.pos.y;
+            Utils::GetWorldPos(cX, cY);
+            s32 mouseX, mouseY;
+            AEInputGetCursorPosition(&mouseX, &mouseY);
+
+            Projectile& selectedProjectile = projectiles[selectedProjectileId];
+
+            // Show cannon information
+            std::string debugStr = "Cannon Manager\nIs Player:" + static_cast<std::string>(isPlayerControlled ? "true" : "false")
+                + "\nIs Active: " + std::string(isActive ? "true" : "false") + "\nHas Shot : " + static_cast<std::string>(hasShot ? "true" : "false")
+                + "\nPos x: " + Utils::FormatFloat(transform.pos.x, 2) + " y: " + Utils::FormatFloat(transform.pos.y, 2)
+                + "\nAngle: " + Utils::FormatFloat(cannonAngle * (180.0f / 3.14159265359), 2) + " " + Utils::FormatFloat(cannonAngle, 2)
+                + "\n\nSelected Projectile\nId: " + std::to_string(selectedProjectileId)
+                + "\nName: " + selectedProjectile.ModeName()
+                + "\nDamage: " + std::to_string(selectedProjectile.attribute.Damage()) + " Radius: " + std::to_string(selectedProjectile.attribute.DamageRadius());
+            if (!isPlayerControlled) {
+                debugStr += "\nAI Shoot Timer: " + Utils::FormatFloat(aiShootTimer, 2);
+            }
+
+            // Show projectile that is shoot out information
+            if (activeProjectiles.size() > 0) {
+                Projectile& projectile = activeProjectiles.back();
+                debugStr += "\n\nActive Projectile " + std::to_string(static_cast<int>(projectile.Mode())) + "\nSize: x: "
+                    + Utils::FormatFloat(projectile.transform.size.x, 2) + " y: " + Utils::FormatFloat(projectile.transform.size.y, 2)
+                    + "\nPos x: " + Utils::FormatFloat(projectile.transform.pos.x, 2) + " y " + Utils::FormatFloat(projectile.transform.pos.y, 2)
+                    + "\nVelocity x: " + Utils::FormatFloat(activeProjectiles.back().velocity.x, 2) + " y: " + Utils::FormatFloat(projectile.velocity.y, 2)
+                    + "\nGrounded: " + std::string(projectile.isGrounded ? "true" : "false")
+                    + "\nTo Be Destroyed: " + std::string(projectile.toBeDestroyed ? "true" : "false")
+                    + "\nTimer: " + Utils::FormatFloat(projectile.timer, 2)
+                    + "\nAttack Charges: " + std::to_string(projectile.AttackCharges())
+                    + "\nDamage Radius: " + std::to_string(projectile.attribute.DamageRadius());
+            }
+
+            TextObject textObj{ debugStr, Utils::debuggerInfo.first * 0.8f, Utils::debuggerInfo.second, {0.5f, 0.99f} };
+            textObj.Draw();
         }
     }
 }
