@@ -362,8 +362,10 @@ namespace GameStateManager {
             panel.Draw();
 
             debugText.textContent = "\n[P] Debugger ON\nFPS: " + Utils::FormatFloat(AEFrameRateControllerGetFrameRate(), 2)
-                + "\nDeltaTime: " + Utils::FormatFloat(rawDt, 4)
-                + "\n[M] Main Menu" + "\nCamera State: " + CameraManager::camera.PrintState();
+                + "\nDeltaTime: " + Utils::FormatFloat(rawDt, 2)
+                + "\n[M] Main Menu" + "\nCamera State: " + CameraManager::camera.PrintState()
+                + "\n Zoom: " + Utils::FormatFloat(CameraManager::camera.GetZoom(), 2)
+                + "\n" + CameraManager::camera.PrintVisibleTiles();
 
             debugText.Draw();
         }
