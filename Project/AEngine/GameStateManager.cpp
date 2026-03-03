@@ -201,10 +201,10 @@ namespace GameStateManager {
         float halfW = Config::SCREEN_WIDTH / 2.0f;
         float halfH = Config::SCREEN_HEIGHT / 2.0f;
         CameraManager::camera.SetBounds(
-            Config::WORLD_MIN_X + halfW,
-            Config::WORLD_MAX_X - halfW,
-            Config::WORLD_MIN_Y + halfH,
-            Config::WORLD_MAX_Y - halfH
+            Config::WORLD_MIN_X,
+            Config::WORLD_MAX_X,
+            Config::WORLD_MIN_Y,
+            Config::WORLD_MAX_Y
         );
 
         debugText = { "", Utils::debuggerInfo.first * 0.75f, Utils::debuggerInfo.second, {-1.f, -0.8f} };
@@ -341,7 +341,9 @@ namespace GameStateManager {
 
             debugText.textContent = "\n[P] Debugger ON\nFPS: " + Utils::FormatFloat(AEFrameRateControllerGetFrameRate(), 2)
                 + "\nDeltaTime: " + Utils::FormatFloat(rawDt, 2)
-                + "\n[M] Main Menu" + "\nCamera State: " + CameraManager::camera.PrintState();
+                + "\n[M] Main Menu" + "\nCamera State: " + CameraManager::camera.PrintState()
+                + "\n Zoom: " + Utils::FormatFloat(CameraManager::camera.GetZoom(), 2)
+                + "\n" + CameraManager::camera.PrintVisibleTiles();
 
             debugText.Draw();
         }
