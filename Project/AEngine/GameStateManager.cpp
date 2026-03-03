@@ -1,4 +1,4 @@
-#include "GameStateManager.hpp"
+﻿#include "GameStateManager.hpp"
 #include "MapManager.hpp"
 #include "MapEditor.hpp"
 #include "CannonManager.hpp"
@@ -92,7 +92,7 @@ namespace GameStateManager {
                 "[Q] Quit\n";
         }
 
-        // Position text near top-left of panel with padding (panel.Pos() is top-left in screen overlay coords)
+        // Position text near top-left of panel with padding
         float x = panel.Pos().x + 40.0f;
         float y = panel.Pos().y - 40.0f;
         Utils::NormalizeCoordinates(x, y);
@@ -115,12 +115,12 @@ namespace GameStateManager {
         float maxTime = 0.9f;
         float progress = 1.0f - (loadingTimer / maxTime);
         if (progress > 1.0f) progress = 1.0f;
+        if (progress < 0.0f) progress = 0.0f;
 
-        // Animated dots
-        dotAnimTimer += PhysicsManager::g_dt;
+        // Animated dots (do NOT depend on paused g_dt in case you pause elsewhere)
+        dotAnimTimer += static_cast<float>(AEFrameRateControllerGetFrameTime());
         if (dotAnimTimer >= 0.3f) {
             dotAnimTimer = 0.0f;
-
             dotCount = (dotCount + 1) % 4;
         }
 
@@ -138,17 +138,16 @@ namespace GameStateManager {
         };
         loadingTextObj.Draw();
 
-        // Loading bar dimensions (in screen pixels)
+        // Loading bar dimensions
         float barWidth = 600.0f;
         float barHeight = 40.0f;
 
-        // Center the bar on screen (x=0 is screen center in world coords when cam is at 0,0)
-        float barX = 0.0f;   // Center X
-        float barY = 15.0f;  // Below the loading text
+        float barX = 0.0f;
+        float barY = 15.0f;
 
-        // Background bar (full width, dark gray)
+        // Background bar
         AEMtx33 bgMat = GraphicsManager::CreateTransformMatrix(
-            barX - (barWidth / 2.0f),  // Start from left edge
+            barX - (barWidth / 2.0f),
             barY,
             0,
             barWidth,
@@ -156,20 +155,20 @@ namespace GameStateManager {
         );
         GraphicsManager::DrawScreenOverlay(AssetsManager::squareTexture, bgMat, Color(0.2f, 0.2f, 0.2f, 1.0f));
 
-        // Progress bar (fills from left to right)
+        // Progress bar
         float progressWidth = barWidth * progress;
-        if (progressWidth > 0) {
+        if (progressWidth > 0.0f) {
             AEMtx33 progressMat = GraphicsManager::CreateTransformMatrix(
-                barX - (barWidth / 2.0f),  // Start from same left edge
+                barX - (barWidth / 2.0f),
                 barY,
                 0,
-                progressWidth,  // Only the progress portion
+                progressWidth,
                 barHeight
             );
             GraphicsManager::DrawScreenOverlay(AssetsManager::squareTexture, progressMat, Color(0.3f, 0.7f, 1.0f, 1.0f));
         }
 
-        // Percentage text (centered below bar)
+        // Percentage text
         int percentage = static_cast<int>(progress * 100);
         TextObject percentText{
             std::to_string(percentage) + "%",
@@ -184,6 +183,9 @@ namespace GameStateManager {
         // Start with main menu
         current = previous = GameState::INITIALIZE;
         next = GameState::MAIN_MENU;
+
+        // Clear function pointers
+        gsLoad = gsIntialize = gsUpdate = gsDraw = gsFree = gsUnload = nullptr;
 
         // Load all resources
         AssetsManager::Load();
@@ -201,114 +203,134 @@ namespace GameStateManager {
         float halfW = Config::SCREEN_WIDTH / 2.0f;
         float halfH = Config::SCREEN_HEIGHT / 2.0f;
         CameraManager::camera.SetBounds(
-            Config::WORLD_MIN_X + halfW,
-            Config::WORLD_MAX_X - halfW,
-            Config::WORLD_MIN_Y + halfH,
-            Config::WORLD_MAX_Y - halfH
+            Config::WORLD_MIN_X,
+            Config::WORLD_MAX_X,
+            Config::WORLD_MIN_Y,
+            Config::WORLD_MAX_Y
         );
 
         debugText = { "", Utils::debuggerInfo.first * 0.75f, Utils::debuggerInfo.second, {-1.f, -0.8f} };
         instructionText = { "", 0.65f, Color(1.0f, 1.0f, 1.0f, 1.0f), {0.0f, 0.0f} };
+
+        // Reset transition vars
+        setNewState = false;
+        loadingTimer = 0.0f;
+        dotAnimTimer = 0.0f;
+        dotCount = 0;
     }
 
     void Update() {
         float rawDt = static_cast<float>(AEFrameRateControllerGetFrameTime());
         PhysicsManager::g_dt = rawDt;
 
-        // Toggle instructions popup
-        if (AEInputCheckTriggered(AEVK_I)) {
-            Utils::isInstructionOn = !Utils::isInstructionOn;
-        }
-
         // Handle quit state
         if (current == GameState::QUIT) {
-            // This will cause the game loop to exit
             return;
         }
 
-        // State transition logic (loading screen)
+        // ================== STATE TRANSITION (LOADING SCREEN) ==================
         if (next != current) {
-            // Don't allow pausing during loading, otherwise loadingTimer will never decrease.
-            if (Utils::isInstructionOn) Utils::isInstructionOn = false;
+            // Do not allow instructions popup to interfere with loading
+            Utils::isInstructionOn = false;
 
+            // Start transition once
             if (!setNewState) {
-                loadingTimer = 0.9f; // Initialize timer
-                dotAnimTimer = 0.0f; // Reset dot animation
+                loadingTimer = 0.9f;
+                dotAnimTimer = 0.0f;
                 dotCount = 0;
                 setNewState = true;
             }
-            else {
-                // Is currently Loading
-                loadingTimer -= PhysicsManager::g_dt;
 
-                // Render loading screen during transition
-                RenderLoadingScreen();
+            // IMPORTANT: decrement with rawDt (NOT PhysicsManager::g_dt)
+            loadingTimer -= rawDt;
 
-                if (loadingTimer <= 0.0f) {
-                    // Call Free on the current state
-                    if (gsFree != nullptr) {
-                        gsFree();
-                    }
+            // Render loading screen during transition
+            RenderLoadingScreen();
 
-                    // Update state
-                    previous = current;
-                    current = next;
-                    setNewState = false;
+            if (loadingTimer <= 0.0f) {
 
-                    // Update Game state function pointers based on current state
-                    switch (current) {
-                    case GameState::MAIN_MENU:
-                        gsLoad = MainMenu::Load;
-                        gsIntialize = MainMenu::Initialize;
-                        gsUpdate = MainMenu::Update;
-                        gsDraw = MainMenu::Draw;
-                        gsFree = MainMenu::Free;
-                        gsUnload = MainMenu::Unload;
-                        break;
-                    case GameState::MAP_EDITOR:
-                        gsLoad = nullptr;
-                        gsIntialize = MapEditor::Initialize;
-                        gsUpdate = MapEditor::Update;
-                        gsDraw = nullptr;
-                        gsFree = MapEditor::Exit;
-                        gsUnload = nullptr;
-                        break;
-                    case GameState::LEVEL_1:
-                    case GameState::LEVEL_2:
-                        LevelManager::SelectLevel(static_cast<int>(current) - static_cast<int>(GameState::LEVEL_1));
-                        gsLoad = LevelManager::LoadLevel;
-                        gsIntialize = LevelManager::InitializeLevel;
-                        gsUpdate = LevelManager::UpdateLevel;
-                        gsDraw = nullptr;
-                        gsFree = LevelManager::FreeLevel;
-                        gsUnload = nullptr;
-                        break;
-                    case GameState::CREDITS:
-                        gsLoad = Credits::Load;
-                        gsIntialize = Credits::Initialize;
-                        gsUpdate = Credits::Update;
-                        gsDraw = Credits::Draw;
-                        gsFree = Credits::Free;
-                        gsUnload = Credits::Unload;
-                        break;
-                    case GameState::RESTART:
-                        // Restart current level
-                        next = previous;
-                        break;
-                    case GameState::EXIT:
-                        // Return to main menu
-                        next = GameState::MAIN_MENU;
-                        break;
-                    }
-
-                    // Call Initialize on the new state
-                    if (gsIntialize != nullptr) {
-                        gsIntialize();
-                    }
+                // Free old state
+                if (gsFree != nullptr) {
+                    gsFree();
                 }
-                // Return early during loading - don't update the game state
-                return;
+
+                previous = current;
+                current = next;
+                setNewState = false;
+
+                // Update Game state function pointers based on current state
+                switch (current) {
+                case GameState::MAIN_MENU:
+                    gsLoad = MainMenu::Load;
+                    gsIntialize = MainMenu::Initialize;
+                    gsUpdate = MainMenu::Update;
+                    gsDraw = MainMenu::Draw;
+                    gsFree = MainMenu::Free;
+                    gsUnload = MainMenu::Unload;
+                    break;
+
+                case GameState::MAP_EDITOR:
+                    gsLoad = nullptr;
+                    gsIntialize = MapEditor::Initialize;
+                    gsUpdate = MapEditor::Update;
+                    gsDraw = nullptr;
+                    gsFree = MapEditor::Exit;
+                    gsUnload = nullptr;
+                    break;
+
+                case GameState::LEVEL_1:
+                case GameState::LEVEL_2:
+                    LevelManager::SelectLevel(static_cast<int>(current) - static_cast<int>(GameState::LEVEL_1));
+                    gsLoad = LevelManager::LoadLevel;
+                    gsIntialize = LevelManager::InitializeLevel;
+                    gsUpdate = LevelManager::UpdateLevel;
+                    gsDraw = nullptr;
+                    gsFree = LevelManager::FreeLevel;
+                    gsUnload = nullptr;
+                    break;
+
+                case GameState::CREDITS:
+                    gsLoad = Credits::Load;
+                    gsIntialize = Credits::Initialize;
+                    gsUpdate = Credits::Update;
+                    gsDraw = Credits::Draw;
+                    gsFree = Credits::Free;
+                    gsUnload = Credits::Unload;
+                    break;
+
+                case GameState::RESTART:
+                    next = previous;
+                    break;
+
+                case GameState::EXIT:
+                    next = GameState::MAIN_MENU;
+                    break;
+
+                default:
+                    break;
+                }
+
+                // ✅ IMPORTANT: call gsLoad before gsInitialize
+                if (gsLoad != nullptr) {
+                    gsLoad();
+                }
+
+                if (gsIntialize != nullptr) {
+                    gsIntialize();
+                }
+
+                // Apply camera immediately after state switch
+                CameraManager::camera.Update(0.0f);
             }
+
+            // Always stop normal update/camera logic while transitioning
+            return;
+        }
+        // ======================================================================
+
+        // Toggle instructions popup (only when NOT loading)
+        if (AEInputCheckTriggered(AEVK_I)) {
+            Utils::isInstructionOn = !Utils::isInstructionOn;
         }
 
         // Pause time while instructions are open
@@ -340,7 +362,7 @@ namespace GameStateManager {
             panel.Draw();
 
             debugText.textContent = "\n[P] Debugger ON\nFPS: " + Utils::FormatFloat(AEFrameRateControllerGetFrameRate(), 2)
-                + "\nDeltaTime: " + Utils::FormatFloat(rawDt, 2)
+                + "\nDeltaTime: " + Utils::FormatFloat(rawDt, 4)
                 + "\n[M] Main Menu" + "\nCamera State: " + CameraManager::camera.PrintState();
 
             debugText.Draw();
@@ -352,12 +374,11 @@ namespace GameStateManager {
             return; // block camera movement while popup is open
         }
 
-        // Update camera (handles movement, clamping, flooring, and setting position)
+        // Update camera
         CameraManager::camera.Update(PhysicsManager::g_dt);
     }
 
     void Exit() {
-        // Call unload for all states
         MainMenu::Unload();
         AssetsManager::Unload();
         GraphicsManager::Unload();

@@ -34,7 +34,7 @@ namespace CannonManager {
         // Initalize all instance of all the different type of projectile
         for (int i = 0; i < projectileCount; ++i) {
             Projectile& projectile = projectiles[i];
-            projectile = { AssetsManager::circleTexture, static_cast<ProjectileMode>(i+1) };
+            projectile = { AssetsManager::circleTexture, static_cast<ProjectileMode>(i + 1) };
             AbilitiesManager::SetProjectileAbility(projectile);
         }
     }
@@ -67,9 +67,9 @@ namespace CannonManager {
 
     void Cannon::ResetTurn() {
         hasShot = false;
-        SetCamera(false); // Reset camera back to the cannon
+        SetCamera(false);
 
-        if (!isPlayerControlled) {
+        if (!isPlayerControlled && abilityController) {
             abilityController->ResetAbilitySelection();
         }
     }
@@ -92,20 +92,20 @@ namespace CannonManager {
     }
 
     void Cannon::EnemyAI() {
-        if (isActive || hasShot) return; // return if the cannon has shot something out or the projectile has already been shot out and destroyed
+        if (isActive || hasShot) return;
         if (!target) {
             std::cout << "[CannonManager] Can't find any player character targets for the enemy to shoot!" << '\n';
             return;
         }
+        if (!abilityController) {
+            std::cerr << "[CannonManager] EnemyAI failed. abilityController is nullptr\n";
+            return;
+        }
 
         if (!canAIShoot) {
-            // Select Ability first
             abilityController->AIAbilitySelection();
-
-            // Calculate angle and shot power first
             EnemyAICalculation(target->transform.pos);
 
-            // Set shoot timer to add a delay between the start of the enemy turn and enemy shooting the projectile out
             float minTimer = 1.5f;
             float maxTimer = 3.0f;
 
@@ -200,13 +200,13 @@ namespace CannonManager {
             // Render UI
             float x = transform.pos.x - (transform.size.x * 1.5f);
             if (!isShootingRight) x = transform.pos.x + (transform.size.x * 1.5f);
-            UIManager::Bar bar { { x, transform.pos.y + (transform.size.y * 1.5f) }, 
+            UIManager::Bar bar{ { x, transform.pos.y + (transform.size.y * 1.5f) },
                 { 15,100 }, Color{ 0,1,0 }, UIManager::FillType::TOP_TO_BOTTOM };
             bar.Draw(chargingPower, maxPower);
         }
     }
 
-    void Cannon::ClampAngle(float &angle) {
+    void Cannon::ClampAngle(float& angle) {
         if (isShootingRight) {
             angle = std::clamp(angle, -1.5f, 1.5f);
         }
@@ -242,24 +242,24 @@ namespace CannonManager {
         if (isActive) return;
 
         isActive = true;
-        // Assign values to this active projectile
-        Projectile& projectile = projectiles[selectedProjectileId];
-        projectile.isActive = true;
-        projectile.id = static_cast<int>(activeProjectiles.size() - 1);
 
-        // Add offset to ensure that the projectile spawn at the barrel instead of the middle of the cannon
+        // IMPORTANT: use a COPY here so we don't permanently modify the template projectile inside projectiles[].
+        Projectile projectile = projectiles[selectedProjectileId];
+        projectile.isActive = true;
+        projectile.id = static_cast<int>(activeProjectiles.size());
+
         projectile.transform.pos.x = transform.pos.x + (cos(cannonAngle) * transform.size.x);
         projectile.transform.pos.y = transform.pos.y + (sin(cannonAngle) * transform.size.y);
 
-        // Calculate velocity here once only to ensure that gravity has an effect
         projectile.velocity.x = cos(cannonAngle) * shotPower;
         projectile.velocity.y = sin(cannonAngle) * shotPower;
         projectile.timer = Config::PROJECTILE_LIFESPAN;
 
-        // Add to the vector list
         activeProjectiles.push_back(projectile);
 
-        abilityController->UseAbility();
+        if (abilityController) {
+            abilityController->UseAbility();
+        }
 
         SetCamera(true);
         std::cout << "[CannonManager] Projectile Fired!\n";
@@ -268,38 +268,36 @@ namespace CannonManager {
     void Cannon::UpdateProjectile() {
         if (activeProjectiles.empty()) return;
 
-        for (Projectile& projectile : activeProjectiles) {
-            if (!projectile.isActive) continue;
+        // IMPORTANT:
+        // Never erase from a std::vector while range-for iterating it.
+        // MSVC debug runtime can abort() due to invalidated iterators.
+        for (size_t i = 0; i < activeProjectiles.size(); /* manual increment */) {
+            Projectile& projectile = activeProjectiles[i];
+            if (!projectile.isActive) { ++i; continue; }
 
             projectile.AbilityUpdate();
 
             float dt = PhysicsManager::g_dt;
-            // Increased the frequency of the collision check by using loops
-            // ensuring faster moving projectiles are check for collision multiple times
-            // to ensure that the GHOSTING of block bug does not happen
-            // Using sub_steps to ensure that it still moving at a per frame rate time (dt or 1/10 dt but 10 loops) even though it is looping
             const int SUB_STEPS = 10;
             float subDt = dt / SUB_STEPS;
 
             for (int step = 0; step < SUB_STEPS; ++step) {
-                // Set movement first
                 projectile.MoveProjectile(subDt);
                 projectile.isGrounded = false;
 
-                // Check for collision in a 3x3 area with the projectile
                 int gridX = 0, gridY = 0;
                 Utils::GetGridIndex(gridX, gridY, projectile.transform.pos);
 
                 float radius = projectile.transform.size.x / 2.0f;
                 float bias = 0.25f;
                 int minX = gridX - 1, minY = gridY - 1, maxX = gridX + 1, maxY = gridY + 1;
+
                 for (int y = minY; y <= maxY; ++y) {
                     for (int x = minX; x <= maxX; ++x) {
                         if (Utils::IsGridIndexOutOfBounds(x, y)) continue;
 
                         Tile& tile = (*MapManager::currentMap)[y][x];
 
-                        // Checking collision of the projectile with the tile blocks
                         if (tile.IsBlocks() || tile.IsGround() || tile.IsEnemy()) {
                             if (CollisionManager::AreCircleSquareIntersecting(
                                 tile.transform.pos.x, tile.transform.pos.y, tile.transform.size.x, tile.transform.size.y,
@@ -315,7 +313,6 @@ namespace CannonManager {
                                     projectile.DamageTile(x, y);
                                     projectile.isCollisionActive = true;
 
-                                    // If the projectile hit something, REDUCE the velocity by a percentage
                                     float percentage = 0.2f;
                                     projectile.velocity.x *= percentage;
                                     projectile.velocity.y *= percentage;
@@ -325,9 +322,7 @@ namespace CannonManager {
                     }
                 }
 
-                // SECONDARY CHECK IF THE PROJECTILE IS GROUNDED OR NOT
                 if (!projectile.isGrounded) {
-                    // Only and MUST check 2x3 for additonal checks
                     for (int y = gridY; y <= maxY; ++y) {
                         for (int x = minX; x <= maxX; ++x) {
                             if (Utils::IsGridIndexOutOfBounds(x, y)) continue;
@@ -340,8 +335,6 @@ namespace CannonManager {
                                 float tileLeft = tile.transform.pos.x - halfW;
                                 float tileRight = tile.transform.pos.x + halfW;
 
-                                // Check if projectile is resting on top of this tile by checking the projectile x-axis is within the tile x-axis
-                                // and its y-axis is the same +- bias as the tile + projectile radius
                                 if (projectile.transform.pos.x >= tileLeft - radius &&
                                     projectile.transform.pos.x <= tileRight + radius &&
                                     std::abs(projectile.transform.pos.y - (tileTop + radius)) < bias) {
@@ -357,43 +350,43 @@ namespace CannonManager {
             }
 
             projectile.Render();
-            DestroyProjectile(projectile);
+            bool shouldRemove = DestroyProjectile(projectile);
+
+            if (shouldRemove) {
+                activeProjectiles.erase(activeProjectiles.begin() + static_cast<std::vector<Projectile>::difference_type>(i));
+
+                if (activeProjectiles.empty()) {
+                    isActive = false;
+                    hasShot = true;
+                    SetCamera(false);
+                }
+                continue; // do NOT increment i (vector shifted)
+            }
+
+            ++i;
         }
     }
 
-    void Cannon::DestroyProjectile(Projectile& projectile) {
+    bool Cannon::DestroyProjectile(Projectile & projectile) {
         float speedSq = (projectile.velocity.x * projectile.velocity.x) + (projectile.velocity.y * projectile.velocity.y);
 
-        // Start timer if it going to be destroy and projectile stops moving
         if (projectile.toBeDestroyed) {
             projectile.timer -= 1.0f * PhysicsManager::g_dt;
         }
         else {
-            // Set to be destroyed to be true and set the timer to activated the destruction time
             if (projectile.isGrounded && speedSq <= 0.1f) {
                 projectile.timer = Config::PROJECTILE_LIFESPAN;
                 projectile.toBeDestroyed = true;
             }
         }
 
-        // Destroy projectile and erase it from vector if the timer runs out or out of map bounds X 
         if (projectile.timer <= 0.0f || !projectile.IsInMapBoundsX()) {
             projectile.Destroy();
-
-            // Find the index containing the projectile and erase from the active ammo vector
-            for (int i = 0; i < activeProjectiles.size(); i++) {
-                if (activeProjectiles[i].id == projectile.id) {
-                    activeProjectiles.erase(activeProjectiles.begin() + i);
-                    // Reset camera back to input
-                    CameraManager::camera.SetFollowTarget(nullptr);
-                    CameraManager::camera.SetState(CameraManager::CameraController::CameraState::INPUT);
-                    std::cout << "[CannonManager] Remove projectile " << activeProjectiles.size() << std::endl;
-                }
-            }
-
-            isActive = false; // reset cannon back to false to allow player to shoot again after projectile been destroyed
-            hasShot = true;
+            std::cout << "[CannonManager] Projectile destroyed\n";
+            return true;
         }
+
+        return false;
     }
 
     void Cannon::SetCamera(bool isFollowingProjectile) {

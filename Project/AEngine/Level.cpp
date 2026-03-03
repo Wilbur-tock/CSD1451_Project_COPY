@@ -24,82 +24,85 @@ namespace {
 Level::Level(std::string _levelName) : levelName{ _levelName } {}
 
 void Level::Load() {
+	levelMap.clear();
 	levelMap.resize(Config::GRID_HEIGHT, std::vector<Tile>(Config::GRID_WIDTH));
+
+	enemies.clear();
+	playerCharacters.clear();
 	int reserveCount = 5;
 	enemies.reserve(reserveCount);
 	playerCharacters.reserve(reserveCount);
 
-	// Read the map data
 	std::string filePath = "Assets/Map/" + levelName + ".txt";
 	MapManager::ReadMapData(filePath, levelMap);
 
-	AEVec2 playerCannonStartPos = { 0,0 }, enemyCannonStartPos = {0, 0};
+	AEVec2 playerCannonStartPos = { 0,0 }, enemyCannonStartPos = { 0,0 };
 
-	// Loop through each tile block to find the position of the character objects, cannons, etc
 	for (int y = 0; y < Config::GRID_HEIGHT; ++y) {
 		for (int x = 0; x < Config::GRID_WIDTH; ++x) {
 			Tile& tile = levelMap[y][x];
 
-			// Find cannon starting position
 			if (tile.Type() == TILE_PLAYER_CANNON) {
-				playerCannonStartPos = { tile.transform.pos.x,tile.transform.pos.y + tile.transform.size.y *0.5f};
+				playerCannonStartPos = { tile.transform.pos.x, tile.transform.pos.y + tile.transform.size.y * 0.5f };
 			}
 
-			// Find enemy cannon starting position
 			if (tile.Type() == TILE_ENEMY_CANNON) {
-				enemyCannonStartPos = { tile.transform.pos.x,tile.transform.pos.y + tile.transform.size.y * 0.5f };
+				enemyCannonStartPos = { tile.transform.pos.x, tile.transform.pos.y + tile.transform.size.y * 0.5f };
 			}
 
-			// Find all instance of player and enemy character objects
 			if (tile.Type() == TILE_PLAYER_CHARACTER || tile.Type() == TILE_ENEMY_MINION || tile.Type() == TILE_ENEMY_BOSS) {
 				Character characterObj{ tile.transform.pos, tile.transform.size, AssetsManager::squareTexture, {x,y}, CharacterType::PLAYER };
 				int listId = 0;
+
 				switch (tile.Type()) {
 				case TILE_PLAYER_CHARACTER:
 					playerCharacters.push_back(characterObj);
 					listId = static_cast<int>(playerCharacters.size() - 1);
-					playerCharacters[listId].id = listId; // assign the character id to the character component itself
+					playerCharacters[listId].id = listId;
 					break;
+
 				case TILE_ENEMY_MINION:
 					characterObj = { tile.transform.pos, tile.transform.size, AssetsManager::squareTexture, {x,y}, CharacterType::ENEMY_MINION };
 					enemies.push_back(characterObj);
 					listId = static_cast<int>(enemies.size() - 1);
-					enemies[listId].id = listId; // assign the character id to the character component itself
+					enemies[listId].id = listId;
 					break;
+
 				case TILE_ENEMY_BOSS:
 					characterObj = { tile.transform.pos, tile.transform.size, AssetsManager::squareTexture, {x,y}, CharacterType::ENEMY_BOSS };
 					enemies.push_back(characterObj);
 					listId = static_cast<int>(enemies.size() - 1);
-					enemies[listId].id = listId; // assign the character id to the character component itself
+					enemies[listId].id = listId;
 					break;
 				}
 
-				tile.CharacterId(listId); // assign the character id to the tile component
+				tile.CharacterId(listId);
 			}
 		}
 	}
 
 	AEGfxTexture* barrelTex = AssetsManager::GetTexture("Assets/cannonBarrel.png");
-	if (!barrelTex) barrelTex = AssetsManager::GetTexture("Assets/square.png"); // fallback
+	if (!barrelTex) barrelTex = AssetsManager::GetTexture("Assets/square.png");
 
-	// Pick barrel half-size (these are SCALE values, not full pixels)
-	// Your old barrel used {30,10} (meaning it appears ~60x20 pixels)
 	AEVec2 barrelHalfSize{ 60, 20 };
 
 	playerCannon = CannonManager::Cannon(playerCannonStartPos, barrelTex, { 0,0 }, barrelHalfSize, true, true);
-	playerCannon.textureColor = Color{ 1, 1, 1, 1 };   // black barrel
+	playerCannon.textureColor = Color{ 1, 1, 1, 1 };
 
 	AbilitiesManager::AbilityController& playerController = AbilitiesManager::playerAbilityController;
 	playerController.LoadAllAbilities();
 	playerCannon.SetAbilityController(&playerController);
 
-	// Initialize Enemy instance
-	// TODO: add a texture for the enemy cannon (flip the player cannon texture from facing right to facing left)
 	enemyCannon = CannonManager::Cannon(enemyCannonStartPos, barrelTex, { 0,0 }, barrelHalfSize, false, false);
-	// Set enemy ability controller
 	AbilitiesManager::AbilityController& enemyController = AbilitiesManager::enemyAbilityController;
 	enemyController.LoadAllAbilities();
 	enemyCannon.SetAbilityController(&enemyController);
+
+	// Reset level flow variables
+	isPlayerTurn = true;
+	autoPlayOn = false;
+	skipEnemyTurn = false;
+	turnTimer = 0.0f;
 
 	debugText = { "", Utils::debuggerInfo.first * 0.8f, Utils::debuggerInfo.second, { -1.0f, 0.99f} };
 
@@ -111,12 +114,17 @@ void Level::Initalize() {
 
 	MapManager::currentMap = &levelMap;
 
-	// Always start with player first
 	activeCannon = &playerCannon;
+	isPlayerTurn = true;
+	turnTimer = 0.0f;
 
-	// Set camera position to the player cannon
 	CameraManager::camera.SetPosition(playerCannon.transform.pos);
 	CameraManager::camera.SetState(CameraManager::CameraController::INPUT);
+
+	// Give enemy an initial target if possible (prevents "no target" warnings on first enemy turn)
+	if (!playerCharacters.empty()) {
+		enemyCannon.SetTarget(&playerCharacters[0]);
+	}
 
 	std::cout << "[Level] Initialize " + levelName << std::endl;
 }
