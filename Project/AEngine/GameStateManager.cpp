@@ -9,6 +9,7 @@
 #include "Credits.hpp"
 #include "PhysicsManager.hpp"
 #include "UIManager.hpp"
+#include "InstructionOverlay.hpp"
 
 namespace GameStateManager {
     Utils::FuncPtr gsLoad, gsIntialize, gsUpdate, gsDraw, gsFree, gsUnload;
@@ -20,91 +21,7 @@ namespace GameStateManager {
     float dotAnimTimer = 0.0f;
     int dotCount = 0;
 
-    TextObject debugText;
-    TextObject instructionText;
-
-    static std::string GetStateName(GameState s) {
-        switch (s) {
-        case GameState::INITIALIZE: return "INITIALIZE";
-        case GameState::MAIN_MENU:  return "MAIN MENU";
-        case GameState::MAP_EDITOR: return "MAP EDITOR";
-        case GameState::LEVEL_1:    return "LEVEL 1";
-        case GameState::LEVEL_2:    return "LEVEL 2";
-        case GameState::CREDITS:    return "CREDITS";
-        case GameState::RESTART:    return "RESTART";
-        case GameState::EXIT:       return "EXIT";
-        case GameState::QUIT:       return "QUIT";
-        }
-        return "GAME";
-    }
-
-    static void RenderInstructionsOverlay() {
-        // Dim background
-        UIManager::Panel dim{ {static_cast<float>(Config::SCREEN_WIDTH), static_cast<float>(Config::SCREEN_HEIGHT)},
-            Color(0.0f, 0.0f, 0.0f, 0.55f), Utils::RectMode::RECT_CENTER };
-        dim.Draw();
-
-        // Main panel
-        UIManager::Panel panel{ {1120.0f, 730.0f}, Color(0.12f, 0.12f, 0.16f, 0.95f), Utils::RectMode::RECT_CENTER };
-        panel.Draw();
-
-        // Build content based on current state
-        std::string msg =
-            "INSTRUCTIONS  (Press [I] to close)\n"
-            "---------------------------------\n"
-            "Current: " + GetStateName(current) + "\n\n"
-            "GLOBAL\n"
-            "[I] Toggle this popup\n"
-            "[P] Toggle Debugger\n"
-            "[M] Main Menu\n"
-            "[ESC] Quit Game\n\n";
-
-        if (current == GameState::LEVEL_1 || current == GameState::LEVEL_2) {
-            msg +=
-                "LEVEL\n"
-                "Mouse: Aim\n"
-                "Hold [LMB]: Charge shot (player squats)\n"
-                "Release [LMB]: Shoot\n"
-                "[0] [1] [2]: Change projectile ability\n\n"
-                "NOTE: Game is paused while this popup is open.\n";
-        }
-        else if (current == GameState::MAP_EDITOR) {
-            msg +=
-                "MAP EDITOR\n"
-                "[LMB]: Place tile\n"
-                "[RMB]: Erase tile\n"
-                "[CTRL]+Click: Fill COLUMN\n"
-                "[SHIFT]+Click: Fill ROW\n"
-                "Mouse Wheel: Change selected tile\n"
-                "[T]: Toggle tile list\n"
-                "[E]: Save\n"
-                "[R]: Reset map\n"
-                "[Q]: Quit editor\n"
-                "[CTRL]+[1..5]: Load level file\n\n"
-                "NOTE: Editor input is blocked while this popup is open.\n";
-        }
-        else if (current == GameState::MAIN_MENU) {
-            msg +=
-                "MAIN MENU\n"
-                "[1] Play\n"
-                "[2] Map Editor\n"
-                "[3] Credits\n"
-                "[Q] Quit\n";
-        }
-
-        // Position text near top-left of panel with padding
-        float x = panel.Pos().x + 40.0f;
-        float y = panel.Pos().y - 40.0f;
-        Utils::NormalizeCoordinates(x, y);
-
-        instructionText.textContent = msg;
-        instructionText.textScale = 0.65f;
-        instructionText.color = { 1.0f, 1.0f, 1.0f, 1.0f };
-        instructionText.pos = { x, y };
-        instructionText.Draw();
-    }
-
-    void RenderLoadingScreen() {
+    TextObject debugText;    void RenderLoadingScreen() {
         // Reset camera to center for loading screen
         AEGfxSetCamPosition(0.0f, 0.0f);
 
@@ -209,10 +126,7 @@ namespace GameStateManager {
             Config::WORLD_MAX_Y
         );
 
-        debugText = { "", Utils::debuggerInfo.first * 0.75f, Utils::debuggerInfo.second, {-1.f, -0.8f} };
-        instructionText = { "", 0.65f, Color(1.0f, 1.0f, 1.0f, 1.0f), {0.0f, 0.0f} };
-
-        // Reset transition vars
+        debugText = { "", Utils::debuggerInfo.first * 0.75f, Utils::debuggerInfo.second, {-1.f, -0.8f} };        // Reset transition vars
         setNewState = false;
         loadingTimer = 0.0f;
         dotAnimTimer = 0.0f;
@@ -372,7 +286,7 @@ namespace GameStateManager {
 
         // Instructions overlay (draw last so it appears on top)
         if (Utils::isInstructionOn) {
-            RenderInstructionsOverlay();
+            UIInstructionsOverlay::Draw(current);
             return; // block camera movement while popup is open
         }
 
