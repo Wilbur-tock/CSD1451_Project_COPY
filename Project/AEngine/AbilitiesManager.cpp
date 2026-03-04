@@ -3,6 +3,7 @@
 #include "Utils.hpp"
 #include "Color.hpp"
 #include "UIManager.hpp"
+#include "Card.hpp"
 
 namespace AbilitiesManager {
 	AbilityController playerAbilityController;
@@ -77,7 +78,6 @@ namespace AbilitiesManager {
 
 		std::cout << "[AbilitiesManager] Ability used: " + abilitiesName[currentAbility->Id()]
 			+ " Charges Remaining: " + std::to_string(currentAbility->Charges()) << '\n';
-
 		return true;
 	}
 
