@@ -13,13 +13,7 @@
 #include "UIManager.hpp"
 #include "TextObject.hpp"
 
-namespace {
-	void Debugger() {
-		if (Utils::isDebuggerOn) {
-
-		}
-	}
-}
+AEGfxTexture* barrelTex = nullptr;
 
 Level::Level(std::string _levelName) : levelName{ _levelName } {}
 
@@ -35,6 +29,19 @@ void Level::Load() {
 
 	std::string filePath = "Assets/Map/" + levelName + ".txt";
 	MapManager::ReadMapData(filePath, levelMap);
+
+	barrelTex = AssetsManager::GetTexture("Assets/cannonBarrel.png");
+	if (!barrelTex) barrelTex = AssetsManager::GetTexture("Assets/square.png");
+
+	std::cout << "[Level] Load " + levelName << '\n';
+}
+
+void Level::Initalize() {
+	MapManager::currentMap = &levelMap;
+
+	activeCannon = &playerCannon;
+	isPlayerTurn = true;
+	turnTimer = 0.0f;
 
 	AEVec2 playerCannonStartPos = { 0,0 }, enemyCannonStartPos = { 0,0 };
 
@@ -81,9 +88,6 @@ void Level::Load() {
 		}
 	}
 
-	AEGfxTexture* barrelTex = AssetsManager::GetTexture("Assets/cannonBarrel.png");
-	if (!barrelTex) barrelTex = AssetsManager::GetTexture("Assets/square.png");
-
 	AEVec2 barrelHalfSize{ 60, 20 };
 
 	playerCannon = CannonManager::Cannon(playerCannonStartPos, barrelTex, { 0,0 }, barrelHalfSize, true, true);
@@ -101,30 +105,13 @@ void Level::Load() {
 	// Reset level flow variables
 	isPlayerTurn = true;
 	autoPlayOn = false;
-	skipEnemyTurn = false;
+	isSkippingEnemyTurn = false;
 	turnTimer = 0.0f;
 
 	debugText = { "", Utils::debuggerInfo.first * 0.8f, Utils::debuggerInfo.second, { -1.0f, 0.99f} };
 
-	std::cout << "[Level] Load " + levelName << '\n';
-}
-
-void Level::Initalize() {
-	AEGfxSetBackgroundColor(0.92f, 0.92f, 0.95f);
-
-	MapManager::currentMap = &levelMap;
-
-	activeCannon = &playerCannon;
-	isPlayerTurn = true;
-	turnTimer = 0.0f;
-
 	CameraManager::camera.SetPosition(playerCannon.transform.pos);
 	CameraManager::camera.SetState(CameraManager::CameraController::INPUT);
-
-	// Give enemy an initial target if possible (prevents "no target" warnings on first enemy turn)
-	if (!playerCharacters.empty()) {
-		enemyCannon.SetTarget(&playerCharacters[0]);
-	}
 
 	std::cout << "[Level] Initialize " + levelName << std::endl;
 }
@@ -132,8 +119,8 @@ void Level::Initalize() {
 void Level::Update() {
 	MapManager::RenderMap(levelMap, false);
 
-	if (skipEnemyTurn) { // Skipping enemy turn
-		if (skipEnemyTurn && !isPlayerTurn) {
+	if (isSkippingEnemyTurn) { // Skipping enemy turn
+		if (!isPlayerTurn) {
 			SwitchCannon(true);
 		}
 	}
@@ -241,7 +228,7 @@ void Level::Debugger() {
 
 		// Input E to skip enemy turn
 		if (AEInputCheckTriggered(AEVK_E)) {
-			skipEnemyTurn = !skipEnemyTurn;
+			isSkippingEnemyTurn = !isSkippingEnemyTurn;
 		}
 
 		int gridX = 0, gridY = 0;
@@ -256,7 +243,7 @@ void Level::Debugger() {
 				}
 
 				// Damage characters
-				if (tile.ContainCharacter()) {
+				if (tile.IsCharacter()) {
 					Character *charPtr = FindCharacterObj(tile);
 					charPtr->attribute.TakeDamage(10);
 				}
@@ -273,11 +260,11 @@ void Level::Debugger() {
 		Utils::GetWorldMousePos(mX, mY);
 
 		std::string debug = "Shortcuts:\n[CTRL + R] Auto play " + static_cast<std::string>(autoPlayOn ? "ON" : "OFF")
-			+ "\n[E] Skipping enemy turn " + static_cast<std::string>(skipEnemyTurn ? "ON" : "OFF")
+			+ "\n[E] Skipping enemy turn " + static_cast<std::string>(isSkippingEnemyTurn ? "ON" : "OFF")
 			+ "\n\nTile Map\nIndex X: " + std::to_string(gridX) + " Y: " + std::to_string(gridY)
 			+ "\n\nTile: " + GetTileName(tile.Type());
 		// Display which character is currently at this tile type
-		if (tile.ContainCharacter()) {
+		if (tile.IsCharacter()) {
 			std::stringstream ss;
 			ss << FindCharacterObj(tile);
 			debug += " " + ss.str();
@@ -316,7 +303,7 @@ void Level::Debugger() {
 }
 
 Character* Level::FindCharacterObj(Tile const& tile) {
-	if (!tile.ContainCharacter()) {
+	if (!tile.IsCharacter()) {
 		std::cerr << "[Level] Tile does not contain any characters!" << '\n';
 		return nullptr;
 	}

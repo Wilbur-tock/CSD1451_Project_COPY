@@ -40,14 +40,14 @@ public:
 		return "NULL";
 	}
 private:
-	void UpdateSprite(); // Select correct sprite based on HP / animation state
-
 	CharacterType type;
 
 	// Player squat animation state
 	bool squatAnimEnabled = false;
 	float squatAnimTimer = 0.0f;
 	bool squatAnimShowSquat = false;
+
+	void UpdateSprite(); // Select correct sprite based on HP / animation state
 };
 
 #endif // !CHARACTER_HPP

@@ -8,6 +8,7 @@ namespace LevelManager {
 		levelDatas.clear();
 		levelDatas.reserve(levelCount);
 
+		// Add all instance of level into the vector
 		for (int i = 0; i < levelCount; ++i) {
 			std::string levelName = "level" + std::to_string(i + 1);
 			Level data{ levelName };
@@ -23,17 +24,21 @@ namespace LevelManager {
 	void LoadLevel() {
 		selectedLevel->Load();
 	}
+
 	void InitializeLevel() {
 		selectedLevel->Initalize();
 	}
+
 	void UpdateLevel() {
 		selectedLevel->Update();
 	}
+
 	void FreeLevel() {
 		selectedLevel->Free();
 	}
 
-	void Unload() {
+	void UnloadLevel() {
+		levelDatas.clear();
 		selectedLevel = nullptr;
 	}
 }

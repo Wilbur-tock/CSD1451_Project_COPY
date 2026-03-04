@@ -106,7 +106,7 @@ void Projectile::DamageTile(int x, int y) {
     int blastRadius = attribute.DamageRadius();
 
     std::cout << "===================== [Projectile] Damaging tiles ====================="
-        << "\nDamage Radius: " << blastRadius << " Center: " << x << " " << y << '\n';
+        << "\n[Projectile] Damage Radius: " << blastRadius << " Center Tile Id: " << x << " " << y << '\n';
 
     int minDX = x, minDY = y, maxDX = x, maxDY = y;
     // Increased damage radius based on blast radius
@@ -118,7 +118,7 @@ void Projectile::DamageTile(int x, int y) {
         maxDY += addRadius;
     }
 
-    bool hasDamagedTile = false;
+    bool hasDamageAnyTile = false; // Check if the projectile has damage any tiles (Blocks/Character)
     int projDamage = attribute.Damage();
 
     // Damage how many number of tile based on the radius using a nested for loop
@@ -130,36 +130,27 @@ void Projectile::DamageTile(int x, int y) {
             //std::cout << "[Projectile] Checked tile " << tileToDamage << '\n';
 
             // Only damage blocks or character tile
-            if (!tileToDamage.IsBlocks() && !tileToDamage.ContainCharacter()) continue;
-
-            // Damage tile blocks
-            std::cout << "[Projectile] Damage Tile: " << tileToDamage
-                << " Current hp: " << tileToDamage.attribute.Health() << '\n';
+            if (!tileToDamage.IsBlocks() && !tileToDamage.IsCharacter()) continue;
 
             // Damage Tiles that contain a character object
-            if (tileToDamage.ContainCharacter()) {
+            if (tileToDamage.IsCharacter()) {
                 Character* character = LevelManager::selectedLevel->FindCharacterObj(tileToDamage);
 
-                if (!character) {
-                    std::cerr << "[Projectile] Can't find " << tileToDamage.CharacterId() << '\n';
-                    continue;
-                }
-                else {
+                if (character) {
                     character->attribute.TakeDamage(projDamage);
-
-                    std::cout << "[Projectile] Damaged character " << character->TypeName() <<  " new hp: " << character->attribute.Health() << '\n';
+                    std::cout << "[Projectile] Damaged character " << character->TypeName() << " new hp: " << character->attribute.Health() << '\n';
                 }
             }
 
-            // Damage tile after it has damage the enemy compononent first
+            // Damage tile AFTER it has damage a CHARACTER compononent
             tileToDamage.TakeDamage(projDamage);
-
-            hasDamagedTile = true;
+            std::cout << "[Projectile] Damage Tile: " << tileToDamage << " Current hp: " << tileToDamage.attribute.Health() << '\n';
+            hasDamageAnyTile = true;
         }
     }
 
     // Consume 1 attack charge if projectile has damaged a tile 
-    if (hasDamagedTile) {
+    if (hasDamageAnyTile) {
         ConsumeAttackCharge();
 
         // Damage effect

@@ -30,6 +30,8 @@ public:
 	void SwitchCannon(bool _isPlayerTurn);
 	void Debugger();
 
+	// Find the character object that is within the parameter tile, 
+	// return pointer to the chracter if a character object can be found otherwise return nullptr
 	Character* FindCharacterObj(Tile const& tile);
 	Character* FindEnemyCharacterObj(int characterId);
 	Character* FindPlayerCharacterObj(int characterId);
@@ -42,7 +44,7 @@ private:
 
 	bool isPlayerTurn = true; // is player or enemy turn to shoot
 	bool autoPlayOn = false; // used for debugging let enemy play ONLY
-	bool skipEnemyTurn = false;
+	bool isSkippingEnemyTurn = false;
 	float turnTimer = 0.0f;
 
 	std::vector<std::vector<Tile>> levelMap; // Level tile map

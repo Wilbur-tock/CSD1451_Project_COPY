@@ -66,19 +66,15 @@ namespace {
 Character::Character(AEVec2 _pos, AEVec2 _size, AEGfxTexture* _texture, TileIndex _tileId, CharacterType _type)
 	: GameObject{ _pos, _size, _texture, _tileId, Color{1,1,1,1} }, type{ _type } {
 	attribute.MaxHealth(100);
-
-	// With real sprites, tinting usually makes them look wrong. Keep white.
-	textureColor = { 1,1,1,1 };
-
 	LoadCharacterTexturesOnce();
-	UpdateSprite();
 }
 
 CharacterType Character::Type() const { return type; }
 
 void Character::Update() {
+	if (!attribute.IsActive()) return;
+
 	physics.Update(*this);
-	UpdateSprite(); // Drawing of character sprite
 	Render();
 }
 
@@ -93,10 +89,6 @@ void Character::SetSquatAnimation(bool enabled) {
 }
 
 void Character::UpdateSprite() {
-	if (!attribute.IsActive()) return;
-
-	LoadCharacterTexturesOnce();
-
 	// Defensive: avoid divide-by-zero
 	float hpRatio = 1.0f;
 	if (attribute.MaxHealth() > 0) {
@@ -136,9 +128,9 @@ void Character::UpdateSprite() {
 }
 
 void Character::Render() {
-	if (!attribute.IsActive()) return;
-
+	UpdateSprite(); // Update character sprite texture
 	GraphicsManager::DrawGameObject(*this);
+
 	// UI
 	float x = transform.pos.x, y = transform.pos.y + transform.size.y;
 	UIManager::Bar bar{ { x, y}, { transform.size.x, 10 }, Color{1,0,0} };

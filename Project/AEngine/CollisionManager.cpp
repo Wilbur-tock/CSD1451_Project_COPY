@@ -43,8 +43,9 @@ namespace CollisionManager {
             float mouseX = 0, mouseY = 0;
             Utils::GetWorldMousePos(mouseX, mouseY);
 
-            // Calculate the bounding box in WORLD COORDINATES ONLY
             float halfWidth = obj.transform.size.x / 2.0f, halfHeight = obj.transform.size.y / 2.0f;
+
+            // Calculate the bounding box in WORLD COORDINATES ONLY
             float left = obj.transform.pos.x - halfWidth;
             float right = obj.transform.pos.x + halfWidth;
             float top = obj.transform.pos.y + halfHeight;

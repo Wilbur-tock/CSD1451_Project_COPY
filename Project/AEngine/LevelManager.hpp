@@ -16,6 +16,7 @@ namespace LevelManager {
 	void InitializeLevel();
 	void UpdateLevel();
 	void FreeLevel();
+	void UnloadLevel();
 }
 
 #endif // !LEVELMANAGER_HPP

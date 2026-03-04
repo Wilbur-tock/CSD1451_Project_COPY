@@ -59,7 +59,7 @@ public:
 
 	bool IsEnemy() const;
 	bool IsPlayer() const;
-	bool ContainCharacter() const;
+	bool IsCharacter() const;
 
 	void TakeDamage(int damage);
 private:

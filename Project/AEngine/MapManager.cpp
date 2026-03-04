@@ -69,6 +69,7 @@ namespace MapManager {
 
 		// cannon base tile texture
 		gTileTex[TILE_PLAYER_CANNON] = gCannonBaseTex;
+		gTileTex[TILE_ENEMY_CANNON] = gCannonBaseTex;
 
 		// other types can stay fallback for now
 		gTileTex[TILE_PLAYER_CHARACTER] = gPlayerIdleTex;
@@ -166,6 +167,8 @@ namespace MapManager {
 	}
 
 	void RenderMap(std::vector<std::vector<Tile>> const& map, bool drawCharacters) {
+		AEGfxSetBackgroundColor(0.92f, 0.92f, 0.95f);
+
 		int mapHeight = static_cast<int>(map.size());
 		int mapWidth = static_cast<int>(map[0].size());
 
@@ -177,7 +180,7 @@ namespace MapManager {
 		for (std::vector<Tile> const& row : map) {
 			for (Tile const& tile : row) {
 				if (tile.Type() == TILE_EMPTY) continue;
-				if (!drawCharacters && tile.ContainCharacter()) continue;
+				if (!drawCharacters && tile.IsCharacter()) continue;
 				AEGfxTexture* tex = gTileTex[tile.Type()]; if (!tex) continue;
 
 				GraphicsManager::DrawGameObject(

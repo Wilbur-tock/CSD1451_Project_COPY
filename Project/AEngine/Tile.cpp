@@ -6,7 +6,7 @@ Tile::Tile(AEVec2 _pos, AEGfxTexture* _texture, TileType _type)
 TileType Tile::Type() const { return type; }
 void Tile::Type(TileType newType) {
 	prevType = type;
-	if (IsEmpty() && ContainCharacter()) characterId = -1; // reset characterId
+	if (IsEmpty() && IsCharacter()) characterId = -1; // reset characterId
 	type = newType;
 }
 
@@ -30,9 +30,10 @@ bool Tile::IsBlocks() const {
 
 bool Tile::IsEnemy() const { return type == TILE_ENEMY_MINION || type == TILE_ENEMY_BOSS; }
 bool Tile::IsPlayer() const { return type == TILE_PLAYER_CHARACTER; }
-bool Tile::ContainCharacter() const { return IsEnemy() || IsPlayer(); }
+bool Tile::IsCharacter() const { return IsEnemy() || IsPlayer(); }
 
 void Tile::TakeDamage(int damage) {
+	if (!IsBlocks()) return; // ONLY DAMAGE TILE that is blocks type
 	attribute.TakeDamage(damage * attribute.DamageMultiplier());
 
 	if (!attribute.IsActive()) {

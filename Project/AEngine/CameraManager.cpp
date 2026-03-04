@@ -19,7 +19,7 @@ namespace CameraManager
         , currentState(CameraState::INPUT)
         , followTarget(nullptr)
         , zoomLevel(1.0f)
-        , zoomSpeed(1.0f)
+        , zoomSpeed(2.5f)
         , zoomMin(0.5f)
         , zoomMax(2.0f)
         , isZoomAllow(true)
@@ -80,19 +80,12 @@ namespace CameraManager
 
             if (!isZoomAllow) break;
 
-            if (GameStateManager::current == GameStateManager::GameState::MAP_EDITOR) {
-                if (AEInputCheckCurr(AEVK_UP))   ZoomOut(dt);  // ZoomOut already calls ClampPosition()
-                if (AEInputCheckCurr(AEVK_DOWN))  ZoomIn(dt);  // ZoomIn  already calls ClampPosition()
-            }
-            else {
-                s32 scrollDelta = 0;
-                AEInputMouseWheelDelta(&scrollDelta);
-                if (scrollDelta > 0)        ZoomIn(dt);
-                else if (scrollDelta < 0)   ZoomOut(dt);
-                break;
-            }
+            s32 scrollDelta = 0;
+            AEInputMouseWheelDelta(&scrollDelta);
+            if (scrollDelta > 0)        ZoomIn(dt);
+            else if (scrollDelta < 0)   ZoomOut(dt);
+            break;
         }
-
         case CameraState::FOLLOW:
         {
             if (followTarget != nullptr)
