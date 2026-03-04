@@ -16,7 +16,9 @@ namespace MapManager {
 	static const char* CANNON_BASE_PATH = "Assets/cannonBase.png"; //Cannon (for testing now, not actual sprite)
 	static const char* PLAYER_IDLE_PATH = "Assets/playerIdle.png";      //player
 	static const char* ENEMY_100_PATH = "Assets/enemy100.png";        //enemy (full hp)
-
+	static const char* CRACKS_LIGHT_PATH = "Assets/lightCracks.png";
+	static const char* CRACKS_MEDIUM_PATH = "Assets/mediumCracks.png";
+	static const char* CRACKS_HEAVY_PATH = "Assets/heavyCracks.png";
 	// Cached textures
 	static AEGfxTexture* gTileTex[TILE_COUNT] = { nullptr };
 	static AEGfxTexture* gFloorTopTex = nullptr;
@@ -29,6 +31,9 @@ namespace MapManager {
 	static AEGfxTexture* gFallbackTex = nullptr;
 	static AEGfxTexture* gPlayerIdleTex = nullptr;
 	static AEGfxTexture* gEnemy100Tex = nullptr;
+	static AEGfxTexture* gCracksLightTex = nullptr;
+	static AEGfxTexture* gCracksMediumTex = nullptr;
+	static AEGfxTexture* gCracksHeavyTex = nullptr;
 
 	void Load() {
 		if (gTileTex[TILE_BLOCK_GROUND_0]) return;	
@@ -43,6 +48,9 @@ namespace MapManager {
 		gCannonBaseTex = AssetsManager::GetTexture(CANNON_BASE_PATH);
 		gPlayerIdleTex = AssetsManager::GetTexture(PLAYER_IDLE_PATH);
 		gEnemy100Tex = AssetsManager::GetTexture(ENEMY_100_PATH);
+		gCracksLightTex = AssetsManager::GetTexture(CRACKS_LIGHT_PATH);
+		gCracksMediumTex = AssetsManager::GetTexture(CRACKS_MEDIUM_PATH);
+		gCracksHeavyTex = AssetsManager::GetTexture(CRACKS_HEAVY_PATH);
 
 		// Safety Fallback
 		if (!gFloorTopTex)  gFloorTopTex = gFallbackTex;
@@ -104,7 +112,17 @@ namespace MapManager {
 		if (gCannonBaseTex == gFallbackTex)
 			std::cerr << "[MapManager] WARNING: missing cannonBase at " 
 			<< CANNON_BASE_PATH << "\n";
+
+		// Debug prints if missing cracks
+		if (!gCracksLightTex)
+			std::cerr << "[MapManager] WARNING: missing lightCracks at " << CRACKS_LIGHT_PATH << "\n";
+		if (!gCracksMediumTex)
+			std::cerr << "[MapManager] WARNING: missing mediumCracks at " << CRACKS_MEDIUM_PATH << "\n";
+		if (!gCracksHeavyTex)
+			std::cerr << "[MapManager] WARNING: missing heavyCracks at " << CRACKS_HEAVY_PATH << "\n";
 	}
+
+
 
 	void Unload() {
 		currentMap = nullptr;
@@ -153,6 +171,7 @@ namespace MapManager {
 				tile.texture = tileTexture;
 				tile.Type(static_cast<TileType>(type));
 				tile.tileId = { x,y };
+				tile.attribute = Attributes{};
 
 				if (tile.IsBlocks()) {
 					tile.attribute.DamageMultiplier(5);
@@ -177,18 +196,58 @@ namespace MapManager {
 			return;
 		}
 
+		// Small helper to clamp without relying on C++17 std::clamp (safe either way)
+		auto Clamp01 = [](float v) {
+			if (v < 0.0f) return 0.0f;
+			if (v > 1.0f) return 1.0f;
+			return v;
+			};
+
 		for (std::vector<Tile> const& row : map) {
 			for (Tile const& tile : row) {
 				if (tile.Type() == TILE_EMPTY) continue;
 				if (!drawCharacters && tile.IsCharacter()) continue;
-				AEGfxTexture* tex = gTileTex[tile.Type()]; if (!tex) continue;
 
-				GraphicsManager::DrawGameObject(
-					gTileTex[tile.Type()], 
-					GraphicsManager::CreateTransformMatrix(
-					tile.transform.pos.x, tile.transform.pos.y, 0.0f, tile.transform.size.x / 2.0f, tile.transform.size.y / 2.0f), 
-					Color{ 1,1,1,1 }
+				AEGfxTexture* baseTex = gTileTex[tile.Type()];
+				if (!baseTex) continue;
+
+				AEMtx33 tileMat = GraphicsManager::CreateTransformMatrix(
+					tile.transform.pos.x, tile.transform.pos.y, 0.0f,
+					tile.transform.size.x / 2.0f, tile.transform.size.y / 2.0f
 				);
+
+				// 1) Draw base tile
+				GraphicsManager::DrawGameObject(baseTex, tileMat, Color{ 1,1,1,1 });
+
+				// 2) Draw cracks overlay (only for ground + blocks)
+				if (tile.IsBlocks()) {
+					int hp = tile.attribute.Health();
+					int maxHp = tile.attribute.MaxHealth();
+
+					// Only show cracks once it has taken damage
+					if (maxHp > 0 && hp < maxHp) {
+						float damageFrac = 1.0f - (static_cast<float>(hp) / static_cast<float>(maxHp));
+						damageFrac = Clamp01(damageFrac);
+
+						// pick crack stage
+						AEGfxTexture* cracksTex = nullptr;
+						if (damageFrac < 0.33f) cracksTex = gCracksLightTex;
+						else if (damageFrac < 0.66f) cracksTex = gCracksMediumTex;
+						else cracksTex = gCracksHeavyTex;
+
+						// If one is missing, fallback to any available crack texture
+						if (!cracksTex) cracksTex = gCracksHeavyTex ? gCracksHeavyTex
+							: (gCracksMediumTex ? gCracksMediumTex : gCracksLightTex);
+
+						// draw overlay if we have it
+						if (cracksTex) {
+							float alpha = 0.20f + damageFrac * 0.65f; // 0.20 -> 0.85
+							if (alpha > 0.85f) alpha = 0.85f;
+
+							GraphicsManager::DrawGameObject(cracksTex, tileMat, Color{ 1,1,1,alpha });
+						}
+					}
+				}
 			}
 		}
 	}

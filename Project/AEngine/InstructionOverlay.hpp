@@ -1,5 +1,5 @@
-#ifndef UI_INSTRUCTIONSOVERLAY_HPP
-#define UI_INSTRUCTIONSOVERLAY_HPP
+#ifndef UI_INSTRUCTIONOVERLAY_HPP
+#define UI_INSTRUCTIONOVERLAY_HPP
 
 #include "pch.hpp"
 #include "GameStateManager.hpp"
@@ -12,4 +12,4 @@ namespace UIInstructionsOverlay {
     void Draw(GameStateManager::GameState current);
 }
 
-#endif // UI_INSTRUCTIONSOVERLAY_HPP
+#endif 

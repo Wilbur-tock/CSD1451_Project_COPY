@@ -1,7 +1,8 @@
 #include "Tile.hpp"
 
 Tile::Tile(AEVec2 _pos, AEGfxTexture* _texture, TileType _type)
-	: GameObject{ _pos, {defaultSize,defaultSize}, _texture }, type{ _type } {}
+	: GameObject{ _pos, {defaultSize,defaultSize}, _texture }, type{ _type } {
+}
 
 TileType Tile::Type() const { return type; }
 void Tile::Type(TileType newType) {
@@ -33,9 +34,12 @@ bool Tile::IsPlayer() const { return type == TILE_PLAYER_CHARACTER; }
 bool Tile::IsCharacter() const { return IsEnemy() || IsPlayer(); }
 
 void Tile::TakeDamage(int damage) {
-	if (!IsBlocks()) return; // ONLY DAMAGE TILE that is blocks type
+	// Only tower blocks take damage. Ground stays untouched.
+	if (!IsBlocks()) return;
+
 	attribute.TakeDamage(damage * attribute.DamageMultiplier());
 
+	// Blocks can be destroyed -> become empty
 	if (!attribute.IsActive()) {
 		Type(TileType::TILE_EMPTY);
 	}
