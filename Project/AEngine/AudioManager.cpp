@@ -12,7 +12,7 @@ namespace AudioManager {
     static Track gCurrentTrack = Track::None;
     static float gVolume = 1.0f;
 
-    // ✅ Put your music files here (WAV recommended for PlaySound)
+    // Put your music files here (WAV recommended for PlaySound)
     static const char* BGM_MAINMENU = "Assets/bgm_mainmenu.wav";
     static const char* BGM_LEVEL = "Assets/bgm_level.wav";
     static const char* BGM_CREDITS = "Assets/bgm_credits.wav";
