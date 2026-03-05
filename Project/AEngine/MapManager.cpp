@@ -16,6 +16,7 @@ namespace MapManager {
 	static const char* CANNON_BASE_PATH = "Assets/cannonBase.png"; //Cannon (for testing now, not actual sprite)
 	static const char* PLAYER_IDLE_PATH = "Assets/playerIdle.png";      //player
 	static const char* ENEMY_100_PATH = "Assets/enemy100.png";        //enemy (full hp)
+	//Cracks textures for blocks based on their health (light, medium, heavy)
 	static const char* CRACKS_LIGHT_PATH = "Assets/lightCracks.png";
 	static const char* CRACKS_MEDIUM_PATH = "Assets/mediumCracks.png";
 	static const char* CRACKS_HEAVY_PATH = "Assets/heavyCracks.png";

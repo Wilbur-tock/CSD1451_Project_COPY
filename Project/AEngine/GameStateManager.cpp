@@ -9,6 +9,7 @@
 #include "Credits.hpp"
 #include "PhysicsManager.hpp"
 #include "UIManager.hpp"
+#include "UICursor.hpp"
 //#include "InstructionOverlay.hpp"
 
 namespace GameStateManager {
@@ -106,6 +107,7 @@ namespace GameStateManager {
 
         // Load all resources
         AssetsManager::Load();
+        UICursor::Load();
         GraphicsManager::Load();
         LevelManager::Load();
         MapManager::Load();
@@ -282,6 +284,8 @@ namespace GameStateManager {
             debugText.Draw();
         }
 
+        UICursor::Draw();
+
         // Instructions overlay (draw last so it appears on top)
         if (Utils::isInstructionOn) {
             /*UIInstructionsOverlay::Draw(current);*/
@@ -295,6 +299,7 @@ namespace GameStateManager {
     void Exit() {
         MainMenu::Unload();
         AssetsManager::Unload();
+        UICursor::Unload();
         GraphicsManager::Unload();
         MapManager::Unload();
     }
