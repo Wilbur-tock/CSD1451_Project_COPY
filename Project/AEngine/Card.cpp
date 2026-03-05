@@ -33,7 +33,7 @@ void Card::Draw() {
 
     // Draw card object
     GraphicsManager::DrawScreenOverlay(cardTexture, GraphicsManager::CreateTransformMatrix(pos.x, pos.y, 0, size.x, size.y), cardColor);
-
+       
     // Draw text if the string is not a empty string
     if (!textObj.textContent.empty()) {
         textObj.Draw();

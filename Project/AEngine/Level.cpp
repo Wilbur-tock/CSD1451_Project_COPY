@@ -142,7 +142,10 @@ void Level::Update() {
 		}
 	}
 
-	activeCannon->Update();
+	if (!isAbilitySelectorOn) {
+		activeCannon->Update();
+	}
+
 	ToggleTurn();
 
 	// Update all Player character instance
@@ -160,6 +163,8 @@ void Level::Update() {
 
 	DrawLevel();
 	Debugger();
+
+	AbilitiesManager::playerAbilityController.AbilitySelector(isAbilitySelectorOn);
 }
 
 void Level::DrawLevel() {
@@ -205,6 +210,7 @@ void Level::SwitchCannon(bool _isPlayerTurn) {
 	isPlayerTurn = _isPlayerTurn;
 	if (isPlayerTurn) {
 		activeCannon = &playerCannon;
+		isAbilitySelectorOn = true;
 	}
 	else {
 		activeCannon = &enemyCannon;

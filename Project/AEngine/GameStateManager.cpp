@@ -9,7 +9,7 @@
 #include "Credits.hpp"
 #include "PhysicsManager.hpp"
 #include "UIManager.hpp"
-#include "InstructionOverlay.hpp"
+//#include "InstructionOverlay.hpp"
 
 namespace GameStateManager {
     Utils::FuncPtr gsLoad, gsIntialize, gsUpdate, gsDraw, gsFree, gsUnload;
@@ -117,8 +117,6 @@ namespace GameStateManager {
         CameraManager::camera.SetMoveSpeed(1500.0f);
 
         // Set world boundaries
-        float halfW = Config::SCREEN_WIDTH / 2.0f;
-        float halfH = Config::SCREEN_HEIGHT / 2.0f;
         CameraManager::camera.SetBounds(
             Config::WORLD_MIN_X,
             Config::WORLD_MAX_X,
@@ -286,7 +284,7 @@ namespace GameStateManager {
 
         // Instructions overlay (draw last so it appears on top)
         if (Utils::isInstructionOn) {
-            UIInstructionsOverlay::Draw(current);
+            /*UIInstructionsOverlay::Draw(current);*/
             return; // block camera movement while popup is open
         }
 

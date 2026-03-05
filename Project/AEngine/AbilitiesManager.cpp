@@ -4,6 +4,9 @@
 #include "Color.hpp"
 #include "UIManager.hpp"
 #include "Card.hpp"
+#include "Button.hpp"
+#include "AssetsManager.hpp"
+#include "CameraManager.hpp"
 
 namespace AbilitiesManager {
 	AbilityController playerAbilityController;
@@ -173,5 +176,43 @@ namespace AbilitiesManager {
 		hasEnemySelectedAbility = true;
 
 		std::cout << "[AbilitiesManager] Enemy selected ability: " << *currentAbility << '\n';
+	}
+
+	void AbilityController::AbilitySelector(bool &isOn) {
+		if (!isOn) return;
+
+		//std::cout << "Player Selecting Abilities:\n";
+		CameraManager::camera.SetState(CameraManager::CameraController::STATIC);
+
+		// Randomise Abilties
+		std::vector<std::string> abilities = { "Default Projectile", "Bomb Projectile", "Fast Projectile" };
+
+		UIManager::Panel background{ {1400.0f, 700.0f}, Color(0.6196f, 0.6196f, 0.6196f, 1.0f), Utils::RectMode::RECT_CENTER };
+		background.Draw();
+
+		AEVec2 cardSize{ 350.0f, 550.0f }; // width and height
+		float gap = (1400.0f - (cardSize.x * abilities.size())) / (abilities.size() + 1);
+		AEVec2 cardPos{ -cardSize.x * 1.5f - gap, cardSize.y / 2.0f };
+
+		int id = 1;
+
+		for (std::string abilityName : abilities) {
+			//std::cout << abilityName << '\n';
+			Button Card{ cardPos, cardSize, Color(1,0,0), AssetsManager::squareTexture, [this, id, &isOn]() { onClickAbilityCard(id, &isOn);  } };
+			Card.Update();
+			Card.Draw();
+			cardPos.x += cardSize.x + gap;
+			id++;
+		}
+
+
+	}
+
+	void AbilityController::onClickAbilityCard(int abilityID, bool *isOn) {
+		std::cout << "Clicked ability card" << abilityID << std::endl;
+		if (isOn) {
+			*isOn = false;
+		}
+		CameraManager::camera.SetState(CameraManager::CameraController::INPUT);
 	}
 }

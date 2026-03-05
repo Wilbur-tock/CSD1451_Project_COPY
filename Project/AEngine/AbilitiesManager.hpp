@@ -28,6 +28,10 @@ namespace AbilitiesManager {
 		// AI Member functions
 		void ResetAbilitySelection();
 		void AIAbilitySelection();
+
+		void AbilitySelector(bool& isOn);
+		void onClickAbilityCard(int abilityID, bool *isOn);
+
 	private:
 		Ability* currentAbility = nullptr;
 		std::vector<Ability*> activeAbilities; // vector containing all the type of abilities this controller has in its inventory

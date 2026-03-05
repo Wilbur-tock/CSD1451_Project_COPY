@@ -45,6 +45,7 @@ private:
 	bool isPlayerTurn = true; // is player or enemy turn to shoot
 	bool autoPlayOn = false; // used for debugging let enemy play ONLY
 	bool isSkippingEnemyTurn = false;
+	bool isAbilitySelectorOn = true;
 	float turnTimer = 0.0f;
 
 	std::vector<std::vector<Tile>> levelMap; // Level tile map
