@@ -10,7 +10,8 @@
 #include "PhysicsManager.hpp"
 #include "UIManager.hpp"
 #include "UICursor.hpp"
-//#include "InstructionOverlay.hpp"
+#include "AudioManager.hpp"
+#include "InstructionsOverlay.hpp"
 
 namespace GameStateManager {
     Utils::FuncPtr gsLoad, gsIntialize, gsUpdate, gsDraw, gsFree, gsUnload;
@@ -113,6 +114,7 @@ namespace GameStateManager {
         MapManager::Load();
         MainMenu::Load();
         Credits::Load();
+		AudioManager::Init();
 
         // Initialize camera controller
         CameraManager::camera.Init();
@@ -232,6 +234,22 @@ namespace GameStateManager {
                 if (gsIntialize != nullptr) {
                     gsIntialize();
                 }
+                switch (current) {
+                case GameState::MAIN_MENU:
+                    AudioManager::PlayBGM(AudioManager::Track::MainMenu);
+                    break;
+                case GameState::LEVEL_1:
+                case GameState::LEVEL_2:
+                    AudioManager::PlayBGM(AudioManager::Track::Level);
+                    break;
+                case GameState::CREDITS:
+                    AudioManager::PlayBGM(AudioManager::Track::Credits);
+                    break;
+                default:
+                    // Optional: stop music for other states
+                    // AudioManager::StopBGM();
+                    break;
+                }
 
                 // Apply camera immediately after state switch
                 CameraManager::camera.Update(0.0f);
@@ -288,7 +306,7 @@ namespace GameStateManager {
 
         // Instructions overlay (draw last so it appears on top)
         if (Utils::isInstructionOn) {
-            /*UIInstructionsOverlay::Draw(current);*/
+            UIInstructionsOverlay::Draw(current);
             return; // block camera movement while popup is open
         }
 
@@ -302,5 +320,6 @@ namespace GameStateManager {
         UICursor::Unload();
         GraphicsManager::Unload();
         MapManager::Unload();
+		AudioManager::Shutdown();
     }
 }

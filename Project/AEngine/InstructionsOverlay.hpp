@@ -1,5 +1,5 @@
-#ifndef UI_INSTRUCTIONOVERLAY_HPP
-#define UI_INSTRUCTIONOVERLAY_HPP
+#ifndef UI_INSTRUCTIONSOVERLAY_HPP
+#define UI_INSTRUCTIONSOVERLAY_HPP
 
 #include "pch.hpp"
 #include "GameStateManager.hpp"

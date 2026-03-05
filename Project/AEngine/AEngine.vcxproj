@@ -105,6 +105,7 @@ xcopy "$(SolutionDir)Extern\AlphaEngine\lib\fmod.dll" "$(OutDir)" /s /r /y /q</C
     <ClCompile Include="Ability.cpp" />
     <ClCompile Include="AssetsManager.cpp" />
     <ClCompile Include="Attributes.cpp" />
+    <ClCompile Include="AudioManager.cpp" />
     <ClCompile Include="Button.cpp" />
     <ClCompile Include="CameraManager.cpp" />
     <ClCompile Include="CannonManager.cpp" />
@@ -117,6 +118,7 @@ xcopy "$(SolutionDir)Extern\AlphaEngine\lib\fmod.dll" "$(OutDir)" /s /r /y /q</C
     <ClCompile Include="GameObject.cpp" />
     <ClCompile Include="GameStateManager.cpp" />
     <ClCompile Include="GraphicsManager.cpp" />
+    <ClCompile Include="InstructionsOverlay.cpp" />
     <ClCompile Include="TileIndex.cpp" />
     <ClCompile Include="Level.cpp" />
     <ClCompile Include="LevelManager.cpp" />
@@ -140,6 +142,7 @@ xcopy "$(SolutionDir)Extern\AlphaEngine\lib\fmod.dll" "$(OutDir)" /s /r /y /q</C
     <ClInclude Include="Ability.hpp" />
     <ClInclude Include="AssetsManager.hpp" />
     <ClInclude Include="Attributes.hpp" />
+    <ClInclude Include="AudioManager.hpp" />
     <ClInclude Include="Button.hpp" />
     <ClInclude Include="CameraManager.hpp" />
     <ClInclude Include="CannonManager.hpp" />
@@ -153,6 +156,7 @@ xcopy "$(SolutionDir)Extern\AlphaEngine\lib\fmod.dll" "$(OutDir)" /s /r /y /q</C
     <ClInclude Include="GameObject.hpp" />
     <ClInclude Include="GameStateManager.hpp" />
     <ClInclude Include="GraphicsManager.hpp" />
+    <ClInclude Include="InstructionsOverlay.hpp" />
     <ClInclude Include="TileIndex.hpp" />
     <ClInclude Include="Level.hpp" />
     <ClInclude Include="LevelManager.hpp" />
