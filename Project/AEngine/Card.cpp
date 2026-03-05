@@ -1,41 +1,29 @@
 #include "Card.hpp"
 #include "AssetsManager.hpp"
-#include "CollisionManager.hpp"
+#include "UIManager.hpp"
 #include "GraphicsManager.hpp"
+#include "Button.hpp"
 
-Card::Card(AEVec2 _pos, AEVec2 _size, Color _color, int abilityId, Utils::FuncPtr _onClick)
-    : pos{ _pos }, size{ _size }, color{ _color }, onClick{ _onClick } {
-}
-
-Card::Card(TextObject _textObj, AEVec2 _pos, AEVec2 _size, Color _color,
-    int abilityId, Utils::FuncPtr _onClick)
-    : textObj{ _textObj }, pos{ _pos }, size{ _size }, color{ _color }, onClick{ _onClick } {
-    
+Card::Card(std::string _name,
+	AEVec2 _pos,
+	Color _color,
+	AEGfxTexture* _cardtexture,
+	AEGfxTexture* _imageTexture,
+	Utils::FuncPtr _onClick,
+	AEVec2 _size) 
+	: button{ TextObject{ _name }, Utils::RectMode::RECT_BOTTOM_CENTER, _pos, _size, _color, _cardtexture, _onClick} {
 }
 
 void Card::Update() {
-    isHovered = CollisionManager::IsPointInRect(pos.x, pos.y, size.x, size.y);
-
-    if (isHovered) {
-        if (AEInputCheckTriggered(AEVK_LBUTTON) && onClick) {
-            onClick();
-        }
-    }
-
-    Draw();
+	button.Update();
 }
 
 void Card::Draw() {
-    Color cardColor = color;
-    if (isHovered) {
-        cardColor = Color{ color.Red(), color.Green(), color.Blue(), color.Alpha() * 0.5f }; // Assign hovered color
-    }
-
-    // Draw card object
-    GraphicsManager::DrawScreenOverlay(cardTexture, GraphicsManager::CreateTransformMatrix(pos.x, pos.y, 0, size.x, size.y), cardColor);
-       
-    // Draw text if the string is not a empty string
-    if (!textObj.textContent.empty()) {
-        textObj.Draw();
-    }
+	button.Draw();
+	
+	// Draw the image of the ability on top of the card
+	/*if (imageTexture) {
+		AEVec2 imagePos = { button.pos.x + (button.size.x - IMAGE_WIDTH) / 2.0f, button.pos.y + (button.size.y - IMAGE_HEIGHT) / 2.0f - 50.0f };
+		GraphicsManager::DrawWorldUI(imageTexture, GraphicsManager::CreateTransformMatrix(imagePos.x, imagePos.y, 0, IMAGE_WIDTH, IMAGE_HEIGHT), Color(1,1,1));
+	}*/
 }

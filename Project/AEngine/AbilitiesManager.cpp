@@ -198,9 +198,9 @@ namespace AbilitiesManager {
 
 		for (std::string abilityName : abilities) {
 			//std::cout << abilityName << '\n';
-			Button Card{ cardPos, cardSize, Color(1,0,0), AssetsManager::squareTexture, [this, id, &isOn]() { onClickAbilityCard(id, &isOn);  } };
-			Card.Update();
-			Card.Draw();
+			Card card{ abilityName, cardPos, Color(1,0,0), AssetsManager::squareTexture, AssetsManager::squareTexture, [this, id, &isOn]() { onClickAbilityCard(id, &isOn);  } };
+			card.Update();
+			card.Draw();
 			cardPos.x += cardSize.x + gap;
 			id++;
 		}
