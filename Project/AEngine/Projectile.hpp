@@ -53,7 +53,7 @@ public:
 	// Member functions
 
 	void Render();
-
+	// Check for inputs to activated PROJECTILE Abilities
 	void AbilityUpdate();
 	void MoveProjectile(float dt);
 	// Simulate the projectile physics of bouncing off the walls, checking if it is grounded

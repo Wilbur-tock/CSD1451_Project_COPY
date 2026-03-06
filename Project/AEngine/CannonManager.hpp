@@ -51,7 +51,7 @@ namespace CannonManager {
 		// Destroy projectile once it reached the end of its lifespan or out of the map bounds
 		// return true if projectile should be removed from activeProjectiles
 		bool DestroyProjectile(Projectile& projectile);
-		// UI to display the charging shot power bar */
+		// UI to display the charging shot power bar 
 
 		void SetCamera(bool isFollowingProjectile);
 		void DrawTrajectory();
@@ -62,7 +62,7 @@ namespace CannonManager {
 		float cannonAngle = 0.0f; // Angle of the cannon for the projectile to shoot from
 		bool isHoldingLeftClick = false; // player is holding left mouse click
 		bool canPlayerShoot = true; // can player shoot
-		bool hasShot = false; // projectile has been shot out and destroyed
+		bool isProjectileDestroyed = false; // projectile has been shot out and destroyed
 		bool resetCamWhenShooting = false; // When player press left mouse click, reset camera to position the cannon and unable to move the camera or not
 
 		// Cannon attributes

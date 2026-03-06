@@ -321,7 +321,7 @@ namespace CannonManager {
         for (Projectile& projectile : activeProjectiles) {
             if (!projectile.isActive) continue;
 
-            //projectile.AbilityUpdate();
+            projectile.AbilityUpdate();
 
             float dt = PhysicsManager::g_dt;
             // Increased the frequency of the collision check by using loops
@@ -421,7 +421,7 @@ namespace CannonManager {
             for (int i = 0; i < activeProjectiles.size(); i++) {
                 if (activeProjectiles[i].id == projToDestroy->id) {
                     activeProjectiles.erase(activeProjectiles.begin() + i);
-                    SetCamera(false);
+                    //SetCamera(false); // DISABLE to not allow camera to move back to the cannon after projectile is destroyed
                     std::cout << "[CannonManager] Remove projectile from vector. Active vector count: " << activeProjectiles.size() << '\n';
                 }
             }
@@ -502,9 +502,7 @@ namespace CannonManager {
             s32 mouseX, mouseY;
             AEInputGetCursorPosition(&mouseX, &mouseY);
 
-            //Projectile& selectedProjectile = projectiles[selectedProjectileId];
-
-            Ability* currentProj = isPlayerControlled ? abilityController->GetCurrentProjectile() : abilityController->GetCurrentAIProjectile();
+            Ability* currentAbility = isPlayerControlled ? abilityController->GetCurrentProjectile() : abilityController->GetCurrentAIProjectile();
 
             // Show cannon information
             std::string debugStr = "Cannon Manager Player:\nIs Active: "
@@ -512,11 +510,11 @@ namespace CannonManager {
                 + "\nPos x: " + Utils::FormatFloat(transform.pos.x, 2) + " y: " + Utils::FormatFloat(transform.pos.y, 2)
                 + "\nAngle: " + Utils::FormatFloat(cannonAngle * (180.0f / 3.14159265359), 2) + " " + Utils::FormatFloat(cannonAngle, 2);               
 
-            if (currentProj){
-                debugStr += +"\n\nSelected Projectile\nId: " + std::to_string(currentProj->GetProj().projectileId)
-                + "\nName: " + currentProj->GetName()
-                + "\nDamage: " + std::to_string(currentProj->GetProj().baseDamage)
-                + " Radius: " + std::to_string(currentProj->GetProj().radius);
+            if (currentAbility){
+                debugStr += +"\n\nSelected Projectile\nId: " + std::to_string(currentAbility->GetProj().projectileId)
+                + "\nName: " + currentAbility->GetName()
+                + "\nDamage: " + std::to_string(currentAbility->GetProj().baseDamage)
+                + " Radius: " + std::to_string(currentAbility->GetProj().radius);
             }
                 
             if (!isPlayerControlled) {
