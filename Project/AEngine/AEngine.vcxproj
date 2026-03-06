@@ -175,6 +175,10 @@ xcopy "$(SolutionDir)Extern\AlphaEngine\lib\fmod.dll" "$(OutDir)" /s /r /y /q</C
     <ClInclude Include="UIManager.hpp" />
     <ClInclude Include="Utils.hpp" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="..\Assets\Abils\Abilities.json" />
+    <None Include="..\Assets\Abils\AiAbilities.json" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
