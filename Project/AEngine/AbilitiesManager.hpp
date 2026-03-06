@@ -27,7 +27,7 @@ namespace AbilitiesManager {
 		Ability* GetCurrentProjectile() { return ProjectileSelected; }
 		Ability* GetCurrentAIProjectile() { return AIProjectileSelected; }
 		// AI Member functions
-		void ResetAbilitySelection();
+		void ResetAIAbilitySelection();
 		void AIAbilitySelection();
 
 		void AbilitySelector(bool& isOn);

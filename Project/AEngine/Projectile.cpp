@@ -104,14 +104,14 @@ void Projectile::SimulatePhysics(Tile const& tile) {
         }
     }
 }
-/*
+
 void Projectile::ConsumeAttackCharge() {
     if (--attackCharges <= 0) {
         attackCharges = 0;
         mode = ProjectileMode::IDLE;
     }
 }
-*/
+
 void Projectile::Destroy() {
     isActive = collisionTriggered = toBeDestroyed = false;
     timer = 0.0f;

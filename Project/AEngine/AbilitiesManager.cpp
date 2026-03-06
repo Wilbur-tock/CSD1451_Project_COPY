@@ -167,7 +167,7 @@ namespace AbilitiesManager {
 		return true;
 	}
 
-	void AbilityController::ResetAbilitySelection() { hasEnemySelectedAbility = false; }
+	void AbilityController::ResetAIAbilitySelection() { hasEnemySelectedAbility = false; }
 
 	void AbilityController::AIAbilitySelection() {
 		if (hasEnemySelectedAbility) return;

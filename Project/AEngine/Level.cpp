@@ -214,6 +214,7 @@ void Level::ToggleTurn() {
 		turnTimer = Config::CANNON_SWITCH_TURN_TIMER;
 	}
 
+	std::cout << turnTimer << '\n';
 	if (turnTimer > 0.0f) {
 		turnTimer -= PhysicsManager::g_dt;
 

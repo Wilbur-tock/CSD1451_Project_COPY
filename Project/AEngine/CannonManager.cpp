@@ -16,14 +16,14 @@
 namespace CannonManager {
     Cannon::Cannon(AEVec2 _pos, AEGfxTexture* _texture, TileIndex _tileId, AEVec2 _size, bool _isShootingRight, bool _isPlayerControlled)
         : GameObject(_pos, _size, _texture, _tileId, Color{ 1,1,1,1 }), isShootingRight{ _isShootingRight }, isPlayerControlled{ _isPlayerControlled } {
-        ProjectileSettings();
     }
 
     void Cannon::SetAbilityController(AbilitiesManager::AbilityController* controller) {
         abilityController = controller;
+        ProjectileSettings();
     }
 
-    bool Cannon::HasShot() const { return hasShot; }
+    bool Cannon::HasShot() const { return isProjectileDestroyed; }
     
     void Cannon::ProjectileSettings() {
         // Reset to default
@@ -85,17 +85,18 @@ namespace CannonManager {
     }
 
     void Cannon::ResetTurn() {
-        hasShot = false;
+        isProjectileDestroyed = false;
         SetCamera(false);
 
+        // Reselect AI ability
         if (!isPlayerControlled && abilityController) {
-            abilityController->ResetAbilitySelection();
+            abilityController->ResetAIAbilitySelection();
         }
     }
 
     void Cannon::SetTarget(Character* _target) {
         target = _target;
-        std::cout << "[CannonManager] Set Target" << '\n';
+        std::cout << "[CannonManager] Target set" << '\n';
     }
 
     bool Cannon::IsTargetAlive() {
@@ -111,9 +112,9 @@ namespace CannonManager {
     }
 
     void Cannon::EnemyAI() {
-        if (isActive || hasShot) return;
+        if (isActive || isProjectileDestroyed) return;
         if (!target) {
-            std::cout << "[CannonManager] Can't find any player character targets for the enemy to shoot!" << '\n';
+            std::cerr << "[CannonManager] Can't find any player character targets for the enemy to shoot!" << '\n';
             return;
         }
         if (!abilityController) {
@@ -125,17 +126,17 @@ namespace CannonManager {
             abilityController->AIAbilitySelection();
             EnemyAICalculation(target->transform.pos);
 
-            Ability* current = abilityController->GetCurrentAIProjectile();
-            std::cout << "[CannonManager] AIProjectileSelected is: " << (current ? current->GetName() : "NULL") << '\n';
-            if (current) {
-                int projId = current->GetProj().projectileId;
-                for (int i = 0; i < static_cast<int>(projectiles.size()); ++i) {
-                    if (projectiles[i].ProjectileId() == projId) {
-                        selectedProjectileId = i;
-                        break;
-                    }
-                }
-            }
+            //Ability* current = abilityController->GetCurrentAIProjectile();
+            //std::cout << "[CannonManager] AIProjectileSelected is: " << (current ? current->GetName() : "NULL") << '\n';
+            //if (current) {
+            //    int projId = current->GetProj().projectileId;
+            //    for (int i = 0; i < static_cast<int>(projectiles.size()); ++i) {
+            //        if (projectiles[i].ProjectileId() == projId) {
+            //            selectedProjectileId = i;
+            //            break;
+            //        }
+            //    }
+            //}
 
             // Set shoot timer to add a delay between the start of the enemy turn and enemy shooting the projectile out
             float minTimer = 1.5f;
@@ -259,6 +260,7 @@ namespace CannonManager {
             return;
         }
 
+        //TEMPORARY TO BE REMOVED
         if (isPlayerControlled) {
             // Change abilities based on keys using ID from your JSON
             if (AEInputCheckTriggered(AEVK_1)) abilityController->ChangeProjectile(1);
@@ -282,8 +284,6 @@ namespace CannonManager {
     void Cannon::ShootProjectile() {
         if (isActive) return;
 
-        isActive = true;
-
         // IMPORTANT: use a COPY here so we don't permanently modify the template projectile inside projectiles[].
         Projectile projectile = projectiles[selectedProjectileId];
         projectile.isActive = true;
@@ -296,10 +296,11 @@ namespace CannonManager {
         projectile.velocity.y = sin(cannonAngle) * shotPower;
         projectile.timer = Config::PROJECTILE_LIFESPAN;
 
+        // Add the these projectile to the active projectile list
         activeProjectiles.push_back(projectile);
-
         activeProjectiles.back().id = static_cast<int>(activeProjectiles.size() - 1);
 
+        // Set projectile ability effects here
         if (isPlayerControlled) {
             abilityController->UseProjectile();
         }
@@ -307,7 +308,8 @@ namespace CannonManager {
             abilityController->AIUseProjectile();
         }
 
-        SetCamera(true);
+        SetCamera(true); // Follow the projectile that is shot out of the cannon
+        isActive = true;
         std::cout << "[CannonManager] Projectile Fired!\n";
     }
 
@@ -444,6 +446,7 @@ namespace CannonManager {
         if (projectile.timer <= 0.0f || !projectile.IsInMapBounds()) {
             projectile.Destroy();
             isActive = false; // reset cannon back to false to allow player to shoot again after projectile been destroyed
+            isProjectileDestroyed = true;
             return true;
         }
         return false;
@@ -503,10 +506,9 @@ namespace CannonManager {
 
             Ability* currentProj = isPlayerControlled ? abilityController->GetCurrentProjectile() : abilityController->GetCurrentAIProjectile();
 
-
             // Show cannon information
             std::string debugStr = "Cannon Manager Player:\nIs Active: "
-                + std::string(isActive ? "true" : "false") + "\nHas Shot : " + static_cast<std::string>(hasShot ? "true" : "false")
+                + std::string(isActive ? "true" : "false") + "\nHas Shot : " + static_cast<std::string>(isProjectileDestroyed ? "true" : "false")
                 + "\nPos x: " + Utils::FormatFloat(transform.pos.x, 2) + " y: " + Utils::FormatFloat(transform.pos.y, 2)
                 + "\nAngle: " + Utils::FormatFloat(cannonAngle * (180.0f / 3.14159265359), 2) + " " + Utils::FormatFloat(cannonAngle, 2);               
 
