@@ -99,7 +99,7 @@ void Level::Initalize() {
 
 	enemyCannon = CannonManager::Cannon(enemyCannonStartPos, barrelTex, { 0,0 }, barrelHalfSize, false, false);
 	AbilitiesManager::AbilityController& enemyController = AbilitiesManager::enemyAbilityController;
-	enemyController.LoadAllAbilities();
+	enemyController.LoadAllAIAbilities();
 	enemyCannon.SetAbilityController(&enemyController);
 
 	// Reset level flow variables

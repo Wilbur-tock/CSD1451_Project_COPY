@@ -6,12 +6,13 @@
 #include "GameObject.hpp"
 #include "Attributes.hpp"
 #include "Tile.hpp"
+#include "AbilitiesManager.hpp"
+
+struct ProjectileModule;
 
 enum class ProjectileMode {
 	IDLE,
-	ATTACK,
-	BOMB,
-	FAST,
+	DAMAGE
 };
 
 class Projectile : public GameObject {
@@ -24,7 +25,9 @@ public:
 	Attributes attribute;
 
 	Projectile() = default;
-	Projectile(AEGfxTexture* _texture, ProjectileMode _mode = ProjectileMode::ATTACK, AEVec2 _pos = {0,0}, int _attackCharges = 1);
+	Projectile(AEGfxTexture* _texture, ProjectileMode _mode = ProjectileMode::DAMAGE, AEVec2 _pos = {0,0}, int _attackCharges = 1);
+
+	void InitializeProjectiles(const ProjectileModule& stats);
 
 	// Accessors
 
@@ -35,10 +38,8 @@ public:
 	void Mode(ProjectileMode newMode);
 	inline std::string ModeName() const {
 		switch (mode) {
-		case ProjectileMode::IDLE:		return "IDLE";
-		case ProjectileMode::ATTACK:	return "Attack Projectile";
-		case ProjectileMode::BOMB:		return "Bomb Projectile";
-		case ProjectileMode::FAST:		return "Fast Projectile";
+		case ProjectileMode::IDLE:		return "IDLE"; break;
+		case ProjectileMode::DAMAGE:	return "DAMAGE"; break;
 		default:						return "YOU NEED TO ADD A PROJECTILE NAME";
 		}
 	}
@@ -49,19 +50,19 @@ public:
 
 	void Render();
 
-	void AbilityUpdate();
+	//void AbilityUpdate();
 	void MoveProjectile(float dt);
 	// Simulate the projectile physics of bouncing off the walls, checking if it is grounded
 	void SimulatePhysics(Tile const& tile);
 	// Damage tiles based on projectile damage (Blocks & Enemy included)
 	void DamageTile(int x, int y);
-	void ConsumeAttackCharge();
+	//void ConsumeAttackCharge();
 	void Destroy();
 
 private:
 	static constexpr AEVec2 defaultSize{ 10,10 };
 	int projectileId = 0, attackCharges = 1;
-	ProjectileMode mode = ProjectileMode::ATTACK;
+	ProjectileMode mode = ProjectileMode::DAMAGE;
 };
 
 #endif // !PROJECTILE_HPP

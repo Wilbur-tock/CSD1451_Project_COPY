@@ -23,6 +23,7 @@ void Projectile::Render() {
     GraphicsManager::DrawGameObject(texture, mat, Color{ 0.5f, 0.5f, 0, 1 });
 }
 
+/*
 void Projectile::AbilityUpdate() {
     if (Mode() == ProjectileMode::IDLE || Mode() == ProjectileMode::ATTACK) return;
 
@@ -32,6 +33,24 @@ void Projectile::AbilityUpdate() {
             std::cout << "BOMB mode triggered";
         }
     }
+}
+*/
+
+void Projectile::InitializeProjectiles(const ProjectileModule& data) {
+    // 1. Set Identity
+    this->projectileId = data.projectileId;
+    this->mode = static_cast<ProjectileMode>(data.projectileId);
+
+    // 2. Set Stats directly from JSON data
+    // Total Damage = Base * Multiplier
+    float totalDamage = static_cast<float>(data.baseDamage) * data.damageAmp;
+    this->attribute.Damage(static_cast<int>(totalDamage));
+
+    // Set Radius directly
+    this->attribute.DamageRadius(data.radius);
+
+    // Set Charges
+    this->AttackCharges(data.charges);
 }
 
 void Projectile::MoveProjectile(float dt) {
@@ -87,14 +106,14 @@ void Projectile::SimulatePhysics(Tile const& tile) {
         }
     }
 }
-
+/*
 void Projectile::ConsumeAttackCharge() {
     if (--attackCharges <= 0) {
         attackCharges = 0;
         mode = ProjectileMode::IDLE;
     }
 }
-
+*/
 void Projectile::Destroy() {
     isActive = collisionTriggered = toBeDestroyed = false;
     timer = 0.0f;
@@ -151,7 +170,7 @@ void Projectile::DamageTile(int x, int y) {
 
     // Consume 1 attack charge if projectile has damaged a tile 
     if (hasDamageAnyTile) {
-        ConsumeAttackCharge();
+        //ConsumeAttackCharge();
 
         // Damage effect
         Tile& tileToDamage = (*MapManager::currentMap)[y][x];
