@@ -15,7 +15,7 @@
 
 AEGfxTexture* barrelTex = nullptr;
 
-Level::Level(std::string _levelName) : levelName{ _levelName } {}
+Level::Level(int _leveId) : levelId{ _leveId }, levelName{ "Level " + std::to_string(levelId + 1) }, levelFileName { "level" + std::to_string(levelId) } {}
 
 void Level::Load() {
 	levelMap.clear();
@@ -27,13 +27,13 @@ void Level::Load() {
 	enemies.reserve(reserveCount);
 	playerCharacters.reserve(reserveCount);
 
-	std::string filePath = "Assets/Map/" + levelName + ".txt";
+	std::string filePath = "Assets/Map/" + levelFileName + ".txt";
 	MapManager::ReadMapData(filePath, levelMap);
 
 	barrelTex = AssetsManager::GetTexture("Assets/cannonBarrel.png");
 	if (!barrelTex) barrelTex = AssetsManager::GetTexture("Assets/square.png");
 
-	std::cout << "[Level] Load " + levelName << '\n';
+	std::cout << "[Level] Load " + levelFileName << '\n';
 }
 
 void Level::Initalize() {
@@ -113,61 +113,79 @@ void Level::Initalize() {
 	CameraManager::camera.SetPosition(playerCannon.transform.pos);
 	CameraManager::camera.SetState(CameraManager::CameraController::INPUT);
 
-	std::cout << "[Level] Initialize " + levelName << std::endl;
+	std::cout << "[Level] Initialize " + levelFileName << std::endl;
 }
 
+bool prevIsAbilitySelectorOn = false;
+bool isLevelActive = true;
+float delayTimer = 0.0f, defaultDelayTimer = 0.5f;;
+
 void Level::Update() {
-	MapManager::RenderMap(levelMap, false);
+	isLevelActive = !isAbilitySelectorOn && !isHoveringUI && delayTimer <= 0.0f;
 
-	if (isSkippingEnemyTurn) { // Skipping enemy turn
+	if (isLevelActive) {
+		if (isSkippingEnemyTurn) { // Skipping enemy turn
+			if (!isPlayerTurn) {
+				SwitchCannon(true);
+			}
+		}
+		else { // Skipping enemy turn is off and autoPlayOn
+			if (autoPlayOn && isPlayerTurn) {
+				SwitchCannon(false);
+			}
+		}
+
 		if (!isPlayerTurn) {
-			SwitchCannon(true);
-		}
-	}
-	else { // Skipping enemy turn is off and autoPlayOn
-		if (autoPlayOn && isPlayerTurn) {
-			SwitchCannon(false);
-		}
-	}
-
-	if (!isPlayerTurn) {
-		if(!enemyCannon.IsTargetAlive()) {
-			// Find new target
-			for (Character& playerChars : playerCharacters) {
-				if (playerChars.attribute.IsActive()) {
-					enemyCannon.SetTarget(&playerChars);
-					break;
+			if(!enemyCannon.IsTargetAlive()) {
+				// Find new target
+				for (Character& playerChars : playerCharacters) {
+					if (playerChars.attribute.IsActive()) {
+						enemyCannon.SetTarget(&playerChars);
+						break;
+					}
 				}
 			}
 		}
-	}
 
-	if (!isAbilitySelectorOn) {
-		activeCannon->Update();
-	}
+		if (activeCannon) {
+			activeCannon->Update();
+		}
 
-	ToggleTurn();
+		ToggleTurn();
 
-	// Update all Player character instance
-	bool squatNow = isPlayerTurn && AEInputCheckCurr(AEVK_LBUTTON);
+		// Update all Player character instance
+		bool squatNow = isPlayerTurn && AEInputCheckCurr(AEVK_LBUTTON);
 
-	for (Character& playerChar : playerCharacters) {
-		playerChar.SetSquatAnimation(squatNow);
-		playerChar.Update();
-	}
+		for (Character& playerChar : playerCharacters) {
+			playerChar.SetSquatAnimation(squatNow);
+			playerChar.Update();
+		}
 
-	// Update all enemy instance
-	for (Character& enemy : enemies) {
-		enemy.Update();
+		// Update all enemy instance
+		for (Character& enemy : enemies) {
+			enemy.Update();
+		}
 	}
 
 	DrawLevel();
-	Debugger();
-
+	// Need to be below DrawLevel to ensure that the Ability Selector UI is shows up infront of the level
+	prevIsAbilitySelectorOn = isAbilitySelectorOn;
 	AbilitiesManager::playerAbilityController.AbilitySelector(isAbilitySelectorOn);
+
+	if (isAbilitySelectorOn != prevIsAbilitySelectorOn) {
+		delayTimer = defaultDelayTimer;
+	}
+
+	if (delayTimer > 0.0f) {
+		delayTimer -= PhysicsManager::g_dt;
+	}
+
+	Debugger();
 }
 
 void Level::DrawLevel() {
+	MapManager::RenderMap(levelMap, false);
+
 	// Rendering of assets and UI
 	playerCannon.Render();
 	enemyCannon.Render();

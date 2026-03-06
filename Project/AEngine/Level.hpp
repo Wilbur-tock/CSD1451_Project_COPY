@@ -14,7 +14,7 @@
 // instance of ALL player and enemy cannon objects
 class Level {
 public:
-	Level(std::string levelName);
+	Level(int _leveId);
 
 	// Read level map data and load level resources
 	void Load();
@@ -36,7 +36,9 @@ public:
 	Character* FindEnemyCharacterObj(int characterId);
 	Character* FindPlayerCharacterObj(int characterId);
 private:
+	int levelId = 0;
 	std::string levelName;
+	std::string levelFileName;
 	TextObject debugText;
 	CannonManager::Cannon *activeCannon = nullptr; // pointer to the active instance of the cannon object 
 	CannonManager::Cannon playerCannon; // instance of the player cannon
@@ -46,6 +48,7 @@ private:
 	bool autoPlayOn = false; // used for debugging let enemy play ONLY
 	bool isSkippingEnemyTurn = false;
 	bool isAbilitySelectorOn = true;
+	bool isHoveringUI = false;
 	float turnTimer = 0.0f;
 
 	std::vector<std::vector<Tile>> levelMap; // Level tile map

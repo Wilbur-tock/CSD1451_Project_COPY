@@ -16,14 +16,11 @@
 namespace CannonManager {
     Cannon::Cannon(AEVec2 _pos, AEGfxTexture* _texture, TileIndex _tileId, AEVec2 _size, bool _isShootingRight, bool _isPlayerControlled)
         : GameObject(_pos, _size, _texture, _tileId, Color{ 1,1,1,1 }), isShootingRight{ _isShootingRight }, isPlayerControlled{ _isPlayerControlled } {
-        //ProjectileSettings();
+        ProjectileSettings();
     }
 
     void Cannon::SetAbilityController(AbilitiesManager::AbilityController* controller) {
         abilityController = controller;
-        if (abilityController) {
-            ProjectileSettings();
-        }
     }
 
     bool Cannon::HasShot() const { return hasShot; }
@@ -41,7 +38,7 @@ namespace CannonManager {
             Projectile templateProj(AssetsManager::circleTexture);
 
             // This is where you pass the data from the 'Ability' to the 'Projectile'
-            templateProj.InitializeProjectiles(abil.GetProj());
+            templateProj.SetProjectileStats(abil.GetProj());
 
             projectiles.push_back(templateProj);
         }
@@ -61,10 +58,6 @@ namespace CannonManager {
     }
     
     void Cannon::Update() {
-        SelectProjectileAbility();
-        ChargeShot();
-        UpdateProjectile();
-        Debugger();
         if (isPlayerControlled) {
             float worldMouseX = 0, worldMouseY = 0;
             Utils::GetWorldMousePos(worldMouseX, worldMouseY);
@@ -79,6 +72,11 @@ namespace CannonManager {
         else {
             EnemyAI();
         }
+
+        SelectProjectileAbility();
+        ChargeShot();
+        UpdateProjectile();
+        Debugger();
     }
 
     void Cannon::Render() {
@@ -128,7 +126,7 @@ namespace CannonManager {
             EnemyAICalculation(target->transform.pos);
 
             Ability* current = abilityController->GetCurrentAIProjectile();
-            std::cout << "[EnemyAI] AIProjectileSelected is: " << (current ? current->GetName() : "NULL") << '\n';
+            std::cout << "[CannonManager] AIProjectileSelected is: " << (current ? current->GetName() : "NULL") << '\n';
             if (current) {
                 int projId = current->GetProj().projectileId;
                 for (int i = 0; i < static_cast<int>(projectiles.size()); ++i) {
@@ -262,7 +260,6 @@ namespace CannonManager {
         }
 
         if (isPlayerControlled) {
-
             // Change abilities based on keys using ID from your JSON
             if (AEInputCheckTriggered(AEVK_1)) abilityController->ChangeProjectile(1);
             if (AEInputCheckTriggered(AEVK_2)) abilityController->ChangeProjectile(2);
@@ -317,36 +314,40 @@ namespace CannonManager {
     void Cannon::UpdateProjectile() {
         if (activeProjectiles.empty()) return;
 
-        // IMPORTANT:
-        // Never erase from a std::vector while range-for iterating it.
-        // MSVC debug runtime can abort() due to invalidated iterators.
-        for (size_t i = 0; i < activeProjectiles.size(); /* manual increment */) {
-            Projectile& projectile = activeProjectiles[i];
-            if (!projectile.isActive) { ++i; continue; }
+        std::vector<Projectile*> projPtrToDestroy;
+
+        for (Projectile& projectile : activeProjectiles) {
+            if (!projectile.isActive) continue;
 
             //projectile.AbilityUpdate();
 
             float dt = PhysicsManager::g_dt;
+            // Increased the frequency of the collision check by using loops
+            // ensuring faster moving projectiles are check for collision multiple times
+            // to ensure that the GHOSTING of block bug does not happen
+            // Using sub_steps to ensure that it still moving at a per frame rate time (dt or 1/10 dt but 10 loops) even though it is looping
             const int SUB_STEPS = 10;
             float subDt = dt / SUB_STEPS;
 
             for (int step = 0; step < SUB_STEPS; ++step) {
+                // Set movement first
                 projectile.MoveProjectile(subDt);
                 projectile.isGrounded = false;
 
+                // Check for collision in a 3x3 area with the projectile
                 int gridX = 0, gridY = 0;
                 Utils::GetGridIndex(gridX, gridY, projectile.transform.pos);
 
                 float radius = projectile.transform.size.x / 2.0f;
                 float bias = 0.25f;
                 int minX = gridX - 1, minY = gridY - 1, maxX = gridX + 1, maxY = gridY + 1;
-
                 for (int y = minY; y <= maxY; ++y) {
                     for (int x = minX; x <= maxX; ++x) {
                         if (Utils::IsGridIndexOutOfBounds(x, y)) continue;
 
                         Tile& tile = (*MapManager::currentMap)[y][x];
 
+                        // Checking collision of the projectile with the tile blocks
                         if (tile.IsBlocks() || tile.IsGround() || tile.IsEnemy()) {
                             if (CollisionManager::AreCircleSquareIntersecting(
                                 tile.transform.pos.x, tile.transform.pos.y, tile.transform.size.x, tile.transform.size.y,
@@ -362,6 +363,7 @@ namespace CannonManager {
                                     projectile.DamageTile(x, y);
                                     projectile.isCollisionActive = true;
 
+                                    // If the projectile hit something, REDUCE the velocity by a percentage
                                     float percentage = 0.2f;
                                     projectile.velocity.x *= percentage;
                                     projectile.velocity.y *= percentage;
@@ -371,7 +373,9 @@ namespace CannonManager {
                     }
                 }
 
+                // SECONDARY CHECK IF THE PROJECTILE IS GROUNDED OR NOT
                 if (!projectile.isGrounded) {
+                    // Only and MUST check 2x3 for additonal checks
                     for (int y = gridY; y <= maxY; ++y) {
                         for (int x = minX; x <= maxX; ++x) {
                             if (Utils::IsGridIndexOutOfBounds(x, y)) continue;
@@ -384,6 +388,8 @@ namespace CannonManager {
                                 float tileLeft = tile.transform.pos.x - halfW;
                                 float tileRight = tile.transform.pos.x + halfW;
 
+                                // Check if projectile is resting on top of this tile by checking the projectile x-axis is within the tile x-axis
+                                // and its y-axis is the same +- bias as the tile + projectile radius
                                 if (projectile.transform.pos.x >= tileLeft - radius &&
                                     projectile.transform.pos.x <= tileRight + radius &&
                                     std::abs(projectile.transform.pos.y - (tileTop + radius)) < bias) {
@@ -398,27 +404,32 @@ namespace CannonManager {
                 }
             }
 
-            projectile.Render();
-            bool shouldRemove = DestroyProjectile(projectile);
-
-            if (shouldRemove) {
-                activeProjectiles.erase(activeProjectiles.begin() + static_cast<std::vector<Projectile>::difference_type>(i));
-
-                if (activeProjectiles.empty()) {
-                    isActive = false;
-                    hasShot = true;
-                    SetCamera(false);
-                }
-                continue; // do NOT increment i (vector shifted)
+            // Add to projectile to be destroyed list if true
+            if (DestroyProjectile(projectile)) {
+                projPtrToDestroy.push_back(&projectile);
             }
+            projectile.Render();
+        }
 
-            ++i;
+        //Remove projectiles from the active projectiles list return if vector to destroy is empty
+        if (projPtrToDestroy.empty()) return;
+
+        for (Projectile* projToDestroy : projPtrToDestroy) {
+            // Find the index containing the projectile and erase from the active ammo vector
+            for (int i = 0; i < activeProjectiles.size(); i++) {
+                if (activeProjectiles[i].id == projToDestroy->id) {
+                    activeProjectiles.erase(activeProjectiles.begin() + i);
+                    SetCamera(false);
+                    std::cout << "[CannonManager] Remove projectile from vector. Active vector count: " << activeProjectiles.size() << '\n';
+                }
+            }
         }
     }
 
     bool Cannon::DestroyProjectile(Projectile & projectile) {
         float speedSq = (projectile.velocity.x * projectile.velocity.x) + (projectile.velocity.y * projectile.velocity.y);
 
+        // Start timer if it going to be destroy and projectile stops moving
         if (projectile.toBeDestroyed) {
             projectile.timer -= 1.0f * PhysicsManager::g_dt;
         }
@@ -429,12 +440,12 @@ namespace CannonManager {
             }
         }
 
-        if (projectile.timer <= 0.0f || !projectile.IsInMapBoundsX()) {
+        // Destroy projectile
+        if (projectile.timer <= 0.0f || !projectile.IsInMapBounds()) {
             projectile.Destroy();
-            std::cout << "[CannonManager] Projectile destroyed\n";
+            isActive = false; // reset cannon back to false to allow player to shoot again after projectile been destroyed
             return true;
         }
-
         return false;
     }
 

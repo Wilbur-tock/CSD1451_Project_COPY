@@ -23,7 +23,6 @@ void Projectile::Render() {
     GraphicsManager::DrawGameObject(texture, mat, Color{ 0.5f, 0.5f, 0, 1 });
 }
 
-/*
 void Projectile::AbilityUpdate() {
     if (Mode() == ProjectileMode::IDLE || Mode() == ProjectileMode::ATTACK) return;
 
@@ -34,9 +33,8 @@ void Projectile::AbilityUpdate() {
         }
     }
 }
-*/
 
-void Projectile::InitializeProjectiles(const ProjectileModule& data) {
+void Projectile::SetProjectileStats(ProjectileModule const& data) {
     // 1. Set Identity
     this->projectileId = data.projectileId;
     this->mode = static_cast<ProjectileMode>(data.projectileId);
@@ -47,7 +45,7 @@ void Projectile::InitializeProjectiles(const ProjectileModule& data) {
     this->attribute.Damage(static_cast<int>(totalDamage));
 
     // Set Radius directly
-    this->attribute.DamageRadius(data.radius);
+    this->attribute.DamageRadius(static_cast<int>(data.radius));
 
     // Set Charges
     this->AttackCharges(data.charges);
@@ -170,7 +168,7 @@ void Projectile::DamageTile(int x, int y) {
 
     // Consume 1 attack charge if projectile has damaged a tile 
     if (hasDamageAnyTile) {
-        //ConsumeAttackCharge();
+        ConsumeAttackCharge();
 
         // Damage effect
         Tile& tileToDamage = (*MapManager::currentMap)[y][x];
