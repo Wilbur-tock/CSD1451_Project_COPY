@@ -196,6 +196,21 @@ namespace AbilitiesManager {
 		// Randomise Abilties
 		std::vector<std::string> abilities = { "Default Projectile", "Bomb Projectile", "Fast Projectile" };
 
+		// 2 offensive abilities for the player to choose from
+		// 1 defensive ability for the player to choose from
+
+		// randomise the attack abilities
+		
+		std::vector<Ability> abilitiesVec = {};
+
+		abilitiesVec.push_back(offensiveAbilities[0]);
+		abilitiesVec.push_back(offensiveAbilities[1]);
+		abilitiesVec.push_back(defensiveAbilities[0]);
+		
+		if (abilitiesVec.size() != 3) {
+			std::cerr << "[AbilitiesManager] Incorrect abilities to display in selector!" << std::endl;
+		}
+
 		UIManager::Panel background{ {1400.0f, 700.0f}, Color(0.6196f, 0.6196f, 0.6196f, 1.0f), Utils::RectMode::RECT_CENTER };
 		background.Draw();
 
@@ -205,9 +220,9 @@ namespace AbilitiesManager {
 
 		int id = 1;
 
-		for (std::string abilityName : abilities) {
+		for (Ability ability : abilitiesVec) {
 			//std::cout << abilityName << '\n';
-			Card card{ abilityName, cardPos, Color(1,0,0), AssetsManager::squareTexture, AssetsManager::squareTexture, [this, id, &isOn]() { onClickAbilityCard(id, &isOn);  } };
+			Card card{ ability.GetName(), cardPos, Color(1,0,0), AssetsManager::squareTexture, AssetsManager::squareTexture, [this, id, &isOn]() { onClickAbilityCard(id, &isOn);  }};
 			card.Update();
 			card.Draw();
 			cardPos.x += cardSize.x + gap;

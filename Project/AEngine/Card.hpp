@@ -36,6 +36,7 @@ public:
 
 private:
 	std::string name;
+	AEVec2 pos{ 0,0 };
 	Button button; 
 	AEGfxTexture* imageTexture = nullptr;
 };
