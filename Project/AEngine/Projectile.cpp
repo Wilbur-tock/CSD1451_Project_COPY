@@ -5,6 +5,8 @@
 #include "AssetsManager.hpp"
 #include "LevelManager.hpp"
 #include "Character.hpp"
+#include "CollisionManager.hpp"
+#include "PhysicsManager.hpp"
 
 Projectile::Projectile(AEGfxTexture* _texture, ProjectileMode _mode, AEVec2 _pos, int _attackCharges)
     : GameObject(_pos, defaultSize, _texture), timer{ 0.0f }, mode(_mode), attackCharges{_attackCharges} {
@@ -36,19 +38,19 @@ void Projectile::AbilityUpdate() {
 
 void Projectile::SetProjectileStats(ProjectileModule const& data) {
     // 1. Set Identity
-    this->projectileId = data.projectileId;
-    this->mode = static_cast<ProjectileMode>(data.projectileId);
+    projectileId = data.projectileId;
+    mode = static_cast<ProjectileMode>(data.projectileId);
 
     // 2. Set Stats directly from JSON data
     // Total Damage = Base * Multiplier
     float totalDamage = static_cast<float>(data.baseDamage) * data.damageAmp;
-    this->attribute.Damage(static_cast<int>(totalDamage));
+    attribute.Damage(static_cast<int>(totalDamage));
 
     // Set Radius directly
-    this->attribute.DamageRadius(static_cast<int>(data.radius));
+    attribute.DamageRadius(static_cast<int>(data.radius));
 
     // Set Charges
-    this->AttackCharges(data.charges);
+    AttackCharges(1);
 }
 
 void Projectile::MoveProjectile(float dt) {
@@ -65,7 +67,7 @@ void Projectile::MoveProjectile(float dt) {
     transform.pos.y += velocity.y * dt;
 }
 
-void Projectile::SimulatePhysics(Tile const& tile) {
+void Projectile::ProjectilePhysics(Tile const& tile) {
     float bias = 0.1f, radius = transform.size.y * 0.5f;
     float halfH = tile.transform.size.y * 0.5f, halfW = tile.transform.size.x * 0.5f;
     // Bounds
@@ -74,34 +76,11 @@ void Projectile::SimulatePhysics(Tile const& tile) {
     float tileLeft = tile.transform.pos.x - halfW;
     float tileRight = tile.transform.pos.x + halfW;
 
-    float overlapX = (radius + tile.transform.size.x / 2.0f) - std::abs(transform.pos.x - tile.transform.pos.x);
-    float overlapY = (radius + tile.transform.size.y / 2.0f) - std::abs(transform.pos.y - tile.transform.pos.y);
-
-    if (overlapX < (overlapY + bias)) {
-        float bounce = -0.1f;
-        // Resolve X (Wall) - Hit a side wall
-        if (transform.pos.x < tile.transform.pos.x) {
-            transform.pos.x = tileLeft - radius - 0.1f; // Nudge out
-            if (velocity.x > 0) velocity.x *= bounce;
-        }
-        else {
-            transform.pos.x = tileRight + radius + 0.1f; // Nudge out
-            if (velocity.x < 0) velocity.x *= bounce;
-        }
+    if(CollisionManager::IsHorizontalCollision(transform, tile.transform)) {
+        PhysicsManager::ResolveHorizontalCollision(transform, velocity, tile.transform);
     }
     else {
-        // Resolve Y (Floor/Ceiling) - Hit the top or bottom of the block
-        if (transform.pos.y > tile.transform.pos.y) {
-            transform.pos.y = tileTop + radius; // Flush to the tile
-            isGrounded = true;
-            velocity.y *= -0.1f; // Lose 80% of its velocity
-            velocity.x *= 0.75f; // ADD FRICTION
-            if (std::abs(velocity.y) < Config::MINIMUM_VELOCITY) velocity.y = 0; // prevent tiny velocity
-        }
-        else { // If it hits the celling fall down
-            transform.pos.y = tileBottom - radius;
-            velocity.y *= -0.1f; // Lost 60% of its velocity
-        }
+        PhysicsManager::ResolveVerticalCollision(transform, velocity, isGrounded, tile.transform);
     }
 }
 
@@ -123,7 +102,8 @@ void Projectile::DamageTile(int x, int y) {
     int blastRadius = attribute.DamageRadius();
 
     std::cout << "===================== [Projectile] Damaging tiles ====================="
-        << "\n[Projectile] Damage Radius: " << blastRadius << " Center Tile Id: " << x << " " << y << '\n';
+        << "\n[Projectile] Damage Radius: " << blastRadius << " Center Tile Id: " << x << " " << y 
+        << "\n[Projectile] Remaining Attack Charges: " << AttackCharges() << '\n';
 
     int minDX = x, minDY = y, maxDX = x, maxDY = y;
     // Increased damage radius based on blast radius

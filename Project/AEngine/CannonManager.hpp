@@ -22,7 +22,9 @@ namespace CannonManager {
 
 		// Member Functions
 
-		// Reset values of the cannon ammo vectors to be in its default state
+		// Initialize all the different type of projectile abilities to the CANNON CLASS
+		// Switch between the projectileId to choose the different type of projectile abilities
+		// 0 - Default projectile, 1 - Nuke Projectile , etc
 		void ProjectileSettings();
 		// Calculate the angle of the cannon based on the mouse position, render the cannon sprite
 		// Calculate the charge shot power and update any shot projectiles

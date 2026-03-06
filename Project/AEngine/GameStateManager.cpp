@@ -177,41 +177,33 @@ namespace GameStateManager {
                 // Update Game state function pointers based on current state
                 switch (current) {
                 case GameState::MAIN_MENU:
-                    gsLoad = MainMenu::Load;
                     gsIntialize = MainMenu::Initialize;
                     gsUpdate = MainMenu::Update;
                     gsDraw = MainMenu::Draw;
                     gsFree = MainMenu::Free;
-                    gsUnload = MainMenu::Unload;
                     break;
 
                 case GameState::MAP_EDITOR:
-                    gsLoad = nullptr;
                     gsIntialize = MapEditor::Initialize;
                     gsUpdate = MapEditor::Update;
                     gsDraw = nullptr;
                     gsFree = MapEditor::Exit;
-                    gsUnload = nullptr;
                     break;
 
                 case GameState::LEVEL_1:
                 case GameState::LEVEL_2:
                     LevelManager::SelectLevel(static_cast<int>(current) - static_cast<int>(GameState::LEVEL_1));
-                    gsLoad = LevelManager::LoadLevel;
                     gsIntialize = LevelManager::InitializeLevel;
                     gsUpdate = LevelManager::UpdateLevel;
                     gsDraw = nullptr;
                     gsFree = LevelManager::FreeLevel;
-                    gsUnload = nullptr;
                     break;
 
                 case GameState::CREDITS:
-                    gsLoad = Credits::Load;
                     gsIntialize = Credits::Initialize;
                     gsUpdate = Credits::Update;
                     gsDraw = Credits::Draw;
                     gsFree = Credits::Free;
-                    gsUnload = Credits::Unload;
                     break;
 
                 case GameState::RESTART:
@@ -224,11 +216,6 @@ namespace GameStateManager {
 
                 default:
                     break;
-                }
-
-                // ✅ IMPORTANT: call gsLoad before gsInitialize
-                if (gsLoad != nullptr) {
-                    gsLoad();
                 }
 
                 if (gsIntialize != nullptr) {

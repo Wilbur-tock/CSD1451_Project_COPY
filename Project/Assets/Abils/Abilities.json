@@ -11,7 +11,7 @@
   },
 
   {
-    "Name": "Vanilla",
+    "Name": "Default Projectile",
     "Type": 2,
     "Tier": 1,
     "Projectile_Stats": {
@@ -19,7 +19,7 @@
       "Damage_Amp": 1.0,
       "Base_Damage": 10,
       "Radius": 1,
-      "Charges": 100,
+      "Charges": 1,
       "unlimited_charges": true
     }
   },
@@ -33,7 +33,7 @@
       "Damage_Amp": 2.0,
       "Base_Damage": 20,
       "Radius": 2,
-      "Charges": 10,
+      "Charges": 1,
       "unlimited_charges": false
     }
   },
@@ -47,7 +47,7 @@
       "Damage_Amp": 4.0,
       "Base_Damage": 30,
       "Radius": 5,
-      "Charges": 10,
+      "Charges": 1,
       "unlimited_charges": false
     }
   },
@@ -61,7 +61,7 @@
       "Damage_Amp": 50.0,
       "Base_Damage": 300,
       "Radius": 50,
-      "Charges": 10,
+      "Charges": 1,
       "unlimited_charges": false
     }
   },

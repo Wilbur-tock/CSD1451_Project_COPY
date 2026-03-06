@@ -349,27 +349,25 @@ namespace CannonManager {
 
                         Tile& tile = (*MapManager::currentMap)[y][x];
 
-                        // Checking collision of the projectile with the tile blocks
-                        if (tile.IsBlocks() || tile.IsGround() || tile.IsEnemy()) {
-                            if (CollisionManager::AreCircleSquareIntersecting(
-                                tile.transform.pos.x, tile.transform.pos.y, tile.transform.size.x, tile.transform.size.y,
-                                projectile.transform.pos.x, projectile.transform.pos.y, radius))
-                            {
-                                projectile.collisionTriggered = true;
+                        projectile.collisionTriggered = false;
+                        if (tile.IsEmpty()) continue;
 
-                                if (projectile.isCollisionActive) {
-                                    projectile.SimulatePhysics(tile);
-                                }
+                        // Checking collision of the projectile with the tile blocks that is collidable
+                        if (CollisionManager::AreCircleSquareIntersecting(projectile.transform, tile.transform)) {
+                            projectile.collisionTriggered = true;
 
-                                if (projectile.collisionTriggered) {
-                                    projectile.DamageTile(x, y);
-                                    projectile.isCollisionActive = true;
+                            if (projectile.isCollisionActive) {
+                                projectile.ProjectilePhysics(tile);
+                            }
 
-                                    // If the projectile hit something, REDUCE the velocity by a percentage
-                                    float percentage = 0.2f;
-                                    projectile.velocity.x *= percentage;
-                                    projectile.velocity.y *= percentage;
-                                }
+                            if (projectile.collisionTriggered) {
+                                projectile.DamageTile(x, y);
+                                projectile.isCollisionActive = true;
+
+                                // If the projectile hit something, REDUCE the velocity by a percentage
+                                float percentage = 0.5f;
+                                projectile.velocity.x *= percentage;
+                                projectile.velocity.y *= percentage;
                             }
                         }
                     }
@@ -521,18 +519,20 @@ namespace CannonManager {
                 debugStr += "\nAI Shoot Timer: " + Utils::FormatFloat(aiShootTimer, 2);
             }
 
-            // Show projectile that is shoot out information
+            // Print projectile that is shoot out information
             if (activeProjectiles.size() > 0) {
-                Projectile& projectile = activeProjectiles.back();
+                Projectile const& projectile = activeProjectiles.back();
                 debugStr += "\n\nActive Projectile " + std::to_string(static_cast<int>(projectile.Mode())) + "\nSize: x: "
                     + Utils::FormatFloat(projectile.transform.size.x, 2) + " y: " + Utils::FormatFloat(projectile.transform.size.y, 2)
                     + "\nPos x: " + Utils::FormatFloat(projectile.transform.pos.x, 2) + " y " + Utils::FormatFloat(projectile.transform.pos.y, 2)
                     + "\nVelocity x: " + Utils::FormatFloat(activeProjectiles.back().velocity.x, 2) + " y: " + Utils::FormatFloat(projectile.velocity.y, 2)
-                    + "\nGrounded: " + std::string(projectile.isGrounded ? "true" : "false")
-                    + "\nTo Be Destroyed: " + std::string(projectile.toBeDestroyed ? "true" : "false")
+                    + "\nGrounded: " + static_cast<std::string>(projectile.isGrounded ? "true" : "false")
+                    + "\nTo Be Destroyed: " + static_cast<std::string>(projectile.toBeDestroyed ? "true" : "false")
                     + "\nTimer: " + Utils::FormatFloat(projectile.timer, 2)
                     + "\nAttack Charges: " + std::to_string(projectile.AttackCharges())
-                    + "\nDamage Radius: " + std::to_string(projectile.attribute.DamageRadius());
+                    + "\nDamage Radius: " + std::to_string(projectile.attribute.DamageRadius())
+                    + "\nIsCollisionActive: " + static_cast<std::string>(projectile.isCollisionActive ? "true" : "false")
+                    + "\nCollisionTriggered: " + static_cast<std::string>(projectile.collisionTriggered ? "true" : "false");
             }
 
             TextObject textObj{ debugStr, Utils::debuggerInfo.first * 0.8f, Utils::debuggerInfo.second, {0.5f, 0.99f} };

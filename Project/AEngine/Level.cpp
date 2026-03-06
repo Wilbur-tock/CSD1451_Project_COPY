@@ -15,7 +15,8 @@
 
 AEGfxTexture* barrelTex = nullptr;
 
-Level::Level(int _leveId) : levelId{ _leveId }, levelName{ "Level " + std::to_string(levelId + 1) }, levelFileName { "level" + std::to_string(levelId) } {}
+Level::Level(int _leveId) 
+	: levelId{ _leveId }, levelName{ "Level " + std::to_string(levelId + 1) }, levelFileName { "level" + std::to_string(levelId) } {}
 
 void Level::Load() {
 	levelMap.clear();
@@ -39,9 +40,10 @@ void Level::Load() {
 void Level::Initalize() {
 	MapManager::currentMap = &levelMap;
 
+	// Start of the turn should always be player turn
 	activeCannon = &playerCannon;
 	isPlayerTurn = true;
-	turnTimer = 0.0f;
+	switchTurnCooldown = 0.0f;
 
 	AEVec2 playerCannonStartPos = { 0,0 }, enemyCannonStartPos = { 0,0 };
 
@@ -106,7 +108,7 @@ void Level::Initalize() {
 	isPlayerTurn = true;
 	autoPlayOn = false;
 	isSkippingEnemyTurn = false;
-	turnTimer = 0.0f;
+	switchTurnCooldown = 0.0f;
 
 	debugText = { "", Utils::debuggerInfo.first * 0.8f, Utils::debuggerInfo.second, { -1.0f, 0.99f} };
 
@@ -151,20 +153,20 @@ void Level::Update() {
 			activeCannon->Update();
 		}
 
-		ToggleTurn();
+		SwitchTurn();
+	}
 
-		// Update all Player character instance
-		bool squatNow = isPlayerTurn && AEInputCheckCurr(AEVK_LBUTTON);
+	// Update all Player character instance
+	bool squatNow = isPlayerTurn && AEInputCheckCurr(AEVK_LBUTTON);
 
-		for (Character& playerChar : playerCharacters) {
-			playerChar.SetSquatAnimation(squatNow);
-			playerChar.Update();
-		}
+	for (Character& playerChar : playerCharacters) {
+		playerChar.SetSquatAnimation(squatNow);
+		playerChar.Update();
+	}
 
-		// Update all enemy instance
-		for (Character& enemy : enemies) {
-			enemy.Update();
-		}
+	// Update all enemy instance
+	for (Character& enemy : enemies) {
+		enemy.Update();
 	}
 
 	DrawLevel();
@@ -187,6 +189,7 @@ void Level::DrawLevel() {
 	MapManager::RenderMap(levelMap, false);
 
 	// Rendering of assets and UI
+	// Need to render both player cannon and enemy cannon regardless of whose turn it is
 	playerCannon.Render();
 	enemyCannon.Render();
 
@@ -206,19 +209,18 @@ void Level::DrawLevel() {
 void Level::Free() {
 }
 
-void Level::ToggleTurn() {
+void Level::SwitchTurn() {
 	if (!activeCannon->HasShot()) return;
 
 	// Set timer to delay the transition from cannon to cannon
-	if (turnTimer <= 0.0f) {
-		turnTimer = Config::CANNON_SWITCH_TURN_TIMER;
+	if (switchTurnCooldown <= 0.0f) {
+		switchTurnCooldown = Config::CANNON_SWITCH_COOLDOWN_TIMER;
 	}
 
-	std::cout << turnTimer << '\n';
-	if (turnTimer > 0.0f) {
-		turnTimer -= PhysicsManager::g_dt;
+	if (switchTurnCooldown > 0.0f) {
+		switchTurnCooldown -= PhysicsManager::g_dt;
 
-		if (turnTimer <= 0.0f) {
+		if (switchTurnCooldown <= 0.0f) {
 			// Switch active cannon
 			SwitchCannon(!isPlayerTurn);
 		}
@@ -286,6 +288,7 @@ void Level::Debugger() {
 
 		std::string debug = "Shortcuts:\n[CTRL + R] Auto play " + static_cast<std::string>(autoPlayOn ? "ON" : "OFF")
 			+ "\n[E] Skipping enemy turn " + static_cast<std::string>(isSkippingEnemyTurn ? "ON" : "OFF")
+			+ "\n[R] Skip to enemy turn"
 			+ "\n\nTile Map\nIndex X: " + std::to_string(gridX) + " Y: " + std::to_string(gridY)
 			+ "\n\nTile: " + GetTileName(tile.Type());
 		// Display which character is currently at this tile type
