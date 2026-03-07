@@ -17,21 +17,17 @@ void TextObject::Draw() {
 	AEGfxGetPrintSize(AssetsManager::textFont, "A", textScale, &charW, &charH);
 
 	// Set position y
-	f32 currentY = pos.y;
+	f32 currentY = pos.y - (charH * 1.0f); // minus charH because AEGfxPrint is BOTTOM-LEFT RECT MODE
 	const f32 lineSpacing = 1.5f; // Adjust vertical gap between lines
 
 	// Iterate through each line delimited by '\n'
 	while (std::getline(ss, line)) {
 		// Only render if the line isn't just whitespace or empty
 		if (!line.empty()) {
-			f32 lineW, lineH;
-			AEGfxGetPrintSize(AssetsManager::textFont, line.c_str(), textScale, &lineW, &lineH);
-
-			// currentY - lineH ensures the text is drawn relative to its baseline
 			AEGfxPrint(AssetsManager::textFont,
 				line.c_str(),
 				pos.x,
-				currentY - lineH,
+				currentY,
 				textScale,
 				color.Red(),
 				color.Green(),

@@ -14,7 +14,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	_In_ int       nCmdShow)
 {
 	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
-	_CrtSetBreakAlloc(253);
+	//_CrtSetBreakAlloc(259);
 	UNREFERENCED_PARAMETER(hPrevInstance);
 	UNREFERENCED_PARAMETER(lpCmdLine);
 
@@ -37,6 +37,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 		// Informing the system about the loop's start
 		AESysFrameStart();
 
+		bool isQuitting = GameStateManager::current == GameStateManager::GameState::QUIT;
 		// Basic way to trigger exiting the application
 		// when ESCAPE is hit or when the window is closed
 		if (/*AEInputCheckTriggered(AEVK_ESCAPE) ||*/ 0 == AESysDoesWindowExist() || GameStateManager::current == GameStateManager::GameState::QUIT) {

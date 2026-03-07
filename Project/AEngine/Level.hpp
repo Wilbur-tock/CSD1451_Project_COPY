@@ -8,26 +8,33 @@
 #include "TextObject.hpp"
 #include "Character.hpp"
 
+enum class LevelMode {
+	EASY,
+	MEDIUM,
+	HARD
+};
+
 // Class that contains all the level information 
 // Level tile map data,
 // instances of ALL player and enemy object, 
 // instance of ALL player and enemy cannon objects
 class Level {
 public:
+	// Default ctor
 	Level(int _leveId);
 
 	// Read level map data and load level resources
 	void Load();
 	void Initalize();
 	void Update();
-	void DrawLevel();
+	void Draw();
 	void Free();
 
 	// Member functions
 
 	// Toggle turns between player and enemy once they have shot and a timer has been set and reduced to 0
-	void ToggleTurn();
-	void SwitchCannon(bool _isPlayerTurn);
+	void UpdateTurn();
+	void SetTurn(bool _isPlayerTurn);
 	void Debugger();
 
 	// Find the character object that is within the parameter tile, 
@@ -37,8 +44,9 @@ public:
 	Character* FindPlayerCharacterObj(int characterId);
 private:
 	int levelId = 0;
-	std::string levelName;
-	std::string levelFileName;
+	std::string levelName; // Name of the level in the format (Level [INDEX])
+	std::string levelFileName; // file name to load in the levelMap in the format (level[INDEX])
+	LevelMode levelDifficulty = LevelMode::EASY;
 	TextObject debugText;
 	CannonManager::Cannon *activeCannon = nullptr; // pointer to the active instance of the cannon object 
 	CannonManager::Cannon playerCannon; // instance of the player cannon
@@ -49,7 +57,7 @@ private:
 	bool isSkippingEnemyTurn = false;
 	bool isAbilitySelectorOn = true;
 	bool isHoveringUI = false;
-	float turnTimer = 0.0f;
+	float switchTurnCooldown = 0.0f; // Cooldown timer to add a delay between the destruction of the player projectile and starting of enemy turn
 
 	std::vector<std::vector<Tile>> levelMap; // Level tile map
 	std::vector<Character> enemies; // contains all instance of the Enemy Character Object in the level

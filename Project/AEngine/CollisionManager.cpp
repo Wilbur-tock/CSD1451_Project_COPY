@@ -1,17 +1,33 @@
 #include "CollisionManager.hpp"
 #include "Utils.hpp"
 
+#include "GameObject.hpp"
+#include "BaseTypes.hpp"
+#include "Collider.hpp"
+
 namespace CollisionManager {
-    bool AreCirclesIntersecting(float x1, float y1, float r1, float x2, float y2, float r2) {
-        // Calculate the difference in coordinates
-        float dx = x2 - x1;
-        float dy = y2 - y1;
+    bool AreCircleSquareIntersecting(Transform const& circle, Transform const& square) {
+        // Calculate Bounds
+        float halfW = square.size.x * 0.5f;
+        float halfH = square.size.y * 0.5f;
+
+        float minX = square.pos.x - halfW;
+        float maxX = square.pos.x + halfW;
+        float minY = square.pos.y - halfH;
+        float maxY = square.pos.y + halfH;
+
+        // Find closest point on box to circle center
+        float closestX = std::clamp(circle.pos.x, minX, maxX);
+        float closestY = std::clamp(circle.pos.y, minY, maxY);
+
+        // Distance math
+        float dx = circle.pos.x - closestX;
+        float dy = circle.pos.y - closestY;
 
         float distanceSq = (dx * dx) + (dy * dy);
+        float radius = circle.size.x * 0.5f;
 
-        float radiusSum = r1 + r2;
-        float radiusSumSq = radiusSum * radiusSum;
-        return distanceSq <= radiusSumSq;
+        return distanceSq <= (radius * radius);
     }
 
     bool AreCircleSquareIntersecting(float sX, float sY, float sWidth, float sHeight, float cX, float cY, float r) {
@@ -72,5 +88,13 @@ namespace CollisionManager {
         float bottom = y - h;    // It grows down, so bottom is Y minus height
 
         return (mouseX >= left && mouseX <= right && mouseY <= top && mouseY >= bottom);
+    }
+
+    bool IsHorizontalCollision(Transform const& circle, Transform const& square) {
+        float bias = 0.1f;
+        float radius = circle.size.x * 0.5f;
+        float overlapX = (radius + square.size.x / 2.0f) - std::abs(circle.pos.x - square.pos.x);
+        float overlapY = (radius + square.size.y / 2.0f) - std::abs(circle.pos.y - square.pos.y);
+        return overlapX < (overlapY + bias);
     }
 }

@@ -35,10 +35,9 @@ struct DefenseModule {
 
 class Ability {
 public:
-	Ability(std::string _name, AbilityType _type, Tier _tier);
-	//Ability(int _id, std::string _name, AbilityType _type, int _projectileId, bool _unlimitedCharges = false);
+	Ability(int _id, std::string _name, AbilityType _type, Tier _tier);
 
-
+	int Id() const;
 	std::string GetName() const;
 	AbilityType GetType() const;
 	Tier GetTier() const;
@@ -51,36 +50,22 @@ public:
 	void SetProjectile(s32 _id, f32 _amp, s32 _basedamage, f32 _radius, s32 _charges, bool _unlimited);
 	void SetDefense(s32 _shieldHP);
 	void UpdateCharges(s32 _amount);
-	/*
-	int Id() const;
-	std::string Name() const;
-	int ProjectileId() const;
-	AbilityType Type() const;
 
-	int PreviousCharges() const;
-	int Charges() const;
-	void Charges(int toAdd);
+	int AbilityCharges() const;
+	void AbilityCharges(int toAdd);
+	int PreviousAbilityCharges() const;
 
-	bool UnlimitedCharges() const;
-	*/
 private:
+	int id; // To determind what type of ability it is (Bomb projectile, stats ability, etc)
+	int abilityCharges = 0; // count of how many of these ability the player/enemy has
+	int previousAbilityCharges = 0;
 	std::string name;
 	AbilityType type;
 	Tier tier;
 
-
 	StatsModule stats;
 	ProjectileModule proj;
 	DefenseModule defense;
-
-	//int id; // To determind what type of ability it is (Bomb projectile, stats ability, etc)
-	//int projectileId; // To determined what type of projectiile ability it is
-	//std::string name;
-	//AbilityType type;
-	//int previousCharges; // previous number of charges
-	//int charges; // current number of charges
-	//int cost;
-	//bool unlimitedCharges = false;
 };
 
 std::ostream& operator<<(std::ostream& os, Ability ability);

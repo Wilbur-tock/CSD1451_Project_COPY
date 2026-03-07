@@ -22,7 +22,9 @@ namespace CannonManager {
 
 		// Member Functions
 
-		// Reset values of the cannon ammo vectors to be in its default state
+		// Initialize all the different type of projectile abilities to the CANNON CLASS
+		// Switch between the projectileId to choose the different type of projectile abilities
+		// 0 - Default projectile, 1 - Nuke Projectile , etc
 		void ProjectileSettings();
 		// Calculate the angle of the cannon based on the mouse position, render the cannon sprite
 		// Calculate the charge shot power and update any shot projectiles
@@ -35,6 +37,7 @@ namespace CannonManager {
 		bool IsTargetAlive();
 		void SetTarget(Character* _target);
 
+		void SetEnemyAI(int difficultyLevel);
 		void EnemyAI();
 		// Calculate the ideal cannonAngle and shotPower to hit the target,
 		// add some variance to it to ensure the AI aim and shot feels "human"
@@ -68,6 +71,8 @@ namespace CannonManager {
 		// Cannon attributes
 		AEVec2 defaultSize{ 30,10 };
 		int projectileCount = 10;
+		int projectileAbilitiesCount = 0;
+
 		int selectedProjectileId = 0; // index of the selected projectile from the vector list of all the different type of projectiles
 		std::vector<Projectile> projectiles; // vector containing all the different type of projectiles (Default, bomb , etc)
 		std::vector<Projectile> activeProjectiles; // vector of all the active projectiles (Projectiles that have been shot out of the cannon)
@@ -80,6 +85,8 @@ namespace CannonManager {
 
 		// Abilities variables
 		AbilitiesManager::AbilityController* abilityController = nullptr;
+
+		float aiDifficulty = 0.0f; // 0 - 1 Range, 0 - easier, 1 - hardest
 
 		// Enemy AI variables
 		float aiShootTimer = 0.0f; // randomise timer to visualise a delay for when the enemy when shoot out the prorjectile

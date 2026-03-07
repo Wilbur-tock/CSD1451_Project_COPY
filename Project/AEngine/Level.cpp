@@ -15,7 +15,8 @@
 
 AEGfxTexture* barrelTex = nullptr;
 
-Level::Level(int _leveId) : levelId{ _leveId }, levelName{ "Level " + std::to_string(levelId + 1) }, levelFileName { "level" + std::to_string(levelId) } {}
+Level::Level(int _leveId) 
+	: levelId{ _leveId }, levelName{ "Level " + std::to_string(levelId + 1) }, levelFileName { "level" + std::to_string(levelId) } {}
 
 void Level::Load() {
 	levelMap.clear();
@@ -39,9 +40,10 @@ void Level::Load() {
 void Level::Initalize() {
 	MapManager::currentMap = &levelMap;
 
+	// Start of the turn should always be player turn
 	activeCannon = &playerCannon;
 	isPlayerTurn = true;
-	turnTimer = 0.0f;
+	switchTurnCooldown = 0.0f;
 
 	AEVec2 playerCannonStartPos = { 0,0 }, enemyCannonStartPos = { 0,0 };
 
@@ -94,19 +96,20 @@ void Level::Initalize() {
 	playerCannon.textureColor = Color{ 1, 1, 1, 1 };
 
 	AbilitiesManager::AbilityController& playerController = AbilitiesManager::playerAbilityController;
-	playerController.LoadAllAbilities();
+	playerController.LoadAllAbilities(false);
 	playerCannon.SetAbilityController(&playerController);
 
 	enemyCannon = CannonManager::Cannon(enemyCannonStartPos, barrelTex, { 0,0 }, barrelHalfSize, false, false);
+	enemyCannon.SetEnemyAI(static_cast<int>(levelDifficulty));
 	AbilitiesManager::AbilityController& enemyController = AbilitiesManager::enemyAbilityController;
-	enemyController.LoadAllAIAbilities();
+	enemyController.LoadAllAbilities(true);
 	enemyCannon.SetAbilityController(&enemyController);
 
 	// Reset level flow variables
 	isPlayerTurn = true;
 	autoPlayOn = false;
 	isSkippingEnemyTurn = false;
-	turnTimer = 0.0f;
+	switchTurnCooldown = 0.0f;
 
 	debugText = { "", Utils::debuggerInfo.first * 0.8f, Utils::debuggerInfo.second, { -1.0f, 0.99f} };
 
@@ -123,18 +126,22 @@ float delayTimer = 0.0f, defaultDelayTimer = 0.5f;;
 void Level::Update() {
 	isLevelActive = !isAbilitySelectorOn && !isHoveringUI && delayTimer <= 0.0f;
 
-	if (isLevelActive) {
-		if (isSkippingEnemyTurn) { // Skipping enemy turn
-			if (!isPlayerTurn) {
-				SwitchCannon(true);
+	// For Debugging
+	if (isSkippingEnemyTurn) { // Skipping enemy turn
+		if (!isPlayerTurn) {
+			SetTurn(true);
+		}
+	}
+	else { // Skipping enemy turn is off and autoPlayOn
+		if (autoPlayOn) {
+			isAbilitySelectorOn = false;
+			if (isPlayerTurn) {
+				SetTurn(false);
 			}
 		}
-		else { // Skipping enemy turn is off and autoPlayOn
-			if (autoPlayOn && isPlayerTurn) {
-				SwitchCannon(false);
-			}
-		}
+	}
 
+	if (isLevelActive) {
 		if (!isPlayerTurn) {
 			if(!enemyCannon.IsTargetAlive()) {
 				// Find new target
@@ -151,23 +158,24 @@ void Level::Update() {
 			activeCannon->Update();
 		}
 
-		ToggleTurn();
-
-		// Update all Player character instance
-		bool squatNow = isPlayerTurn && AEInputCheckCurr(AEVK_LBUTTON);
-
-		for (Character& playerChar : playerCharacters) {
-			playerChar.SetSquatAnimation(squatNow);
-			playerChar.Update();
-		}
-
-		// Update all enemy instance
-		for (Character& enemy : enemies) {
-			enemy.Update();
-		}
+		UpdateTurn();
 	}
 
-	DrawLevel();
+	// Update all Player character instance
+	bool squatNow = isPlayerTurn && AEInputCheckCurr(AEVK_LBUTTON);
+
+	for (Character& playerChar : playerCharacters) {
+		playerChar.SetSquatAnimation(squatNow);
+		playerChar.Update();
+	}
+
+	// Update all enemy instance
+	for (Character& enemy : enemies) {
+		enemy.Update();
+	}
+
+	Draw();
+
 	// Need to be below DrawLevel to ensure that the Ability Selector UI is shows up infront of the level
 	prevIsAbilitySelectorOn = isAbilitySelectorOn;
 	AbilitiesManager::playerAbilityController.AbilitySelector(isAbilitySelectorOn);
@@ -183,10 +191,11 @@ void Level::Update() {
 	Debugger();
 }
 
-void Level::DrawLevel() {
+void Level::Draw() {
 	MapManager::RenderMap(levelMap, false);
 
 	// Rendering of assets and UI
+	// Need to render both player cannon and enemy cannon regardless of whose turn it is
 	playerCannon.Render();
 	enemyCannon.Render();
 
@@ -204,28 +213,28 @@ void Level::DrawLevel() {
 }
 
 void Level::Free() {
+	barrelTex = nullptr;
 }
 
-void Level::ToggleTurn() {
+void Level::UpdateTurn() {
 	if (!activeCannon->HasShot()) return;
 
 	// Set timer to delay the transition from cannon to cannon
-	if (turnTimer <= 0.0f) {
-		turnTimer = Config::CANNON_SWITCH_TURN_TIMER;
+	if (switchTurnCooldown <= 0.0f) {
+		switchTurnCooldown = Config::CANNON_SWITCH_COOLDOWN_TIMER;
 	}
 
-	std::cout << turnTimer << '\n';
-	if (turnTimer > 0.0f) {
-		turnTimer -= PhysicsManager::g_dt;
+	if (switchTurnCooldown > 0.0f) {
+		switchTurnCooldown -= PhysicsManager::g_dt;
 
-		if (turnTimer <= 0.0f) {
+		if (switchTurnCooldown <= 0.0f) {
 			// Switch active cannon
-			SwitchCannon(!isPlayerTurn);
+			SetTurn(!isPlayerTurn);
 		}
 	}
 }
 
-void Level::SwitchCannon(bool _isPlayerTurn) {
+void Level::SetTurn(bool _isPlayerTurn) {
 	isPlayerTurn = _isPlayerTurn;
 	if (isPlayerTurn) {
 		activeCannon = &playerCannon;
@@ -235,14 +244,14 @@ void Level::SwitchCannon(bool _isPlayerTurn) {
 		activeCannon = &enemyCannon;
 	}
 	activeCannon->ResetTurn();
-	std::cout << "[Level] Toggle to " << std::string(isPlayerTurn ? "PLAYER" : "ENEMY") << " turn" << '\n';
+	std::cout << "[Level] Switch to " << std::string(isPlayerTurn ? "PLAYER" : "ENEMY") << " turn" << '\n';
 }
 
 void Level::Debugger() {
 	if (Utils::isDebuggerOn) {
 		// Input R to change whose turn it is
 		if (AEInputCheckTriggered(AEVK_R)) {
-			SwitchCannon(!isPlayerTurn);
+			SetTurn(!isPlayerTurn);
 		}
 		// Input CTRL + R to turn autoPlayOn on/off
 		if (AEInputCheckCurr(AEVK_LCTRL) || AEInputCheckCurr(AEVK_RCTRL)) {
@@ -286,6 +295,7 @@ void Level::Debugger() {
 
 		std::string debug = "Shortcuts:\n[CTRL + R] Auto play " + static_cast<std::string>(autoPlayOn ? "ON" : "OFF")
 			+ "\n[E] Skipping enemy turn " + static_cast<std::string>(isSkippingEnemyTurn ? "ON" : "OFF")
+			+ "\n[R] Skip to enemy turn"
 			+ "\n\nTile Map\nIndex X: " + std::to_string(gridX) + " Y: " + std::to_string(gridY)
 			+ "\n\nTile: " + GetTileName(tile.Type());
 		// Display which character is currently at this tile type
@@ -300,7 +310,10 @@ void Level::Debugger() {
 			+ "\nDamage Multiplier: " + std::to_string(tile.attribute.DamageMultiplier())
 			+ "\n\nCamera " + std::to_string(CameraManager::camera.GetState())
 			+ "\nPos X : " + Utils::FormatFloat(x, 2) + " Y : " + Utils::FormatFloat(y, 2)
-			+ "\nMouse\nScreen Pos X: " + Utils::FormatFloat(mouseX, 2) + " Y: " + Utils::FormatFloat(mouseY, 2)
+			+ "\nCamera State: " + CameraManager::camera.PrintState() // Camera INFO
+			+ "\nZoom: " + Utils::FormatFloat(CameraManager::camera.GetZoom(), 2)
+			+ "\n" + CameraManager::camera.PrintVisibleTiles()
+			+ "\n\nMouse\nScreen Pos X: " + Utils::FormatFloat(mouseX, 2) + " Y: " + Utils::FormatFloat(mouseY, 2) // Mouse Info
 			+ "\nWorld Pos X: " + Utils::FormatFloat(mX, 2) + " Y: " + Utils::FormatFloat(mY, 2);
 
 		std::string info = "";

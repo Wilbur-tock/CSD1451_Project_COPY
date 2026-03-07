@@ -20,6 +20,7 @@ namespace CannonManager {
 
     void Cannon::SetAbilityController(AbilitiesManager::AbilityController* controller) {
         abilityController = controller;
+        controller->ChangeAbility(0);
         ProjectileSettings();
     }
 
@@ -29,32 +30,31 @@ namespace CannonManager {
         // Reset to default
         activeProjectiles.clear(); // ensure that there should not be any active ammo when cannon is reset
         projectiles.clear();
-        auto& allProjectiles = isPlayerControlled
-            ? abilityController->GetOffensiveAbilities()
-            : abilityController->GetAIOffensiveAbilities();
+        projectiles.resize(projectileCount);
 
-        // Initalize all instance of all the different type of projectile
-        for (auto& abil : allProjectiles) {
-            Projectile templateProj(AssetsManager::circleTexture);
+        std::vector<Ability>& allProjectileAbilities = abilityController->GetOffensiveAbilities();
+        projectileAbilitiesCount = static_cast<int>(allProjectileAbilities.size());
 
-            // This is where you pass the data from the 'Ability' to the 'Projectile'
-            templateProj.SetProjectileStats(abil.GetProj());
+        // Initializing each projectiles with abilities
+        if (projectiles.empty()) std::cerr << "[CannonManager] Cannon Projectiles vector is EMPTY" << '\n';
 
-            projectiles.push_back(templateProj);
-        }
-        if (isPlayerControlled) {
-            abilityController->ChangeProjectile(1);
-        }
-        else {
-            abilityController->AIAbilitySelection();
-        }
-        /*
-        for (int i = 0; i < projectileCount; ++i) {
+        for (int i = 0; i < projectiles.size(); ++i) {
+            // Assign default projectile ability if the the projectils size is larger than the allProjectileAbilities size
+            int abilityId = 0;
+            if (i < allProjectileAbilities.size()) {
+                abilityId = i;
+            }
+
+            // Assign ability stats to the projectiles
+            Ability const& ability = allProjectileAbilities[abilityId];
             Projectile& projectile = projectiles[i];
+
+            // Initialize projectile with its texture and MODE
             projectile = { AssetsManager::circleTexture, static_cast<ProjectileMode>(i + 1) };
-            AbilitiesManager::SetProjectileAbility(projectile);
+            projectile.SetProjectileStats(ability.GetName(), ability.GetProj());
+
+            //std::cout << "[CannonManager] Set " << ability.Id() << " " << ability.GetName() << " ability into the cannon projectile vector" << '\n';
         }
-        */
     }
     
     void Cannon::Update() {
@@ -111,6 +111,21 @@ namespace CannonManager {
         return true;
     }
 
+    void Cannon::SetEnemyAI(int difficultyLevel) {
+        switch (difficultyLevel) {
+        default:
+        case 0: // Easy
+            aiDifficulty = 0.9f;
+            break;
+        case 1: // Medium
+            aiDifficulty = 0.95f;
+            break;
+        case 2: // Hard
+            aiDifficulty = 0.99f;
+            break;
+        }
+    }
+
     void Cannon::EnemyAI() {
         if (isActive || isProjectileDestroyed) return;
         if (!target) {
@@ -125,18 +140,6 @@ namespace CannonManager {
         if (!canAIShoot) {
             abilityController->AIAbilitySelection();
             EnemyAICalculation(target->transform.pos);
-
-            //Ability* current = abilityController->GetCurrentAIProjectile();
-            //std::cout << "[CannonManager] AIProjectileSelected is: " << (current ? current->GetName() : "NULL") << '\n';
-            //if (current) {
-            //    int projId = current->GetProj().projectileId;
-            //    for (int i = 0; i < static_cast<int>(projectiles.size()); ++i) {
-            //        if (projectiles[i].ProjectileId() == projId) {
-            //            selectedProjectileId = i;
-            //            break;
-            //        }
-            //    }
-            //}
 
             // Set shoot timer to add a delay between the start of the enemy turn and enemy shooting the projectile out
             float minTimer = 1.5f;
@@ -170,11 +173,10 @@ namespace CannonManager {
 
         // Calculate required Power (Initial Velocity)
         // Basic range formula: v = sqrt( (g * d) / sin(2 * theta) )
-        float neededVelocity = sqrt((Config::GRAVITY * abs(distance)) / sin(2 * randomAngleBase));
+        float neededVelocity = sqrt((PhysicsManager::GRAVITY * abs(distance)) / sin(2 * randomAngleBase));
 
         // Randomise offset to add a variance to 
-        float difficulty = 1.0f; // TODO: Adjust difficulty based on levels
-        float inaccuracy = (1.0f - difficulty) + 0.01f;
+        float inaccuracy = (1.0f - aiDifficulty);
         float randomOffset = Utils::RandomValue(-inaccuracy, inaccuracy);
 
         // Apply the variables to the cannon
@@ -260,25 +262,7 @@ namespace CannonManager {
             return;
         }
 
-        //TEMPORARY TO BE REMOVED
-        if (isPlayerControlled) {
-            // Change abilities based on keys using ID from your JSON
-            if (AEInputCheckTriggered(AEVK_1)) abilityController->ChangeProjectile(1);
-            if (AEInputCheckTriggered(AEVK_2)) abilityController->ChangeProjectile(2);
-            if (AEInputCheckTriggered(AEVK_3)) abilityController->ChangeProjectile(3);
-            if (AEInputCheckTriggered(AEVK_4)) abilityController->ChangeProjectile(4);
-        }
-
-        Ability* current = abilityController->GetCurrentAIProjectile();
-        if (current) {
-            int projId = current->GetProj().projectileId;
-            for (int i = 0; i < static_cast<int>(projectiles.size()); ++i) {
-                if (projectiles[i].ProjectileId() == projId) {
-                    selectedProjectileId = i;
-                    break;
-                }
-            }
-        }
+        selectedProjectileId = abilityController->FindProjectileId();
     }
 
     void Cannon::ShootProjectile() {
@@ -301,12 +285,13 @@ namespace CannonManager {
         activeProjectiles.back().id = static_cast<int>(activeProjectiles.size() - 1);
 
         // Set projectile ability effects here
-        if (isPlayerControlled) {
-            abilityController->UseProjectile();
-        }
-        else {
-            abilityController->AIUseProjectile();
-        }
+        abilityController->UseAbility();
+        //if (isPlayerControlled) {
+        //    abilityController->UseProjectile();
+        //}
+        //else {
+        //    abilityController->AIUseProjectile();
+        //}
 
         SetCamera(true); // Follow the projectile that is shot out of the cannon
         isActive = true;
@@ -340,8 +325,6 @@ namespace CannonManager {
                 int gridX = 0, gridY = 0;
                 Utils::GetGridIndex(gridX, gridY, projectile.transform.pos);
 
-                float radius = projectile.transform.size.x / 2.0f;
-                float bias = 0.25f;
                 int minX = gridX - 1, minY = gridY - 1, maxX = gridX + 1, maxY = gridY + 1;
                 for (int y = minY; y <= maxY; ++y) {
                     for (int x = minX; x <= maxX; ++x) {
@@ -349,27 +332,23 @@ namespace CannonManager {
 
                         Tile& tile = (*MapManager::currentMap)[y][x];
 
-                        // Checking collision of the projectile with the tile blocks
-                        if (tile.IsBlocks() || tile.IsGround() || tile.IsEnemy()) {
-                            if (CollisionManager::AreCircleSquareIntersecting(
-                                tile.transform.pos.x, tile.transform.pos.y, tile.transform.size.x, tile.transform.size.y,
-                                projectile.transform.pos.x, projectile.transform.pos.y, radius))
-                            {
+                        if (tile.IsEmpty()) continue;
+
+                        // Checking collision of the projectile with the tile blocks that is collidable
+                        if (CollisionManager::AreCircleSquareIntersecting(projectile.transform, tile.transform)) {
+                            // Damage tile first, incase of destroying the blocks and bouncing back if damageTile is not called first
+                            projectile.DamageTile(x, y);
+
+                            if (!projectile.collisionTriggered) {
+                                // If the projectile hit something, REDUCE the velocity by a percentage for the FIRST COLLISION ONLY
+                                // So that it does not continue having the same projectile velocity even if it hits and destroy something
+                                float percentage = 0.5f;
+                                projectile.velocity.x *= percentage;
+                                projectile.velocity.y *= percentage;
                                 projectile.collisionTriggered = true;
-
-                                if (projectile.isCollisionActive) {
-                                    projectile.SimulatePhysics(tile);
-                                }
-
-                                if (projectile.collisionTriggered) {
-                                    projectile.DamageTile(x, y);
-                                    projectile.isCollisionActive = true;
-
-                                    // If the projectile hit something, REDUCE the velocity by a percentage
-                                    float percentage = 0.2f;
-                                    projectile.velocity.x *= percentage;
-                                    projectile.velocity.y *= percentage;
-                                }
+                            }
+                            else {
+                                projectile.OnCollision(tile);
                             }
                         }
                     }
@@ -383,25 +362,16 @@ namespace CannonManager {
                             if (Utils::IsGridIndexOutOfBounds(x, y)) continue;
 
                             Tile& tile = (*MapManager::currentMap)[y][x];
-                            float halfW = tile.transform.size.x * 0.5f, halfH = tile.transform.size.y * 0.5f;
 
-                            if (tile.IsBlocks() || tile.IsGround()) {
-                                float tileTop = tile.transform.pos.y + halfH;
-                                float tileLeft = tile.transform.pos.x - halfW;
-                                float tileRight = tile.transform.pos.x + halfW;
-
-                                // Check if projectile is resting on top of this tile by checking the projectile x-axis is within the tile x-axis
-                                // and its y-axis is the same +- bias as the tile + projectile radius
-                                if (projectile.transform.pos.x >= tileLeft - radius &&
-                                    projectile.transform.pos.x <= tileRight + radius &&
-                                    std::abs(projectile.transform.pos.y - (tileTop + radius)) < bias) {
-                                    projectile.isGrounded = true;
+                            if (!tile.IsEmpty()) {
+                                projectile.isGrounded = PhysicsManager::IsGrounded(projectile.transform, tile.transform);
+                                if (projectile.isGrounded) {
                                     projectile.velocity.y = 0;
                                     break;
                                 }
                             }
                         }
-                        if (projectile.isGrounded) break;
+                        //if (projectile.isGrounded) break;
                     }
                 }
             }
@@ -485,7 +455,7 @@ namespace CannonManager {
 
             // Kinematic equations
             float drawX = startX + (vx * t);
-            float drawY = startY + (vy * t) - (0.5f * Config::GRAVITY * t * t);
+            float drawY = startY + (vy * t) - (0.5f * PhysicsManager::GRAVITY * t * t);
 
             float alpha = 1.0f - static_cast<float>(i / numDots);
             GraphicsManager::DrawGameObject(AssetsManager::circleTexture, GraphicsManager::CreateTransformMatrix(drawX, drawY, 0, 10, 10), { 1,1,1, alpha });
@@ -493,50 +463,60 @@ namespace CannonManager {
     }
 
     void Cannon::Debugger() {
-        // Debugger
-        if (Utils::isDebuggerOn) {
-            float mX = 0, mY = 0;
-            Utils::GetWorldMousePos(mX, mY);
-            float cX = transform.pos.x, cY = transform.pos.y;
-            Utils::GetWorldPos(cX, cY);
-            s32 mouseX, mouseY;
-            AEInputGetCursorPosition(&mouseX, &mouseY);
+        if (!Utils::isDebuggerOn) return;
 
-            Ability* currentAbility = isPlayerControlled ? abilityController->GetCurrentProjectile() : abilityController->GetCurrentAIProjectile();
-
-            // Show cannon information
-            std::string debugStr = "Cannon Manager Player:\nIs Active: "
-                + std::string(isActive ? "true" : "false") + "\nHas Shot : " + static_cast<std::string>(isProjectileDestroyed ? "true" : "false")
-                + "\nPos x: " + Utils::FormatFloat(transform.pos.x, 2) + " y: " + Utils::FormatFloat(transform.pos.y, 2)
-                + "\nAngle: " + Utils::FormatFloat(cannonAngle * (180.0f / 3.14159265359), 2) + " " + Utils::FormatFloat(cannonAngle, 2);               
-
-            if (currentAbility){
-                debugStr += +"\n\nSelected Projectile\nId: " + std::to_string(currentAbility->GetProj().projectileId)
-                + "\nName: " + currentAbility->GetName()
-                + "\nDamage: " + std::to_string(currentAbility->GetProj().baseDamage)
-                + " Radius: " + std::to_string(currentAbility->GetProj().radius);
-            }
-                
-            if (!isPlayerControlled) {
-                debugStr += "\nAI Shoot Timer: " + Utils::FormatFloat(aiShootTimer, 2);
-            }
-
-            // Show projectile that is shoot out information
-            if (activeProjectiles.size() > 0) {
-                Projectile& projectile = activeProjectiles.back();
-                debugStr += "\n\nActive Projectile " + std::to_string(static_cast<int>(projectile.Mode())) + "\nSize: x: "
-                    + Utils::FormatFloat(projectile.transform.size.x, 2) + " y: " + Utils::FormatFloat(projectile.transform.size.y, 2)
-                    + "\nPos x: " + Utils::FormatFloat(projectile.transform.pos.x, 2) + " y " + Utils::FormatFloat(projectile.transform.pos.y, 2)
-                    + "\nVelocity x: " + Utils::FormatFloat(activeProjectiles.back().velocity.x, 2) + " y: " + Utils::FormatFloat(projectile.velocity.y, 2)
-                    + "\nGrounded: " + std::string(projectile.isGrounded ? "true" : "false")
-                    + "\nTo Be Destroyed: " + std::string(projectile.toBeDestroyed ? "true" : "false")
-                    + "\nTimer: " + Utils::FormatFloat(projectile.timer, 2)
-                    + "\nAttack Charges: " + std::to_string(projectile.AttackCharges())
-                    + "\nDamage Radius: " + std::to_string(projectile.attribute.DamageRadius());
-            }
-
-            TextObject textObj{ debugStr, Utils::debuggerInfo.first * 0.8f, Utils::debuggerInfo.second, {0.5f, 0.99f} };
-            textObj.Draw();
+        // Toggle through all the ability
+        if (AEInputCheckTriggered(AEVK_T)) {
+            abilityController->ToggleAbility();
         }
+
+        float mX = 0, mY = 0;
+        Utils::GetWorldMousePos(mX, mY);
+        float cX = transform.pos.x, cY = transform.pos.y;
+        Utils::GetWorldPos(cX, cY);
+        s32 mouseX, mouseY;
+        AEInputGetCursorPosition(&mouseX, &mouseY);
+
+        Projectile const& selectedProjectile = projectiles[selectedProjectileId];
+        Ability selectedAbility = abilityController->CurrentAbility();
+
+        // Show cannon information
+        std::string debugStr = "Cannon " + static_cast<std::string>(isPlayerControlled ? "PLAYER" : "ENEMY")
+            + "\nIs Active : " + std::string(isActive ? "true" : "false") 
+            + "\nIs Projectile destroyed : " + static_cast<std::string>(isProjectileDestroyed ? "true" : "false")
+            + "\nPos x: " + Utils::FormatFloat(transform.pos.x, 2) + " y: " + Utils::FormatFloat(transform.pos.y, 2)
+            + "\nAngle: " + Utils::FormatFloat(cannonAngle * (180.0f / 3.14159265359), 2) + " " + Utils::FormatFloat(cannonAngle, 2)
+            + "\n\nSelected Projectile\nId: " + std::to_string(selectedProjectile.ProjectileId())
+            + "\nName: " + selectedProjectile.ProjectileName()
+            + "\nDamage: " + std::to_string(selectedProjectile.attribute.Damage())
+            + "\nRadius: " + std::to_string(selectedProjectile.attribute.DamageRadius())
+            + "\n\nSelected Ability:\nId:" + std::to_string(selectedAbility.Id())
+            + "\nName: " + selectedAbility.GetName()
+            + "\nAbility Charges Remaining: " + std::to_string(selectedAbility.AbilityCharges());
+                
+        if (!isPlayerControlled) {
+            debugStr += "\nAI Shoot Timer: " + Utils::FormatFloat(aiShootTimer, 2);
+        }
+        else {
+            debugStr += "\n\nShortcuts:\n[T] Toggle Ability";
+        }
+
+        // Print projectile that is shoot out information
+        if (activeProjectiles.size() > 0) {
+            Projectile const& projectile = activeProjectiles.back();
+            debugStr += "\n\nActive Projectile " + std::to_string(static_cast<int>(projectile.Mode())) + "\nSize: x: "
+                + Utils::FormatFloat(projectile.transform.size.x, 2) + " y: " + Utils::FormatFloat(projectile.transform.size.y, 2)
+                + "\nPos x: " + Utils::FormatFloat(projectile.transform.pos.x, 2) + " y " + Utils::FormatFloat(projectile.transform.pos.y, 2)
+                + "\nVelocity x: " + Utils::FormatFloat(activeProjectiles.back().velocity.x, 2) + " y: " + Utils::FormatFloat(projectile.velocity.y, 2)
+                + "\nGrounded: " + static_cast<std::string>(projectile.isGrounded ? "true" : "false")
+                + "\nTo Be Destroyed: " + static_cast<std::string>(projectile.toBeDestroyed ? "true" : "false")
+                + "\nTimer: " + Utils::FormatFloat(projectile.timer, 2)
+                + "\nAttack Charges: " + std::to_string(projectile.AttackCharges())
+                + "\nDamage Radius: " + std::to_string(projectile.attribute.DamageRadius())
+                + "\nCollisionTriggered: " + static_cast<std::string>(projectile.collisionTriggered ? "true" : "false");
+        }
+
+        TextObject textObj{ debugStr, Utils::debuggerInfo.first * 0.8f, Utils::debuggerInfo.second, {0.5f, 0.99f} };
+        textObj.Draw();
     }
 }

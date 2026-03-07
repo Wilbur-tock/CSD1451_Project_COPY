@@ -3,14 +3,24 @@
 
 #include "pch.hpp"
 
-#include "GameObject.hpp"
-#include "Collider.hpp"
+class GameObject;   // To be defined in GameObject.cpp
+struct Transform;    // To be defined in BaseTypes.cpp
 
 namespace CollisionManager {
-	bool AreCirclesIntersecting(float x1, float y1, float r1, float x2, float y2, float r2);
-
-	bool AreCircleSquareIntersecting(float sX, float sY, float sWidth, float sHeight, float cX, float cY, float r);
     /*!***********************************************************************
+    \brief
+    Checking if circle object transform is overlapping with square object transform
+    \param[in] circle
+    Transform containing the size and position of the circle object
+    \param[in] square
+    Transform containing the size and position of the square object
+    \return
+    return true if circle is overlapping with square or vice versa otherwise false
+    *************************************************************************/
+    bool AreCircleSquareIntersecting(Transform const& circle, Transform const& square);
+    bool AreCircleSquareIntersecting(float sX, float sY, float sWidth, float sHeight, float cX, float cY, float r);
+
+    /**********************************************
     \brief
     Checking if MOUSE WORLD COORINDATES is inside the game object collider
     \param[in] obj
@@ -19,6 +29,7 @@ namespace CollisionManager {
     return true if mouse is inside the gameobject collider otherwise false
     *************************************************************************/
 	bool IsPointInGameObject(GameObject const& obj);
+
     /*!***********************************************************************
     \brief
     Checking if world mouse position is inside a rectangle object
@@ -30,6 +41,18 @@ namespace CollisionManager {
     return true if mouse is inside the rectangle otherwise false
     *************************************************************************/
 	bool IsPointInRect(float x, float y, float w, float h);
+
+    /*!***********************************************************************
+    \brief
+    Checking if the collision between the circle and square is horizontal or not
+    \param[in] circle
+    Transform containing the size and position of the circle object
+    \param[in] square
+    Transform containing the size and position of the square object
+    \return
+    return true if the collision is horizontal otherwise false for vertical collision
+    *************************************************************************/
+    bool IsHorizontalCollision(Transform const& circle, Transform const& square);
 }
 
 #endif // !COLLISIONMANAGER_HPP

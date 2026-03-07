@@ -1,77 +1,63 @@
 [
-  {
-    "Name": "HP",
-    "Type": 1,
-    "Tier": 1,
-    "Base_Stats": {
-      "HP": 50,
-      "ATK": 50,
-      "DEF": 50
-    }
-  },
+    {
+        "Name": "Default Projectile",
+        "Type": 2,
+        "Tier": 1,
+        "Projectile_Stats": {
+            "ProjectileID": 0,
+            "Damage_Amp": 1.0,
+            "Base_Damage": 10,
+            "Radius": 2,
+            "Charges": 1,
+            "unlimited_charges": true
+        }
+    },
 
-  {
-    "Name": "Vanilla",
-    "Type": 2,
-    "Tier": 1,
-    "Projectile_Stats": {
-      "ProjectileID": 1,
-      "Damage_Amp": 1.0,
-      "Base_Damage": 10,
-      "Radius": 1,
-      "Charges": 100,
-      "unlimited_charges": true
-    }
-  },
+    {
+        "Name": "Bomb Projectile",
+        "Type": 2,
+        "Tier": 1,
+        "Projectile_Stats": {
+            "ProjectileID": 1,
+            "Damage_Amp": 1.0,
+            "Base_Damage": 50,
+            "Radius": 5,
+            "Charges": 1,
+            "unlimited_charges": false
+        }
+    },
 
-  {
-    "Name": "Mid Damage",
-    "Type": 2,
-    "Tier": 1,
-    "Projectile_Stats": {
-      "ProjectileID": 2,
-      "Damage_Amp": 2.0,
-      "Base_Damage": 20,
-      "Radius": 2,
-      "Charges": 10,
-      "unlimited_charges": false
-    }
-  },
+    {
+        "Name": "NUKE EM ALL",
+        "Type": 2,
+        "Tier": 1,
+        "Projectile_Stats": {
+            "ProjectileID": 2,
+            "Damage_Amp": 1.0,
+            "Base_Damage": 100,
+            "Radius": 10,
+            "Charges": 1,
+            "unlimited_charges": false
+        }
+    },
 
-  {
-    "Name": "Nuke",
-    "Type": 2,
-    "Tier": 1,
-    "Projectile_Stats": {
-      "ProjectileID": 3,
-      "Damage_Amp": 4.0,
-      "Base_Damage": 30,
-      "Radius": 5,
-      "Charges": 10,
-      "unlimited_charges": false
-    }
-  },
+    {
+        "Name": "HP",
+        "Type": 1,
+        "Tier": 1,
+        "Base_Stats": {
+            "HP": 50,
+            "ATK": 50,
+            "DEF": 50
+        }
+    },
 
-  {
-    "Name": "Destroy everything",
-    "Type": 2,
-    "Tier": 1,
-    "Projectile_Stats": {
-      "ProjectileID": 4,
-      "Damage_Amp": 50.0,
-      "Base_Damage": 300,
-      "Radius": 50,
-      "Charges": 10,
-      "unlimited_charges": false
+    {
+        "Name": "Shield",
+        "Type": 3,
+        "Tier": 1,
+        "Defensive_Stats": {
+            "ShieldHP": 50
+        }
     }
-  },
-
-  {
-    "Name": "Shield",
-    "Type": 3,
-    "Tier": 1,
-    "Defensive_Stats": {
-      "ShieldHP": 50
-    }
-  }
 ]

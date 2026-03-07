@@ -60,7 +60,6 @@ namespace GameStateManager {
             Config::WORLD_MAX_Y
         );
 
-        debugText = { "", Utils::debuggerInfo.first * 0.75f, Utils::debuggerInfo.second, {-1.f, -0.8f} };        // Reset transition vars
         setNewState = false;
         Loading::Init();
 
@@ -114,41 +113,33 @@ namespace GameStateManager {
                 // Update Game state function pointers based on current state
                 switch (current) {
                 case GameState::MAIN_MENU:
-                    gsLoad = MainMenu::Load;
                     gsIntialize = MainMenu::Initialize;
                     gsUpdate = MainMenu::Update;
                     gsDraw = MainMenu::Draw;
                     gsFree = MainMenu::Free;
-                    gsUnload = MainMenu::Unload;
                     break;
 
                 case GameState::MAP_EDITOR:
-                    gsLoad = nullptr;
                     gsIntialize = MapEditor::Initialize;
                     gsUpdate = MapEditor::Update;
                     gsDraw = nullptr;
                     gsFree = MapEditor::Exit;
-                    gsUnload = nullptr;
                     break;
 
                 case GameState::LEVEL_1:
                 case GameState::LEVEL_2:
                     LevelManager::SelectLevel(static_cast<int>(current) - static_cast<int>(GameState::LEVEL_1));
-                    gsLoad = LevelManager::LoadLevel;
                     gsIntialize = LevelManager::InitializeLevel;
                     gsUpdate = LevelManager::UpdateLevel;
                     gsDraw = nullptr;
                     gsFree = LevelManager::FreeLevel;
-                    gsUnload = nullptr;
                     break;
 
                 case GameState::CREDITS:
-                    gsLoad = Credits::Load;
                     gsIntialize = Credits::Initialize;
                     gsUpdate = Credits::Update;
                     gsDraw = Credits::Draw;
                     gsFree = Credits::Free;
-                    gsUnload = Credits::Unload;
                     break;
 
                 case GameState::SETTINGS:
@@ -286,14 +277,16 @@ namespace GameStateManager {
 
         // Debugger display
         if (Utils::isDebuggerOn && !Utils::isInstructionOn) {
-            UIManager::Panel panel{ {250, 75}, {1.0f,1.0f,1.0f, 0.75f}, Utils::RectMode::RECT_BOTTOM_LEFT };
-            panel.Draw();
+            UIManager::Panel debuggerPanel{ {200, 75}, {1.0f,1.0f,1.0f, 0.75f}, Utils::RectMode::RECT_BOTTOM_LEFT };
+            TextObject debugText{ "", Utils::debuggerInfo.first * 0.75f, Utils::debuggerInfo.second, {-1.f, -0.81f} };
+
+            debuggerPanel.Draw();
 
             debugText.textContent = "\n[P] Debugger ON\nFPS: " + Utils::FormatFloat(AEFrameRateControllerGetFrameRate(), 2)
-                + "\nDeltaTime: " + Utils::FormatFloat(rawDt, 2)
-                + "\n[M] Main Menu" + "\nCamera State: " + CameraManager::camera.PrintState()
-                + "\n Zoom: " + Utils::FormatFloat(CameraManager::camera.GetZoom(), 2)
-                + "\n" + CameraManager::camera.PrintVisibleTiles();
+                + "\nDeltaTime: " + Utils::FormatFloat(rawDt, 2);
+                //+ "\n[M] Main Menu" + "\nCamera State: " + CameraManager::camera.PrintState()
+                //+ "\n Zoom: " + Utils::FormatFloat(CameraManager::camera.GetZoom(), 2)
+                //+ "\n" + CameraManager::camera.PrintVisibleTiles();
 
             debugText.Draw();
         }
