@@ -6,9 +6,12 @@
 namespace Utils {
 	bool isDebuggerOn = true;
 	bool isInstructionOn = false;
+	bool isPaused = false;                                         // <-- NEW
+	bool returnToPause = false;                                    // <-- NEW
+	float unpauseCooldown = 0.0f;                                  // <-- NEW
 	Color debuggerColor = Color{ 0,1.f,0 };
 
-	std::pair<float, Color> debuggerInfo = { 0.75f, Color{0, 0.8f, 0 }};
+	std::pair<float, Color> debuggerInfo = { 0.75f, Color{0, 0.8f, 0 } };
 
 	void GetWorldMousePos(float& x, float& y) {
 		s32 mouseX, mouseY;

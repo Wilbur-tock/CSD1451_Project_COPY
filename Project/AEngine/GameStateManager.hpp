@@ -13,6 +13,7 @@ namespace GameStateManager {
 		LEVEL_1,
 		LEVEL_2,
 		CREDITS,
+		SETTINGS,
 		RESTART,
 		EXIT,
 		QUIT,
@@ -27,8 +28,6 @@ namespace GameStateManager {
 
 	void Exit();
 
-	// Render loading screen during state transitions
-	void RenderLoadingScreen();
 }
 
 #endif //

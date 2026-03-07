@@ -48,7 +48,7 @@ namespace UIInstructionsOverlay {
             "[I] Toggle this popup\n"
             "[P] Toggle Debugger\n"
             "[M] Main Menu\n"
-            "[ESC] Quit Game\n\n";
+            "[ESC] Pause Menu\n\n";                                        // <-- CHANGED
 
         using GameStateManager::GameState;
         if (current == GameState::LEVEL_1 || current == GameState::LEVEL_2) {

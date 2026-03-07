@@ -2,6 +2,7 @@
 #include "CollisionManager.hpp"
 #include "AssetsManager.hpp"
 #include "CameraManager.hpp"
+#include "Loading.hpp"
 
 #include "Color.hpp"
 #include "GameObject.hpp"
@@ -20,6 +21,8 @@ namespace GraphicsManager {
 	AEGfxVertexList* pMeshMiddle = nullptr;
 	// Mesh for UI screen overlay and UI in the WORLD environment
 	AEGfxVertexList*pMeshCorner = nullptr;
+	// Mesh for animated sprites
+	AEGfxVertexList* pSpriteMesh = nullptr;
 
 	// Generate the mesh to draw on e.g.paper to draw on. There are TWO mesh, 
 	// pMeshMiddle (RectMode Center) for game objects to draw on,
@@ -116,8 +119,116 @@ namespace GraphicsManager {
 		AEGfxMeshDraw(mesh, AE_GFX_MDM_TRIANGLES);
 	}
 
+	// Builds a custom quad mesh where the UV coordinates span exactly one frame width.
+	// This is called once during GraphicsManager::Load() and the result is stored
+	// in pSpriteMesh for use by DrawSpriteFrame every frame.
+	//
+	// Why a custom mesh instead of reusing pMeshMiddle?
+	// pMeshMiddle UV coordinates span 0.0 to 1.0 (the full texture width).
+	// For a sprite sheet, we only ever want to sample 1/frameCount of the texture
+	// at a time. Baking that fraction into the mesh UVs means the GPU naturally
+	// clips to one frame, and AEGfxTextureSet only needs to shift the offset.
+	void BuildSpriteMesh() {
+
+		// frameUWidth is the UV width of a single frame in normalised texture space.
+		// For 6 frames: 1.0 / 6 = 0.1667
+		// This becomes the right-edge U coordinate of the quad.
+		// The left edge is always 0.0 because AEGfxTextureSet shifts the whole
+		// window by the frame offset at draw time.
+		float frameUWidth = 1.0f / Loading::SPRITE_FRAME_COUNT; 
+
+		// Begin recording vertex data for a new mesh
+		AEGfxMeshStart();
+
+		// The quad is built from two triangles sharing a diagonal edge.
+		// Vertex layout in local space (center-origin, spans -1 to +1):
+		//
+		//  (-1, 1) -------- (1, 1)    UV: (0,0) ------- (frameUWidth, 0)
+		//     |          /    |              |           /      |
+		//     |        /      |              |         /        |
+		//     |      /        |              |       /          |
+		//  (-1,-1) -------- (1,-1)    UV: (0,1) ------- (frameUWidth, 1)
+		//
+		// Note: in Alpha Engine UV Y is flipped - 0.0 is the TOP of the texture,
+		// 1.0 is the BOTTOM.
+
+		// Triangle 1: bottom-left, bottom-right, top-left
+		AEGfxTriAdd(
+			-1.0f, -1.0f, 0xFFFFFFFF, 0.0f, 1.0f,		// Bottom-left  | UV left,  bottom
+			1.0f, -1.0f, 0xFFFFFFFF, frameUWidth, 1.0f, // Bottom-right | UV right, bottom
+			-1.0f, 1.0f, 0xFFFFFFFF, 0.0f, 0.0f			// Top-left     | UV left,  top
+		);
+		// Triangle 2: bottom-right, top-right, top-left
+		AEGfxTriAdd(
+			1.0f, -1.0f, 0xFFFFFFFF, frameUWidth, 1.0f,  // Bottom-right | UV right, bottom
+			1.0f, 1.0f, 0xFFFFFFFF, frameUWidth, 0.0f,   // Top-right    | UV right, top
+			-1.0f, 1.0f, 0xFFFFFFFF, 0.0f, 0.0f			 // Top-left     | UV left,  top
+		); 
+
+		// Finalise and store the mesh. pSpriteMesh is reused every frame by
+		// DrawSpriteFrame - it is only built once here during Load().
+		pSpriteMesh = AEGfxMeshEnd();
+
+	}
+
+	// Renders a single frame from a horizontal sprite sheet in screen space.
+	// Unlike DrawScreenOverlay, this function supplies a UV offset to AEGfxTextureSet
+	// so only the correct frame column of the sheet is sampled by the GPU.
+	//
+	// Parameters:
+	//   tex     - the full sprite sheet texture (all frames in one image)
+	//   frame   - which frame to show, 0-based (e.g. 0 to 5 for a 6-frame sheet)
+	//   screenX - center X position in screen coordinates
+	//   screenY - center Y position in screen coordinates
+	//   w, h    - render size in pixels
+	void DrawSpriteFrame(AEGfxTexture* tex, int frame, float screenX, float screenY, float w, float h) {
+		// Do nothing if the texture or mesh has not been loaded yet, prevent crash due to nullptr
+		if (!tex || !pSpriteMesh) return;
+
+		// Calculate the UV X offset for this frame.
+		// UV coordinates are normalised 0.0 - 1.0 across the full texture width.
+		// Dividing by the total frame count gives the width of one frame in UV space.
+		// Multiplying by the frame index shifts to the correct column.
+		// Example: frame 2 of 6 -> uvOffsetX = 2 * (1/6) = 0.333
+		float uvOffsetX = frame * (1.0f / Loading::SPRITE_FRAME_COUNT);
+
+		// Build the transform matrix for this sprite.
+		AEMtx33 mat = CreateTransformMatrix(screenX, screenY, 0.0f, w * 0.5f, h * 0.5f);
+
+		// Apply the same camera offset correction used by DrawScreenOverlay.
+		// This keeps the sprite locked to screen space even when the world camera moves.
+		// Without this, the sprite would drift with the camera during gameplay.
+		f32 camX = 0, camY = 0;
+		AEGfxGetCamPosition(&camX, &camY);
+		mat.m[0][2] += floorf(camX);
+		mat.m[1][2] += floorf(camY);
+
+		// Set the render mode to texture so the GPU samples the sprite sheet
+		AEGfxSetRenderMode(AE_GFX_RM_TEXTURE);
+		// Enable alpha blending so transparent pixels in the sprite are see-through
+		AEGfxSetBlendMode(AE_GFX_BM_BLEND);
+		AEGfxSetTransparency(1.0f);
+		// Multiply color set to white (1,1,1,1) so the sprite draws with its original colors.
+		// Changing these values would tint the sprite.
+		AEGfxSetColorToMultiply(1.0f, 1.0f, 1.0f, 1.0f);
+		// Additive color set to zero so no extra color is added on top of the sprite
+		AEGfxSetColorToAdd(0.0f, 0.0f, 0.0f, 0.0f);
+
+		// Bind the sprite sheet texture and supply the UV X offset.
+		// This is the key difference from DrawScreenOverlay which always passes (0, 0).
+		// The GPU will start sampling from uvOffsetX instead of 0, showing only
+		// the current frame column. The mesh UVs already span one frame width (0 to 1/6),
+		// so together they isolate exactly one frame of the sheet.
+		AEGfxTextureSet(tex, uvOffsetX, 0.0f);
+		// Apply the transform matrix so the quad is placed and sized correctly
+		AEGfxSetTransform(mat.m);
+		// Draw pSpriteMesh (the custom frame mesh) as two triangles forming a quad
+		AEGfxMeshDraw(pSpriteMesh, AE_GFX_MDM_TRIANGLES);
+	}
+
 	void Load() {
 		GenerateMesh();
+		BuildSpriteMesh();
 		AEGfxSetTextureMode(AE_GFX_TM_PRECISE);
 	}
 
@@ -129,6 +240,10 @@ namespace GraphicsManager {
 		if (pMeshCorner) {
 			AEGfxMeshFree(pMeshCorner);
 			pMeshCorner = nullptr;
+		}
+		if (pSpriteMesh) { 
+			AEGfxMeshFree(pSpriteMesh); 
+			pSpriteMesh = nullptr; 
 		}
 	}
 

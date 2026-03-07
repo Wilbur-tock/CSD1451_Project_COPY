@@ -7,7 +7,7 @@
 
 namespace MainMenu {
     // Menu buttons
-    Button playButton, mapEditorButton, creditsButton, quitButton;
+    Button playButton, mapEditorButton, creditsButton, settingsButton, quitButton;
     TextObject gameTitle, instructions;
 
     // Menu state
@@ -17,11 +17,14 @@ namespace MainMenu {
     AEGfxTexture* bgTexture = nullptr;
     AEGfxTexture* buttonTexture = nullptr;
 
+    float titleAnimTimer = 0.0f;
+    float baseTitleScale = 2.5f;
+
     void Load() {
         // Load any textures or assets needed for the menu
         // This runs once when the game starts
         buttonTexture = AssetsManager::GetTexture("Assets/buttonTexture.png");
-        bgTexture = AssetsManager::GetTexture("Assets/cloudBgFp.png");
+        bgTexture = AssetsManager::GetTexture("Assets/game_bg.png");
         /*bgTexture = nullptr;*/
     }
 
@@ -35,8 +38,8 @@ namespace MainMenu {
         float btnSpacing = 100.0f;
 
         // Calculate centered positions
-        float centerX = 0.0f;  // Center of screen in world coordinates
-        float startY = 100.0f; // Starting Y position for first button
+        float centerX = -550.0f;  // Center of screen in world coordinates
+        float startY = 200.0f; // Starting Y position for first button
 
         // Create Play Button
         AEVec2 playPos = { centerX - btnWidth / 2.0f, startY };
@@ -62,8 +65,20 @@ namespace MainMenu {
             OnMapEditorClicked
         );
 
+        // Create Settings Button
+        AEVec2 settingsPos = { centerX - btnWidth / 2.0f, startY - btnSpacing * 2 };
+        settingsButton = Button(
+            TextObject{ "SETTINGS" },
+            Utils::RectMode::RECT_CENTER,
+            settingsPos,
+            { btnWidth, btnHeight },
+            Color(0.6f, 0.6f, 0.2f, 1.0f),  // Yellow color
+            buttonTexture,
+            OnSettingsClicked
+        );
+
         // Create Credits Button
-        AEVec2 creditsPos = { centerX - btnWidth / 2.0f, startY - btnSpacing * 2 };
+        AEVec2 creditsPos = { centerX - btnWidth / 2.0f, startY - btnSpacing * 3 };
         creditsButton = Button(
             TextObject{ "CREDITS" },
             Utils::RectMode::RECT_CENTER,
@@ -75,7 +90,7 @@ namespace MainMenu {
         );
 
         // Create Quit Button
-        AEVec2 quitPos = { centerX - btnWidth / 2.0f, startY - btnSpacing * 3 };
+        AEVec2 quitPos = { centerX - btnWidth / 2.0f, startY - btnSpacing * 4 };
         quitButton = Button(
             TextObject{ "QUIT" },
             Utils::RectMode::RECT_CENTER,
@@ -89,18 +104,18 @@ namespace MainMenu {
         gameTitle = { "FORTRESS FIGHT",
             2.5f,
             Color(0.0f, 0.0f, 0.0f, 1.0f),  // White color
-            { -0.3f, 0.65f }, // position (normalized)
+            { 0.1f, 0.75f }, // position (normalized)
         };
 
         instructions = {
-            "Click a button or use keyboard shortcuts:\n1 - Play Game | 2 - Map Editor | 3 - Credits | ESC - Quit",
+            "Click a button or use keyboard shortcuts:\n1 - Play Game | 2 - Map Editor | 3 - Credits | 4 - Settings | ESC - Quit",
             0.7f,
             Color(0.0f, 0.0f, 0.0f, 1.0f),
             { -0.98f, -0.9f },
         };
 
         // Reset camera to orgin pos and can't move
-        CameraManager::camera.SetPosition({0, 0});
+        CameraManager::camera.SetPosition({ 0, 0 });
         CameraManager::camera.SetState(CameraManager::CameraController::STATIC);
     }
 
@@ -110,7 +125,7 @@ namespace MainMenu {
             // Draw full-screen background
             GraphicsManager::DrawWorldUI(
                 bgTexture,
-                GraphicsManager::CreateTransformMatrix(-Config::SCREEN_WIDTH / 2.0f, Config::SCREEN_HEIGHT / 2.0f, 0, 
+                GraphicsManager::CreateTransformMatrix(-Config::SCREEN_WIDTH / 2.0f, Config::SCREEN_HEIGHT / 2.0f, 0,
                     Config::SCREEN_WIDTH, Config::SCREEN_HEIGHT),
                 Color(1.0f, 1.0f, 1.0f, 1.0f)  // White = no color tinting
             );
@@ -128,6 +143,26 @@ namespace MainMenu {
     }
 
     void Update() {
+        // Advance animation timer
+        titleAnimTimer += static_cast<float>(AEFrameRateControllerGetFrameTime());
+
+        // Pulse: scale oscillates +/- 0.2 around the base scale
+        // How big the scale bounce * How fast it grows/shrinks (pulse)
+        // `sinf` returns a value that cycles smoothly between `-1.0` and `+1.0`.
+        float pulseScale = baseTitleScale + 0.2f * sinf(titleAnimTimer * 2.0f);
+        gameTitle.textScale = pulseScale;
+
+        // Flash: alpha oscillates between 0.5 and 1.0
+        // Avg. brightness + How much brightness vary * How fast brightness vary
+        // `sinf` returns a value that cycles smoothly between `-1.0` and `+1.0`.
+        float flashAlpha = 0.75f + 0.25f * sinf(titleAnimTimer * 3.0f);
+        gameTitle.color.SetColor(
+            gameTitle.color.Red(),
+            gameTitle.color.Green(),
+            gameTitle.color.Blue(),
+            flashAlpha
+        );
+
         // Keyboard shortcuts
         if (AEInputCheckTriggered(AEVK_1)) {
             OnPlayClicked();
@@ -138,6 +173,9 @@ namespace MainMenu {
         if (AEInputCheckTriggered(AEVK_3)) {
             OnCreditsClicked();
         }
+        if (AEInputCheckTriggered(AEVK_4)) {
+            OnSettingsClicked();
+        }
         if (AEInputCheckTriggered(AEVK_Q)) {
             OnQuitClicked();
         }
@@ -147,6 +185,7 @@ namespace MainMenu {
         playButton.Update();
         mapEditorButton.Update();
         creditsButton.Update();
+        settingsButton.Update();
         quitButton.Update();
     }
 
@@ -176,14 +215,13 @@ namespace MainMenu {
         GameStateManager::next = GameStateManager::GameState::CREDITS;
     }
 
+    void OnSettingsClicked() {
+        // Transition to Settings screen
+        GameStateManager::next = GameStateManager::GameState::SETTINGS;
+    }
+
     void OnQuitClicked() {
         // Quit the game
         GameStateManager::next = GameStateManager::GameState::QUIT;
     }
 }
-
-
-
-
-
-
