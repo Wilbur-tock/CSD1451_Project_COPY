@@ -58,7 +58,7 @@ public:
 	void AbilityUpdate();
 	void MoveProjectile(float dt);
 	// Simulate the projectile physics of bouncing off the walls, checking if it is grounded
-	void ProjectilePhysics(Tile const& tile);
+	void OnCollision(Tile const& tile);
 	// Damage tiles based on projectile damage (Blocks & Enemy included)
 	void DamageTile(int x, int y);
 	void ConsumeAttackCharge();

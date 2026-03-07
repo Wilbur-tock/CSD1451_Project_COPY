@@ -158,11 +158,11 @@ namespace CannonManager {
 
         // Calculate required Power (Initial Velocity)
         // Basic range formula: v = sqrt( (g * d) / sin(2 * theta) )
-        float neededVelocity = sqrt((Config::GRAVITY * abs(distance)) / sin(2 * randomAngleBase));
+        float neededVelocity = sqrt((PhysicsManager::GRAVITY * abs(distance)) / sin(2 * randomAngleBase));
 
         // Randomise offset to add a variance to 
         float difficulty = 1.0f; // TODO: Adjust difficulty based on levels
-        float inaccuracy = (1.0f - difficulty) + 0.01f;
+        float inaccuracy = (1.0f - difficulty) + 0.1f;
         float randomOffset = Utils::RandomValue(-inaccuracy, inaccuracy);
 
         // Apply the variables to the cannon
@@ -310,8 +310,6 @@ namespace CannonManager {
                 int gridX = 0, gridY = 0;
                 Utils::GetGridIndex(gridX, gridY, projectile.transform.pos);
 
-                float radius = projectile.transform.size.x / 2.0f;
-                float bias = 0.25f;
                 int minX = gridX - 1, minY = gridY - 1, maxX = gridX + 1, maxY = gridY + 1;
                 for (int y = minY; y <= maxY; ++y) {
                     for (int x = minX; x <= maxX; ++x) {
@@ -319,15 +317,15 @@ namespace CannonManager {
 
                         Tile& tile = (*MapManager::currentMap)[y][x];
 
-                        projectile.collisionTriggered = false;
                         if (tile.IsEmpty()) continue;
 
                         // Checking collision of the projectile with the tile blocks that is collidable
                         if (CollisionManager::AreCircleSquareIntersecting(projectile.transform, tile.transform)) {
                             projectile.collisionTriggered = true;
 
+                            // Don't change the order
                             if (projectile.isCollisionActive) {
-                                projectile.ProjectilePhysics(tile);
+                                projectile.OnCollision(tile);
                             }
 
                             if (projectile.collisionTriggered) {
@@ -335,7 +333,8 @@ namespace CannonManager {
                                 projectile.isCollisionActive = true;
 
                                 // If the projectile hit something, REDUCE the velocity by a percentage
-                                float percentage = 0.5f;
+                                // So that it does not continue having the same projectile velocity even if it hits and destroy something
+                                float percentage = 0.25f;
                                 projectile.velocity.x *= percentage;
                                 projectile.velocity.y *= percentage;
                             }
@@ -351,25 +350,16 @@ namespace CannonManager {
                             if (Utils::IsGridIndexOutOfBounds(x, y)) continue;
 
                             Tile& tile = (*MapManager::currentMap)[y][x];
-                            float halfW = tile.transform.size.x * 0.5f, halfH = tile.transform.size.y * 0.5f;
 
-                            if (tile.IsBlocks() || tile.IsGround()) {
-                                float tileTop = tile.transform.pos.y + halfH;
-                                float tileLeft = tile.transform.pos.x - halfW;
-                                float tileRight = tile.transform.pos.x + halfW;
-
-                                // Check if projectile is resting on top of this tile by checking the projectile x-axis is within the tile x-axis
-                                // and its y-axis is the same +- bias as the tile + projectile radius
-                                if (projectile.transform.pos.x >= tileLeft - radius &&
-                                    projectile.transform.pos.x <= tileRight + radius &&
-                                    std::abs(projectile.transform.pos.y - (tileTop + radius)) < bias) {
-                                    projectile.isGrounded = true;
+                            if (!tile.IsEmpty()) {
+                                projectile.isGrounded = PhysicsManager::IsGrounded(projectile.transform, tile.transform);
+                                if (projectile.isGrounded) {
                                     projectile.velocity.y = 0;
                                     break;
                                 }
                             }
                         }
-                        if (projectile.isGrounded) break;
+                        //if (projectile.isGrounded) break;
                     }
                 }
             }
@@ -453,7 +443,7 @@ namespace CannonManager {
 
             // Kinematic equations
             float drawX = startX + (vx * t);
-            float drawY = startY + (vy * t) - (0.5f * Config::GRAVITY * t * t);
+            float drawY = startY + (vy * t) - (0.5f * PhysicsManager::GRAVITY * t * t);
 
             float alpha = 1.0f - static_cast<float>(i / numDots);
             GraphicsManager::DrawGameObject(AssetsManager::circleTexture, GraphicsManager::CreateTransformMatrix(drawX, drawY, 0, 10, 10), { 1,1,1, alpha });

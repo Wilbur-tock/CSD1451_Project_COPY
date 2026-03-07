@@ -59,19 +59,19 @@ void Projectile::SetProjectileStats(std::string _projectileName, ProjectileModul
 
 void Projectile::MoveProjectile(float dt) {
     if (isGrounded) {
-        velocity.x *= pow(Config::FRICTION, dt);
+        velocity.x *= pow(PhysicsManager::FRICTION, dt);
         velocity.y = 0; // ensure that the projectile stay on the ground
-        if (std::abs(velocity.x) < Config::MINIMUM_VELOCITY) velocity.x = 0;
+        if (std::abs(velocity.x) < PhysicsManager::MINIMUM_VELOCITY) velocity.x = 0;
     }
     else {
-        velocity.y -= Config::GRAVITY * dt;
+        velocity.y -= PhysicsManager::GRAVITY * dt;
     }
 
     transform.pos.x += velocity.x * dt;
     transform.pos.y += velocity.y * dt;
 }
 
-void Projectile::ProjectilePhysics(Tile const& tile) {
+void Projectile::OnCollision(Tile const& tile) {
     if(CollisionManager::IsHorizontalCollision(transform, tile.transform)) {
         PhysicsManager::ResolveHorizontalCollision(transform, velocity, tile.transform);
     }

@@ -47,6 +47,10 @@ namespace AbilitiesManager {
 		offensiveAbilities.clear();
 		statsAbilities.clear();
 		defensiveAbilities.clear();
+		allAbilities.clear();
+		allAbilities.reserve(64);
+		activeAbilities.clear();
+		currentAbility = nullptr;
 
 		nlohmann::json data;
 		ReadAbilitiesFromFile(data, "Assets/Abils/Abilities.json");

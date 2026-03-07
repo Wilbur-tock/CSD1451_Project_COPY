@@ -127,6 +127,22 @@ namespace MapManager {
 
 	void Unload() {
 		currentMap = nullptr;
+
+		gFallbackTex = nullptr;
+		gFloorTopTex = nullptr;
+		gFloorFillTex = nullptr;
+		gTower1TopTex = nullptr;
+		gTower1BodyTex = nullptr;
+		gTower2TopTex = nullptr;
+		gTower2BodyTex = nullptr;
+		gCannonBaseTex = nullptr;
+		gPlayerIdleTex = nullptr;
+		gEnemy100Tex = nullptr;
+		gCracksLightTex = nullptr;
+		gCracksMediumTex = nullptr;
+		gCracksHeavyTex = nullptr;
+
+		for (int i = 0; i < TILE_COUNT; ++i) gTileTex[i] = nullptr;
 	}
 
 	void ReadMapData(std::string const& fileName, std::vector<std::vector<Tile>> &map) {
