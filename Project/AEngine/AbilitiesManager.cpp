@@ -8,27 +8,53 @@
 #include "AssetsManager.hpp"
 #include "CameraManager.hpp"
 
+namespace {
+	// Helper function to read from JSON file and input the data into a JSON Object
+	static void ReadAbilitiesFromFile(nlohmann::json& jsonData, std::string const& filePath) {
+		// Open the file
+		std::ifstream file(filePath);
+		if (!file.is_open()) {
+			std::cerr << "[AbilitiesManager] ERROR: Could not open " << filePath << '\n';
+			return;
+		}
+
+		// Parse the file into a JSON object
+		//file >> jsonData;
+
+		nlohmann::json newData;
+		file >> newData;
+
+		if (jsonData.is_null()) {
+			jsonData = newData; // First read, just assign
+		}
+		else if (jsonData.is_array() && newData.is_array()) {
+			jsonData.insert(jsonData.end(), newData.begin(), newData.end()); // Merge arrays
+		}
+		else if (jsonData.is_object() && newData.is_object()) {
+			jsonData.update(newData); // Merge objects
+		}
+		else {
+			std::cerr << "[AbilitiesManager] ERROR: JSON type mismatch when merging " << filePath << '\n';
+		}
+	}
+}
+
 namespace AbilitiesManager {
 	AbilityController playerAbilityController;
 	AbilityController enemyAbilityController;
 
-
-	void AbilityController::LoadAllAbilities() {
+	void AbilityController::LoadAllAbilities(bool isAi) {
 		offensiveAbilities.clear();
 		statsAbilities.clear();
 		defensiveAbilities.clear();
 
-		// 2. Open the file
-		std::ifstream file("Assets/Abils/Abilities.json");
-		if (!file.is_open()) {
-			std::cerr << "[AbilitiesManager] ERROR: Could not open Abilities.json" << std::endl;
-			return;
-		}
-
-		// 3. Parse the file into a JSON object
 		nlohmann::json data;
-		file >> data;
+		ReadAbilitiesFromFile(data, "Assets/Abils/Abilities.json");
 
+		// Read enemies ONLY ability and merge it to the data
+		if (isAi) {
+			ReadAbilitiesFromFile(data, "Assets/Abils/AiAbilities.json");
+		}
 
 		for (auto& item : data) { // Your JSON is an array at the root
 			std::string name = item["Name"];
@@ -62,9 +88,9 @@ namespace AbilitiesManager {
 			}
 
 		}
-		std::cout << "[AbilitiesManager] Successfully loaded " << statsAbilities.size() << " player stats abilities." << std::endl;
-		std::cout << "[AbilitiesManager] Successfully loaded " << offensiveAbilities.size() << " player offensive abilities." << std::endl;
-		std::cout << "[AbilitiesManager] Successfully loaded " << defensiveAbilities.size() << " player defensive abilities." << std::endl;
+		std::cout << "[AbilitiesManager] Successfully loaded " << statsAbilities.size() << " stats abilities." << std::endl;
+		std::cout << "[AbilitiesManager] Successfully loaded " << offensiveAbilities.size() << " offensive abilities." << std::endl;
+		std::cout << "[AbilitiesManager] Successfully loaded " << defensiveAbilities.size() << " defensive abilities." << std::endl;
 	}
 
 	void AbilityController::LoadAllAIAbilities() {
@@ -177,6 +203,7 @@ namespace AbilitiesManager {
 			std::cerr << "[AbilitiesManager] No AI abilities loaded!" << '\n';
 			return;
 		}
+		// Randomly select abilities for now
 		int size = static_cast<int>(AIoffensiveAbilities.size());;
 		if (size > 1) {
 			selectedId = Utils::RandomValue(0, size);
@@ -187,6 +214,12 @@ namespace AbilitiesManager {
 		std::cout << "[AbilitiesManager] Enemy selected ability: " << AIProjectileSelected->GetName() << '\n';
 	}
 
+	int AbilityController::FindProjectileId() {
+		if (!currentAbility) return 0;
+		if (currentAbility->GetType() != AbilityType::OFFENSIVE) return 0;
+		return currentAbility->GetProj().projectileId;
+	}
+
 	void AbilityController::AbilitySelector(bool& isOn) {
 		if (!isOn) return;
 
@@ -194,7 +227,7 @@ namespace AbilitiesManager {
 		CameraManager::camera.SetState(CameraManager::CameraController::STATIC);
 
 		// Randomise Abilties
-		std::vector<std::string> abilities = { "Default Projectile", "Bomb Projectile", "Fast Projectile" };
+		std::vector<std::string> abilitiesName = { "Default Projectile", "Bomb Projectile", "Fast Projectile" };
 
 		// 2 offensive abilities for the player to choose from
 		// 1 defensive ability for the player to choose from
@@ -215,7 +248,7 @@ namespace AbilitiesManager {
 		background.Draw();
 
 		AEVec2 cardSize{ 350.0f, 550.0f }; // width and height
-		float gap = (1400.0f - (cardSize.x * abilities.size())) / (abilities.size() + 1);
+		float gap = (1400.0f - (cardSize.x * abilitiesName.size())) / (abilitiesName.size() + 1);
 		AEVec2 cardPos{ -cardSize.x * 1.5f - gap, cardSize.y / 2.0f };
 
 		int id = 1;

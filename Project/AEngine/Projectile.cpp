@@ -20,6 +20,8 @@ void Projectile::Mode(ProjectileMode newMode) { mode = newMode; }
 
 int Projectile::ProjectileId() const { return projectileId; }
 
+std::string Projectile::ProjectileName() const { return projectileName; }
+
 void Projectile::Render() {
     AEMtx33 mat = GraphicsManager::CreateTransformMatrix(transform.pos.x, transform.pos.y, 0, transform.size.x, transform.size.y);
     GraphicsManager::DrawGameObject(texture, mat, Color{ 0.5f, 0.5f, 0, 1 });
@@ -36,7 +38,9 @@ void Projectile::AbilityUpdate() {
     }
 }
 
-void Projectile::SetProjectileStats(ProjectileModule const& data) {
+void Projectile::SetProjectileStats(std::string _projectileName, ProjectileModule const& data) {
+    projectileName = _projectileName;
+
     // 1. Set Identity
     projectileId = data.projectileId;
     mode = static_cast<ProjectileMode>(data.projectileId);
@@ -68,14 +72,6 @@ void Projectile::MoveProjectile(float dt) {
 }
 
 void Projectile::ProjectilePhysics(Tile const& tile) {
-    float bias = 0.1f, radius = transform.size.y * 0.5f;
-    float halfH = tile.transform.size.y * 0.5f, halfW = tile.transform.size.x * 0.5f;
-    // Bounds
-    float tileTop = tile.transform.pos.y + halfH;
-    float tileBottom = tile.transform.pos.y - halfH;
-    float tileLeft = tile.transform.pos.x - halfW;
-    float tileRight = tile.transform.pos.x + halfW;
-
     if(CollisionManager::IsHorizontalCollision(transform, tile.transform)) {
         PhysicsManager::ResolveHorizontalCollision(transform, velocity, tile.transform);
     }

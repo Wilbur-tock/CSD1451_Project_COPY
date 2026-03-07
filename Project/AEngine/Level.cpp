@@ -96,12 +96,12 @@ void Level::Initalize() {
 	playerCannon.textureColor = Color{ 1, 1, 1, 1 };
 
 	AbilitiesManager::AbilityController& playerController = AbilitiesManager::playerAbilityController;
-	playerController.LoadAllAbilities();
+	playerController.LoadAllAbilities(false);
 	playerCannon.SetAbilityController(&playerController);
 
 	enemyCannon = CannonManager::Cannon(enemyCannonStartPos, barrelTex, { 0,0 }, barrelHalfSize, false, false);
 	AbilitiesManager::AbilityController& enemyController = AbilitiesManager::enemyAbilityController;
-	enemyController.LoadAllAIAbilities();
+	enemyController.LoadAllAbilities(true);
 	enemyCannon.SetAbilityController(&enemyController);
 
 	// Reset level flow variables
@@ -126,14 +126,15 @@ void Level::Update() {
 	isLevelActive = !isAbilitySelectorOn && !isHoveringUI && delayTimer <= 0.0f;
 
 	if (isLevelActive) {
+		// For Debugging
 		if (isSkippingEnemyTurn) { // Skipping enemy turn
 			if (!isPlayerTurn) {
-				SwitchCannon(true);
+				SetTurn(true);
 			}
 		}
 		else { // Skipping enemy turn is off and autoPlayOn
 			if (autoPlayOn && isPlayerTurn) {
-				SwitchCannon(false);
+				SetTurn(false);
 			}
 		}
 
@@ -153,7 +154,7 @@ void Level::Update() {
 			activeCannon->Update();
 		}
 
-		SwitchTurn();
+		UpdateTurn();
 	}
 
 	// Update all Player character instance
@@ -170,6 +171,7 @@ void Level::Update() {
 	}
 
 	DrawLevel();
+
 	// Need to be below DrawLevel to ensure that the Ability Selector UI is shows up infront of the level
 	prevIsAbilitySelectorOn = isAbilitySelectorOn;
 	AbilitiesManager::playerAbilityController.AbilitySelector(isAbilitySelectorOn);
@@ -209,7 +211,7 @@ void Level::DrawLevel() {
 void Level::Free() {
 }
 
-void Level::SwitchTurn() {
+void Level::UpdateTurn() {
 	if (!activeCannon->HasShot()) return;
 
 	// Set timer to delay the transition from cannon to cannon
@@ -222,12 +224,12 @@ void Level::SwitchTurn() {
 
 		if (switchTurnCooldown <= 0.0f) {
 			// Switch active cannon
-			SwitchCannon(!isPlayerTurn);
+			SetTurn(!isPlayerTurn);
 		}
 	}
 }
 
-void Level::SwitchCannon(bool _isPlayerTurn) {
+void Level::SetTurn(bool _isPlayerTurn) {
 	isPlayerTurn = _isPlayerTurn;
 	if (isPlayerTurn) {
 		activeCannon = &playerCannon;
@@ -237,14 +239,14 @@ void Level::SwitchCannon(bool _isPlayerTurn) {
 		activeCannon = &enemyCannon;
 	}
 	activeCannon->ResetTurn();
-	std::cout << "[Level] Toggle to " << std::string(isPlayerTurn ? "PLAYER" : "ENEMY") << " turn" << '\n';
+	std::cout << "[Level] Switch to " << std::string(isPlayerTurn ? "PLAYER" : "ENEMY") << " turn" << '\n';
 }
 
 void Level::Debugger() {
 	if (Utils::isDebuggerOn) {
 		// Input R to change whose turn it is
 		if (AEInputCheckTriggered(AEVK_R)) {
-			SwitchCannon(!isPlayerTurn);
+			SetTurn(!isPlayerTurn);
 		}
 		// Input CTRL + R to turn autoPlayOn on/off
 		if (AEInputCheckCurr(AEVK_LCTRL) || AEInputCheckCurr(AEVK_RCTRL)) {

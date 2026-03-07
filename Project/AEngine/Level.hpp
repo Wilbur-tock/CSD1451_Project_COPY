@@ -27,8 +27,8 @@ public:
 	// Member functions
 
 	// Toggle turns between player and enemy once they have shot and a timer has been set and reduced to 0
-	void SwitchTurn();
-	void SwitchCannon(bool _isPlayerTurn);
+	void UpdateTurn();
+	void SetTurn(bool _isPlayerTurn);
 	void Debugger();
 
 	// Find the character object that is within the parameter tile, 

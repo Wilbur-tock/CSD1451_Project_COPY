@@ -14,7 +14,7 @@ enum class ProjectileMode {
 	IDLE,
 	ATTACK,
 	BOMB,
-	FAST,
+	NUKE,
 };
 
 class Projectile : public GameObject {
@@ -29,8 +29,6 @@ public:
 	Projectile() = default;
 	Projectile(AEGfxTexture* _texture, ProjectileMode _mode = ProjectileMode::ATTACK, AEVec2 _pos = {0,0}, int _attackCharges = 1);
 
-	void SetProjectileStats(ProjectileModule const& stats);
-
 	// Accessors
 
 	int AttackCharges() const;
@@ -43,14 +41,17 @@ public:
 		case ProjectileMode::IDLE:		return "IDLE"; break;
 		case ProjectileMode::ATTACK:	return "DAMAGE"; break;
 		case ProjectileMode::BOMB:		return "BOMB"; break;
-		case ProjectileMode::FAST:		return "FAST"; break;
-		default:						return "YOU NEED TO ADD A PROJECTILE NAME";
+		case ProjectileMode::NUKE:		return "NUKE"; break;
+		default:						return "YOU NEED TO ADD A PROJECTILE MODE NAME";
 		}
 	}
 
 	int ProjectileId() const;
+	std::string ProjectileName() const;
 
 	// Member functions
+
+	void SetProjectileStats(std::string _projectileName, ProjectileModule const& data);
 
 	void Render();
 	// Check for inputs to activated PROJECTILE Abilities
@@ -66,6 +67,7 @@ public:
 private:
 	static constexpr AEVec2 defaultSize{ 10,10 };
 	int projectileId = 0, attackCharges = 1;
+	std::string projectileName;
 	ProjectileMode mode = ProjectileMode::ATTACK;
 };
 

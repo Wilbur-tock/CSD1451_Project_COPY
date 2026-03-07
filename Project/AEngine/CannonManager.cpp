@@ -29,32 +29,30 @@ namespace CannonManager {
         // Reset to default
         activeProjectiles.clear(); // ensure that there should not be any active ammo when cannon is reset
         projectiles.clear();
-        auto& allProjectiles = isPlayerControlled
-            ? abilityController->GetOffensiveAbilities()
-            : abilityController->GetAIOffensiveAbilities();
+        projectiles.resize(projectileCount);
 
-        // Initalize all instance of all the different type of projectile
-        for (auto& abil : allProjectiles) {
-            Projectile templateProj(AssetsManager::circleTexture);
+        std::vector<Ability>& allProjectileAbilities = abilityController->GetOffensiveAbilities();
+        
+        // Initializing each projectiles with abilities
+        if (projectiles.empty()) std::cerr << "[CannonManager] Cannon Projectiles vector is EMPTY" << '\n';
 
-            // This is where you pass the data from the 'Ability' to the 'Projectile'
-            templateProj.SetProjectileStats(abil.GetProj());
+        for (int i = 0; i < projectiles.size(); ++i) {
+            // Assign default projectile ability if the the projectils size is larger than the allProjectileAbilities size
+            int abilityId = 0;
+            if (i < allProjectileAbilities.size()) {
+                abilityId = i;
+            }
 
-            projectiles.push_back(templateProj);
-        }
-        if (isPlayerControlled) {
-            abilityController->ChangeProjectile(1);
-        }
-        else {
-            abilityController->AIAbilitySelection();
-        }
-        /*
-        for (int i = 0; i < projectileCount; ++i) {
+            // Assign ability stats to the projectiles
+            Ability const& ability = allProjectileAbilities[abilityId];
             Projectile& projectile = projectiles[i];
+
+            // Initialize projectile with its texture and MODE
             projectile = { AssetsManager::circleTexture, static_cast<ProjectileMode>(i + 1) };
-            AbilitiesManager::SetProjectileAbility(projectile);
+            projectile.SetProjectileStats(ability.GetName(), ability.GetProj());
+
+            std::cout << "[CannonManager] Set " << ability.GetName() << " ability into the cannon projectile vector" << '\n';
         }
-        */
     }
     
     void Cannon::Update() {
@@ -125,18 +123,6 @@ namespace CannonManager {
         if (!canAIShoot) {
             abilityController->AIAbilitySelection();
             EnemyAICalculation(target->transform.pos);
-
-            //Ability* current = abilityController->GetCurrentAIProjectile();
-            //std::cout << "[CannonManager] AIProjectileSelected is: " << (current ? current->GetName() : "NULL") << '\n';
-            //if (current) {
-            //    int projId = current->GetProj().projectileId;
-            //    for (int i = 0; i < static_cast<int>(projectiles.size()); ++i) {
-            //        if (projectiles[i].ProjectileId() == projId) {
-            //            selectedProjectileId = i;
-            //            break;
-            //        }
-            //    }
-            //}
 
             // Set shoot timer to add a delay between the start of the enemy turn and enemy shooting the projectile out
             float minTimer = 1.5f;
@@ -260,25 +246,27 @@ namespace CannonManager {
             return;
         }
 
-        //TEMPORARY TO BE REMOVED
+        selectedProjectileId = abilityController->FindProjectileId();
+
+        // Debugger to choosing ability
         if (isPlayerControlled) {
             // Change abilities based on keys using ID from your JSON
-            if (AEInputCheckTriggered(AEVK_1)) abilityController->ChangeProjectile(1);
-            if (AEInputCheckTriggered(AEVK_2)) abilityController->ChangeProjectile(2);
-            if (AEInputCheckTriggered(AEVK_3)) abilityController->ChangeProjectile(3);
+            if (AEInputCheckTriggered(AEVK_1)) abilityController->ChangeProjectile(0);
+            if (AEInputCheckTriggered(AEVK_2)) abilityController->ChangeProjectile(1);
+            if (AEInputCheckTriggered(AEVK_3)) abilityController->ChangeProjectile(2);
             if (AEInputCheckTriggered(AEVK_4)) abilityController->ChangeProjectile(4);
         }
 
-        Ability* current = abilityController->GetCurrentAIProjectile();
-        if (current) {
-            int projId = current->GetProj().projectileId;
-            for (int i = 0; i < static_cast<int>(projectiles.size()); ++i) {
-                if (projectiles[i].ProjectileId() == projId) {
-                    selectedProjectileId = i;
-                    break;
-                }
-            }
-        }
+        //Ability* current = abilityController->GetCurrentAIProjectile();
+        //if (current) {
+        //    int projId = current->GetProj().projectileId;
+        //    for (int i = 0; i < static_cast<int>(projectiles.size()); ++i) {
+        //        if (projectiles[i].ProjectileId() == projId) {
+        //            selectedProjectileId = i;
+        //            break;
+        //        }
+        //    }
+        //}
     }
 
     void Cannon::ShootProjectile() {
@@ -500,20 +488,17 @@ namespace CannonManager {
             s32 mouseX, mouseY;
             AEInputGetCursorPosition(&mouseX, &mouseY);
 
-            Ability* currentAbility = isPlayerControlled ? abilityController->GetCurrentProjectile() : abilityController->GetCurrentAIProjectile();
+            Projectile const& selectedProjectile = projectiles[selectedProjectileId];
 
             // Show cannon information
             std::string debugStr = "Cannon Manager Player:\nIs Active: "
                 + std::string(isActive ? "true" : "false") + "\nHas Shot : " + static_cast<std::string>(isProjectileDestroyed ? "true" : "false")
                 + "\nPos x: " + Utils::FormatFloat(transform.pos.x, 2) + " y: " + Utils::FormatFloat(transform.pos.y, 2)
-                + "\nAngle: " + Utils::FormatFloat(cannonAngle * (180.0f / 3.14159265359), 2) + " " + Utils::FormatFloat(cannonAngle, 2);               
-
-            if (currentAbility){
-                debugStr += +"\n\nSelected Projectile\nId: " + std::to_string(currentAbility->GetProj().projectileId)
-                + "\nName: " + currentAbility->GetName()
-                + "\nDamage: " + std::to_string(currentAbility->GetProj().baseDamage)
-                + " Radius: " + std::to_string(currentAbility->GetProj().radius);
-            }
+                + "\nAngle: " + Utils::FormatFloat(cannonAngle * (180.0f / 3.14159265359), 2) + " " + Utils::FormatFloat(cannonAngle, 2)
+                + "\n\nSelected Projectile\nId: " + std::to_string(selectedProjectile.ProjectileId())
+                + "\nName: " + selectedProjectile.ProjectileName()
+                + "\nDamage: " + std::to_string(selectedProjectile.attribute.Damage())
+                + "\nRadius: " + std::to_string(selectedProjectile.attribute.DamageRadius());
                 
             if (!isPlayerControlled) {
                 debugStr += "\nAI Shoot Timer: " + Utils::FormatFloat(aiShootTimer, 2);
