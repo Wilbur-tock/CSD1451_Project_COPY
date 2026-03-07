@@ -79,6 +79,12 @@
     <Filter Include="Header Files\Game States">
       <UniqueIdentifier>{c6a5c1de-465e-43d8-a13a-900e230bc954}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Audio">
+      <UniqueIdentifier>{d486f9a8-4a95-4c5c-a1ad-93853fbc191f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Audio">
+      <UniqueIdentifier>{058351f8-1382-48bb-b6d3-7e06099ba2be}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Main.cpp">
@@ -177,14 +183,14 @@
     <ClCompile Include="Card.cpp">
       <Filter>Source Files\UI</Filter>
     </ClCompile>
-    <ClCompile Include="AudioManager.cpp">
-      <Filter>Source Files\Components</Filter>
-    </ClCompile>
     <ClCompile Include="UICursor.cpp">
       <Filter>Source Files\UI</Filter>
     </ClCompile>
     <ClCompile Include="InstructionsOverlay.cpp">
       <Filter>Source Files\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="AudioManager.cpp">
+      <Filter>Source Files\Audio</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -284,9 +290,6 @@
     <ClInclude Include="Card.hpp">
       <Filter>Header Files\UI</Filter>
     </ClInclude>
-    <ClInclude Include="AudioManager.hpp">
-      <Filter>Header Files\Map</Filter>
-    </ClInclude>
     <ClInclude Include="InstructionsOverlay.hpp">
       <Filter>Header Files\UI</Filter>
     </ClInclude>
@@ -296,5 +299,16 @@
     <ClInclude Include="json.hpp">
       <Filter>Header Files\Game</Filter>
     </ClInclude>
+    <ClInclude Include="AudioManager.hpp">
+      <Filter>Header Files\Audio</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\Assets\Abils\Abilities.json">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\Assets\Abils\AiAbilities.json">
+      <Filter>Resource Files</Filter>
+    </None>
   </ItemGroup>
 </Project>

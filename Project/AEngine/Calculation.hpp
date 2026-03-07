@@ -1,4 +1,0 @@
-ifndef CALCULATION_HPP
-#define CALCULATION_HPP
-
-#endif // !CALCULATION_HPP
