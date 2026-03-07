@@ -47,6 +47,7 @@ namespace AbilitiesManager {
 		offensiveAbilities.clear();
 		statsAbilities.clear();
 		defensiveAbilities.clear();
+
 		allAbilities.clear();
 		allAbilities.reserve(64);
 		activeAbilities.clear();
@@ -210,19 +211,19 @@ namespace AbilitiesManager {
 		if (hasEnemySelectedAbility) return;
 
 		int selectedId = 0;
-		if (AIoffensiveAbilities.empty()) {
-			std::cerr << "[AbilitiesManager] No AI abilities loaded!" << '\n';
+		if (allAbilities.empty()) {
+			std::cerr << "[AbilitiesManager] No abilities loaded!" << '\n';
 			return;
 		}
 		// Randomly select abilities for now
-		int size = static_cast<int>(AIoffensiveAbilities.size());;
+		int size = static_cast<int>(allAbilities.size());;
 		if (size > 1) {
-			selectedId = Utils::RandomValue(0, size);
+			selectedId = Utils::RandomValue(0, size - 1);
 		}
-		AIProjectileSelected = &AIoffensiveAbilities[selectedId];
+		ChangeAbility(selectedId);
 		hasEnemySelectedAbility = true;
 
-		std::cout << "[AbilitiesManager] Enemy selected ability: " << AIProjectileSelected->GetName() << '\n';
+		std::cout << "[AbilitiesManager] Enemy selected ability: " << currentAbility->GetName() << '\n';
 	}
 
 	void AbilityController::ChangeAbility(int abilityId) {
@@ -239,7 +240,7 @@ namespace AbilitiesManager {
 
 	bool AbilityController::UseAbility() {
 		if (!currentAbility) {
-			std::cerr << "[AbilitiesManager] UseAbility failed. currentAbility is nullptr\n";
+			std::cerr << "[AbilitiesManager] Use Ability failed. currentAbility is nullptr\n";
 			return false;
 		}
 		if (currentAbility->GetProj().unlimited_charges) return true;

@@ -100,6 +100,7 @@ void Level::Initalize() {
 	playerCannon.SetAbilityController(&playerController);
 
 	enemyCannon = CannonManager::Cannon(enemyCannonStartPos, barrelTex, { 0,0 }, barrelHalfSize, false, false);
+	enemyCannon.SetEnemyAI(static_cast<int>(levelDifficulty));
 	AbilitiesManager::AbilityController& enemyController = AbilitiesManager::enemyAbilityController;
 	enemyController.LoadAllAbilities(true);
 	enemyCannon.SetAbilityController(&enemyController);
@@ -173,7 +174,7 @@ void Level::Update() {
 		enemy.Update();
 	}
 
-	DrawLevel();
+	Draw();
 
 	// Need to be below DrawLevel to ensure that the Ability Selector UI is shows up infront of the level
 	prevIsAbilitySelectorOn = isAbilitySelectorOn;
@@ -190,7 +191,7 @@ void Level::Update() {
 	Debugger();
 }
 
-void Level::DrawLevel() {
+void Level::Draw() {
 	MapManager::RenderMap(levelMap, false);
 
 	// Rendering of assets and UI
@@ -212,6 +213,7 @@ void Level::DrawLevel() {
 }
 
 void Level::Free() {
+	barrelTex = nullptr;
 }
 
 void Level::UpdateTurn() {

@@ -14,7 +14,7 @@ void Physics::GroundedChecks(GameObject const& obj) {
     }
     Tile& btmTile = *MapManager::FindTile(btmId);
 
-    isGrounded = PhysicsManager::IsGrounded(obj.transform, btmTile.transform) && !btmTile.IsEmpty();
+    isGrounded = !btmTile.IsEmpty() && PhysicsManager::IsGrounded(obj.transform, btmTile.transform);
 }
 
 void Physics::Update(GameObject& obj) {

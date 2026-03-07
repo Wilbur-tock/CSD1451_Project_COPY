@@ -10,7 +10,7 @@ namespace PhysicsManager {
 	// Physics Constants
 	constexpr float GRAVITY = 1500.0f;
 	constexpr float FRICTION = 0.25f;
-	constexpr float MINIMUM_VELOCITY = 10.0f;
+	constexpr float MINIMUM_VELOCITY = 5.0f;
 	constexpr float BIAS = 0.01f;
 	constexpr float BOUNCE = -0.1f; // Negative value because when moving left x velocity is negative -*- = positve (moving right)
 

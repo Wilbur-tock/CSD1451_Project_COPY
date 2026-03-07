@@ -53,7 +53,7 @@ namespace CannonManager {
             projectile = { AssetsManager::circleTexture, static_cast<ProjectileMode>(i + 1) };
             projectile.SetProjectileStats(ability.GetName(), ability.GetProj());
 
-            std::cout << "[CannonManager] Set " << ability.Id() << " " << ability.GetName() << " ability into the cannon projectile vector" << '\n';
+            //std::cout << "[CannonManager] Set " << ability.Id() << " " << ability.GetName() << " ability into the cannon projectile vector" << '\n';
         }
     }
     
@@ -111,6 +111,21 @@ namespace CannonManager {
         return true;
     }
 
+    void Cannon::SetEnemyAI(int difficultyLevel) {
+        switch (difficultyLevel) {
+        default:
+        case 0: // Easy
+            aiDifficulty = 0.9f;
+            break;
+        case 1: // Medium
+            aiDifficulty = 0.95f;
+            break;
+        case 2: // Hard
+            aiDifficulty = 0.99f;
+            break;
+        }
+    }
+
     void Cannon::EnemyAI() {
         if (isActive || isProjectileDestroyed) return;
         if (!target) {
@@ -161,8 +176,7 @@ namespace CannonManager {
         float neededVelocity = sqrt((PhysicsManager::GRAVITY * abs(distance)) / sin(2 * randomAngleBase));
 
         // Randomise offset to add a variance to 
-        float difficulty = 1.0f; // TODO: Adjust difficulty based on levels
-        float inaccuracy = (1.0f - difficulty) + 0.1f;
+        float inaccuracy = (1.0f - aiDifficulty);
         float randomOffset = Utils::RandomValue(-inaccuracy, inaccuracy);
 
         // Apply the variables to the cannon
@@ -271,12 +285,13 @@ namespace CannonManager {
         activeProjectiles.back().id = static_cast<int>(activeProjectiles.size() - 1);
 
         // Set projectile ability effects here
-        if (isPlayerControlled) {
-            abilityController->UseProjectile();
-        }
-        else {
-            abilityController->AIUseProjectile();
-        }
+        abilityController->UseAbility();
+        //if (isPlayerControlled) {
+        //    abilityController->UseProjectile();
+        //}
+        //else {
+        //    abilityController->AIUseProjectile();
+        //}
 
         SetCamera(true); // Follow the projectile that is shot out of the cannon
         isActive = true;
@@ -321,22 +336,19 @@ namespace CannonManager {
 
                         // Checking collision of the projectile with the tile blocks that is collidable
                         if (CollisionManager::AreCircleSquareIntersecting(projectile.transform, tile.transform)) {
-                            projectile.collisionTriggered = true;
+                            // Damage tile first, incase of destroying the blocks and bouncing back if damageTile is not called first
+                            projectile.DamageTile(x, y);
 
-                            // Don't change the order
-                            if (projectile.isCollisionActive) {
-                                projectile.OnCollision(tile);
-                            }
-
-                            if (projectile.collisionTriggered) {
-                                projectile.DamageTile(x, y);
-                                projectile.isCollisionActive = true;
-
-                                // If the projectile hit something, REDUCE the velocity by a percentage
+                            if (!projectile.collisionTriggered) {
+                                // If the projectile hit something, REDUCE the velocity by a percentage for the FIRST COLLISION ONLY
                                 // So that it does not continue having the same projectile velocity even if it hits and destroy something
-                                float percentage = 0.25f;
+                                float percentage = 0.5f;
                                 projectile.velocity.x *= percentage;
                                 projectile.velocity.y *= percentage;
+                                projectile.collisionTriggered = true;
+                            }
+                            else {
+                                projectile.OnCollision(tile);
                             }
                         }
                     }
@@ -469,7 +481,7 @@ namespace CannonManager {
         Ability selectedAbility = abilityController->CurrentAbility();
 
         // Show cannon information
-        std::string debugStr = "Cannon" + static_cast<std::string>(isPlayerControlled ? "PLAYER" : "ENEMY")
+        std::string debugStr = "Cannon " + static_cast<std::string>(isPlayerControlled ? "PLAYER" : "ENEMY")
             + "\nIs Active : " + std::string(isActive ? "true" : "false") 
             + "\nIs Projectile destroyed : " + static_cast<std::string>(isProjectileDestroyed ? "true" : "false")
             + "\nPos x: " + Utils::FormatFloat(transform.pos.x, 2) + " y: " + Utils::FormatFloat(transform.pos.y, 2)
@@ -501,7 +513,6 @@ namespace CannonManager {
                 + "\nTimer: " + Utils::FormatFloat(projectile.timer, 2)
                 + "\nAttack Charges: " + std::to_string(projectile.AttackCharges())
                 + "\nDamage Radius: " + std::to_string(projectile.attribute.DamageRadius())
-                + "\nIsCollisionActive: " + static_cast<std::string>(projectile.isCollisionActive ? "true" : "false")
                 + "\nCollisionTriggered: " + static_cast<std::string>(projectile.collisionTriggered ? "true" : "false");
         }
 

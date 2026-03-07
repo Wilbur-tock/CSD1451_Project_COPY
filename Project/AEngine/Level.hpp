@@ -8,6 +8,12 @@
 #include "TextObject.hpp"
 #include "Character.hpp"
 
+enum class LevelMode {
+	EASY,
+	MEDIUM,
+	HARD
+};
+
 // Class that contains all the level information 
 // Level tile map data,
 // instances of ALL player and enemy object, 
@@ -21,7 +27,7 @@ public:
 	void Load();
 	void Initalize();
 	void Update();
-	void DrawLevel();
+	void Draw();
 	void Free();
 
 	// Member functions
@@ -40,6 +46,7 @@ private:
 	int levelId = 0;
 	std::string levelName; // Name of the level in the format (Level [INDEX])
 	std::string levelFileName; // file name to load in the levelMap in the format (level[INDEX])
+	LevelMode levelDifficulty = LevelMode::EASY;
 	TextObject debugText;
 	CannonManager::Cannon *activeCannon = nullptr; // pointer to the active instance of the cannon object 
 	CannonManager::Cannon playerCannon; // instance of the player cannon

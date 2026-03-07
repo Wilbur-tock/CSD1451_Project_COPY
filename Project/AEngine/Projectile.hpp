@@ -22,7 +22,6 @@ public:
 	float timer = 0.0f;
 	bool isActive = false, isGrounded = false, toBeDestroyed = false;
 	bool collisionTriggered = false; // collision is detected for the FIRST TIME
-	bool isCollisionActive = false; // collision has been detected in the past frame
 
 	Attributes attribute;
 
