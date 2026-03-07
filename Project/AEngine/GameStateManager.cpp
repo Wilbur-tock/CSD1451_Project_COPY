@@ -23,7 +23,7 @@ namespace GameStateManager {
     float dotAnimTimer = 0.0f;
     int dotCount = 0;
 
-    TextObject debugText;    void RenderLoadingScreen() {
+    void RenderLoadingScreen() {
         // Reset camera to center for loading screen
         AEGfxSetCamPosition(0.0f, 0.0f);
 
@@ -128,7 +128,6 @@ namespace GameStateManager {
             Config::WORLD_MAX_Y
         );
 
-        debugText = { "", Utils::debuggerInfo.first * 0.75f, Utils::debuggerInfo.second, {-1.f, -0.8f} };        // Reset transition vars
         setNewState = false;
         loadingTimer = 0.0f;
         dotAnimTimer = 0.0f;
@@ -277,14 +276,16 @@ namespace GameStateManager {
 
         // Debugger display
         if (Utils::isDebuggerOn && !Utils::isInstructionOn) {
-            UIManager::Panel panel{ {250, 75}, {1.0f,1.0f,1.0f, 0.75f}, Utils::RectMode::RECT_BOTTOM_LEFT };
-            panel.Draw();
+            UIManager::Panel debuggerPanel{ {200, 75}, {1.0f,1.0f,1.0f, 0.75f}, Utils::RectMode::RECT_BOTTOM_LEFT };
+            TextObject debugText{ "", Utils::debuggerInfo.first * 0.75f, Utils::debuggerInfo.second, {-1.f, -0.81f} };
+
+            debuggerPanel.Draw();
 
             debugText.textContent = "\n[P] Debugger ON\nFPS: " + Utils::FormatFloat(AEFrameRateControllerGetFrameRate(), 2)
-                + "\nDeltaTime: " + Utils::FormatFloat(rawDt, 2)
-                + "\n[M] Main Menu" + "\nCamera State: " + CameraManager::camera.PrintState()
-                + "\n Zoom: " + Utils::FormatFloat(CameraManager::camera.GetZoom(), 2)
-                + "\n" + CameraManager::camera.PrintVisibleTiles();
+                + "\nDeltaTime: " + Utils::FormatFloat(rawDt, 2);
+                //+ "\n[M] Main Menu" + "\nCamera State: " + CameraManager::camera.PrintState()
+                //+ "\n Zoom: " + Utils::FormatFloat(CameraManager::camera.GetZoom(), 2)
+                //+ "\n" + CameraManager::camera.PrintVisibleTiles();
 
             debugText.Draw();
         }

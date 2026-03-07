@@ -26,18 +26,21 @@ namespace AbilitiesManager {
 		Ability* GetCurrentProjectile() { return ProjectileSelected; }
 		Ability* GetCurrentAIProjectile() { return AIProjectileSelected; }
 
-		//// Change the type of ability this controller is current using
-		//void ChangeAbility(int abilityId);
-		//// Use the currently select ability if it has unlimited or any charges remaining
-		//// return true and the selected ability can be use, otherwise false
-		//bool UseAbility();
-		//// Add ability charges from the based on selection
-		//void AddAbility(int abilityId, int chargesToAdd);
-		//void UpdateActiveAbilites(Ability& ability, bool toAddToVector);
-		//Ability* FindAbility(int abilityId);
+		Ability CurrentAbility() const;
+		// Change the type of ability this controller is current using
+		void ChangeAbility(int abilityId);
+		// Use the currently select ability if it has unlimited or any charges remaining
+		// return true and the selected ability can be use, otherwise false
+		bool UseAbility();
+		// Add ability charges from the based on selection
+		void AddAbility(int abilityId, int chargesToAdd);
+		void UpdateActiveAbilites(Ability& ability, bool toAddToVector);
+		Ability* FindAbility(int abilityId);
 		// return the projectile Id to change the type of projectile the CANNON is currently using
 		// if the ability type is an offensive which affects the projectile
 		int FindProjectileId();
+
+		void ToggleAbility();
 
 		// AI Member functions
 		void ResetAIAbilitySelection();
@@ -63,7 +66,7 @@ namespace AbilitiesManager {
 		Ability* currentAbility = nullptr;
 
 		std::vector<Ability*> activeAbilities; // vector containing all the type of abilities this controller has in its inventory
-		std::vector<Ability> abilities; // vector containing all the different type of abilities
+		std::vector<Ability> allAbilities; // vector containing all the different type of abilities
 
 		bool isAIController = false;
 		bool hasEnemySelectedAbility = false; // has enemy selected their ability

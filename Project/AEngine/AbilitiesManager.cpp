@@ -56,12 +56,14 @@ namespace AbilitiesManager {
 			ReadAbilitiesFromFile(data, "Assets/Abils/AiAbilities.json");
 		}
 
+		int id = 0;
 		for (auto& item : data) { // Your JSON is an array at the root
 			std::string name = item["Name"];
 			AbilityType type = static_cast<AbilityType>(item["Type"].get<int>());
 			Tier tier = static_cast<Tier>(item["Tier"].get<int>());
 
-			Ability newAbil(name, type, tier);
+			Ability newAbil(id,name, type, tier);
+			++id;
 
 			// ROUTE based on Type
 			if (type == AbilityType::STATISTICS) {
@@ -87,12 +89,14 @@ namespace AbilitiesManager {
 				defensiveAbilities.push_back(newAbil);
 			}
 
+			allAbilities.push_back(newAbil);
 		}
 		std::cout << "[AbilitiesManager] Successfully loaded " << statsAbilities.size() << " stats abilities." << std::endl;
 		std::cout << "[AbilitiesManager] Successfully loaded " << offensiveAbilities.size() << " offensive abilities." << std::endl;
 		std::cout << "[AbilitiesManager] Successfully loaded " << defensiveAbilities.size() << " defensive abilities." << std::endl;
 	}
 
+	/*
 	void AbilityController::LoadAllAIAbilities() {
 		AIoffensiveAbilities.clear();
 
@@ -143,6 +147,7 @@ namespace AbilitiesManager {
 		std::cout << "[AbilitiesManager] Successfully loaded " << AIoffensiveAbilities.size() << " AI offensive abilities." << std::endl;
 		std::cout << "[AbilitiesManager] Successfully loaded " << AIdefensiveAbilities.size() << " AI defensive abilities." << std::endl;
 	}
+	*/
 
 	void AbilityController::ChangeProjectile(s32 _projectileID) {
 		for (size_t i = 0; i < offensiveAbilities.size(); ++i) {
@@ -193,6 +198,8 @@ namespace AbilitiesManager {
 		return true;
 	}
 
+	Ability AbilityController::CurrentAbility() const { return *currentAbility; }
+
 	void AbilityController::ResetAIAbilitySelection() { hasEnemySelectedAbility = false; }
 
 	void AbilityController::AIAbilitySelection() {
@@ -214,10 +221,95 @@ namespace AbilitiesManager {
 		std::cout << "[AbilitiesManager] Enemy selected ability: " << AIProjectileSelected->GetName() << '\n';
 	}
 
+	void AbilityController::ChangeAbility(int abilityId) {
+		Ability* found = FindAbility(abilityId);
+		if (!found) {
+			std::cerr << "[AbilitiesManager] ChangeAbility failed. abilityId=" << abilityId << '\n';
+			return;
+		}
+		currentAbility = found;
+
+		std::cout << "[AbilitiesManager] Current ability: " + currentAbility->GetName()
+			+ " Charges Remaining: " + std::to_string(currentAbility->AbilityCharges()) << '\n';
+	}
+
+	bool AbilityController::UseAbility() {
+		if (!currentAbility) {
+			std::cerr << "[AbilitiesManager] UseAbility failed. currentAbility is nullptr\n";
+			return false;
+		}
+		if (currentAbility->GetProj().unlimited_charges) return true;
+		if (currentAbility->AbilityCharges() <= 0) return false;
+
+		currentAbility->AbilityCharges(-1);
+		UpdateActiveAbilites(*currentAbility, false);
+
+		if (currentAbility->GetType() == AbilityType::OFFENSIVE && currentAbility->AbilityCharges() <= 0) {
+			ChangeAbility(0);
+		}
+
+		std::cout << "[AbilitiesManager] Ability used: " + currentAbility->GetName()
+			+ " Charges Remaining: " + std::to_string(currentAbility->AbilityCharges()) << '\n';
+		return true;
+	}
+
+	void AbilityController::AddAbility(int abilityId, int chargesToAdd) {
+		Ability* found = FindAbility(abilityId);
+		if (!found) {
+			std::cerr << "[AbilitiesManager] AddAbility failed. abilityId=" << abilityId << '\n';
+			return;
+		}
+		Ability& ability = *found;
+		ability.AbilityCharges(chargesToAdd);
+
+		UpdateActiveAbilites(ability, true);
+	}
+
+	void AbilityController::UpdateActiveAbilites(Ability& ability, bool toAddToVector) {
+		if (toAddToVector) {
+			// if previous charges is already more than or equal to 1, means that it is already in the vector no need to add
+			if (ability.PreviousAbilityCharges() >= 1) return;
+
+			// add into the activeAbilities vector
+			activeAbilities.push_back(&ability);
+
+			std::cout << "[AbilitiesManager] Added " << ability << " into active abilities vector" << '\n';
+		}
+		else {
+			if (ability.AbilityCharges() > 0) return;
+			for (int i = 0; i < activeAbilities.size(); ++i) {
+				if (activeAbilities[i] == &ability) {
+					activeAbilities.erase(activeAbilities.begin() + i);
+					std::cout << "[AbilitiesManager] Removed " << ability << " from active abilities vector" << '\n';
+					return;
+				}
+			}
+		}
+	}
+
+	Ability* AbilityController::FindAbility(int abilityId) {
+		for (Ability& ab : allAbilities) {
+			if (ab.Id() == abilityId) {
+				return &ab;
+			}
+		}
+
+		std::cerr << "[AbilitiesManager] Can't find " + std::to_string(abilityId) + " in the abilities list\n";
+		return nullptr;
+	}
+
 	int AbilityController::FindProjectileId() {
 		if (!currentAbility) return 0;
+		// if current ability is a offensive one return the projectile id 
+		// otherwise just return the default projectile id which is 0
 		if (currentAbility->GetType() != AbilityType::OFFENSIVE) return 0;
 		return currentAbility->GetProj().projectileId;
+	}
+
+	void AbilityController::ToggleAbility() {
+		int abilityId = currentAbility->Id();
+		Utils::Wrap(++abilityId, 0, static_cast<int>(allAbilities.size()-1));
+		ChangeAbility(abilityId);
 	}
 
 	void AbilityController::AbilitySelector(bool& isOn) {

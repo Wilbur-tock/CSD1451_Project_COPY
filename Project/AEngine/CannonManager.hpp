@@ -70,6 +70,8 @@ namespace CannonManager {
 		// Cannon attributes
 		AEVec2 defaultSize{ 30,10 };
 		int projectileCount = 10;
+		int projectileAbilitiesCount = 0;
+
 		int selectedProjectileId = 0; // index of the selected projectile from the vector list of all the different type of projectiles
 		std::vector<Projectile> projectiles; // vector containing all the different type of projectiles (Default, bomb , etc)
 		std::vector<Projectile> activeProjectiles; // vector of all the active projectiles (Projectiles that have been shot out of the cannon)

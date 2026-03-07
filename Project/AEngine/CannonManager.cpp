@@ -20,6 +20,7 @@ namespace CannonManager {
 
     void Cannon::SetAbilityController(AbilitiesManager::AbilityController* controller) {
         abilityController = controller;
+        controller->ChangeAbility(0);
         ProjectileSettings();
     }
 
@@ -32,7 +33,8 @@ namespace CannonManager {
         projectiles.resize(projectileCount);
 
         std::vector<Ability>& allProjectileAbilities = abilityController->GetOffensiveAbilities();
-        
+        projectileAbilitiesCount = static_cast<int>(allProjectileAbilities.size());
+
         // Initializing each projectiles with abilities
         if (projectiles.empty()) std::cerr << "[CannonManager] Cannon Projectiles vector is EMPTY" << '\n';
 
@@ -51,7 +53,7 @@ namespace CannonManager {
             projectile = { AssetsManager::circleTexture, static_cast<ProjectileMode>(i + 1) };
             projectile.SetProjectileStats(ability.GetName(), ability.GetProj());
 
-            std::cout << "[CannonManager] Set " << ability.GetName() << " ability into the cannon projectile vector" << '\n';
+            std::cout << "[CannonManager] Set " << ability.Id() << " " << ability.GetName() << " ability into the cannon projectile vector" << '\n';
         }
     }
     
@@ -247,26 +249,6 @@ namespace CannonManager {
         }
 
         selectedProjectileId = abilityController->FindProjectileId();
-
-        // Debugger to choosing ability
-        if (isPlayerControlled) {
-            // Change abilities based on keys using ID from your JSON
-            if (AEInputCheckTriggered(AEVK_1)) abilityController->ChangeProjectile(0);
-            if (AEInputCheckTriggered(AEVK_2)) abilityController->ChangeProjectile(1);
-            if (AEInputCheckTriggered(AEVK_3)) abilityController->ChangeProjectile(2);
-            if (AEInputCheckTriggered(AEVK_4)) abilityController->ChangeProjectile(4);
-        }
-
-        //Ability* current = abilityController->GetCurrentAIProjectile();
-        //if (current) {
-        //    int projId = current->GetProj().projectileId;
-        //    for (int i = 0; i < static_cast<int>(projectiles.size()); ++i) {
-        //        if (projectiles[i].ProjectileId() == projId) {
-        //            selectedProjectileId = i;
-        //            break;
-        //        }
-        //    }
-        //}
     }
 
     void Cannon::ShootProjectile() {
@@ -479,49 +461,61 @@ namespace CannonManager {
     }
 
     void Cannon::Debugger() {
-        // Debugger
-        if (Utils::isDebuggerOn) {
-            float mX = 0, mY = 0;
-            Utils::GetWorldMousePos(mX, mY);
-            float cX = transform.pos.x, cY = transform.pos.y;
-            Utils::GetWorldPos(cX, cY);
-            s32 mouseX, mouseY;
-            AEInputGetCursorPosition(&mouseX, &mouseY);
+        if (!Utils::isDebuggerOn) return;
 
-            Projectile const& selectedProjectile = projectiles[selectedProjectileId];
-
-            // Show cannon information
-            std::string debugStr = "Cannon Manager Player:\nIs Active: "
-                + std::string(isActive ? "true" : "false") + "\nHas Shot : " + static_cast<std::string>(isProjectileDestroyed ? "true" : "false")
-                + "\nPos x: " + Utils::FormatFloat(transform.pos.x, 2) + " y: " + Utils::FormatFloat(transform.pos.y, 2)
-                + "\nAngle: " + Utils::FormatFloat(cannonAngle * (180.0f / 3.14159265359), 2) + " " + Utils::FormatFloat(cannonAngle, 2)
-                + "\n\nSelected Projectile\nId: " + std::to_string(selectedProjectile.ProjectileId())
-                + "\nName: " + selectedProjectile.ProjectileName()
-                + "\nDamage: " + std::to_string(selectedProjectile.attribute.Damage())
-                + "\nRadius: " + std::to_string(selectedProjectile.attribute.DamageRadius());
-                
-            if (!isPlayerControlled) {
-                debugStr += "\nAI Shoot Timer: " + Utils::FormatFloat(aiShootTimer, 2);
-            }
-
-            // Print projectile that is shoot out information
-            if (activeProjectiles.size() > 0) {
-                Projectile const& projectile = activeProjectiles.back();
-                debugStr += "\n\nActive Projectile " + std::to_string(static_cast<int>(projectile.Mode())) + "\nSize: x: "
-                    + Utils::FormatFloat(projectile.transform.size.x, 2) + " y: " + Utils::FormatFloat(projectile.transform.size.y, 2)
-                    + "\nPos x: " + Utils::FormatFloat(projectile.transform.pos.x, 2) + " y " + Utils::FormatFloat(projectile.transform.pos.y, 2)
-                    + "\nVelocity x: " + Utils::FormatFloat(activeProjectiles.back().velocity.x, 2) + " y: " + Utils::FormatFloat(projectile.velocity.y, 2)
-                    + "\nGrounded: " + static_cast<std::string>(projectile.isGrounded ? "true" : "false")
-                    + "\nTo Be Destroyed: " + static_cast<std::string>(projectile.toBeDestroyed ? "true" : "false")
-                    + "\nTimer: " + Utils::FormatFloat(projectile.timer, 2)
-                    + "\nAttack Charges: " + std::to_string(projectile.AttackCharges())
-                    + "\nDamage Radius: " + std::to_string(projectile.attribute.DamageRadius())
-                    + "\nIsCollisionActive: " + static_cast<std::string>(projectile.isCollisionActive ? "true" : "false")
-                    + "\nCollisionTriggered: " + static_cast<std::string>(projectile.collisionTriggered ? "true" : "false");
-            }
-
-            TextObject textObj{ debugStr, Utils::debuggerInfo.first * 0.8f, Utils::debuggerInfo.second, {0.5f, 0.99f} };
-            textObj.Draw();
+        // Toggle through all the ability
+        if (AEInputCheckTriggered(AEVK_T)) {
+            abilityController->ToggleAbility();
         }
+
+        float mX = 0, mY = 0;
+        Utils::GetWorldMousePos(mX, mY);
+        float cX = transform.pos.x, cY = transform.pos.y;
+        Utils::GetWorldPos(cX, cY);
+        s32 mouseX, mouseY;
+        AEInputGetCursorPosition(&mouseX, &mouseY);
+
+        Projectile const& selectedProjectile = projectiles[selectedProjectileId];
+        Ability selectedAbility = abilityController->CurrentAbility();
+
+        // Show cannon information
+        std::string debugStr = "Cannon" + static_cast<std::string>(isPlayerControlled ? "PLAYER" : "ENEMY")
+            + "\nIs Active : " + std::string(isActive ? "true" : "false") 
+            + "\nIs Projectile destroyed : " + static_cast<std::string>(isProjectileDestroyed ? "true" : "false")
+            + "\nPos x: " + Utils::FormatFloat(transform.pos.x, 2) + " y: " + Utils::FormatFloat(transform.pos.y, 2)
+            + "\nAngle: " + Utils::FormatFloat(cannonAngle * (180.0f / 3.14159265359), 2) + " " + Utils::FormatFloat(cannonAngle, 2)
+            + "\n\nSelected Projectile\nId: " + std::to_string(selectedProjectile.ProjectileId())
+            + "\nName: " + selectedProjectile.ProjectileName()
+            + "\nDamage: " + std::to_string(selectedProjectile.attribute.Damage())
+            + "\nRadius: " + std::to_string(selectedProjectile.attribute.DamageRadius())
+            + "\n\nSelected Ability:\nId:" + std::to_string(selectedAbility.Id())
+            + "\nName: " + selectedAbility.GetName()
+            + "\nAbility Charges Remaining: " + std::to_string(selectedAbility.AbilityCharges());
+                
+        if (!isPlayerControlled) {
+            debugStr += "\nAI Shoot Timer: " + Utils::FormatFloat(aiShootTimer, 2);
+        }
+        else {
+            debugStr += "\n\nShortcuts:\n[T] Toggle Ability";
+        }
+
+        // Print projectile that is shoot out information
+        if (activeProjectiles.size() > 0) {
+            Projectile const& projectile = activeProjectiles.back();
+            debugStr += "\n\nActive Projectile " + std::to_string(static_cast<int>(projectile.Mode())) + "\nSize: x: "
+                + Utils::FormatFloat(projectile.transform.size.x, 2) + " y: " + Utils::FormatFloat(projectile.transform.size.y, 2)
+                + "\nPos x: " + Utils::FormatFloat(projectile.transform.pos.x, 2) + " y " + Utils::FormatFloat(projectile.transform.pos.y, 2)
+                + "\nVelocity x: " + Utils::FormatFloat(activeProjectiles.back().velocity.x, 2) + " y: " + Utils::FormatFloat(projectile.velocity.y, 2)
+                + "\nGrounded: " + static_cast<std::string>(projectile.isGrounded ? "true" : "false")
+                + "\nTo Be Destroyed: " + static_cast<std::string>(projectile.toBeDestroyed ? "true" : "false")
+                + "\nTimer: " + Utils::FormatFloat(projectile.timer, 2)
+                + "\nAttack Charges: " + std::to_string(projectile.AttackCharges())
+                + "\nDamage Radius: " + std::to_string(projectile.attribute.DamageRadius())
+                + "\nIsCollisionActive: " + static_cast<std::string>(projectile.isCollisionActive ? "true" : "false")
+                + "\nCollisionTriggered: " + static_cast<std::string>(projectile.collisionTriggered ? "true" : "false");
+        }
+
+        TextObject textObj{ debugStr, Utils::debuggerInfo.first * 0.8f, Utils::debuggerInfo.second, {0.5f, 0.99f} };
+        textObj.Draw();
     }
 }
