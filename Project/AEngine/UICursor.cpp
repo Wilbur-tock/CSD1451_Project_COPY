@@ -15,7 +15,7 @@ namespace UICursor {
     static const char* CURSOR_PATH = "Assets/cursor.png";
 
     static AEGfxTexture* gCursorTex = nullptr;
-    static AEVec2 gSize = { 32.0f, 32.0f };      // pixels
+    static AEVec2 gSize = { 70.0f, 70.0f };      // pixels
     static AEVec2 gHotspot = { 0.0f, 0.0f };     // pixels from TOP-LEFT of sprite
     static bool gVisible = true;
 
@@ -71,7 +71,7 @@ namespace UICursor {
         float originX = x - gHotspot.x;
         float originY = y + gHotspot.y;
 
-        AEMtx33 mat = GraphicsManager::CreateTransformMatrix(originX, originY, 0.0f, 50.0f, 50.0f);
-        GraphicsManager::DrawScreenOverlay(gCursorTex, mat, Color{ 0.0f,0.0f,0.0f,0.8f });
+        AEMtx33 mat = GraphicsManager::CreateTransformMatrix(originX, originY, 0.0f, gSize.x, gSize.y);
+        GraphicsManager::DrawScreenOverlay(gCursorTex, mat, Color{ 1.0f, 1.0f, 1.0f, 1.0f });
     }
 }
