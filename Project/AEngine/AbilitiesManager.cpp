@@ -462,7 +462,13 @@ namespace AbilitiesManager {
 
 	void AbilityController::onClickAbilityCard(Ability ability, bool* isOn) {
 		std::cout << "Clicked ability card " << ability.Id() << std::endl;
-		AddAbility(ability.Id());
+		if (ability.GetType() != AbilityType::STATISTICS) {
+			AddAbility(ability.Id());
+		}
+		else {
+			// Update stats
+
+		}
 		if (isOn) {
 			*isOn = false;
 		}
@@ -477,7 +483,18 @@ namespace AbilitiesManager {
 		for (int i = 0; i < inventory.size(); ++i) {
 			Ability* ability = inventory[i];
 			Color iconColor = ability->GetType() == AbilityType::OFFENSIVE ? Color(1, 0, 0) : Color(0, 0, 1);
+			std::vector<std::string> toBeRemoved = { "Projectile" };
 			std::string AbilityName = ability->GetName();
+			for (const std::string& word : toBeRemoved) {
+				size_t found = AbilityName.find(word);
+				if (found != std::string::npos) {
+					AbilityName.erase(found, std::string(word).length());
+				}
+			};
+
+			// Trim any trailing/leading spaces left behind
+			while (!AbilityName.empty() && AbilityName.back() == ' ') AbilityName.pop_back();
+			while (!AbilityName.empty() && AbilityName.front() == ' ') AbilityName.erase(AbilityName.begin());
 
 			Button abilityButton{ TextObject{ AbilityName },
 				Utils::AnchorMode::BOTTOM_CENTER, AEVec2{ -220.0f + i * 100.0f, -370.0f },
