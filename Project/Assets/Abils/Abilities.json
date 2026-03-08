@@ -3,6 +3,7 @@
         "Name": "Default Projectile",
         "Type": 2,
         "Tier": 1,
+        "Texture": "",
         "Projectile_Stats": {
             "ProjectileID": 0,
             "Damage_Amp": 1.0,
@@ -17,6 +18,7 @@
         "Name": "Bomb Projectile",
         "Type": 2,
         "Tier": 1,
+        "Texture": "",
         "Projectile_Stats": {
             "ProjectileID": 1,
             "Damage_Amp": 1.0,
@@ -31,6 +33,7 @@
         "Name": "NUKE EM ALL",
         "Type": 2,
         "Tier": 1,
+        "Texture": "",
         "Projectile_Stats": {
             "ProjectileID": 2,
             "Damage_Amp": 1.0,
@@ -45,6 +48,7 @@
         "Name": "HP",
         "Type": 1,
         "Tier": 1,
+        "Texture": "Assets/Card_Add_Health.png",
         "Base_Stats": {
             "HP": 50,
             "ATK": 50,
@@ -56,6 +60,7 @@
         "Name": "Shield",
         "Type": 3,
         "Tier": 1,
+        "Texture": "Assets/Card_Shield.png",
         "Defensive_Stats": {
             "ShieldHP": 50
         }

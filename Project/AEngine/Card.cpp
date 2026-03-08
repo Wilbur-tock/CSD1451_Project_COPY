@@ -11,9 +11,10 @@ Card::Card(std::string _name,
 	AEGfxTexture* _imageTexture,
 	Utils::FuncPtr _onClick,
 	AEVec2 _size) 
-	: button{ TextObject{ _name }, Utils::AnchorMode::BOTTOM_CENTER, _pos, _size, _color, _cardtexture, _onClick} {
+	: button{ TextObject{ _name }, Utils::AnchorMode::CENTER, _pos, _size, _color, _cardtexture, _onClick} {
 	pos = _pos;
 	imageTexture = _imageTexture;
+	button.SetTextOffset(0.0f, -0.1f);
 }
 
 void Card::Update() {
@@ -21,6 +22,7 @@ void Card::Update() {
 }
 
 void Card::Draw() {
+	
 	button.Draw();
 	
 	// Draw the image of the ability on top of the card

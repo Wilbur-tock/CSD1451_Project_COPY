@@ -35,12 +35,13 @@ struct DefenseModule {
 
 class Ability {
 public:
-	Ability(int _id, std::string _name, AbilityType _type, Tier _tier);
+	Ability(int _id, std::string _name, AbilityType _type, Tier _tier, std::string _texture);
 
 	int					Id() const { return id; }
 	std::string			GetName() const { return name; }
 	AbilityType			GetType() const { return type; }
 	Tier				GetTier() const { return tier; }
+	std::string			GetTexture() const { return texture; }
 						
 	StatsModule			GetStats() const { return stats; }
 	ProjectileModule	GetProj() const { return proj; }
@@ -62,6 +63,7 @@ private:
 	std::string name;
 	AbilityType type;
 	Tier tier;
+	std::string texture;
 
 	StatsModule stats;
 	ProjectileModule proj;

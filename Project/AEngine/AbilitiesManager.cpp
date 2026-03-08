@@ -70,8 +70,9 @@ namespace AbilitiesManager {
 			std::string name = item["Name"];
 			AbilityType type = static_cast<AbilityType>(item["Type"].get<int>());
 			Tier tier = static_cast<Tier>(item["Tier"].get<int>());
+			std::string texture = item["Texture"];
 
-			Ability newAbil(id,name, type, tier);
+			Ability newAbil(id, name, type, tier, texture);
 			++id;
 
 			// ROUTE based on Type
@@ -383,7 +384,8 @@ namespace AbilitiesManager {
 
 		for (Ability ability : abilitiesVec) {
 			//std::cout << abilityName << '\n';
-			Card card{ ability.GetName(), cardPos, Color(1,0,0), AssetsManager::squareTexture, AssetsManager::squareTexture, [this, id, &isOn]() { onClickAbilityCard(id, &isOn);  }};
+			AEGfxTexture* imageTexture = ability.GetTexture() == "" ? AssetsManager::squareTexture : AssetsManager::GetTexture(ability.GetTexture().c_str());
+			Card card{ ability.GetName(), cardPos, Color(1,0,0), AssetsManager::squareTexture, imageTexture, [this, id, &isOn]() { onClickAbilityCard(id, &isOn);  }};
 			card.Update();
 			card.Draw();
 			cardPos.x += cardSize.x + gap;

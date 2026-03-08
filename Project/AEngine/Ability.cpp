@@ -27,8 +27,8 @@ std::ostream& operator<<(std::ostream& os, Ability ability) {
 	return os;
 }
 */
-Ability::Ability(int _id, std::string _name, AbilityType _type, Tier _tier) 
-	: id{_id}, name(_name), type(_type), tier(_tier) { //inits all my stuff to 0(non-garbage value)
+Ability::Ability(int _id, std::string _name, AbilityType _type, Tier _tier, std::string _texture) 
+	: id{_id}, name(_name), type(_type), tier(_tier), texture(_texture) { //inits all my stuff to 0(non-garbage value)
 	stats = { 0.0f, 0.0f, 0.0f }; // HP, ATK, DEF
 	proj = { 0, 0.0f, 0, 0.0f, 0, false }; // ID, DmgAmp, BaseDmg, Radius, Charges, IsUnlimitedCharge
 	defense = { 0 }; // Shield HP
@@ -80,3 +80,4 @@ std::ostream& operator<<(std::ostream& os, Ability ability) {
 		<< " Remaining Charges: " << ability.GetProj().charges;
 	return os;
 }
+

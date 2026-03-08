@@ -22,6 +22,9 @@ public:
 	// Check for player hover and whatever or not it is clicked
 	void Update();
 	void Draw();
+
+	void SetTextOffset(f32 offsetX, f32 offsetY);
+
 private:
 	TextObject textObj;
 	AEVec2 pos{ 0,0 }, size{ 0,0 };

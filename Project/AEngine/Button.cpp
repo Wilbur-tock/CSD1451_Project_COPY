@@ -112,3 +112,8 @@ void Button::Draw() {
         textObj.Draw();
     }
 }
+
+void Button::SetTextOffset(f32 offsetX, f32 offsetY) {
+    textObj.pos.x += offsetX;
+    textObj.pos.y += offsetY;
+}

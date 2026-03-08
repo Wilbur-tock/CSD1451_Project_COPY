@@ -1,9 +1,10 @@
 [
-  
+
   {
     "Name": "AI Vanilla",
     "Type": 2,
     "Tier": 1,
+    "Texture": "",
     "Projectile_Stats": {
       "ProjectileID": 1,
       "Damage_Amp": 1.0,
@@ -18,6 +19,7 @@
     "Name": "AI Mid Damage",
     "Type": 2,
     "Tier": 1,
+    "Texture": "",
     "Projectile_Stats": {
       "ProjectileID": 2,
       "Damage_Amp": 2.0,
@@ -32,6 +34,7 @@
     "Name": "AI Nuke",
     "Type": 2,
     "Tier": 1,
+    "Texture": "",
     "Projectile_Stats": {
       "ProjectileID": 3,
       "Damage_Amp": 4.0,
