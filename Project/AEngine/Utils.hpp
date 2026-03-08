@@ -11,6 +11,7 @@ namespace Utils {
 	extern bool isInstructionOn;
 	extern bool isPaused;                                          // <-- NEW (pause menu)
 	extern bool isSettingsOpen;                                     // settings overlay inside pause menu
+	extern bool isResultScreenOn;                                   // defeat/victory screen active
 	extern float unpauseCooldown;                                  // <-- NEW (input delay after resume)
 	extern std::pair<float, Color> debuggerInfo; // Store the text scale and color
 	typedef std::function<void()> FuncPtr;

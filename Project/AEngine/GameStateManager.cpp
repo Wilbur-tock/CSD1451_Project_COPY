@@ -134,6 +134,7 @@ namespace GameStateManager {
                 case GameState::LEVEL_1:
                 case GameState::LEVEL_2:
                     LevelManager::SelectLevel(static_cast<int>(current) - static_cast<int>(GameState::LEVEL_1));
+                    gsLoad = LevelManager::LoadLevel;
                     gsIntialize = LevelManager::InitializeLevel;
                     gsUpdate = LevelManager::UpdateLevel;
                     gsDraw = nullptr;
@@ -156,6 +157,7 @@ namespace GameStateManager {
 
                 case GameState::RESTART:
                     next = previous;
+                    current = next;
                     break;
 
                 case GameState::EXIT:
@@ -212,7 +214,7 @@ namespace GameStateManager {
 
         // =================== PAUSE MENU (ESC) ================================
         // Toggle pause only during gameplay states
-        if (IsGameplayState() && !Utils::isInstructionOn) {
+        if (IsGameplayState() && !Utils::isInstructionOn && !Utils::isResultScreenOn) {
             if (AEInputCheckTriggered(AEVK_ESCAPE)) {
                 AudioManager::PlaySFX(AudioManager::SFX::UIButton);
                 Utils::isPaused = !Utils::isPaused;

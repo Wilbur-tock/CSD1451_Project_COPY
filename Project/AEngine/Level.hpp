@@ -7,6 +7,7 @@
 #include "Tile.hpp"
 #include "TextObject.hpp"
 #include "Character.hpp"
+#include "Button.hpp"
 
 enum class LevelMode {
 	EASY,
@@ -57,6 +58,7 @@ private:
 	void UpdateTurn();
 	void SetTurn(bool _isPlayerTurn);
 	void UpdateLevelStatus();
+	void DrawResultScreen();
 
 	void Debugger();
 
@@ -68,8 +70,11 @@ private:
 	TextObject debugText;
 
 	LevelStatus status = LevelStatus::PLAYING;
+	bool resultScreenInitialized = false;
+	Button resultRestartButton;
+	Button resultMainMenuButton;
 
-	CannonManager::Cannon *activeCannon = nullptr; // pointer to the active instance of the cannon object 
+	CannonManager::Cannon* activeCannon = nullptr; // pointer to the active instance of the cannon object 
 	CannonManager::Cannon playerCannon; // instance of the player cannon
 	CannonManager::Cannon enemyCannon; // instance of the enemy cannon
 

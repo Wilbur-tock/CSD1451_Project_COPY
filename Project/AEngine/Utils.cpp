@@ -9,6 +9,7 @@ namespace Utils {
 	bool isInstructionOn = false;
 	bool isPaused = false;                                         // <-- NEW
 	bool isSettingsOpen = false;                                    // settings overlay inside pause menu
+	bool isResultScreenOn = false;                                  // defeat/victory screen active
 	float unpauseCooldown = 0.0f;                                  // <-- NEW
 	Color debuggerColor = Color{ 0,1.f,0 };
 

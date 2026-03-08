@@ -13,11 +13,13 @@
 
 #include "UIManager.hpp"
 #include "TextObject.hpp"
+#include "GameStateManager.hpp"
 
 AEGfxTexture* barrelTex = nullptr;
 
-Level::Level(int _leveId) 
-	: levelId{ _leveId }, levelName{ "Level " + std::to_string(levelId + 1) }, levelFileName { "level" + std::to_string(levelId) } {}
+Level::Level(int _leveId)
+	: levelId{ _leveId }, levelName{ "Level " + std::to_string(levelId + 1) }, levelFileName{ "level" + std::to_string(levelId) } {
+}
 
 void Level::Load() {
 	levelMap.clear();
@@ -198,6 +200,16 @@ void Level::Update() {
 	if (isPlayerTurn) AbilitiesManager::playerAbilityController.abilityUI();
 
 	Debugger();
+
+	// Draw result screen LAST so it renders on top of everything
+	if (status == LevelStatus::PLAYER_WON || status == LevelStatus::ENEMY_WON) {
+		Utils::isResultScreenOn = true;
+		DrawResultScreen();
+	}
+	else {
+		Utils::isResultScreenOn = false;
+		resultScreenInitialized = false;
+	}
 }
 
 void Level::Draw() {
@@ -240,7 +252,7 @@ void Level::DrawUI() {
 	GetMaxHP(maxHP);
 	playerHPBar.Draw(currentHP, maxHP);
 
-	UIManager::Bar enemyHPBar{ { barTrans.pos.x + 150 + barTrans.size.x, barTrans.pos.y }, barTrans.size, {colorVal,0,0,}, UIManager::FillType::RIGHT_TO_LEFT};
+	UIManager::Bar enemyHPBar{ { barTrans.pos.x + 150 + barTrans.size.x, barTrans.pos.y }, barTrans.size, {colorVal,0,0,}, UIManager::FillType::RIGHT_TO_LEFT };
 
 	GetCurrentHP(currentHP, false);
 	GetMaxHP(maxHP, false);
@@ -320,22 +332,121 @@ void Level::UpdateLevelStatus() {
 
 	// Checking win conditions for both enemy and player
 	float currentPlayerHP, currentEnemyHP;
-	GetCurrentHP(currentPlayerHP);
-	GetCurrentHP(currentEnemyHP);
+	GetCurrentHP(currentPlayerHP, true);
+	GetCurrentHP(currentEnemyHP, false);
 
 	if (currentEnemyHP <= 0) status = LevelStatus::PLAYER_WON;
 	if (currentPlayerHP <= 0) status = LevelStatus::ENEMY_WON;
+}
 
-	if (status == LevelStatus::PLAYING) return;
+static void OnResultRestart() {
+	GameStateManager::next = GameStateManager::GameState::RESTART;
+}
 
-	switch (status) {
-	case LevelStatus::PLAYER_WON:
-		// Draw Player WON Panel
-		break;
-	case LevelStatus::ENEMY_WON:
-		// Draw Player lost panel
-		break;
+static void OnResultMainMenu() {
+	GameStateManager::next = GameStateManager::GameState::MAIN_MENU;
+}
+
+void Level::DrawResultScreen() {
+	// Initialize buttons once when the result screen first appears
+	if (!resultScreenInitialized) {
+		resultScreenInitialized = true;
+
+		AEGfxTexture* btnTex = AssetsManager::GetTexture("Assets/buttonTexture.png");
+		if (!btnTex) btnTex = AssetsManager::squareTexture;
+
+		float btnW = 250.0f;
+		float btnH = 70.0f;
+		float gap = 30.0f;
+
+		// Coordinates use world-origin where (0,0) = screen center
+		// pMeshCorner draws from top-left corner downward
+		// Total button area width: btnW + gap + btnW = 530
+		float totalW = btnW + gap + btnW;
+
+		// Restart button: left side of center
+		float restartX = -totalW * 0.5f;
+		float restartY = -20.0f;
+
+		resultRestartButton = Button(
+			TextObject{ "RESTART" },
+			Utils::AnchorMode::CENTER,
+			{ restartX, restartY },
+			{ btnW, btnH },
+			Color(0.2f, 0.6f, 0.9f, 1.0f),
+			btnTex,
+			OnResultRestart
+		);
+
+		// Main menu button: right side of center
+		float menuX = restartX + btnW + gap;
+		float menuY = restartY;
+
+		resultMainMenuButton = Button(
+			TextObject{ "MAIN MENU" },
+			Utils::AnchorMode::CENTER,
+			{ menuX, menuY },
+			{ btnW, btnH },
+			Color(0.8f, 0.2f, 0.2f, 1.0f),
+			btnTex,
+			OnResultMainMenu
+		);
 	}
+
+	// -- Draw dark semi-transparent full-screen overlay --
+	// Screen top-left in world-origin coords is (-SCREEN_WIDTH/2, SCREEN_HEIGHT/2)
+	UIManager::Panel overlay{ {(float)Config::SCREEN_WIDTH, (float)Config::SCREEN_HEIGHT},
+		Color(0.0f, 0.0f, 0.0f, 0.6f), Utils::AnchorMode::TOP_LEFT };
+	overlay.Draw();
+
+	// -- Draw center panel background --
+	float panelW = 600.0f;
+	float panelH = 300.0f;
+
+	Color panelColor = (status == LevelStatus::PLAYER_WON)
+		? Color(0.1f, 0.3f, 0.1f, 0.9f)
+		: Color(0.3f, 0.1f, 0.1f, 0.9f);
+
+	UIManager::Panel centerPanel{ {panelW, panelH}, panelColor, Utils::AnchorMode::CENTER };
+	centerPanel.Draw();
+
+	// -- Draw result title text --
+	std::string resultStr = (status == LevelStatus::PLAYER_WON) ? "VICTORY!" : "DEFEAT!";
+	Color textColor = (status == LevelStatus::PLAYER_WON)
+		? Color(0.2f, 1.0f, 0.2f, 1.0f)
+		: Color(1.0f, 0.2f, 0.2f, 1.0f);
+
+	TextObject resultTitle{
+		resultStr,
+		2.0f,
+		textColor,
+		{0.0f, 0.0f},
+		Utils::AnchorMode::CENTER
+	};
+	resultTitle.SetPos(centerPanel.Pos(), centerPanel.Size());
+	// Shift title text upward inside the panel
+	resultTitle.pos.y += 0.15f;
+	resultTitle.Draw();
+
+	// -- Draw subtitle text --
+	std::string subStr = (status == LevelStatus::PLAYER_WON)
+		? "All enemies have been defeated!"
+		: "All your units have fallen!";
+
+	TextObject subtitle{
+		subStr,
+		0.7f,
+		Color(1.0f, 1.0f, 1.0f, 0.9f),
+		{0.0f, 0.0f},
+		Utils::AnchorMode::CENTER
+	};
+	subtitle.SetPos(centerPanel.Pos(), centerPanel.Size());
+	subtitle.pos.y += 0.02f;
+	subtitle.Draw();
+
+	// -- Draw buttons --
+	resultRestartButton.Update();
+	resultMainMenuButton.Update();
 }
 
 void Level::Debugger() {
