@@ -57,6 +57,8 @@ namespace AbilitiesManager {
 		void AbilitySelector(bool& isOn);
 		void onClickAbilityCard(Ability ability, bool* isOn);
 
+		void abilityUI();
+
 	private:
 
 		Ability* ProjectileSelected = nullptr;// Player selected projectile

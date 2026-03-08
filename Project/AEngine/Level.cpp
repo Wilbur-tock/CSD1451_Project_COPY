@@ -193,6 +193,9 @@ void Level::Update() {
 		delayTimer -= PhysicsManager::g_dt;
 	}
 
+	// UI
+	if (isPlayerTurn) AbilitiesManager::playerAbilityController.abilityUI();
+
 	Debugger();
 }
 

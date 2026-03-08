@@ -468,5 +468,35 @@ namespace AbilitiesManager {
 		}
 		CameraManager::camera.SetState(CameraManager::CameraController::INPUT);
 	}
+
+	void AbilityController::abilityUI() {
+		UIManager::Panel background{ {600.0f, 90.0f}, Color(0.647f, 0.165f, 0.165f, 1.0f), Utils::AnchorMode::BOTTOM_CENTER };
+		background.Draw();
+
+		// Ability icons
+		for (int i = 0; i < inventory.size(); ++i) {
+			Ability* ability = inventory[i];
+			Color iconColor = ability->GetType() == AbilityType::OFFENSIVE ? Color(1, 0, 0) : Color(0, 0, 1);
+			std::string AbilityName = ability->GetName();
+
+			Button abilityButton{ TextObject{ AbilityName },
+				Utils::AnchorMode::BOTTOM_CENTER, AEVec2{ -220.0f + i * 100.0f, -370.0f },
+				AEVec2{ 75.0f, 75.0f }, iconColor, AssetsManager::squareTexture };
+			abilityButton.SetTextScale(0.5f);
+			abilityButton.Update();
+			abilityButton.Draw();
+		}
+		
+		int i = static_cast<int>(inventory.size());
+		while (i < 5) {
+			Button emptyButton{ TextObject{ "Empty" },
+				Utils::AnchorMode::BOTTOM_CENTER, AEVec2{ -220.0f + i * 100.0f, -370.0f },
+				AEVec2{ 75.0f, 75.0f }, Color(0.5f,0.5f,0.5f), AssetsManager::squareTexture };
+			emptyButton.SetTextScale(0.5f);
+			emptyButton.Update();
+			emptyButton.Draw();
+			i++;
+		}
+	}
 }
 
