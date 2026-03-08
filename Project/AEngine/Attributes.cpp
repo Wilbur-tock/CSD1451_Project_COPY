@@ -1,31 +1,13 @@
 #include "Attributes.hpp"
 
-int  Attributes::Health() const { return health; }
-void Attributes::Health(int value) { health = std::clamp(value, 0, maxHealth); }
-
-int	 Attributes::MaxHealth() const { return maxHealth; }
-void Attributes::MaxHealth(int value) { maxHealth = value; }
-
-int  Attributes::Damage() const { return damage; }
-void Attributes::Damage(int value) { damage = value; }
-
-int  Attributes::DamageRadius() const { return damageRadius; }
-void Attributes::DamageRadius(int value) { damageRadius = value; }
-
-int Attributes::DamageMultiplier() const { return damageMultiplier; }
-void Attributes::DamageMultiplier(int value){ damageMultiplier = std::clamp(value, 1, 10); }
-
-bool Attributes::IsActive() const { return isActive; }
-
 void Attributes::TakeDamage(int damageValue) {
 	if (!canBeDamaged) return;
 
 	if (shield <= 0) {
-		Health(health - damageValue);
-
-		if (health <= 0) { isActive = false; }
+		int damageVal = static_cast<int>(damageValue * (1.0f - damageReduction));
+		Health(health - damageVal);
 	}
 	else {
-
+		Shield(--shield);
 	}
 }

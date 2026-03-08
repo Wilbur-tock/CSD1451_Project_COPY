@@ -30,11 +30,16 @@ public:
 
 	// Accessors
 
-	int AttackCharges() const;
-	void AttackCharges(int value);
+	int  AttackCharges() const { return attackCharges; }
+	void AttackCharges(int value) { attackCharges = std::clamp(value, 0, 100); }
 
-	ProjectileMode Mode() const;
-	void Mode(ProjectileMode newMode);
+	ProjectileMode Mode() const { return mode; }
+	void Mode(ProjectileMode newMode) { mode = newMode; }
+
+	int ProjectileId() const { return projectileId; }
+
+	std::string ProjectileName() const { return projectileName; }
+
 	inline std::string ModeName() const {
 		switch (mode) {
 		case ProjectileMode::IDLE:		return "IDLE"; break;
@@ -44,9 +49,6 @@ public:
 		default:						return "YOU NEED TO ADD A PROJECTILE MODE NAME";
 		}
 	}
-
-	int ProjectileId() const;
-	std::string ProjectileName() const;
 
 	// Member functions
 

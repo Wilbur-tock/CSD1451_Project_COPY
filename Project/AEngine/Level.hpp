@@ -14,6 +14,13 @@ enum class LevelMode {
 	HARD
 };
 
+enum class LevelStatus {
+	PLAYING,
+	PAUSED,
+	PLAYER_WON,
+	ENEMY_WON,
+};
+
 // Class that contains all the level information 
 // Level tile map data,
 // instances of ALL player and enemy object, 
@@ -23,6 +30,8 @@ public:
 	// Default ctor
 	Level(int _leveId);
 
+	// Member functions
+
 	// Read level map data and load level resources
 	void Load();
 	void Initalize();
@@ -30,24 +39,36 @@ public:
 	void Draw();
 	void Free();
 
-	// Member functions
-
-	// Toggle turns between player and enemy once they have shot and a timer has been set and reduced to 0
-	void UpdateTurn();
-	void SetTurn(bool _isPlayerTurn);
-	void Debugger();
-
 	// Find the character object that is within the parameter tile, 
 	// return pointer to the chracter if a character object can be found otherwise return nullptr
 	Character* FindCharacterObj(Tile const& tile);
 	Character* FindEnemyCharacterObj(int characterId);
 	Character* FindPlayerCharacterObj(int characterId);
+	Character* EnemyBoss() { return &enemies[bossId]; }
+private:
+	void DrawUI();
+
+	// Calculate and get the current health for all the player or enemies characters
+	void GetCurrentHP(float& currentHP, bool isGettingPlayerHP = true);
+	// Calculate and get the max health for all the player or enemies characters
+	void GetMaxHP(float& maxHP, bool isGettingPlayerHP = true);
+
+	// Toggle turns between player and enemy once they have shot and a timer has been set and reduced to 0
+	void UpdateTurn();
+	void SetTurn(bool _isPlayerTurn);
+	void UpdateLevelStatus();
+
+	void Debugger();
+
 private:
 	int levelId = 0;
 	std::string levelName; // Name of the level in the format (Level [INDEX])
 	std::string levelFileName; // file name to load in the levelMap in the format (level[INDEX])
 	LevelMode levelDifficulty = LevelMode::EASY;
 	TextObject debugText;
+
+	LevelStatus status = LevelStatus::PLAYING;
+
 	CannonManager::Cannon *activeCannon = nullptr; // pointer to the active instance of the cannon object 
 	CannonManager::Cannon playerCannon; // instance of the player cannon
 	CannonManager::Cannon enemyCannon; // instance of the enemy cannon
@@ -61,6 +82,7 @@ private:
 
 	std::vector<std::vector<Tile>> levelMap; // Level tile map
 	std::vector<Character> enemies; // contains all instance of the Enemy Character Object in the level
+	int bossId = 0; // enemies vector id which the boss is stored in
 	std::vector<Character> playerCharacters; // contains all instance of the Player Character Object in the level
 };
 

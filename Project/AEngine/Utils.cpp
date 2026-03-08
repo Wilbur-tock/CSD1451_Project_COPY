@@ -2,13 +2,17 @@
 
 #include "GraphicsManager.hpp"
 #include "CameraManager.hpp"
+#include "BaseTypes.hpp"
 
 namespace Utils {
 	bool isDebuggerOn = true;
 	bool isInstructionOn = false;
+	bool isPaused = false;                                         // <-- NEW
+	bool returnToPause = false;                                    // <-- NEW
+	float unpauseCooldown = 0.0f;                                  // <-- NEW
 	Color debuggerColor = Color{ 0,1.f,0 };
 
-	std::pair<float, Color> debuggerInfo = { 0.75f, Color{0, 0.8f, 0 }};
+	std::pair<float, Color> debuggerInfo = { 0.75f, Color{0, 0.8f, 0 } };
 
 	void GetWorldMousePos(float& x, float& y) {
 		s32 mouseX, mouseY;
@@ -64,6 +68,56 @@ namespace Utils {
 
 	bool IsGridIndexOutOfBounds(int x, int y) {
 		return x < 0 || x >= Config::GRID_WIDTH || y < 0 || y >= Config::GRID_HEIGHT;
+	}
+
+	void SetAnchoredPosition(Transform& trans, AnchorMode const& anchorMode) {
+		// Set position based on screen width and height
+		float x = 0, y = 0, width = trans.size.x, height = trans.size.y;
+		float halfScreenW = Config::SCREEN_WIDTH * 0.5f, halfScreenH = Config::SCREEN_HEIGHT * 0.5f;
+		float halfW = width * 0.5f, halfH = height * 0.5f;
+
+		// Set position based on rect mode
+		switch (anchorMode) {
+		case Utils::AnchorMode::TOP_LEFT:
+			x = -halfScreenW;
+			y = halfScreenH;
+			break;
+		case Utils::AnchorMode::TOP_CENTER:
+			x = -halfW;
+			y = halfScreenH;
+			break;
+		case Utils::AnchorMode::TOP_RIGHT:
+			x = halfScreenW - width;
+			y = halfScreenH;
+			break;
+		case Utils::AnchorMode::CENTER_LEFT:
+			x = -halfScreenW;
+			y = halfH;
+			break;
+		case Utils::AnchorMode::CENTER:
+			x = -halfW;
+			y = halfH;
+			break;
+		case Utils::AnchorMode::CENTER_RIGHT:
+			x = halfScreenW - width;
+			y = halfH;
+			break;
+		case Utils::AnchorMode::BOTTOM_LEFT:
+			x = -halfScreenW;
+			y = -halfScreenH + height;
+			break;
+		case Utils::AnchorMode::BOTTOM_CENTER:
+			x = -halfW;
+			y = -halfScreenH + height;
+			break;
+		case Utils::AnchorMode::BOTTOM_RIGHT:
+			x = halfScreenW - width;
+			y = -halfScreenH + height;
+			break;
+		}
+
+		trans.pos.x = x;
+		trans.pos.y = y;
 	}
 
 	std::string FormatFloat(double value, int precision) {

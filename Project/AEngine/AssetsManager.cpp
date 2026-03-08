@@ -5,6 +5,7 @@
 namespace AssetsManager {
     std::map<std::string, AEGfxTexture*> textureCache;
 
+    // Common textures
     AEGfxTexture* squareTexture, *circleTexture;
     s8 textFont;
 
@@ -35,5 +36,7 @@ namespace AssetsManager {
             AEGfxTextureUnload(pair.second);
         }
         textureCache.clear();
+        squareTexture = nullptr;
+        circleTexture = nullptr;
     }
 }

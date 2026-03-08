@@ -27,10 +27,10 @@ namespace CollisionManager {
         float distanceSq = (dx * dx) + (dy * dy);
         float radius = circle.size.x * 0.5f;
 
-        return distanceSq <= (radius * radius);
+        return distanceSq - 0.01f <= (radius * radius);
     }
 
-    bool AreCircleSquareIntersecting(float sX, float sY, float sWidth, float sHeight, float cX, float cY, float r) {
+    bool AreCircleSquareIntersecting(float cX, float cY, float r, float sX, float sY, float sWidth, float sHeight) {
         // Calculate the bounds of the square
         float halfW = sWidth / 2.0f;
         float halfH = sHeight / 2.0f;

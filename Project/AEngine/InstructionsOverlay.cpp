@@ -29,14 +29,14 @@ namespace UIInstructionsOverlay {
         UIManager::Panel dim{
             {static_cast<float>(Config::SCREEN_WIDTH), static_cast<float>(Config::SCREEN_HEIGHT)},
             Color(0.0f, 0.0f, 0.0f, 0.55f),
-            Utils::RectMode::RECT_CENTER
+            Utils::AnchorMode::CENTER
         };
         dim.Draw();
 
         UIManager::Panel panel{
             {1120.0f, 730.0f},
             Color(0.12f, 0.12f, 0.16f, 0.95f),
-            Utils::RectMode::RECT_CENTER
+            Utils::AnchorMode::CENTER
         };
         panel.Draw();
 
@@ -49,7 +49,8 @@ namespace UIInstructionsOverlay {
             "[ESC] Quit Game\n\n"
             "WHEN THIS POPUP IS CLOSED\n"
             "[P] Toggle Debugger\n"
-            "[M] Return to Main Menu\n\n";
+            "[M] Main Menu\n"
+            "[ESC] Pause Menu\n\n";                                        // <-- CHANGED
 
         using GameStateManager::GameState;
         if (current == GameState::LEVEL_1 || current == GameState::LEVEL_2) {

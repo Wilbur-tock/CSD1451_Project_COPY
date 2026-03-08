@@ -7,7 +7,7 @@
 
 class Physics {
 public:
-	bool IsGrounded() const;
+	bool IsGrounded() const { return isGrounded; }
 
 	void GroundedChecks(GameObject const& obj);
 	void Update(GameObject& obj);

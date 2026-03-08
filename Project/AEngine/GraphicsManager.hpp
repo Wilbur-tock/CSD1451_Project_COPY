@@ -8,7 +8,7 @@
 
 // Contains all the drawing of graphics/UI functions in here
 namespace GraphicsManager {
-	extern AEGfxVertexList *pMeshMiddle, *pMeshCorner;
+	extern AEGfxVertexList *pMeshMiddle, *pMeshCorner, *pSpriteMesh;
 
 	// Load all resources required and generate mesh
 	void Load();
@@ -29,6 +29,14 @@ namespace GraphicsManager {
 	void DrawWorldUI(AEGfxTexture* pTex, AEMtx33 const& transform, Color const& color);
 	// Draw UI texture using pMeshCorner (rect mode corner origin) using WORLD COORDINATES
 	void DrawScreenOverlay(AEGfxTexture* pTex, AEMtx33 const& transform, Color const& color);
+
+	// Call once during Load() to build the sprite frame mesh
+	void BuildSpriteMesh();
+	// Draw a single frame from a horizontal sprite sheet in screen space
+	// frame     – 0-based frame index
+	// screenX/Y – center position of the sprite (screen coordinates)
+	// w, h      – render size in pixels
+	void DrawSpriteFrame(AEGfxTexture* tex, int frame, float screenX, float screenY, float w, float h);
 }
 
 #endif // !GRAPHICSMANAGER_HPP
