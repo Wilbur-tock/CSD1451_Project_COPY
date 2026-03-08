@@ -12,11 +12,11 @@ namespace PhysicsManager {
         float tileLeft = tileTransform.pos.x - halfTileW;
         float tileRight = tileTransform.pos.x + halfTileW;
 
-        if (obj.pos.x < tileTransform.pos.x) { // Hit left side bounce off from the left side to move right
+        if (obj.pos.x < tileTransform.pos.x) { // Hit left side of a block bounce off from the left side to move right
             obj.pos.x = tileLeft - halfW - BIAS;
             if (velocity.x > 0) velocity.x *= BOUNCE;
         }
-        else { // hit right side bounce off from the right side to move left
+        else { // hit right side of a block bounce off from the right side to move left
             obj.pos.x = tileRight + halfW + BIAS;
             if (velocity.x < 0) velocity.x *= BOUNCE;
         }

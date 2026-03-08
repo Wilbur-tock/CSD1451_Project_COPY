@@ -24,7 +24,7 @@ void Level::Load() {
 
 	enemies.clear();
 	playerCharacters.clear();
-	int reserveCount = 5;
+	int reserveCount = 10;
 	enemies.reserve(reserveCount);
 	playerCharacters.reserve(reserveCount);
 
@@ -38,6 +38,7 @@ void Level::Load() {
 }
 
 void Level::Initalize() {
+	status = LevelStatus::PLAYING;
 	MapManager::currentMap = &levelMap;
 
 	// Start of the turn should always be player turn
@@ -75,6 +76,7 @@ void Level::Initalize() {
 					enemies.push_back(characterObj);
 					listId = static_cast<int>(enemies.size() - 1);
 					enemies[listId].id = listId;
+					enemies[listId].SetStats(static_cast<int>(levelDifficulty));
 					break;
 
 				case TILE_ENEMY_BOSS:
@@ -82,6 +84,9 @@ void Level::Initalize() {
 					enemies.push_back(characterObj);
 					listId = static_cast<int>(enemies.size() - 1);
 					enemies[listId].id = listId;
+
+					bossId = listId;
+					enemies[listId].SetStats(static_cast<int>(levelDifficulty));
 					break;
 				}
 
@@ -120,11 +125,10 @@ void Level::Initalize() {
 }
 
 bool prevIsAbilitySelectorOn = false;
-bool isLevelActive = true;
 float delayTimer = 0.0f, defaultDelayTimer = 0.5f;;
 
 void Level::Update() {
-	isLevelActive = !isAbilitySelectorOn && !isHoveringUI && delayTimer <= 0.0f;
+	UpdateLevelStatus();
 
 	// For Debugging
 	if (isSkippingEnemyTurn) { // Skipping enemy turn
@@ -141,15 +145,13 @@ void Level::Update() {
 		}
 	}
 
-	if (isLevelActive) {
-		if (!isPlayerTurn) {
-			if(!enemyCannon.IsTargetAlive()) {
-				// Find new target
-				for (Character& playerChars : playerCharacters) {
-					if (playerChars.attribute.IsActive()) {
-						enemyCannon.SetTarget(&playerChars);
-						break;
-					}
+	if (status == LevelStatus::PLAYING) {
+		if (!isPlayerTurn && !enemyCannon.IsTargetAlive()) {
+			// Find new target if current target is not alive
+			for (Character& playerChars : playerCharacters) {
+				if (playerChars.attribute.IsActive()) {
+					enemyCannon.SetTarget(&playerChars);
+					break;
 				}
 			}
 		}
@@ -203,7 +205,6 @@ void Level::Draw() {
 }
 
 void Level::Free() {
-	barrelTex = nullptr;
 }
 
 void Level::DrawUI() {
@@ -228,26 +229,40 @@ void Level::DrawUI() {
 	UIManager::Bar playerHPBar{ {barTrans.pos.x, barTrans.pos.y }, barTrans.size, {0,colorVal,0} };
 
 	float currentHP = 0, maxHP = 0;
-	GetHealth(currentHP, maxHP);
+	GetCurrentHP(currentHP);
+	GetMaxHP(maxHP);
 	playerHPBar.Draw(currentHP, maxHP);
 
 	UIManager::Bar enemyHPBar{ { barTrans.pos.x + 150 + barTrans.size.x, barTrans.pos.y }, barTrans.size, {colorVal,0,0,}, UIManager::FillType::RIGHT_TO_LEFT};
 
-	GetHealth(currentHP, maxHP, false);
+	GetCurrentHP(currentHP, false);
+	GetMaxHP(maxHP, false);
 	enemyHPBar.Draw(currentHP, maxHP);
 }
 
-void Level::GetHealth(float& currentHP, float& maxHP, bool isGettingPlayerHP) {
-	currentHP = 0, maxHP = 0;
+void Level::GetCurrentHP(float& currentHP, bool isGettingPlayerHP) {
+	currentHP = 0;
 	if (isGettingPlayerHP) {
 		for (Character& character : playerCharacters) {
 			currentHP += static_cast<float>(character.attribute.Health());
-			maxHP += static_cast<float>(character.attribute.MaxHealth());
 		}
 	}
 	else {
 		for (Character& character : enemies) {
 			currentHP += static_cast<float>(character.attribute.Health());
+		}
+	}
+}
+
+void Level::GetMaxHP(float& maxHP, bool isGettingPlayerHP) {
+	maxHP = 0;
+	if (isGettingPlayerHP) {
+		for (Character& character : playerCharacters) {
+			maxHP += static_cast<float>(character.attribute.MaxHealth());
+		}
+	}
+	else {
+		for (Character& character : enemies) {
 			maxHP += static_cast<float>(character.attribute.MaxHealth());
 		}
 	}
@@ -284,6 +299,34 @@ void Level::SetTurn(bool _isPlayerTurn) {
 	std::cout << "[Level] Switch to " << std::string(isPlayerTurn ? "PLAYER" : "ENEMY") << " turn" << '\n';
 }
 
+void Level::UpdateLevelStatus() {
+	if (!isAbilitySelectorOn && !isHoveringUI && delayTimer <= 0.0f) {
+		status = LevelStatus::PLAYING;
+	}
+	else {
+		status = LevelStatus::PAUSED;
+	}
+
+	// Checking win conditions for both enemy and player
+	float currentPlayerHP, currentEnemyHP;
+	GetCurrentHP(currentPlayerHP);
+	GetCurrentHP(currentEnemyHP);
+
+	if (currentEnemyHP <= 0) status = LevelStatus::PLAYER_WON;
+	if (currentPlayerHP <= 0) status = LevelStatus::ENEMY_WON;
+
+	if (status == LevelStatus::PLAYING) return;
+
+	switch (status) {
+	case LevelStatus::PLAYER_WON:
+		// Draw Player WON Panel
+		break;
+	case LevelStatus::ENEMY_WON:
+		// Draw Player lost panel
+		break;
+	}
+}
+
 void Level::Debugger() {
 	if (Utils::isDebuggerOn) {
 		// Input R to change whose turn it is
@@ -317,10 +360,7 @@ void Level::Debugger() {
 			if (AEInputCheckTriggered(AEVK_RBUTTON)) {
 				// Damage characters
 				if (tile.IsCharacter()) {
-					int dmg = 10;
-					tile.TakeDamage(dmg);
-					Character* charPtr = FindCharacterObj(tile);
-					charPtr->attribute.TakeDamage(dmg);
+					tile.TakeDamage(10);
 				}
 			}
 		}

@@ -1,10 +1,11 @@
 #include "Tile.hpp"
 
+#include "LevelManager.hpp"
+
 Tile::Tile(AEVec2 _pos, AEGfxTexture* _texture, TileType _type)
 	: GameObject{ _pos, {defaultSize,defaultSize}, _texture }, type{ _type } {
 }
 
-TileType Tile::Type() const { return type; }
 void Tile::Type(TileType newType) {
 	prevType = type;
 	if (IsEmpty() && IsCharacter()) characterId = -1; // reset characterId
@@ -18,26 +19,21 @@ void Tile::Type(Tile const& toCopy) {
 	attribute = toCopy.attribute;
 }
 
-int  Tile::CharacterId() const { return characterId; }
-void Tile::CharacterId(int newId) { characterId = newId; }
-
-bool Tile::IsEmpty() const { return type == TILE_EMPTY; }
-bool Tile::IsGround() const {
-	return type >= TILE_BLOCK_GROUND_0 && type <= TILE_BLOCK_GROUND_2;
-}
-bool Tile::IsBlocks() const {
-	return type >= TILE_BLOCK_1_TOP && type <= TILE_BLOCK_2;
-}
-
-bool Tile::IsEnemy() const { return type == TILE_ENEMY_MINION || type == TILE_ENEMY_BOSS; }
-bool Tile::IsPlayer() const { return type == TILE_PLAYER_CHARACTER; }
-bool Tile::IsCharacter() const { return IsEnemy() || IsPlayer(); }
-
 void Tile::TakeDamage(int damage) {
-	// Only tower blocks take damage. Ground stays untouched.
-	if (!IsBlocks()) return;
+	if (!IsDestructible()) return;
 
-	attribute.TakeDamage(damage * attribute.DamageMultiplier());
+	// Damage character here
+	if (IsCharacter()) {
+		Character* character = LevelManager::selectedLevel->FindCharacterObj(*this);
+		if (character) {
+			character->attribute.TakeDamage(damage);
+			std::cout << "[Tile] Damaged character " + character->TypeName() + " new hp: " + std::to_string(character->attribute.Health()) + '\n';
+			attribute.Health(character->attribute.Health()); // Assign tile health to character health
+		}
+	}
+	else {
+		attribute.TakeDamage(damage * attribute.DamageMultiplier());
+	}
 
 	// Blocks can be destroyed -> become empty
 	if (!attribute.IsActive()) {

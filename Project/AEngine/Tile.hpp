@@ -42,24 +42,24 @@ public:
 	Tile() = default;
 	Tile(AEVec2 _pos, AEGfxTexture* _texture, TileType _type);
 
-	TileType Type() const;
-	void Type(TileType newType);
+	TileType Type() const { return type; }
 
+	void Type(TileType newType);
 	// Copy another type data
 	void Type(Tile const& toCopy);
 
-	// To retrive the character object found in this tile block
-	int CharacterId() const;
-	// To retrive the character object found in this tile block
-	void CharacterId(int newId);
+	int  CharacterId() const { return characterId; }
+	void CharacterId(int newId) { characterId = newId; }
 
-	bool IsEmpty() const;
-	bool IsGround() const;
-	bool IsBlocks() const;
+	bool IsEmpty() const { return type == TILE_EMPTY; }
+	bool IsGround() const { return type >= TILE_BLOCK_GROUND_0 && type <= TILE_BLOCK_GROUND_2;}
+	bool IsBlocks() const { return type >= TILE_BLOCK_1_TOP && type <= TILE_BLOCK_2;}
 
-	bool IsEnemy() const;
-	bool IsPlayer() const;
-	bool IsCharacter() const;
+	bool IsEnemy() const { return type == TILE_ENEMY_MINION || type == TILE_ENEMY_BOSS; }
+	bool IsPlayer() const { return type == TILE_PLAYER_CHARACTER; }
+	bool IsCharacter() const { return IsEnemy() || IsPlayer(); }
+
+	bool IsDestructible() const { return IsEnemy() || IsPlayer() || IsBlocks(); }
 
 	void TakeDamage(int damage);
 private:

@@ -33,7 +33,7 @@ namespace CannonManager {
         std::vector<Ability>& allProjectileAbilities = abilityController->GetOffensiveAbilities();
         projectileAbilitiesCount = static_cast<int>(allProjectileAbilities.size());
 
-        // Initializing each projectiles with abilities
+        // Initializing the default and ALL projectiles with abilities
         if (projectiles.empty()) std::cerr << "[CannonManager] Cannon Projectiles vector is EMPTY" << '\n';
 
         for (int i = 0; i < projectiles.size(); ++i) {
@@ -47,11 +47,11 @@ namespace CannonManager {
             Ability const& ability = allProjectileAbilities[abilityId];
             Projectile& projectile = projectiles[i];
 
-            // Initialize projectile with its texture and MODE
-            projectile = { AssetsManager::circleTexture, static_cast<ProjectileMode>(i + 1) };
+            // Initialize projectile with its texture
+            projectile = { AssetsManager::circleTexture };
             projectile.SetProjectileStats(ability.GetName(), ability.GetProj());
 
-            //std::cout << "[CannonManager] Set " << ability.Id() << " " << ability.GetName() << " ability into the cannon projectile vector" << '\n';
+            //std::cout << "[CannonManager] Set " << ability.Id() << " Mode: " << projectile.ModeName() << " " << ability.GetName() << " ability into the cannon projectile vector" << '\n';
         }
     }
     
@@ -346,10 +346,12 @@ namespace CannonManager {
 
                         Tile& tile = (*MapManager::currentMap)[y][x];
 
-                        if (tile.IsEmpty()) continue;
+                        if (tile.IsEmpty()) continue; // If it hits a empty tile continue
+
+                        bool hasCollision = CollisionManager::AreCircleSquareIntersecting(projectile.transform, tile.transform);
 
                         // Checking collision of the projectile with the tile blocks that is collidable
-                        if (CollisionManager::AreCircleSquareIntersecting(projectile.transform, tile.transform)) {
+                        if(hasCollision) {
                             // Damage tile first, incase of destroying the blocks and bouncing back if damageTile is not called first
                             projectile.DamageTile(x, y);
 
@@ -509,12 +511,13 @@ namespace CannonManager {
 
         // Show cannon information
         std::string debugStr = "Cannon " + static_cast<std::string>(isPlayerControlled ? "PLAYER" : "ENEMY")
-            + "\nIs Active : " + std::string(hasCannonShot ? "true" : "false") 
+            + "\nIs Active : " + std::string(hasCannonShot ? "true" : "false")
             + "\nIs Projectile destroyed : " + static_cast<std::string>(isProjectileDestroyed ? "true" : "false")
             + "\nPos x: " + Utils::FormatFloat(transform.pos.x, 2) + " y: " + Utils::FormatFloat(transform.pos.y, 2)
             + "\nAngle: " + Utils::FormatFloat(cannonAngle * (180.0f / 3.14159265359), 2) + " " + Utils::FormatFloat(cannonAngle, 2)
             + "\n\nSelected Projectile\nId: " + std::to_string(selectedProjectile.ProjectileId())
             + "\nName: " + selectedProjectile.ProjectileName()
+            + "\nMode: " + selectedProjectile.ModeName()
             + "\nDamage: " + std::to_string(selectedProjectile.attribute.Damage())
             + "\nRadius: " + std::to_string(selectedProjectile.attribute.DamageRadius())
             + "\n\nAbilities Inventory Count: " + std::to_string(abilityController->InventoryCount())

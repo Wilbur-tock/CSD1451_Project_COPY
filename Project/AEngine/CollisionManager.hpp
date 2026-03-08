@@ -18,7 +18,7 @@ namespace CollisionManager {
     return true if circle is overlapping with square or vice versa otherwise false
     *************************************************************************/
     bool AreCircleSquareIntersecting(Transform const& circle, Transform const& square);
-    bool AreCircleSquareIntersecting(float sX, float sY, float sWidth, float sHeight, float cX, float cY, float r);
+    bool AreCircleSquareIntersecting(float cX, float cY, float r, float sX, float sY, float sWidth, float sHeight);
 
     /**********************************************
     \brief

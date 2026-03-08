@@ -20,14 +20,14 @@ public:
 
 	Character(AEVec2 _pos, AEVec2 _size, AEGfxTexture* _texture, TileIndex _tileId, CharacterType _type);
 
-	CharacterType Type() const;
+	CharacterType Type() const { return type; }
 
 	void Update();
 	void Draw();
 	void DebugInfo(std::string &str);
 	void SetSquatAnimation(bool enabled); // Player only: toggles idle <-> squat animation
 
-	inline std::string TypeName() {
+	std::string TypeName() {
 		switch (type) {
 		case CharacterType::PLAYER:
 			return "PLAYER";
@@ -39,6 +39,9 @@ public:
 
 		return "NULL";
 	}
+
+	void SetStats(int difficultyLevel);
+
 private:
 	CharacterType type;
 

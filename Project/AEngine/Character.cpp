@@ -69,8 +69,6 @@ Character::Character(AEVec2 _pos, AEVec2 _size, AEGfxTexture* _texture, TileInde
 	LoadCharacterTexturesOnce();
 }
 
-CharacterType Character::Type() const { return type; }
-
 void Character::Update() {
 	if (!attribute.IsActive()) return;
 
@@ -148,5 +146,28 @@ void Character::DebugInfo(std::string& str) {
 		+ "\nSize x: " + Utils::FormatFloat(transform.size.x, 2) + " y: " + Utils::FormatFloat(transform.size.x, 2)
 		+ "\nIsGrounded: " + static_cast<std::string>(physics.IsGrounded() ? "true" : "false")
 		+ "\n\nStats:\nHP: " + std::to_string(attribute.Health()) + " Max HP: " + std::to_string(attribute.MaxHealth())
-		+ "\nDamage Multiplier: " + std::to_string(attribute.DamageMultiplier());
+		+ "\nDamage Multiplier: " + std::to_string(attribute.DamageMultiplier())
+		+ "\nShield: " + std::to_string(attribute.Shield());
+}
+
+void Character::SetStats(int difficultyLevel) {
+	if (type == CharacterType::ENEMY_BOSS) {
+		++difficultyLevel; // Easy mode = 0, so plus 1
+		int maxHP = 100 * difficultyLevel;
+		attribute.MaxHealth(maxHP);
+		attribute.Health(maxHP);
+		attribute.Shield(10 * difficultyLevel);
+
+		float dmgReduc = 0.0f;
+		switch (difficultyLevel) {
+		case 2:
+			dmgReduc = 0.25f;
+			break;
+		case 3:
+			dmgReduc = 0.5f;
+			break;
+		}
+
+		attribute.DamageReduction(dmgReduc);
+	}
 }

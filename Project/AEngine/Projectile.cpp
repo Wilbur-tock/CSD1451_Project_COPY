@@ -33,7 +33,7 @@ void Projectile::SetProjectileStats(std::string _projectileName, ProjectileModul
 
     // 1. Set Identity
     projectileId = data.projectileId;
-    mode = static_cast<ProjectileMode>(data.projectileId);
+    mode = static_cast<ProjectileMode>(data.projectileId + 1);
 
     // 2. Set Stats directly from JSON data
     // Total Damage = Base * Multiplier
@@ -116,14 +116,14 @@ void Projectile::DamageTile(int x, int y) {
             if (tileToDamage.IsEmpty() || tileToDamage.IsGround()) continue;
 
             // Damage Tiles that contain a character object
-            if (tileToDamage.IsCharacter()) {
-                Character* character = LevelManager::selectedLevel->FindCharacterObj(tileToDamage);
+            //if (tileToDamage.IsCharacter()) {
+            //    Character* character = LevelManager::selectedLevel->FindCharacterObj(tileToDamage);
 
-                if (character) {
-                    character->attribute.TakeDamage(projDamage);
-                    std::cout << "[Projectile] Damaged character " << character->TypeName() << " new hp: " << character->attribute.Health() << '\n';
-                }
-            }
+            //    if (character) {
+            //        character->attribute.TakeDamage(projDamage);
+            //        std::cout << "[Projectile] Damaged character " << character->TypeName() << " new hp: " << character->attribute.Health() << '\n';
+            //    }
+            //}
 
             // Damage tile AFTER it has damage a CHARACTER compononent
             std::cout << "[Projectile] Damage Tile: " << tileToDamage << " Current hp: " << tileToDamage.attribute.Health() << " Damage: " << projDamage << '\n';
