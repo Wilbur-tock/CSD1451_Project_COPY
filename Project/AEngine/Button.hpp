@@ -24,6 +24,8 @@ public:
 	void Draw();
 
 	void SetTextOffset(f32 offsetX, f32 offsetY);
+	void SetTextScale(float scale);
+	void RecalculateTextPos();
 
 private:
 	TextObject textObj;
@@ -32,6 +34,7 @@ private:
 	AEGfxTexture* texture = nullptr;
 	Utils::FuncPtr onClick = nullptr;
 	bool isHovered = false;
+	Utils::AnchorMode anchorMode = Utils::AnchorMode::TOP_LEFT;
 };
 
 #endif // !BUTTON_HPP

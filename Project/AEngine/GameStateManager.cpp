@@ -72,6 +72,7 @@ namespace GameStateManager {
     void Update() {
         float rawDt = static_cast<float>(AEFrameRateControllerGetFrameTime());
         PhysicsManager::g_dt = rawDt;
+        AudioManager::Update();
 
         // Handle quit -- skip loading screen entirely 
         // When the Quit button sets next = QUIT, the very next frame hits the new check, 
@@ -213,6 +214,7 @@ namespace GameStateManager {
         // Toggle pause only during gameplay states
         if (IsGameplayState() && !Utils::isInstructionOn) {
             if (AEInputCheckTriggered(AEVK_ESCAPE)) {
+                AudioManager::PlaySFX(AudioManager::SFX::UIButton);
                 Utils::isPaused = !Utils::isPaused;
             }
         }
@@ -257,6 +259,7 @@ namespace GameStateManager {
 
         // Toggle instructions popup (only when NOT loading)
         if (AEInputCheckTriggered(AEVK_I)) {
+            AudioManager::PlaySFX(AudioManager::SFX::UIButton);
             Utils::isInstructionOn = !Utils::isInstructionOn;
         }
 
@@ -279,6 +282,7 @@ namespace GameStateManager {
 
             // Return to main menu
             if (AEInputCheckTriggered(AEVK_M)) {
+                AudioManager::PlaySFX(AudioManager::SFX::UIButton);
                 next = GameState::MAIN_MENU;
             }
         }

@@ -58,6 +58,7 @@ namespace Settings {
     }
 
     void Initialize() {
+        currentVolume = AudioManager::GetVolume();
         // Reset camera to origin
         CameraManager::camera.SetPosition({ 0.0f, 0.0f });
         CameraManager::camera.SetState(CameraManager::CameraController::STATIC);
@@ -203,6 +204,7 @@ namespace Settings {
 
         // ESC -> back to pause menu
         if (AEInputCheckTriggered(AEVK_ESCAPE) || AEInputCheckTriggered(AEVK_BACK)) {
+            AudioManager::PlaySFX(AudioManager::SFX::UIButton);
             OnBackClicked();
             CameraManager::camera.SetPosition(savedCamPos);
             return;

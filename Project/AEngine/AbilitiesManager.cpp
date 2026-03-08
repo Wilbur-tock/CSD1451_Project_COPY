@@ -462,11 +462,58 @@ namespace AbilitiesManager {
 
 	void AbilityController::onClickAbilityCard(Ability ability, bool* isOn) {
 		std::cout << "Clicked ability card " << ability.Id() << std::endl;
-		AddAbility(ability.Id());
+		if (ability.GetType() != AbilityType::STATISTICS) {
+			AddAbility(ability.Id());
+		}
+		else {
+			// Update stats
+
+		}
 		if (isOn) {
 			*isOn = false;
 		}
 		CameraManager::camera.SetState(CameraManager::CameraController::INPUT);
+	}
+
+	void AbilityController::abilityUI() {
+		UIManager::Panel background{ {600.0f, 90.0f}, Color(0.647f, 0.165f, 0.165f, 1.0f), Utils::AnchorMode::BOTTOM_CENTER };
+		background.Draw();
+
+		// Ability icons
+		for (int i = 0; i < inventory.size(); ++i) {
+			Ability* ability = inventory[i];
+			Color iconColor = ability->GetType() == AbilityType::OFFENSIVE ? Color(1, 0, 0) : Color(0, 0, 1);
+			std::vector<std::string> toBeRemoved = { "Projectile" };
+			std::string AbilityName = ability->GetName();
+			for (const std::string& word : toBeRemoved) {
+				size_t found = AbilityName.find(word);
+				if (found != std::string::npos) {
+					AbilityName.erase(found, std::string(word).length());
+				}
+			};
+
+			// Trim any trailing/leading spaces left behind
+			while (!AbilityName.empty() && AbilityName.back() == ' ') AbilityName.pop_back();
+			while (!AbilityName.empty() && AbilityName.front() == ' ') AbilityName.erase(AbilityName.begin());
+
+			Button abilityButton{ TextObject{ AbilityName },
+				Utils::AnchorMode::BOTTOM_CENTER, AEVec2{ -220.0f + i * 100.0f, -370.0f },
+				AEVec2{ 75.0f, 75.0f }, iconColor, AssetsManager::squareTexture };
+			abilityButton.SetTextScale(0.5f);
+			abilityButton.Update();
+			abilityButton.Draw();
+		}
+		
+		int i = static_cast<int>(inventory.size());
+		while (i < 5) {
+			Button emptyButton{ TextObject{ "Empty" },
+				Utils::AnchorMode::BOTTOM_CENTER, AEVec2{ -220.0f + i * 100.0f, -370.0f },
+				AEVec2{ 75.0f, 75.0f }, Color(0.5f,0.5f,0.5f), AssetsManager::squareTexture };
+			emptyButton.SetTextScale(0.5f);
+			emptyButton.Update();
+			emptyButton.Draw();
+			i++;
+		}
 	}
 }
 

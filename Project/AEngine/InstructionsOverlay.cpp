@@ -18,6 +18,7 @@ namespace UIInstructionsOverlay {
         case GameState::LEVEL_1:    return "LEVEL 1";
         case GameState::LEVEL_2:    return "LEVEL 2";
         case GameState::CREDITS:    return "CREDITS";
+        case GameState::SETTINGS:   return "SETTINGS";
         case GameState::RESTART:    return "RESTART";
         case GameState::EXIT:       return "EXIT";
         case GameState::QUIT:       return "QUIT";
@@ -45,13 +46,10 @@ namespace UIInstructionsOverlay {
             "---------------------------------\n"
             "Current: " + GetStateName(current) + "\n\n"
             "WHILE THIS POPUP IS OPEN\n"
-            "[I] Close this popup\n"
-            "[ESC] Quit Game\n\n"
+            "[I] Close this popup\n\n"
             "WHEN THIS POPUP IS CLOSED\n"
-            "[P] Toggle Debugger\n"
-            "[M] Main Menu\n"
-            "[ESC] Pause Menu\n\n";                                        // <-- CHANGED
-
+            "[P] Toggle Debugger\n";
+       
         using GameStateManager::GameState;
         if (current == GameState::LEVEL_1 || current == GameState::LEVEL_2) {
             msg +=
@@ -59,7 +57,8 @@ namespace UIInstructionsOverlay {
                 "Mouse: Aim cannon\n"
                 "Hold [LMB]: Charge shot\n"
                 "Release [LMB]: Fire\n"
-                "Ability selection: Click a card when the selector appears\n\n"
+                "Ability selection: Click a card when the selector appears\n"
+                "[ESC]: Pause Menu\n\n"
                 "NOTE: Gameplay is paused while this popup is open.\n";
         }
         else if (current == GameState::MAP_EDITOR) {
@@ -73,7 +72,8 @@ namespace UIInstructionsOverlay {
                 "[T]: Toggle tile list\n"
                 "[CTRL] + [S]: Save current map\n"
                 "[R]: Reset map\n"
-                "[CTRL] + [1..5]: Load level file\n\n"
+                "[CTRL] + [1..5]: Load level file\n"
+                "[ESC]: Pause Menu\n\n"
                 "NOTE: Editor input is blocked while this popup is open.\n";
         }
         else if (current == GameState::MAIN_MENU) {
@@ -82,12 +82,20 @@ namespace UIInstructionsOverlay {
                 "[1] Play\n"
                 "[2] Map Editor\n"
                 "[3] Credits\n"
+                "[4] Settings\n"
                 "[Q] Quit\n";
         }
         else if (current == GameState::CREDITS) {
             msg +=
                 "CREDITS\n"
-                "Close this popup, then press [M] to return to Main Menu.\n";
+                "[SPACE]: Speed up scroll\n"
+                "[ESC] / [BACK]: Return to Main Menu\n";
+        }
+        else if (current == GameState::SETTINGS) {
+            msg +=
+                "SETTINGS\n"
+                "Use the slider or +/- buttons to adjust volume.\n"
+                "[ESC] / [BACK]: Return\n";
         }
 
         float x = panel.Pos().x + 40.0f;

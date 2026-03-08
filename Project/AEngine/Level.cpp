@@ -9,6 +9,7 @@
 #include "CameraManager.hpp"
 #include "LevelManager.hpp"
 #include "PhysicsManager.hpp"
+#include "AudioManager.hpp"
 
 #include "UIManager.hpp"
 #include "TextObject.hpp"
@@ -193,6 +194,9 @@ void Level::Update() {
 		delayTimer -= PhysicsManager::g_dt;
 	}
 
+	// UI
+	if (isPlayerTurn) AbilitiesManager::playerAbilityController.abilityUI();
+
 	Debugger();
 }
 
@@ -302,6 +306,7 @@ void Level::SetTurn(bool _isPlayerTurn) {
 		activeCannon = &enemyCannon;
 	}
 	activeCannon->ResetTurn();
+	AudioManager::PlaySFX(AudioManager::SFX::TurnSwitch);
 	std::cout << "[Level] Switch to " << std::string(isPlayerTurn ? "PLAYER" : "ENEMY") << " turn" << '\n';
 }
 
