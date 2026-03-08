@@ -115,6 +115,7 @@ void Level::Initalize() {
 	autoPlayOn = false;
 	isSkippingEnemyTurn = false;
 	switchTurnCooldown = 0.0f;
+	isAbilitySelectorOn = true;
 
 	debugText = { "", Utils::debuggerInfo.first * 0.8f, Utils::debuggerInfo.second, { -1.0f, 0.99f} };
 
