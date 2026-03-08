@@ -45,6 +45,7 @@ namespace AbilitiesManager {
 	AbilityController playerAbilityController;
 	AbilityController enemyAbilityController;
 
+	// Load all abilities from the JSON file and categorize them into their respective vectors
 	void AbilityController::LoadAllAbilities(bool isAi) {
 		offensiveAbilities.clear();
 		statsAbilities.clear();
@@ -101,18 +102,40 @@ namespace AbilitiesManager {
 
 			allAbilities.push_back(newAbil);
 		}
+
 		std::cout << "[AbilitiesManager] Successfully loaded " << statsAbilities.size() << " stats abilities." << std::endl;
 		std::cout << "[AbilitiesManager] Successfully loaded " << offensiveAbilities.size() << " offensive abilities." << std::endl;
 		std::cout << "[AbilitiesManager] Successfully loaded " << defensiveAbilities.size() << " defensive abilities." << std::endl;
 
 		LoadStartingAbilities();
+
+		//PrintAllAbilities();
 	}
 
+	void AbilityController::PrintAllAbilities() {
+		for (Ability ability : statsAbilities) {
+			std::cout << "[AbilitiesManager] Loaded stats ability " << ability.Id() << " : " << ability.GetName() << std::endl;
+		}
+		std::cout << "[AbilitiesManager] Successfully loaded " << statsAbilities.size() << " stats abilities." << std::endl;
+
+		for (Ability ability : offensiveAbilities) {
+			std::cout << "[AbilitiesManager] Loaded offensive ability " << ability.Id() << " : " << ability.GetName() << std::endl;
+		}
+		std::cout << "[AbilitiesManager] Successfully loaded " << offensiveAbilities.size() << " offensive abilities." << std::endl;
+
+		for (Ability ability : defensiveAbilities) {
+			std::cout << "[AbilitiesManager] Loaded defensive ability " << ability.Id() << " : " << ability.GetName() << std::endl;
+		}
+		std::cout << "[AbilitiesManager] Successfully loaded " << defensiveAbilities.size() << " defensive abilities." << std::endl;
+	}
+
+	// Load the starting abilities for the player and AI
 	void AbilityController::LoadStartingAbilities() {
 		if (!isAIController) { // Load player starting Abilities
-			AddAbility(0);
-			AddAbility(1);
-			AddAbility(2);
+			AddAbility(AbilityRandomisator(offensiveAbilities).Id());
+			AddAbility(AbilityRandomisator(offensiveAbilities).Id());
+			AddAbility(AbilityRandomisator(defensiveAbilities).Id());
+			AddAbility(AbilityRandomisator(defensiveAbilities).Id());
 		}
 
 		std::cout << "[AbilitiesManager] List of starting abilities:" << '\n';
@@ -121,59 +144,7 @@ namespace AbilitiesManager {
 		}
 	}
 
-	/*
-	void AbilityController::LoadAllAIAbilities() {
-		AIoffensiveAbilities.clear();
-
-		// 2. Open the file
-		std::ifstream file("Assets/Abils/AIAbilities.json");
-		if (!file.is_open()) {
-			std::cerr << "[AbilitiesManager] ERROR: Could not open AIAbilities.json" << std::endl;
-			return;
-		}
-
-		// 3. Parse the file into a JSON object
-		nlohmann::json data;
-		file >> data;
-
-		for (auto& item : data) { // Your JSON is an array at the root
-			std::string name = item["Name"];
-			AbilityType type = static_cast<AbilityType>(item["Type"].get<int>());
-			Tier tier = static_cast<Tier>(item["Tier"].get<int>());
-
-			Ability newAbil(name, type, tier);
-
-			// ROUTE based on Type
-			if (type == AbilityType::STATISTICS) {
-				auto& s = item["Base_Stats"];
-				newAbil.SetStats(s["HP"], s["ATK"], s["DEF"]);
-				AIstatsAbilities.push_back(newAbil);
-			}
-			else if (type == AbilityType::OFFENSIVE) {
-				auto& p = item["Projectile_Stats"];
-				newAbil.SetProjectile(
-					p["ProjectileID"],
-					p["Damage_Amp"],
-					p["Base_Damage"],
-					p["Radius"],
-					p["Charges"],
-					p["unlimited_charges"]
-				);
-				AIoffensiveAbilities.push_back(newAbil);
-			}
-			else if (type == AbilityType::DEFENSIVE) {
-				auto& d = item["Defensive_Stats"];
-				newAbil.SetDefense(d["ShieldHP"]);
-				AIdefensiveAbilities.push_back(newAbil);
-			}
-
-		}
-		std::cout << "[AbilitiesManager] Successfully loaded " << AIstatsAbilities.size() << " AI stats abilities." << std::endl;
-		std::cout << "[AbilitiesManager] Successfully loaded " << AIoffensiveAbilities.size() << " AI offensive abilities." << std::endl;
-		std::cout << "[AbilitiesManager] Successfully loaded " << AIdefensiveAbilities.size() << " AI defensive abilities." << std::endl;
-	}
-	*/
-
+	// Change the current projectile based on the projectile ID
 	void AbilityController::ChangeProjectile(s32 _projectileID) {
 		for (size_t i = 0; i < offensiveAbilities.size(); ++i) {
 			if (offensiveAbilities[i].GetProj().projectileId == _projectileID) {
@@ -185,6 +156,7 @@ namespace AbilitiesManager {
 		std::cerr << "[AbilitiesManager] ERROR: Projectile ID " << _projectileID << " not found in offensive list!" << std::endl;
 	}
 
+	// Use the currently selected projectile if it has unlimited or any charges remaining
 	bool AbilityController::UseProjectile() {
 		if (ProjectileSelected == nullptr) return false;
 
@@ -204,6 +176,7 @@ namespace AbilitiesManager {
 		return true;
 	}
 
+	// Use the currently selected projectile for the AI if it has unlimited or any charges remaining
 	bool AbilityController::AIUseProjectile() {
 		if (AIProjectileSelected == nullptr) return false;
 
@@ -223,8 +196,10 @@ namespace AbilitiesManager {
 		return true;
 	}
 
+	// AI Member functions
 	void AbilityController::ResetAIAbilitySelection() { hasEnemySelectedAbility = false; }
 
+	// Randomly select an ability for the AI if it has not already selected one
 	void AbilityController::AIAbilitySelection() {
 		if (hasEnemySelectedAbility) return;
 
@@ -244,6 +219,7 @@ namespace AbilitiesManager {
 		std::cout << "[AbilitiesManager] Enemy selected ability: " << currentAbility->GetName() << '\n';
 	}
 
+	// Change the current ability based on the ability ID
 	void AbilityController::ChangeAbility(int abilityId) {
 		Ability* found = FindAbility(abilityId);
 		if (!found) {
@@ -257,6 +233,7 @@ namespace AbilitiesManager {
  			<< '\n';
 	}
 
+	// Use the currently select ability if it has unlimited or any charges remaining
 	bool AbilityController::UseAbility() {
 		if (!currentAbility) {
 			std::cerr << "[AbilitiesManager] Use Ability failed. currentAbility is nullptr\n";
@@ -277,6 +254,7 @@ namespace AbilitiesManager {
 		return true;
 	}
 
+	// Add ability charges from the based on selection
 	void AbilityController::AddAbility(int abilityId, int chargesToAdd) {
 		Ability* found = FindAbility(abilityId);
 		if (!found) {
@@ -289,6 +267,7 @@ namespace AbilitiesManager {
 		UpdateInventory(ability, true);
 	}
 
+	// Helper function to add or remove abilities from the inventory vector based on the ability charges
 	void AbilityController::UpdateInventory(Ability& ability, bool toAddToVector) {
 		if (toAddToVector) {
 			// if previous charges is already more than or equal to 1, means that it is already in the vector no need to add
@@ -311,6 +290,34 @@ namespace AbilitiesManager {
 		}
 	}
 
+	// Return the type of ability that is lesser in inventory, 
+	// if 0 or equal then randomly return either offensive or defensive, 
+	// if one of them is lesser than the other, return that type
+	AbilityType AbilityController::OffensiveOrDefensive() {
+		int offensiveCount = 0;
+		int defensiveCount = 0;
+
+		for (Ability* ability : inventory) {
+			if (ability->GetType() == AbilityType::OFFENSIVE) {
+				offensiveCount++;
+			}
+			else if (ability->GetType() == AbilityType::DEFENSIVE) {
+				defensiveCount++;
+			}
+		}
+
+		if (offensiveCount == defensiveCount) {
+			return Utils::RandomValue(0, 1) == 0 ? AbilityType::OFFENSIVE : AbilityType::DEFENSIVE;
+		}
+		else if (offensiveCount < defensiveCount) {
+			return AbilityType::OFFENSIVE;
+		}
+		else {
+			return AbilityType::DEFENSIVE;
+		}
+	}
+
+	// Helper function to find and return the ability pointer based on the ability ID
 	Ability* AbilityController::FindAbility(int abilityId) {
 		for (Ability& ab : allAbilities) {
 			if (ab.Id() == abilityId) {
@@ -322,6 +329,7 @@ namespace AbilitiesManager {
 		return nullptr;
 	}
 
+	// return the projectile Id to change the type of projectile the CANNON is currently using
 	int AbilityController::FindProjectileId() {
 		if (!currentAbility) return 0;
 		// if current ability is a offensive one return the projectile id 
@@ -330,6 +338,7 @@ namespace AbilitiesManager {
 		return currentAbility->GetProj().projectileId;
 	}
 
+	// True to toggle through all abilities or false to toggle through of all the active abilities this controller has in its inventory
 	void AbilityController::ToggleAbility(bool isAllAbilities) {
 		int abilityId = currentAbility->Id();
 
@@ -349,43 +358,101 @@ namespace AbilitiesManager {
 		ChangeAbility(abilityId);
 	}
 
+	const Ability AbilityController::AbilityRandomisator(const std::vector<Ability> &abilities) {
+		return abilities[Utils::RandomValue(0, static_cast<int>(abilities.size() - 1))];
+	}
+
+	// Randomly select abilities for the ability selector UI
+	void AbilityController::AbilitySelectionRandomisator() {
+
+		std::cout << "[AbilitiesManager] Randomising abilities for the selector..." << std::endl;
+
+		abilitiesCards.clear();
+
+		// Randomise Abilties
+		// Check inventory how many offensive and defensive abilities the player has and randomise based on that
+		std::cout << "[AbilitiesManager] Number of abilities in inventory: " << inventory.size() << std::endl;
+
+		if (inventory.size() == 5) {
+			std::cerr << "[AbilitiesManager] Enough abilities in inventory, randomise stats" << std::endl;
+			
+			// Currently only 3 stat cards so no need randomise, just push all 3 stat cards into the selector
+			for (int i = 0; i < 3; ++i) {
+				//abilitiesCards.push_back(AbilityRandomisator(statsAbilities));
+				abilitiesCards.push_back(statsAbilities[i]);
+			}
+		}
+		else {
+			std::cerr << "[AbilitiesManager] Not enough abilities in inventory, randomise offensive and defensive" << std::endl;
+			if (OffensiveOrDefensive() == AbilityType::OFFENSIVE) {
+				// 2 offensive and 1 defensive
+				abilitiesCards.push_back(AbilityRandomisator(offensiveAbilities));
+				abilitiesCards.push_back(AbilityRandomisator(offensiveAbilities));
+				abilitiesCards.push_back(AbilityRandomisator(defensiveAbilities));
+			}
+			else {
+				// 2 defensive and 1 offensive
+				abilitiesCards.push_back(AbilityRandomisator(defensiveAbilities));
+				abilitiesCards.push_back(AbilityRandomisator(defensiveAbilities));
+				abilitiesCards.push_back(AbilityRandomisator(offensiveAbilities));
+			}
+		}
+
+
+
+		if (abilitiesCards.size() != 3) {
+			std::cerr << "[AbilitiesManager] Incorrect abilities to display in selector!" << std::endl;
+
+			// Fallback to default abilities if there are not enough abilities to randomise
+			abilitiesCards.clear();
+			abilitiesCards.push_back(offensiveAbilities[0]);
+			abilitiesCards.push_back(offensiveAbilities[1]);
+			abilitiesCards.push_back(defensiveAbilities[0]);
+		}
+
+		// Display the randomised abilities in the console for testing purposes
+		int i = 1;
+		for (Ability ability : abilitiesCards) {
+			std::cout << "[AbilitiesManager] Ability Card " << i << " : "
+				<< ability.GetName()
+				<< " Type: "; 
+			switch (ability.GetType()) {
+			case AbilityType::STATISTICS:
+				std::cout << "Statistics";
+				break;
+			case AbilityType::OFFENSIVE:
+				std::cout << "Offensive";
+				break;
+			case AbilityType::DEFENSIVE:
+				std::cout << "Defensive";
+				break;
+			}
+			std::cout << std::endl;
+			i++;
+		}
+
+	}
+
+	// Display the ability selector UI for the player to select an ability
 	void AbilityController::AbilitySelector(bool& isOn) {
 		if (!isOn) return;
 
 		//std::cout << "Player Selecting Abilities:\n";
 		CameraManager::camera.SetState(CameraManager::CameraController::STATIC);
 
-		// Randomise Abilties
-		std::vector<std::string> abilitiesName = { "Default Projectile", "Bomb Projectile", "Fast Projectile" };
-
-		// 2 offensive abilities for the player to choose from
-		// 1 defensive ability for the player to choose from
-
-		// randomise the attack abilities
-		
-		std::vector<Ability> abilitiesVec = {};
-
-		abilitiesVec.push_back(offensiveAbilities[0]);
-		abilitiesVec.push_back(offensiveAbilities[1]);
-		abilitiesVec.push_back(defensiveAbilities[0]);
-		
-		if (abilitiesVec.size() != 3) {
-			std::cerr << "[AbilitiesManager] Incorrect abilities to display in selector!" << std::endl;
-		}
-
 		UIManager::Panel background{ {1400.0f, 700.0f}, Color(0.6196f, 0.6196f, 0.6196f, 1.0f), Utils::AnchorMode::CENTER };
 		background.Draw();
 
-		AEVec2 cardSize{ 350.0f, 550.0f }; // width and height
-		float gap = (1400.0f - (cardSize.x * abilitiesName.size())) / (abilitiesName.size() + 1);
+		AEVec2 cardSize{ CARD_WIDTH, CARD_HEIGHT }; // width and height
+		float gap = (1400.0f - (cardSize.x * abilitiesCards.size())) / (abilitiesCards.size() + 1);
 		AEVec2 cardPos{ -cardSize.x * 1.5f - gap, cardSize.y / 2.0f };
 
 		int id = 1;
 
-		for (Ability ability : abilitiesVec) {
-			//std::cout << abilityName << '\n';
+		for (Ability ability : abilitiesCards) {
+			//std::cout << ability.GetName() << '\n';
 			AEGfxTexture* imageTexture = ability.GetTexture() == "" ? AssetsManager::squareTexture : AssetsManager::GetTexture(ability.GetTexture().c_str());
-			Card card{ ability.GetName(), cardPos, Color(1,0,0), AssetsManager::squareTexture, imageTexture, [this, id, &isOn]() { onClickAbilityCard(id, &isOn);  }};
+			Card card{ ability.GetName(), cardPos, Color(1,0,0), AssetsManager::squareTexture, imageTexture, [this, ability, &isOn]() { onClickAbilityCard(ability, &isOn);  }};
 			card.Update();
 			card.Draw();
 			cardPos.x += cardSize.x + gap;
@@ -393,191 +460,60 @@ namespace AbilitiesManager {
 		}
 	}
 
-	void AbilityController::onClickAbilityCard(int abilityID, bool* isOn) {
-		std::cout << "Clicked ability card" << abilityID << std::endl;
+	void AbilityController::onClickAbilityCard(Ability ability, bool* isOn) {
+		std::cout << "Clicked ability card " << ability.Id() << std::endl;
+		if (ability.GetType() != AbilityType::STATISTICS) {
+			AddAbility(ability.Id());
+		}
+		else {
+			// Update stats
+
+		}
 		if (isOn) {
 			*isOn = false;
 		}
 		CameraManager::camera.SetState(CameraManager::CameraController::INPUT);
 	}
-}
 
+	void AbilityController::abilityUI() {
+		UIManager::Panel background{ {600.0f, 90.0f}, Color(0.647f, 0.165f, 0.165f, 1.0f), Utils::AnchorMode::BOTTOM_CENTER };
+		background.Draw();
 
-
-
-
-
-
-
-	/*
-	void AbilityController::LoadAllAbilities() {
-		abilities.clear();
-		activeAbilities.clear();
-		currentAbility = nullptr;
-		hasEnemySelectedAbility = false;
-
-		int count = 3;
-		abilities.reserve(count);
-		for (int i = 0; i < count; ++i) {
-			int defaultProjectileId = 0; // DEFAULT PROJECTILE id should always be 0
-			Ability ability{ i, abilitiesName[i], AbilityType::OFFENSIVE, defaultProjectileId, true };
-
-			switch (i) {
-			case 0: // Default Projectile
-				break;
-			case 1: // Bomb Projectile
-				ability = { i, abilitiesName[i], AbilityType::OFFENSIVE, 1 };
-				break;
-			case 2:
-				ability = { i, abilitiesName[i], AbilityType::OFFENSIVE, 2 };
-				break;
-			}
-
-			abilities.push_back(ability);
-		}
-
-		AddAbility(0, 1); // Unlimited default projectile ability
-		// Testing add bomb projectile with 10 charges
-		AddAbility(1, 10);
-		AddAbility(2, 10);
-		// Set current ability to be the default projectile ability
-		Ability* defaultAbility = FindAbility(0);
-		if (defaultAbility) {
-			currentAbility = defaultAbility;
-		}
-		else {
-			std::cerr << "[AbilitiesManager] Failed to set default ability!\n";
-		}
-	}
-
-	void AbilityController::ChangeAbility(int abilityId) {
-		Ability* found = FindAbility(abilityId);
-		if (!found) {
-			std::cerr << "[AbilitiesManager] ChangeAbility failed. abilityId=" << abilityId << '\n';
-			return;
-		}
-		currentAbility = found;
-
-		std::cout << "[AbilitiesManager] Current ability: " + abilitiesName[currentAbility->Id()]
-			+ " Charges Remaining: " + std::to_string(currentAbility->Charges()) << '\n';
-	}
-
-	bool AbilityController::UseAbility() {
-		if (!currentAbility) {
-			std::cerr << "[AbilitiesManager] UseAbility failed. currentAbility is nullptr\n";
-			return false;
-		}
-		if (currentAbility->UnlimitedCharges()) return true;
-		if (currentAbility->Charges() <= 0) return false;
-
-		currentAbility->Charges(-1);
-		UpdateActiveAbilites(*currentAbility, false);
-
-		if (currentAbility->Type() == AbilityType::OFFENSIVE && currentAbility->Charges() <= 0) {
-			ChangeAbility(0);
-		}
-
-		std::cout << "[AbilitiesManager] Ability used: " + abilitiesName[currentAbility->Id()]
-			+ " Charges Remaining: " + std::to_string(currentAbility->Charges()) << '\n';
-		return true;
-	}
-
-	void AbilityController::AddAbility(int abilityId, int chargesToAdd) {
-		Ability* found = FindAbility(abilityId);
-		if (!found) {
-			std::cerr << "[AbilitiesManager] AddAbility failed. abilityId=" << abilityId << '\n';
-			return;
-		}
-		Ability& ability = *found;
-		ability.Charges(chargesToAdd);
-
-		UpdateActiveAbilites(ability, true);
-	}
-
-	int AbilityController::FindProjectileId() {
-		if (!currentAbility) return 0;
-		if (currentAbility->Type() != AbilityType::OFFENSIVE) return 0;
-		return currentAbility->ProjectileId();
-	}
-
-	void AbilityController::UpdateActiveAbilites(Ability& ability, bool toAddToVector) {
-		if (toAddToVector) {
-			// if previous charges is already more than or equal to 1, means that it is already in the vector no need to add
-			if (ability.PreviousCharges() >= 1) return;
-
-			// add into the activeAbilities vector
-			activeAbilities.push_back(&ability);
-
-			std::cout << "[AbilitiesManager] Added " << ability << " into active abilities vector" << '\n';
-		}
-		else {
-			if (ability.Charges() > 0) return;
-			for (int i = 0; i < activeAbilities.size(); ++i) {
-				if (activeAbilities[i] == &ability) {
-					activeAbilities.erase(activeAbilities.begin() + i);
-					std::cout << "[AbilitiesManager] Removed " << ability << " from active abilities vector" << '\n';
-					return;
+		// Ability icons
+		for (int i = 0; i < inventory.size(); ++i) {
+			Ability* ability = inventory[i];
+			Color iconColor = ability->GetType() == AbilityType::OFFENSIVE ? Color(1, 0, 0) : Color(0, 0, 1);
+			std::vector<std::string> toBeRemoved = { "Projectile" };
+			std::string AbilityName = ability->GetName();
+			for (const std::string& word : toBeRemoved) {
+				size_t found = AbilityName.find(word);
+				if (found != std::string::npos) {
+					AbilityName.erase(found, std::string(word).length());
 				}
-			}
+			};
+
+			// Trim any trailing/leading spaces left behind
+			while (!AbilityName.empty() && AbilityName.back() == ' ') AbilityName.pop_back();
+			while (!AbilityName.empty() && AbilityName.front() == ' ') AbilityName.erase(AbilityName.begin());
+
+			Button abilityButton{ TextObject{ AbilityName },
+				Utils::AnchorMode::BOTTOM_CENTER, AEVec2{ -220.0f + i * 100.0f, -370.0f },
+				AEVec2{ 75.0f, 75.0f }, iconColor, AssetsManager::squareTexture };
+			abilityButton.SetTextScale(0.5f);
+			abilityButton.Update();
+			abilityButton.Draw();
+		}
+		
+		int i = static_cast<int>(inventory.size());
+		while (i < 5) {
+			Button emptyButton{ TextObject{ "Empty" },
+				Utils::AnchorMode::BOTTOM_CENTER, AEVec2{ -220.0f + i * 100.0f, -370.0f },
+				AEVec2{ 75.0f, 75.0f }, Color(0.5f,0.5f,0.5f), AssetsManager::squareTexture };
+			emptyButton.SetTextScale(0.5f);
+			emptyButton.Update();
+			emptyButton.Draw();
+			i++;
 		}
 	}
-
-	Ability* AbilityController::FindAbility(int abilityId) {
-		for (Ability& ab : abilities) {
-			if (ab.Id() == abilityId) {
-				return &ab;
-			}
-		}
-
-		std::cerr << "[AbilitiesManager] Can't find " + std::to_string(abilityId) + " in the abilities list\n";
-		return nullptr;
-	}
-
-	void SetProjectileAbility(Projectile& projectile) {
-		switch (projectile.Mode()) {
-		case ProjectileMode::ATTACK:
-			projectile.attribute.Damage(10);
-			projectile.attribute.DamageRadius(1);
-			break;
-		case ProjectileMode::BOMB: // 3 tile radius AOE Instant damage
-			projectile.attribute.DamageRadius(3);
-			projectile.attribute.Damage(10);
-			break;
-		case ProjectileMode::FAST:
-			projectile.attribute.DamageRadius(5);
-			projectile.attribute.Damage(50);
-			break;
-		}
-	}
-
-	void AbilityController::ResetAbilitySelection() { hasEnemySelectedAbility = false; }
-
-	void AbilityController::AIAbilitySelection() {
-		if (hasEnemySelectedAbility) return;
-
-		int size = static_cast<int>(activeAbilities.size());
-		if (size <= 0) {
-			std::cerr << "[AbilitiesManager] Enemy has no active abilities to choose from!\n";
-			currentAbility = FindAbility(0); // fallback
-			hasEnemySelectedAbility = true;
-			return;
-		}
-
-		int selectedId = 0;
-		if (size > 1) {
-			// If RandomValue can ever return "size", clamp prevents out-of-range crash
-			selectedId = Utils::RandomValue(0, size);
-			selectedId = std::clamp(selectedId, 0, size - 1);
-		}
-
-		currentAbility = activeAbilities[selectedId];
-		hasEnemySelectedAbility = true;
-
-		std::cout << "[AbilitiesManager] Enemy selected ability: " << *currentAbility << '\n';
-	}
-
-	
 }
 
-
-*/

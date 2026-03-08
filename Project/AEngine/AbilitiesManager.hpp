@@ -12,6 +12,7 @@ namespace AbilitiesManager {
 		void LoadAllAbilities(bool isAi); //Loads all player abils from Abilities.json file
 		//void LoadAllAIAbilities(); //Loads all AI abils from AiAbilities.json file
 		void LoadStartingAbilities();
+		void PrintAllAbilities();
 
 		std::vector<Ability>& GetOffensiveAbilities() { return offensiveAbilities; }
 		std::vector<Ability>& GetStatsAbilities() { return statsAbilities; }
@@ -29,6 +30,7 @@ namespace AbilitiesManager {
 
 		Ability CurrentAbility() const { return *currentAbility; }
 		int InventoryCount() const{ return static_cast<int>(inventory.size()); }
+		AbilityType OffensiveOrDefensive();
 
 		// Change the type of ability this controller is current using
 		void ChangeAbility(int abilityId);
@@ -50,8 +52,12 @@ namespace AbilitiesManager {
 		void ResetAIAbilitySelection();
 		void AIAbilitySelection();
 
+		const Ability AbilityRandomisator(const std::vector<Ability>& abilities);
+		void AbilitySelectionRandomisator();
 		void AbilitySelector(bool& isOn);
-		void onClickAbilityCard(int abilityID, bool* isOn);
+		void onClickAbilityCard(Ability ability, bool* isOn);
+
+		void abilityUI();
 
 	private:
 
@@ -74,6 +80,8 @@ namespace AbilitiesManager {
 
 		bool isAIController = false;
 		bool hasEnemySelectedAbility = false; // has enemy selected their ability
+
+		std::vector<Ability> abilitiesCards; // vector containing the 3 abilities to be displayed in the ability selector for the player to select from
 	};
 
 	extern AbilityController playerAbilityController;

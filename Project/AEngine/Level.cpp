@@ -122,6 +122,9 @@ void Level::Initalize() {
 	CameraManager::camera.SetPosition(playerCannon.transform.pos);
 	CameraManager::camera.SetState(CameraManager::CameraController::INPUT);
 
+	// Randomise at the start of the level the 3 abilities that the player can choose from in the ability selector UI
+	AbilitiesManager::playerAbilityController.AbilitySelectionRandomisator();
+
 	std::cout << "[Level] Initialize " + levelFileName << std::endl;
 }
 
@@ -190,6 +193,9 @@ void Level::Update() {
 	if (delayTimer > 0.0f) {
 		delayTimer -= PhysicsManager::g_dt;
 	}
+
+	// UI
+	if (isPlayerTurn) AbilitiesManager::playerAbilityController.abilityUI();
 
 	Debugger();
 }
@@ -292,6 +298,9 @@ void Level::SetTurn(bool _isPlayerTurn) {
 	if (isPlayerTurn) {
 		activeCannon = &playerCannon;
 		isAbilitySelectorOn = true;
+		// randomise the abilities available to the player for this turn
+		AbilitiesManager::playerAbilityController.AbilitySelectionRandomisator();
+
 	}
 	else {
 		activeCannon = &enemyCannon;
