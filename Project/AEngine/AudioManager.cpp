@@ -112,6 +112,7 @@ namespace AudioManager {
 
     void Update() {
 #ifdef _WIN32
+        // Clean up finished SFX aliases
         for (auto it = gActiveSfxAliases.begin(); it != gActiveSfxAliases.end(); ) {
             std::string mode = GetMode(*it);
 
@@ -121,6 +122,16 @@ namespace AudioManager {
             }
             else {
                 ++it;
+            }
+        }
+
+        // Manual BGM looping
+        if (gCurrentTrack != Track::None) {
+            std::string bgmMode = GetMode(gBgmAlias);
+
+            if (bgmMode == "stopped") {
+                MciCommand("seek " + gBgmAlias + " to start");
+                MciCommand("play " + gBgmAlias);
             }
         }
 #endif
@@ -171,7 +182,8 @@ namespace AudioManager {
             return;
         }
 
-        if (!MciCommand("play " + gBgmAlias + " repeat")) {
+        if (!MciCommand("play " + gBgmAlias)) {
+            std::cerr << "[AudioManager] Failed to play BGM: " << path << "\n";
             CloseAlias(gBgmAlias);
             gCurrentTrack = Track::None;
             return;
