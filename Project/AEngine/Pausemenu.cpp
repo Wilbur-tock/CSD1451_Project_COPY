@@ -138,9 +138,7 @@ namespace PauseMenu {
     }
 
     void OnSettingsClicked() {
-        Utils::isPaused = false;
-        Utils::returnToPause = true;                               // <-- NEW: remember we came from pause
-        GameStateManager::next = GameStateManager::GameState::SETTINGS;
+        Utils::isSettingsOpen = true;                              // show settings on top of pause
     }
 
     void OnBackToMenuClicked() {

@@ -8,6 +8,7 @@
 #include "Utils.hpp"
 #include "CameraManager.hpp"
 #include "Config.hpp"
+#include "UICursor.hpp"
 
 namespace Settings {
 
@@ -76,7 +77,7 @@ namespace Settings {
 
         // Volume +/- buttons (beside the slider) 
         float smallBtnW = 60.0f, smallBtnH = 50.0f;
-        float btnY = SLIDER_Y;
+        float btnY = SLIDER_Y * 0.75f;
 
         AEVec2 volDownPos = { -SLIDER_W / 2.0f - smallBtnW - 10.0f - smallBtnW / 2.0f, btnY };
         volumeDownButton = Button(
@@ -105,14 +106,14 @@ namespace Settings {
             "SETTINGS",
             2.5f,
             Color(0.0f, 0.0f, 0.0f, 1.0f),
-            { -0.2f, 0.65f }
+            { -0.17f, 0.65f }
         };
 
         volumeLabel = {
             "VOLUME",
             1.0f,
             Color(0.0f, 0.0f, 0.0f, 1.0f),
-            { -0.08f, 0.1f }
+            { -0.06f, 0.1f }
         };
 
         hintText = {
@@ -148,7 +149,7 @@ namespace Settings {
             GraphicsManager::CreateTransformMatrix(
                 SLIDER_LEFT_X, SLIDER_Y, 0,
                 SLIDER_W, SLIDER_H),
-            Color(0.2f, 0.2f, 0.2f, 0.8f)
+            Color(0.2f, 0.2f, 0.2f, 0.5f)
         );
 
         // Slider fill (coloured portion = current volume)
@@ -159,7 +160,7 @@ namespace Settings {
                 GraphicsManager::CreateTransformMatrix(
                     SLIDER_LEFT_X, SLIDER_Y, 0,
                     fillW, SLIDER_H),
-                Color(0.2f, 0.6f, 0.9f, 1.0f)
+                Color(0.2f, 0.6f, 0.9f, 0.75f)
             );
         }
 
@@ -169,7 +170,7 @@ namespace Settings {
         GraphicsManager::DrawWorldUI(
             nullptr,
             GraphicsManager::CreateTransformMatrix(
-                knobX - knobSz / 2.0f, SLIDER_Y, 0,
+                knobX - knobSz / 2.0f, SLIDER_Y * 0.75f, 0,
                 knobSz, knobSz),
             Color(1.0f, 1.0f, 1.0f, 1.0f)
         );
@@ -190,15 +191,21 @@ namespace Settings {
             pctStr,
             0.9f,
             Color(0.0f, 0.0f, 0.0f, 1.0f),
-            { -0.04f, -0.12f }
+            { -0.03f, -0.22f }
         };
         pctText.Draw();
     }
 
     void Update() {
-        // ESC -> back
+        // Save camera position so the level resumes with it intact
+        AEVec2 savedCamPos = CameraManager::camera.GetPosition();
+        CameraManager::camera.SetPosition({ 0.0f, 0.0f });
+
+        // ESC -> back to pause menu
         if (AEInputCheckTriggered(AEVK_ESCAPE) || AEInputCheckTriggered(AEVK_BACK)) {
             OnBackClicked();
+            CameraManager::camera.SetPosition(savedCamPos);
+            return;
         }
 
         // Slider mouse interaction 
@@ -232,6 +239,12 @@ namespace Settings {
         backButton.Update();
         volumeUpButton.Update();
         volumeDownButton.Update();
+
+        // Draw cursor while camera is still at origin so it matches the UI
+        UICursor::Draw();
+
+        // Restore camera position
+        CameraManager::camera.SetPosition(savedCamPos);
     }
 
     void Free() {
@@ -242,16 +255,15 @@ namespace Settings {
 
     // Button callbacks
     void OnBackClicked() {
-        // ---- NEW: return to pause menu if we came from one ----     // <-- NEW
-        if (Utils::returnToPause) {                                    // <-- NEW
-            // Go back to the gameplay state we came from              // <-- NEW
-            GameStateManager::next = GameStateManager::previous;       // <-- NEW
-            // isPaused will be set to true after the state loads      // <-- NEW
-            // (handled in GameStateManager via the returnToPause flag)// <-- NEW
-            return;                                                    // <-- NEW
-        }                                                              // <-- NEW
-        // -----------------------------------------------------------// <-- NEW
+        isDragging = false;
 
+        // If we are an overlay on the pause menu, just close the overlay
+        if (Utils::isSettingsOpen) {
+            Utils::isSettingsOpen = false;
+            return;
+        }
+
+        // Otherwise we got here via a full state transition (e.g. MainMenu)
         GameStateManager::next = GameStateManager::GameState::MAIN_MENU;
     }
 

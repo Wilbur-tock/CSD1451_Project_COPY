@@ -46,7 +46,7 @@ namespace GameStateManager {
         MapManager::Load();
         MainMenu::Load();
         Credits::Load();
-		AudioManager::Init();
+        AudioManager::Init();
         AudioManager::SetVolume(0.35f);
 
         // Initialize camera controller
@@ -65,6 +65,8 @@ namespace GameStateManager {
         Loading::Init();
 
         PauseMenu::Init();                                                // <-- NEW
+        Settings::Load();                                                     // init settings overlay
+        Settings::Initialize();                                               // init settings overlay
     }
 
     void Update() {
@@ -84,6 +86,7 @@ namespace GameStateManager {
         if (next != current) {
             // Unpause when switching states so the new state starts clean
             Utils::isPaused = false;
+            Utils::isSettingsOpen = false;
 
             // Do not allow instructions popup to interfere with loading
             Utils::isInstructionOn = false;
@@ -144,12 +147,10 @@ namespace GameStateManager {
                     break;
 
                 case GameState::SETTINGS:
-                    gsLoad = Settings::Load;
                     gsIntialize = Settings::Initialize;
                     gsUpdate = Settings::Update;
                     gsDraw = Settings::Draw;
                     gsFree = Settings::Free;
-                    gsUnload = Settings::Unload;
                     break;
 
                 case GameState::RESTART:
@@ -201,16 +202,6 @@ namespace GameStateManager {
 
                 // Apply camera immediately after state switch
                 CameraManager::camera.Update(0.0f);
-
-                // ------- Return-to-pause: re-open pause menu after loading ----
-                // Only consume the flag when we land back in a gameplay state.
-                // If we just entered SETTINGS, keep the flag alive so it
-                // triggers when Settings navigates back to the level.
-                if (Utils::returnToPause && IsGameplayState()) {
-                    Utils::returnToPause = false;
-                    Utils::isPaused = true;
-                }
-                // --------------------------------------------------------------
             }
 
             // Always stop normal update/camera logic while transitioning
@@ -234,9 +225,15 @@ namespace GameStateManager {
                 gsDraw();
             }
 
-            // Draw and handle the pause menu on top
-            PauseMenu::Update();
-            UICursor::Draw();
+            // Show either the settings overlay or the pause menu
+            if (Utils::isSettingsOpen) {
+                Settings::Update();   // draws its own cursor before restoring camera
+            }
+            else {
+                PauseMenu::Update();
+                UICursor::Draw();
+            }
+
             return;
         }
         // ======================================================================
@@ -295,7 +292,7 @@ namespace GameStateManager {
 
             debugText.textContent = "\n[P] Debugger ON\nFPS: " + Utils::FormatFloat(AEFrameRateControllerGetFrameRate(), 2)
                 + "\nDeltaTime: " + Utils::FormatFloat(rawDt, 2)
-                +"\n[M] Main Menu";
+                + "\n[M] Main Menu";
             debugText.Draw();
         }
 

@@ -17,6 +17,7 @@ namespace MainMenu {
     AEGfxTexture* bgTexture = nullptr;
     AEGfxTexture* buttonTexture = nullptr;
 
+    // Game title animations initialize
     float titleAnimTimer = 0.0f;
     float baseTitleScale = 2.5f;
 
