@@ -44,35 +44,35 @@ namespace UIInstructionsOverlay {
             "INSTRUCTIONS  (Press [I] to close)\n"
             "---------------------------------\n"
             "Current: " + GetStateName(current) + "\n\n"
-            "GLOBAL\n"
-            "[I] Toggle this popup\n"
+            "WHILE THIS POPUP IS OPEN\n"
+            "[I] Close this popup\n"
+            "[ESC] Quit Game\n\n"
+            "WHEN THIS POPUP IS CLOSED\n"
             "[P] Toggle Debugger\n"
-            "[M] Main Menu\n"
-            "[ESC] Quit Game\n\n";
+            "[M] Return to Main Menu\n\n";
 
         using GameStateManager::GameState;
         if (current == GameState::LEVEL_1 || current == GameState::LEVEL_2) {
             msg +=
                 "LEVEL\n"
-                "Mouse: Aim\n"
-                "Hold [LMB]: Charge shot (player squats)\n"
-                "Release [LMB]: Shoot\n"
-                "[0] [1] [2]: Change projectile ability\n\n"
-                "NOTE: Game is paused while this popup is open.\n";
+                "Mouse: Aim cannon\n"
+                "Hold [LMB]: Charge shot\n"
+                "Release [LMB]: Fire\n"
+                "Ability selection: Click a card when the selector appears\n\n"
+                "NOTE: Gameplay is paused while this popup is open.\n";
         }
         else if (current == GameState::MAP_EDITOR) {
             msg +=
                 "MAP EDITOR\n"
-                "[LMB]: Place tile\n"
+                "[LMB]: Place selected tile\n"
                 "[RMB]: Erase tile\n"
-                "[CTRL]+Click: Fill COLUMN\n"
-                "[SHIFT]+Click: Fill ROW\n"
-                "Mouse Wheel: Change selected tile\n"
+                "[CTRL] + Click: Fill ROW\n"
+                "[SHIFT] + Click: Fill COLUMN\n"
+                "[Q] / [E]: Change selected tile\n"
                 "[T]: Toggle tile list\n"
-                "[E]: Save\n"
+                "[CTRL] + [S]: Save current map\n"
                 "[R]: Reset map\n"
-                "[Q]: Quit editor\n"
-                "[CTRL]+[1..5]: Load level file\n\n"
+                "[CTRL] + [1..5]: Load level file\n\n"
                 "NOTE: Editor input is blocked while this popup is open.\n";
         }
         else if (current == GameState::MAIN_MENU) {
@@ -82,6 +82,11 @@ namespace UIInstructionsOverlay {
                 "[2] Map Editor\n"
                 "[3] Credits\n"
                 "[Q] Quit\n";
+        }
+        else if (current == GameState::CREDITS) {
+            msg +=
+                "CREDITS\n"
+                "Close this popup, then press [M] to return to Main Menu.\n";
         }
 
         float x = panel.Pos().x + 40.0f;

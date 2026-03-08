@@ -115,6 +115,7 @@ namespace GameStateManager {
         MainMenu::Load();
         Credits::Load();
 		AudioManager::Init();
+        AudioManager::SetVolume(0.35f);
 
         // Initialize camera controller
         CameraManager::camera.Init();
@@ -224,16 +225,26 @@ namespace GameStateManager {
                 case GameState::MAIN_MENU:
                     AudioManager::PlayBGM(AudioManager::Track::MainMenu);
                     break;
+
+                case GameState::MAP_EDITOR:
+                    AudioManager::PlayBGM(AudioManager::Track::MapEditor);
+                    break;
+
                 case GameState::LEVEL_1:
                 case GameState::LEVEL_2:
                     AudioManager::PlayBGM(AudioManager::Track::Level);
                     break;
+
                 case GameState::CREDITS:
                     AudioManager::PlayBGM(AudioManager::Track::Credits);
                     break;
+
+                case GameState::QUIT:
+                    AudioManager::StopBGM();
+                    break;
+
                 default:
-                    // Optional: stop music for other states
-                    // AudioManager::StopBGM();
+                    AudioManager::StopBGM();
                     break;
                 }
 

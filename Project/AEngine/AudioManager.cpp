@@ -12,8 +12,9 @@ namespace AudioManager {
     static Track gCurrentTrack = Track::None;
     static float gVolume = 1.0f;
 
-    // ✅ Put your music files here (WAV recommended for PlaySound)
+    // BGM only. Do NOT use this PlaySound-based manager for SFX.
     static const char* BGM_MAINMENU = "Assets/bgm_mainmenu.wav";
+    static const char* BGM_MAPEDITOR = "Assets/bgm_mapeditor.wav";
     static const char* BGM_LEVEL = "Assets/bgm_level.wav";
     static const char* BGM_CREDITS = "Assets/bgm_credits.wav";
 
@@ -29,11 +30,18 @@ namespace AudioManager {
 
     static const char* TrackToPath(Track t) {
         switch (t) {
-        case Track::MainMenu: return BGM_MAINMENU;
-        case Track::Level:    return BGM_LEVEL;
-        case Track::Credits:  return BGM_CREDITS;
+        case Track::MainMenu:  return BGM_MAINMENU;
+        case Track::MapEditor: return BGM_MAPEDITOR;
+        case Track::Level:     return BGM_LEVEL;
+        case Track::Credits:   return BGM_CREDITS;
         default:              return nullptr;
         }
+    }
+
+    static bool FileExists(const char* path) {
+        DWORD attrs = GetFileAttributesA(path);
+        return (attrs != INVALID_FILE_ATTRIBUTES &&
+            !(attrs & FILE_ATTRIBUTE_DIRECTORY));
     }
 #endif
 
@@ -54,6 +62,10 @@ namespace AudioManager {
 #endif
     }
 
+    Track GetCurrentTrack() {
+        return gCurrentTrack;
+    }
+
     void PlayBGM(Track t) {
         if (t == gCurrentTrack) return; // prevent restarting every time
         gCurrentTrack = t;
@@ -62,6 +74,13 @@ namespace AudioManager {
         const char* path = TrackToPath(t);
         if (!path) {
             PlaySoundA(nullptr, nullptr, 0); // stop
+            gCurrentTrack = Track::None;
+            return;
+        }
+
+        if (!FileExists(path)) {
+            std::cerr << "[AudioManager] Missing BGM file: " << path << "\n";
+            gCurrentTrack = Track::None;
             return;
         }
 
@@ -69,7 +88,10 @@ namespace AudioManager {
         BOOL ok = PlaySoundA(path, nullptr, SND_FILENAME | SND_ASYNC | SND_LOOP | SND_NODEFAULT);
         if (!ok) {
             std::cerr << "[AudioManager] Failed to play BGM: " << path << "\n";
+            gCurrentTrack = Track::None;
+            return;
         }
+        gCurrentTrack = t;
 #else
         (void)t;
 #endif
@@ -80,5 +102,6 @@ namespace AudioManager {
 #ifdef _WIN32
         PlaySoundA(nullptr, nullptr, 0);
 #endif
+        gCurrentTrack = Track::None;
     }
 }

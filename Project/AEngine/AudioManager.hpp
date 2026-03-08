@@ -8,6 +8,7 @@ namespace AudioManager {
     enum class Track {
         None,
         MainMenu,
+        MapEditor,
         Level,
         Credits
     };
@@ -26,6 +27,8 @@ namespace AudioManager {
 
     // Optional: set output volume [0.0 .. 1.0]
     void SetVolume(float v);
+
+    Track GetCurrentTrack();
 }
 
 #endif // AUDIO_MANAGER_HPP
