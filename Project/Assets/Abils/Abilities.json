@@ -45,6 +45,111 @@
     },
 
     {
+        "Name": "AOE Projectile",
+        "Type": 2,
+        "Tier": 1,
+        "Texture": "",
+        "Projectile_Stats": {
+            "ProjectileID": 2,
+            "Damage_Amp": 1.0,
+            "Base_Damage": 100,
+            "Radius": 10,
+            "Charges": 1,
+            "unlimited_charges": false
+        }
+    },
+
+    {
+        "Name": "Cluster Projectile",
+        "Type": 2,
+        "Tier": 1,
+        "Texture": "",
+        "Projectile_Stats": {
+            "ProjectileID": 2,
+            "Damage_Amp": 1.0,
+            "Base_Damage": 100,
+            "Radius": 10,
+            "Charges": 1,
+            "unlimited_charges": false
+        }
+    },
+
+    {
+        "Name": "Booster Projectile",
+        "Type": 2,
+        "Tier": 1,
+        "Texture": "",
+        "Projectile_Stats": {
+            "ProjectileID": 2,
+            "Damage_Amp": 1.0,
+            "Base_Damage": 100,
+            "Radius": 10,
+            "Charges": 1,
+            "unlimited_charges": false
+        }
+    },
+
+    {
+        "Name": "Piercing Projectile",
+        "Type": 2,
+        "Tier": 1,
+        "Texture": "",
+        "Projectile_Stats": {
+            "ProjectileID": 2,
+            "Damage_Amp": 1.0,
+            "Base_Damage": 100,
+            "Radius": 10,
+            "Charges": 1,
+            "unlimited_charges": false
+        }
+    },
+
+    {
+        "Name": "Decay",
+        "Type": 2,
+        "Tier": 1,
+        "Texture": "",
+        "Projectile_Stats": {
+            "ProjectileID": 2,
+            "Damage_Amp": 1.0,
+            "Base_Damage": 100,
+            "Radius": 10,
+            "Charges": 1,
+            "unlimited_charges": false
+        }
+    },
+
+    {
+        "Name": "Earthquake",
+        "Type": 2,
+        "Tier": 1,
+        "Texture": "",
+        "Projectile_Stats": {
+            "ProjectileID": 2,
+            "Damage_Amp": 1.0,
+            "Base_Damage": 100,
+            "Radius": 10,
+            "Charges": 1,
+            "unlimited_charges": false
+        }
+    },
+
+    {
+        "Name": "Go to bed",
+        "Type": 2,
+        "Tier": 1,
+        "Texture": "",
+        "Projectile_Stats": {
+            "ProjectileID": 2,
+            "Damage_Amp": 1.0,
+            "Base_Damage": 100,
+            "Radius": 10,
+            "Charges": 1,
+            "unlimited_charges": false
+        }
+    },
+
+    {
         "Name": "HP",
         "Type": 1,
         "Tier": 1,
@@ -85,6 +190,36 @@
         "Type": 3,
         "Tier": 1,
         "Texture": "Assets/Card_Shield.png",
+        "Defensive_Stats": {
+            "ShieldHP": 50
+        }
+    },
+
+    {
+        "Name": "Gravity",
+        "Type": 3,
+        "Tier": 1,
+        "Texture": "Assets/Card_Gravity.png",
+        "Defensive_Stats": {
+            "ShieldHP": 50
+        }
+    },
+
+    {
+        "Name": "Rebuild",
+        "Type": 3,
+        "Tier": 1,
+        "Texture": "",
+        "Defensive_Stats": {
+            "ShieldHP": 50
+        }
+    },
+
+    {
+        "Name": "Invisibility",
+        "Type": 3,
+        "Tier": 1,
+        "Texture": "",
         "Defensive_Stats": {
             "ShieldHP": 50
         }
