@@ -8,23 +8,23 @@ class Attributes {
 public:
 	Attributes() = default;
 
-	int  Health() const;
-	void Health(int value);
+	int  Health() const { return health; }
+	void Health(int value) { health = std::clamp(value, 0, maxHealth); }
 
-	int  MaxHealth() const;
-	void MaxHealth(int value);
+	int	 MaxHealth() const { return maxHealth; }
+	void MaxHealth(int value) { maxHealth = value; }
 
-	int  Damage() const;
-	void Damage(int value);
+	int  Damage() const { return damage; }
+	void Damage(int value) { damage = value; }
 
-	int  DamageRadius() const;
-	void DamageRadius(int value);
+	int  DamageRadius() const { return damageRadius; }
+	void DamageRadius(int value) { damageRadius = value; }
 
-	int DamageMultiplier() const;
-	void DamageMultiplier(int value);
+	int	 DamageMultiplier() const { return damageMultiplier; }
+	void DamageMultiplier(int value) { damageMultiplier = std::clamp(value, 1, 10); }
 
 	// return true if attribute health is more than 0 otherwise false
-	bool IsActive() const;
+	bool IsActive() const { return isActive; }
 
 	void TakeDamage(int damage);
 private:

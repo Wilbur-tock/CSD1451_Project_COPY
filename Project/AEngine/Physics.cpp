@@ -4,8 +4,6 @@
 #include "MapManager.hpp"
 #include "Utils.hpp"
 
-bool Physics::IsGrounded() const { return isGrounded; }
-
 void Physics::GroundedChecks(GameObject const& obj) {
     TileIndex btmId{ obj.tileId.x, obj.tileId.y + 1 };
     if (btmId.IsOutOfBounds()) {

@@ -14,7 +14,7 @@
 #include "AudioManager.hpp"
 #include "InstructionsOverlay.hpp"
 #include "Loading.hpp"
-#include "PauseMenu.hpp"                                           // <-- NEW
+#include "PauseMenu.hpp"                                           
 
 namespace GameStateManager {
     Utils::FuncPtr gsLoad, gsIntialize, gsUpdate, gsDraw, gsFree, gsUnload;
@@ -277,17 +277,14 @@ namespace GameStateManager {
 
         // Debugger display
         if (Utils::isDebuggerOn && !Utils::isInstructionOn) {
-            UIManager::Panel debuggerPanel{ {200, 75}, {1.0f,1.0f,1.0f, 0.75f}, Utils::RectMode::RECT_BOTTOM_LEFT };
-            TextObject debugText{ "", Utils::debuggerInfo.first * 0.75f, Utils::debuggerInfo.second, {-1.f, -0.81f} };
+            UIManager::Panel debuggerPanel{ {200, 75}, {1.0f,1.0f,1.0f, 0.75f}, Utils::AnchorMode::BOTTOM_LEFT };
+            debugText = { "", Utils::debuggerInfo.first * 0.75f, Utils::debuggerInfo.second, {-1.f, -0.81f} };
 
             debuggerPanel.Draw();
 
             debugText.textContent = "\n[P] Debugger ON\nFPS: " + Utils::FormatFloat(AEFrameRateControllerGetFrameRate(), 2)
-                + "\nDeltaTime: " + Utils::FormatFloat(rawDt, 2);
-                //+ "\n[M] Main Menu" + "\nCamera State: " + CameraManager::camera.PrintState()
-                //+ "\n Zoom: " + Utils::FormatFloat(CameraManager::camera.GetZoom(), 2)
-                //+ "\n" + CameraManager::camera.PrintVisibleTiles();
-
+                + "\nDeltaTime: " + Utils::FormatFloat(rawDt, 2)
+                +"\n[M] Main Menu";
             debugText.Draw();
         }
 

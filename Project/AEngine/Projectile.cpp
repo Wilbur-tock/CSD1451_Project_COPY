@@ -12,16 +12,6 @@ Projectile::Projectile(AEGfxTexture* _texture, ProjectileMode _mode, AEVec2 _pos
     : GameObject(_pos, defaultSize, _texture), timer{ 0.0f }, mode(_mode), attackCharges{_attackCharges} {
 }
 
-int  Projectile::AttackCharges() const { return attackCharges; }
-void Projectile::AttackCharges(int value) { attackCharges = std::clamp(value, 0, 100); }
-
-ProjectileMode Projectile::Mode() const { return mode; }
-void Projectile::Mode(ProjectileMode newMode) { mode = newMode; }
-
-int Projectile::ProjectileId() const { return projectileId; }
-
-std::string Projectile::ProjectileName() const { return projectileName; }
-
 void Projectile::Render() {
     AEMtx33 mat = GraphicsManager::CreateTransformMatrix(transform.pos.x, transform.pos.y, 0, transform.size.x, transform.size.y);
     GraphicsManager::DrawGameObject(texture, mat, Color{ 0.5f, 0.5f, 0, 1 });
@@ -97,9 +87,9 @@ void Projectile::DamageTile(int x, int y) {
 
     int blastRadius = attribute.DamageRadius();
 
-    std::cout << "===================== [Projectile] Damaging tiles ====================="
-        << "\n[Projectile] Damage Radius: " << blastRadius << " Center Tile Id: " << x << " " << y 
-        << "\n[Projectile] Remaining Attack Charges: " << AttackCharges() << '\n';
+    std::cout << "===================== [Projectile] Damaging tiles =====================\n[Projectile] Damage Radius : " 
+        + std::to_string(blastRadius) + " Center Tile Id : " + std::to_string(x) + " " + std::to_string(y) 
+        + "\n[Projectile] Remaining Attack Charges: " + std::to_string(AttackCharges()) << '\n';
 
     int minDX = x, minDY = y, maxDX = x, maxDY = y;
     // Increased damage radius based on blast radius
@@ -123,7 +113,7 @@ void Projectile::DamageTile(int x, int y) {
             //std::cout << "[Projectile] Checked tile " << tileToDamage << '\n';
 
             // Only damage blocks or character tile
-            if (!tileToDamage.IsBlocks() && !tileToDamage.IsCharacter()) continue;
+            if (tileToDamage.IsEmpty() || tileToDamage.IsGround()) continue;
 
             // Damage Tiles that contain a character object
             if (tileToDamage.IsCharacter()) {
@@ -136,8 +126,8 @@ void Projectile::DamageTile(int x, int y) {
             }
 
             // Damage tile AFTER it has damage a CHARACTER compononent
+            std::cout << "[Projectile] Damage Tile: " << tileToDamage << " Current hp: " << tileToDamage.attribute.Health() << " Damage: " << projDamage << '\n';
             tileToDamage.TakeDamage(projDamage);
-            std::cout << "[Projectile] Damage Tile: " << tileToDamage << " Current hp: " << tileToDamage.attribute.Health() << '\n';
             hasDamageAnyTile = true;
         }
     }

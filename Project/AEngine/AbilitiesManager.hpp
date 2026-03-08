@@ -4,14 +4,15 @@
 #include "pch.hpp"
 #include "Projectile.hpp"
 #include "Ability.hpp"
-#include "json.hpp"
 
 namespace AbilitiesManager {
 	class AbilityController {
 	public:
 		// Load all different type of abilites to be called at the start of the game
 		void LoadAllAbilities(bool isAi); //Loads all player abils from Abilities.json file
-		void LoadAllAIAbilities(); //Loads all AI abils from AiAbilities.json file
+		//void LoadAllAIAbilities(); //Loads all AI abils from AiAbilities.json file
+		void LoadStartingAbilities();
+
 		std::vector<Ability>& GetOffensiveAbilities() { return offensiveAbilities; }
 		std::vector<Ability>& GetStatsAbilities() { return statsAbilities; }
 		std::vector<Ability>& GetDefensiveAbilities() { return defensiveAbilities; }
@@ -26,21 +27,24 @@ namespace AbilitiesManager {
 		Ability* GetCurrentProjectile() { return ProjectileSelected; }
 		Ability* GetCurrentAIProjectile() { return AIProjectileSelected; }
 
-		Ability CurrentAbility() const;
+		Ability CurrentAbility() const { return *currentAbility; }
+		int InventoryCount() const{ return static_cast<int>(inventory.size()); }
+
 		// Change the type of ability this controller is current using
 		void ChangeAbility(int abilityId);
 		// Use the currently select ability if it has unlimited or any charges remaining
 		// return true and the selected ability can be use, otherwise false
 		bool UseAbility();
 		// Add ability charges from the based on selection
-		void AddAbility(int abilityId, int chargesToAdd);
-		void UpdateActiveAbilites(Ability& ability, bool toAddToVector);
+		void AddAbility(int abilityId, int chargesToAdd = 1);
+		void UpdateInventory(Ability& ability, bool toAddToVector);
 		Ability* FindAbility(int abilityId);
 		// return the projectile Id to change the type of projectile the CANNON is currently using
 		// if the ability type is an offensive which affects the projectile
 		int FindProjectileId();
 
-		void ToggleAbility();
+		// True to toggle through all abilities or false to toggle through of all the active abilities this controller has in its inventory
+		void ToggleAbility(bool isAllAbilities);
 
 		// AI Member functions
 		void ResetAIAbilitySelection();
@@ -65,7 +69,7 @@ namespace AbilitiesManager {
 
 		Ability* currentAbility = nullptr;
 
-		std::vector<Ability*> activeAbilities; // vector containing all the type of abilities this controller has in its inventory
+		std::vector<Ability*> inventory; // vector containing all the type of abilities this controller has in its inventory
 		std::vector<Ability> allAbilities; // vector containing all the different type of abilities
 
 		bool isAIController = false;

@@ -4,6 +4,8 @@
 #include "pch.hpp"
 #include "Color.hpp"
 
+struct Transform; 
+
 namespace Utils {
 	extern bool isDebuggerOn;
 	extern bool isInstructionOn;
@@ -13,16 +15,16 @@ namespace Utils {
 	extern std::pair<float, Color> debuggerInfo; // Store the text scale and color
 	typedef std::function<void()> FuncPtr;
 
-	enum class RectMode {
-		RECT_TOP_LEFT,
-		RECT_TOP_CENTER,
-		RECT_TOP_RIGHT,
-		RECT_CENTER_LEFT,
-		RECT_CENTER,
-		RECT_CENTER_RIGHT,
-		RECT_BOTTOM_LEFT,
-		RECT_BOTTOM_CENTER,
-		RECT_BOTTOM_RIGHT,
+	enum class AnchorMode {
+		TOP_LEFT,
+		TOP_CENTER,
+		TOP_RIGHT,
+		CENTER_LEFT,
+		CENTER,
+		CENTER_RIGHT,
+		BOTTOM_LEFT,
+		BOTTOM_CENTER,
+		BOTTOM_RIGHT,
 	};
 
 	// Get world mouse position instead of the screen position due to camera movement
@@ -36,6 +38,8 @@ namespace Utils {
 	// Return true if it is out of bounds
 	bool IsGridIndexOutOfBounds(int x, int y);
 
+	void SetAnchoredPosition(Transform& trans, AnchorMode const& anchorMode);
+
 	std::string FormatFloat(double value, int precision);
 
 	template <typename T>
@@ -43,8 +47,8 @@ namespace Utils {
 		return static_cast<T>(min + (AERandFloat() * (max - min)));
 	}
 
+	// Set val to wrap to min value if it is MORE THAN max and vice versa
 	template <typename T>
-	// Set val to wrap to max if it go below min and vice versa
 	void Wrap(T& val, T min, T max) {
 		if (val < min) val = max;
 		if (val > max) val = min;

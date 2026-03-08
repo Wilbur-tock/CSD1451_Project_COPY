@@ -23,7 +23,7 @@ public:
 	CharacterType Type() const;
 
 	void Update();
-	void Render();
+	void Draw();
 	void DebugInfo(std::string &str);
 	void SetSquatAnimation(bool enabled); // Player only: toggles idle <-> squat animation
 

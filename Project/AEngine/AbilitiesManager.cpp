@@ -1,5 +1,7 @@
 #include "AbilitiesManager.hpp"
 
+#include "json.hpp"
+
 #include "Utils.hpp"
 #include "Color.hpp"
 #include "UIManager.hpp"
@@ -50,8 +52,10 @@ namespace AbilitiesManager {
 
 		allAbilities.clear();
 		allAbilities.reserve(64);
-		activeAbilities.clear();
+		inventory.clear();
 		currentAbility = nullptr;
+
+		isAIController = isAi;
 
 		nlohmann::json data;
 		ReadAbilitiesFromFile(data, "Assets/Abils/Abilities.json");
@@ -99,6 +103,21 @@ namespace AbilitiesManager {
 		std::cout << "[AbilitiesManager] Successfully loaded " << statsAbilities.size() << " stats abilities." << std::endl;
 		std::cout << "[AbilitiesManager] Successfully loaded " << offensiveAbilities.size() << " offensive abilities." << std::endl;
 		std::cout << "[AbilitiesManager] Successfully loaded " << defensiveAbilities.size() << " defensive abilities." << std::endl;
+
+		LoadStartingAbilities();
+	}
+
+	void AbilityController::LoadStartingAbilities() {
+		if (!isAIController) { // Load player starting Abilities
+			AddAbility(0);
+			AddAbility(1);
+			AddAbility(2);
+		}
+
+		std::cout << "[AbilitiesManager] List of starting abilities:" << '\n';
+		for (Ability* ability : inventory) {
+			std::cout << ability->GetName() << " Charges: " << ability->AbilityCharges() << '\n';
+		}
 	}
 
 	/*
@@ -203,8 +222,6 @@ namespace AbilitiesManager {
 		return true;
 	}
 
-	Ability AbilityController::CurrentAbility() const { return *currentAbility; }
-
 	void AbilityController::ResetAIAbilitySelection() { hasEnemySelectedAbility = false; }
 
 	void AbilityController::AIAbilitySelection() {
@@ -235,7 +252,8 @@ namespace AbilitiesManager {
 		currentAbility = found;
 
 		std::cout << "[AbilitiesManager] Current ability: " + currentAbility->GetName()
-			+ " Charges Remaining: " + std::to_string(currentAbility->AbilityCharges()) << '\n';
+			+ " Charges Remaining: " + std::to_string(currentAbility->AbilityCharges())
+ 			<< '\n';
 	}
 
 	bool AbilityController::UseAbility() {
@@ -247,7 +265,7 @@ namespace AbilitiesManager {
 		if (currentAbility->AbilityCharges() <= 0) return false;
 
 		currentAbility->AbilityCharges(-1);
-		UpdateActiveAbilites(*currentAbility, false);
+		UpdateInventory(*currentAbility, false);
 
 		if (currentAbility->GetType() == AbilityType::OFFENSIVE && currentAbility->AbilityCharges() <= 0) {
 			ChangeAbility(0);
@@ -261,30 +279,30 @@ namespace AbilitiesManager {
 	void AbilityController::AddAbility(int abilityId, int chargesToAdd) {
 		Ability* found = FindAbility(abilityId);
 		if (!found) {
-			std::cerr << "[AbilitiesManager] AddAbility failed. abilityId=" << abilityId << '\n';
+			std::cerr << "[AbilitiesManager] Add Ability failed. abilityId=" << abilityId << '\n';
 			return;
 		}
 		Ability& ability = *found;
 		ability.AbilityCharges(chargesToAdd);
 
-		UpdateActiveAbilites(ability, true);
+		UpdateInventory(ability, true);
 	}
 
-	void AbilityController::UpdateActiveAbilites(Ability& ability, bool toAddToVector) {
+	void AbilityController::UpdateInventory(Ability& ability, bool toAddToVector) {
 		if (toAddToVector) {
 			// if previous charges is already more than or equal to 1, means that it is already in the vector no need to add
 			if (ability.PreviousAbilityCharges() >= 1) return;
 
 			// add into the activeAbilities vector
-			activeAbilities.push_back(&ability);
+			inventory.push_back(&ability);
 
 			std::cout << "[AbilitiesManager] Added " << ability << " into active abilities vector" << '\n';
 		}
 		else {
 			if (ability.AbilityCharges() > 0) return;
-			for (int i = 0; i < activeAbilities.size(); ++i) {
-				if (activeAbilities[i] == &ability) {
-					activeAbilities.erase(activeAbilities.begin() + i);
+			for (int i = 0; i < inventory.size(); ++i) {
+				if (inventory[i] == &ability) {
+					inventory.erase(inventory.begin() + i);
 					std::cout << "[AbilitiesManager] Removed " << ability << " from active abilities vector" << '\n';
 					return;
 				}
@@ -311,9 +329,22 @@ namespace AbilitiesManager {
 		return currentAbility->GetProj().projectileId;
 	}
 
-	void AbilityController::ToggleAbility() {
+	void AbilityController::ToggleAbility(bool isAllAbilities) {
 		int abilityId = currentAbility->Id();
-		Utils::Wrap(++abilityId, 0, static_cast<int>(allAbilities.size()-1));
+
+		if (isAllAbilities) {
+			Utils::Wrap(++abilityId, 0, static_cast<int>(allAbilities.size()-1));
+		}
+		else {
+			for (int i = 0; i < inventory.size(); ++i) {
+				if (inventory[i] == currentAbility) {
+					int selectedListId = i + 1;
+					Utils::Wrap(selectedListId, 0, static_cast<int>(inventory.size() - 1));
+					abilityId = inventory[selectedListId]->Id();
+					break;
+				}
+			}
+		}
 		ChangeAbility(abilityId);
 	}
 
@@ -341,7 +372,7 @@ namespace AbilitiesManager {
 			std::cerr << "[AbilitiesManager] Incorrect abilities to display in selector!" << std::endl;
 		}
 
-		UIManager::Panel background{ {1400.0f, 700.0f}, Color(0.6196f, 0.6196f, 0.6196f, 1.0f), Utils::RectMode::RECT_CENTER };
+		UIManager::Panel background{ {1400.0f, 700.0f}, Color(0.6196f, 0.6196f, 0.6196f, 1.0f), Utils::AnchorMode::CENTER };
 		background.Draw();
 
 		AEVec2 cardSize{ 350.0f, 550.0f }; // width and height
@@ -358,8 +389,6 @@ namespace AbilitiesManager {
 			cardPos.x += cardSize.x + gap;
 			id++;
 		}
-
-
 	}
 
 	void AbilityController::onClickAbilityCard(int abilityID, bool* isOn) {
@@ -369,7 +398,6 @@ namespace AbilitiesManager {
 		}
 		CameraManager::camera.SetState(CameraManager::CameraController::INPUT);
 	}
-
 }
 
 

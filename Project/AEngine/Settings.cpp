@@ -66,7 +66,7 @@ namespace Settings {
         AEVec2 backPos = { -btnW / 2.0f, -160.0f };
         backButton = Button(
             TextObject{ "< BACK" },
-            Utils::RectMode::RECT_CENTER,
+            Utils::AnchorMode::CENTER,
             backPos,
             { btnW, btnH },
             Color(0.8f, 0.2f, 0.2f, 1.0f),
@@ -81,7 +81,7 @@ namespace Settings {
         AEVec2 volDownPos = { -SLIDER_W / 2.0f - smallBtnW - 10.0f - smallBtnW / 2.0f, btnY };
         volumeDownButton = Button(
             TextObject{ "-" },
-            Utils::RectMode::RECT_CENTER,
+            Utils::AnchorMode::CENTER,
             volDownPos,
             { smallBtnW, smallBtnH },
             Color(0.7f, 0.3f, 0.3f, 1.0f),
@@ -92,7 +92,7 @@ namespace Settings {
         AEVec2 volUpPos = { SLIDER_W / 2.0f + 10.0f + smallBtnW / 2.0f, btnY };
         volumeUpButton = Button(
             TextObject{ "+" },
-            Utils::RectMode::RECT_CENTER,
+            Utils::AnchorMode::CENTER,
             volUpPos,
             { smallBtnW, smallBtnH },
             Color(0.3f, 0.7f, 0.3f, 1.0f),

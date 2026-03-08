@@ -34,15 +34,6 @@ Ability::Ability(int _id, std::string _name, AbilityType _type, Tier _tier)
 	defense = { 0 }; // Shield HP
 }
 
-int Ability::Id() const { return id; }
-std::string Ability::GetName() const { return name; }
-AbilityType Ability::GetType() const { return type; }
-Tier Ability::GetTier() const { return tier; }
-
-StatsModule Ability::GetStats() const { return stats; }
-ProjectileModule Ability::GetProj() const { return proj; }
-DefenseModule Ability::GetDefense() const { return defense; }
-
 void Ability::UpdateCharges(s32 _amount) {
 	// Only subtract if it's an offensive ability (since stats/defense might not use charges)
 	if (type == AbilityType::OFFENSIVE) {

@@ -26,7 +26,7 @@ namespace MapEditor {
 	int tileId = static_cast<int>(defaultTile);
 
 	// UI Objects
-	UIManager::Panel mapLabelPanel{ {250,50}, {1,1,1}, Utils::RectMode::RECT_TOP_CENTER };
+	UIManager::Panel mapLabelPanel{ {250,50}, {1,1,1}, Utils::AnchorMode::TOP_CENTER };
 	TextObject helpText, debugText, mapLabelText;
 
 	// If the Project/Assets/Map does not contain default.txt file it will create a new one if not just return
@@ -125,7 +125,7 @@ namespace MapEditor {
 		helpText =  { "",  Utils::debuggerInfo.first * 0.9f, Utils::debuggerInfo.second,{-1.0f,.99f} };
 		debugText = { "",  Utils::debuggerInfo.first * 0.8f, Utils::debuggerInfo.second, { 0.5f, 0.99f} };
 
-		mapLabelText = { currentMapLabel, 0.75f, {0,0,0}, {0,0}, Utils::RectMode::RECT_CENTER };
+		mapLabelText = { currentMapLabel, 0.75f, {0,0,0}, {0,0}, Utils::AnchorMode::CENTER };
 		mapLabelText.SetPos(mapLabelPanel.Pos(), mapLabelPanel.Size());
 
 		CameraManager::camera.SetPosition({ 0, 0 });
@@ -236,7 +236,7 @@ namespace MapEditor {
 
 	static void Draw() {
 		// Render the map drawn
-		MapManager::RenderMap(newMap);
+		MapManager::DrawMap(newMap);
 
 		// Display the label on which map is being editing 
 		mapLabelPanel.Draw();

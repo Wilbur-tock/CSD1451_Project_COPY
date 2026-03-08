@@ -192,32 +192,69 @@ void Level::Update() {
 }
 
 void Level::Draw() {
-	MapManager::RenderMap(levelMap, false);
+	MapManager::DrawMap(levelMap, false);
 
-	// Rendering of assets and UI
-	// Need to render both player cannon and enemy cannon regardless of whose turn it is
-	playerCannon.Render();
-	enemyCannon.Render();
+	// Drawing of assets and UI
+	// Need to draw both player cannon and enemy cannon regardless of whose turn it is
+	playerCannon.Draw();
+	enemyCannon.Draw();
 
-	// UI to display whose turn it is
-	UIManager::Panel turnStatusPanel{ {150,50}, {1,1,1}, Utils::RectMode::RECT_TOP_CENTER };
-	turnStatusPanel.Draw();
-
-	TextObject turnText = { "PLAYER TURN", 0.75f,{0,0.75f,0}, Utils::NormalizeCoordinates(turnStatusPanel.Pos()), Utils::RectMode::RECT_CENTER };
-	if (!isPlayerTurn) {
-		turnText.textContent = "ENEMY TURN";
-		turnText.color = { 0.75f,0,0 };
-	}
-	turnText.SetPos(turnStatusPanel.Pos(), turnStatusPanel.Size());
-	turnText.Draw();
+	DrawUI();
 }
 
 void Level::Free() {
 	barrelTex = nullptr;
 }
 
+void Level::DrawUI() {
+	activeCannon->DrawUI();
+
+	// UI to display whose turn it is
+	UIManager::Panel turnStatusPanel{ {150,50}, {1,1,1}, Utils::AnchorMode::TOP_CENTER };
+	turnStatusPanel.Draw();
+
+	TextObject turnText = { "PLAYER TURN", 0.75f,{0,0.75f,0}, Utils::NormalizeCoordinates(turnStatusPanel.Pos()), Utils::AnchorMode::CENTER };
+	if (!isPlayerTurn) {
+		turnText.textContent = "ENEMY TURN";
+		turnText.color = { 0.75f,0,0 };
+	}
+	turnText.SetPos(turnStatusPanel.Pos(), turnStatusPanel.Size());
+	turnText.Draw();
+
+	float colorVal = 0.9f;
+	Transform barTrans = { {0,0}, {725,25} };
+	Utils::SetAnchoredPosition(barTrans, Utils::AnchorMode::TOP_LEFT);
+
+	UIManager::Bar playerHPBar{ {barTrans.pos.x, barTrans.pos.y }, barTrans.size, {0,colorVal,0} };
+
+	float currentHP = 0, maxHP = 0;
+	GetHealth(currentHP, maxHP);
+	playerHPBar.Draw(currentHP, maxHP);
+
+	UIManager::Bar enemyHPBar{ { barTrans.pos.x + 150 + barTrans.size.x, barTrans.pos.y }, barTrans.size, {colorVal,0,0,}, UIManager::FillType::RIGHT_TO_LEFT};
+
+	GetHealth(currentHP, maxHP, false);
+	enemyHPBar.Draw(currentHP, maxHP);
+}
+
+void Level::GetHealth(float& currentHP, float& maxHP, bool isGettingPlayerHP) {
+	currentHP = 0, maxHP = 0;
+	if (isGettingPlayerHP) {
+		for (Character& character : playerCharacters) {
+			currentHP += static_cast<float>(character.attribute.Health());
+			maxHP += static_cast<float>(character.attribute.MaxHealth());
+		}
+	}
+	else {
+		for (Character& character : enemies) {
+			currentHP += static_cast<float>(character.attribute.Health());
+			maxHP += static_cast<float>(character.attribute.MaxHealth());
+		}
+	}
+}
+
 void Level::UpdateTurn() {
-	if (!activeCannon->HasShot()) return;
+	if (!activeCannon->IsProjectileDestroyed()) return;
 
 	// Set timer to delay the transition from cannon to cannon
 	if (switchTurnCooldown <= 0.0f) {
@@ -275,11 +312,15 @@ void Level::Debugger() {
 				if (tile.IsBlocks()) {
 					tile.Type(TILE_EMPTY);
 				}
+			}
 
+			if (AEInputCheckTriggered(AEVK_RBUTTON)) {
 				// Damage characters
 				if (tile.IsCharacter()) {
-					Character *charPtr = FindCharacterObj(tile);
-					charPtr->attribute.TakeDamage(10);
+					int dmg = 10;
+					tile.TakeDamage(dmg);
+					Character* charPtr = FindCharacterObj(tile);
+					charPtr->attribute.TakeDamage(dmg);
 				}
 			}
 		}

@@ -20,11 +20,9 @@ namespace CannonManager {
 
     void Cannon::SetAbilityController(AbilitiesManager::AbilityController* controller) {
         abilityController = controller;
-        controller->ChangeAbility(0);
+        controller->ChangeAbility(0); // Set default projectile as the default ability
         ProjectileSettings();
     }
-
-    bool Cannon::HasShot() const { return isProjectileDestroyed; }
     
     void Cannon::ProjectileSettings() {
         // Reset to default
@@ -62,9 +60,11 @@ namespace CannonManager {
             float worldMouseX = 0, worldMouseY = 0;
             Utils::GetWorldMousePos(worldMouseX, worldMouseY);
 
-            // Calculate angle toward mouse
+            // Calculate angle toward mouse in world space
             cannonAngle = atan2(worldMouseY - transform.pos.y, worldMouseX - transform.pos.x);
 
+            //std::cout << "Angle: " << cannonAngle << "Mouse x: " << worldMouseX << " y:" << worldMouseY
+            //    << " Cannon pos x: " << transform.pos.x << " y: " << transform.pos.y << '\n';
             // Add limits so it can only turn facing upwards or downwards limits
             ClampAngle(cannonAngle);
             DrawTrajectory();
@@ -79,13 +79,36 @@ namespace CannonManager {
         Debugger();
     }
 
-    void Cannon::Render() {
+    void Cannon::Draw() {
+        // Render cannon
         AEMtx33 mat = GraphicsManager::CreateTransformMatrix(transform.pos.x, transform.pos.y, cannonAngle, transform.size.x, transform.size.y);
         GraphicsManager::DrawGameObject(texture, mat, textureColor);
     }
 
+    void Cannon::DrawUI() {
+        if (hasCannonShot) return;
+        // Render UI
+        if (isHoldingLeftClick) {
+            float x = transform.pos.x - (transform.size.x * 1.5f);
+            if (!isShootingRight) x = transform.pos.x + (transform.size.x * 1.5f);
+            UIManager::Bar bar{ { x, transform.pos.y + (transform.size.y * 1.5f) },
+                { 15,100 }, Color{ 0,1,0 }, UIManager::FillType::TOP_TO_BOTTOM };
+            bar.Draw(chargingPower, maxPower, false);
+
+            if (!isPlayerControlled) return;
+
+            Transform trans{ { 0,0 }, {500,25} };
+            Utils::SetAnchoredPosition(trans, Utils::AnchorMode::BOTTOM_CENTER);
+
+            UIManager::Bar uiBar{ trans.pos,
+                trans.size, Color{ 0,1,0 }, UIManager::FillType::LEFT_TO_RIGHT };
+            uiBar.Draw(chargingPower, maxPower);
+        }
+    }
+
     void Cannon::ResetTurn() {
         isProjectileDestroyed = false;
+        hasCannonShot = false;
         SetCamera(false);
 
         // Reselect AI ability
@@ -127,7 +150,7 @@ namespace CannonManager {
     }
 
     void Cannon::EnemyAI() {
-        if (isActive || isProjectileDestroyed) return;
+        if (hasCannonShot || isProjectileDestroyed) return;
         if (!target) {
             std::cerr << "[CannonManager] Can't find any player character targets for the enemy to shoot!" << '\n';
             return;
@@ -190,7 +213,7 @@ namespace CannonManager {
     }
 
     void Cannon::ChargeShot() {
-        if (isActive == true) return;
+        if (hasCannonShot == true) return;
 
         // Shoot when the button is RELEASED
         if (isPlayerControlled && AEInputCheckReleased(AEVK_LBUTTON)) {
@@ -231,13 +254,10 @@ namespace CannonManager {
                 CameraManager::camera.SetPosition(transform.pos);
                 CameraManager::camera.SetState(CameraManager::CameraController::CameraState::STATIC);
             }
+        }
 
-            // Render UI
-            float x = transform.pos.x - (transform.size.x * 1.5f);
-            if (!isShootingRight) x = transform.pos.x + (transform.size.x * 1.5f);
-            UIManager::Bar bar{ { x, transform.pos.y + (transform.size.y * 1.5f) },
-                { 15,100 }, Color{ 0,1,0 }, UIManager::FillType::TOP_TO_BOTTOM };
-            bar.Draw(chargingPower, maxPower);
+        if (AEInputCheckReleased(AEVK_LBUTTON)) {
+            isHoldingLeftClick = false;
         }
     }
 
@@ -266,7 +286,7 @@ namespace CannonManager {
     }
 
     void Cannon::ShootProjectile() {
-        if (isActive) return;
+        if (hasCannonShot) return;
 
         // IMPORTANT: use a COPY here so we don't permanently modify the template projectile inside projectiles[].
         Projectile projectile = projectiles[selectedProjectileId];
@@ -286,15 +306,9 @@ namespace CannonManager {
 
         // Set projectile ability effects here
         abilityController->UseAbility();
-        //if (isPlayerControlled) {
-        //    abilityController->UseProjectile();
-        //}
-        //else {
-        //    abilityController->AIUseProjectile();
-        //}
 
         SetCamera(true); // Follow the projectile that is shot out of the cannon
-        isActive = true;
+        hasCannonShot = true;
         std::cout << "[CannonManager] Projectile Fired!\n";
     }
 
@@ -415,7 +429,7 @@ namespace CannonManager {
         // Destroy projectile
         if (projectile.timer <= 0.0f || !projectile.IsInMapBounds()) {
             projectile.Destroy();
-            isActive = false; // reset cannon back to false to allow player to shoot again after projectile been destroyed
+            //hasCannonShot = false; // reset cannon back to false to allow player to shoot again after projectile been destroyed
             isProjectileDestroyed = true;
             return true;
         }
@@ -438,7 +452,8 @@ namespace CannonManager {
     }
 
     void Cannon::DrawTrajectory() {
-        int numDots = 0;
+        if (hasCannonShot) return; 
+        int numDots = 30;
         // Starting position (at the barrel tip, matching ShootProjectile)
         float startX = transform.pos.x + cos(cannonAngle) * transform.size.x;
         float startY = transform.pos.y + sin(cannonAngle) * transform.size.x;
@@ -466,8 +481,20 @@ namespace CannonManager {
         if (!Utils::isDebuggerOn) return;
 
         // Toggle through all the ability
-        if (AEInputCheckTriggered(AEVK_T)) {
-            abilityController->ToggleAbility();
+        if (AEInputCheckCurr(AEVK_LCTRL) || AEInputCheckCurr(AEVK_RCTRL)) {
+            if (AEInputCheckTriggered(AEVK_T)) {
+                abilityController->ToggleAbility(true);
+            }
+        }
+        else {
+            if (AEInputCheckTriggered(AEVK_T)) {
+                abilityController->ToggleAbility(false);
+            }
+        }
+
+        if (AEInputCheckTriggered(AEVK_Y)) {
+            Utils::Wrap(++aiDifficulty, 0.0f, 1.0f);
+            std::cout << "[CannonManager] AI Difficulty: " + std::to_string(aiDifficulty) << '\n';
         }
 
         float mX = 0, mY = 0;
@@ -482,7 +509,7 @@ namespace CannonManager {
 
         // Show cannon information
         std::string debugStr = "Cannon " + static_cast<std::string>(isPlayerControlled ? "PLAYER" : "ENEMY")
-            + "\nIs Active : " + std::string(isActive ? "true" : "false") 
+            + "\nIs Active : " + std::string(hasCannonShot ? "true" : "false") 
             + "\nIs Projectile destroyed : " + static_cast<std::string>(isProjectileDestroyed ? "true" : "false")
             + "\nPos x: " + Utils::FormatFloat(transform.pos.x, 2) + " y: " + Utils::FormatFloat(transform.pos.y, 2)
             + "\nAngle: " + Utils::FormatFloat(cannonAngle * (180.0f / 3.14159265359), 2) + " " + Utils::FormatFloat(cannonAngle, 2)
@@ -490,7 +517,8 @@ namespace CannonManager {
             + "\nName: " + selectedProjectile.ProjectileName()
             + "\nDamage: " + std::to_string(selectedProjectile.attribute.Damage())
             + "\nRadius: " + std::to_string(selectedProjectile.attribute.DamageRadius())
-            + "\n\nSelected Ability:\nId:" + std::to_string(selectedAbility.Id())
+            + "\n\nAbilities Inventory Count: " + std::to_string(abilityController->InventoryCount())
+            + "\nSelected Ability:\nId:" + std::to_string(selectedAbility.Id())
             + "\nName: " + selectedAbility.GetName()
             + "\nAbility Charges Remaining: " + std::to_string(selectedAbility.AbilityCharges());
                 
@@ -498,7 +526,7 @@ namespace CannonManager {
             debugStr += "\nAI Shoot Timer: " + Utils::FormatFloat(aiShootTimer, 2);
         }
         else {
-            debugStr += "\n\nShortcuts:\n[T] Toggle Ability";
+            debugStr += "\n\nShortcuts:\n[CTRL + T] Toggle ALL Abilities\n[T] Toggle Inventory Abilities";
         }
 
         // Print projectile that is shoot out information

@@ -45,7 +45,7 @@ namespace MainMenu {
         AEVec2 playPos = { centerX - btnWidth / 2.0f, startY };
         playButton = Button(
             TextObject{ "PLAY" },
-            Utils::RectMode::RECT_CENTER,
+            Utils::AnchorMode::CENTER,
             playPos,
             { btnWidth, btnHeight },
             Color(0.2f, 0.6f, 0.9f, 1.0f),  // Blue color
@@ -57,7 +57,7 @@ namespace MainMenu {
         AEVec2 editorPos = { centerX - btnWidth / 2.0f, startY - btnSpacing };
         mapEditorButton = Button(
             TextObject{ "MAP EDITOR" },
-            Utils::RectMode::RECT_CENTER,
+            Utils::AnchorMode::CENTER,
             editorPos,
             { btnWidth, btnHeight },
             Color(0.3f, 0.7f, 0.3f, 1.0f),  // Green color
@@ -69,7 +69,7 @@ namespace MainMenu {
         AEVec2 settingsPos = { centerX - btnWidth / 2.0f, startY - btnSpacing * 2 };
         settingsButton = Button(
             TextObject{ "SETTINGS" },
-            Utils::RectMode::RECT_CENTER,
+            Utils::AnchorMode::CENTER,
             settingsPos,
             { btnWidth, btnHeight },
             Color(0.6f, 0.6f, 0.2f, 1.0f),  // Yellow color
@@ -81,7 +81,7 @@ namespace MainMenu {
         AEVec2 creditsPos = { centerX - btnWidth / 2.0f, startY - btnSpacing * 3 };
         creditsButton = Button(
             TextObject{ "CREDITS" },
-            Utils::RectMode::RECT_CENTER,
+            Utils::AnchorMode::CENTER,
             creditsPos,
             { btnWidth, btnHeight },
             Color(0.7f, 0.5f, 0.9f, 1.0f),  // Purple color
@@ -93,7 +93,7 @@ namespace MainMenu {
         AEVec2 quitPos = { centerX - btnWidth / 2.0f, startY - btnSpacing * 4 };
         quitButton = Button(
             TextObject{ "QUIT" },
-            Utils::RectMode::RECT_CENTER,
+            Utils::AnchorMode::CENTER,
             quitPos,
             { btnWidth, btnHeight },
             Color(0.8f, 0.2f, 0.2f, 1.0f),  // Red color

@@ -75,7 +75,7 @@ void Character::Update() {
 	if (!attribute.IsActive()) return;
 
 	physics.Update(*this);
-	Render();
+	Draw();
 }
 
 void Character::SetSquatAnimation(bool enabled) {
@@ -127,14 +127,14 @@ void Character::UpdateSprite() {
 	if (!texture) texture = FallbackTex();
 }
 
-void Character::Render() {
+void Character::Draw() {
 	UpdateSprite(); // Update character sprite texture
 	GraphicsManager::DrawGameObject(*this);
 
 	// UI
 	float x = transform.pos.x, y = transform.pos.y + transform.size.y;
-	UIManager::Bar bar{ { x, y}, { transform.size.x, 10 }, Color{1,0,0} };
-	bar.Draw(static_cast<float>(attribute.Health()), static_cast<float>(attribute.MaxHealth()));
+	UIManager::Bar bar{ { x - transform.size.x * 0.5f, y}, { transform.size.x, 10 }, Color{1,0,0} };
+	bar.Draw(static_cast<float>(attribute.Health()), static_cast<float>(attribute.MaxHealth()), false);
 }
 
 void Character::DebugInfo(std::string& str) {

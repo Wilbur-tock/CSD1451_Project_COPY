@@ -15,13 +15,12 @@ namespace CannonManager {
 		Cannon() = default;
 		Cannon(AEVec2 _pos, AEGfxTexture* _texture, TileIndex _tileId, AEVec2 _size = { 30,10 }, bool _isShootingRight = true, bool _isPlayerControlled = true);
 
-		// Getters & Setters
-		void SetAbilityController(AbilitiesManager::AbilityController* controller);
 		// return true if projectile has been shoot out of the cannon and be destroyed
-		bool HasShot() const;
+		inline bool IsProjectileDestroyed() const { return isProjectileDestroyed; }
 
 		// Member Functions
 
+		void SetAbilityController(AbilitiesManager::AbilityController* controller);
 		// Initialize all the different type of projectile abilities to the CANNON CLASS
 		// Switch between the projectileId to choose the different type of projectile abilities
 		// 0 - Default projectile, 1 - Nuke Projectile , etc
@@ -30,7 +29,8 @@ namespace CannonManager {
 		// Calculate the charge shot power and update any shot projectiles
 		// map is used to check for collision with the tiles
 		void Update();
-		void Render();
+		void Draw();
+		void DrawUI();
 		void ResetTurn();
 
 		// Return true if this cannon has a lock in target or the target has been destroyed
@@ -61,10 +61,9 @@ namespace CannonManager {
 		void Debugger();
 	private:
 		bool isPlayerControlled = true, isShootingRight = true;
-		bool isActive = false; // has projectile has been shot out of the cannon return true if yes
-		float cannonAngle = 0.0f; // Angle of the cannon for the projectile to shoot from
+		bool hasCannonShot = false; // has projectile has been shot out of the cannon return true if yes
 		bool isHoldingLeftClick = false; // player is holding left mouse click
-		bool canPlayerShoot = true; // can player shoot
+		bool canPlayerShoot = true; // can player shoot used for checking if player press right click to cancel his shot
 		bool isProjectileDestroyed = false; // projectile has been shot out and destroyed
 		bool resetCamWhenShooting = false; // When player press left mouse click, reset camera to position the cannon and unable to move the camera or not
 
@@ -72,13 +71,14 @@ namespace CannonManager {
 		AEVec2 defaultSize{ 30,10 };
 		int projectileCount = 10;
 		int projectileAbilitiesCount = 0;
+		float cannonAngle = 0.0f; // Angle of the cannon for the projectile to shoot from
 
 		int selectedProjectileId = 0; // index of the selected projectile from the vector list of all the different type of projectiles
 		std::vector<Projectile> projectiles; // vector containing all the different type of projectiles (Default, bomb , etc)
 		std::vector<Projectile> activeProjectiles; // vector of all the active projectiles (Projectiles that have been shot out of the cannon)
 
 		// Shot power charging system (how far the cannon shoots the projectile)
-		float minPower = 100, maxPower = 2500, chargeRate = maxPower * 0.75f;
+		float minPower = 100, maxPower = 2500, chargeRate = maxPower * 1.5f;
 		float chargingPower = 0;
 		float shotPower = 0; // The amount of shot power player charged up
 		bool isPowerIncreasing = true;
@@ -86,9 +86,8 @@ namespace CannonManager {
 		// Abilities variables
 		AbilitiesManager::AbilityController* abilityController = nullptr;
 
-		float aiDifficulty = 0.0f; // 0 - 1 Range, 0 - easier, 1 - hardest
-
 		// Enemy AI variables
+		float aiDifficulty = 0.0f; // 0 - 1 Range, 0 - easier, 1 - hardest
 		float aiShootTimer = 0.0f; // randomise timer to visualise a delay for when the enemy when shoot out the prorjectile
 		bool canAIShoot = false;
 		Character* target = nullptr;

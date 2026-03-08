@@ -16,7 +16,7 @@ public:
 	// with its default position being 0,0 (Top left corner of the button object)
 	// _rectMode - set where the text content will be print out 
 	// e.g. RECT_CENTER will print text to align center of the button
-	Button(TextObject _textObj, Utils::RectMode _rectMode, AEVec2 _pos, AEVec2 _size, Color _color, 
+	Button(TextObject _textObj, Utils::AnchorMode _anchorMode, AEVec2 _pos, AEVec2 _size, Color _color,
 		AEGfxTexture* _texture, Utils::FuncPtr _onClick = nullptr);
 
 	// Check for player hover and whatever or not it is clicked

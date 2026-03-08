@@ -40,7 +40,7 @@ namespace PauseMenu {
         AEVec2 resumePos = { centerX - btnW / 2.0f, startY };
         resumeButton = Button(
             TextObject{ "RESUME" },
-            Utils::RectMode::RECT_CENTER,
+            Utils::AnchorMode::CENTER,
             resumePos,
             { btnW, btnH },
             Color(0.2f, 0.7f, 0.3f, 1.0f),   // green
@@ -52,7 +52,7 @@ namespace PauseMenu {
         AEVec2 settingsPos = { centerX - btnW / 2.0f, startY - spacing };
         settingsButton = Button(
             TextObject{ "SETTINGS" },
-            Utils::RectMode::RECT_CENTER,
+            Utils::AnchorMode::CENTER,
             settingsPos,
             { btnW, btnH },
             Color(0.6f, 0.6f, 0.2f, 1.0f),   // yellow
@@ -64,7 +64,7 @@ namespace PauseMenu {
         AEVec2 menuPos = { centerX - btnW / 2.0f, startY - spacing * 2 };
         backToMenuButton = Button(
             TextObject{ "BACK TO MENU" },
-            Utils::RectMode::RECT_CENTER,
+            Utils::AnchorMode::CENTER,
             menuPos,
             { btnW, btnH },
             Color(0.8f, 0.2f, 0.2f, 1.0f),   // red
@@ -98,7 +98,7 @@ namespace PauseMenu {
             { static_cast<float>(Config::SCREEN_WIDTH),
               static_cast<float>(Config::SCREEN_HEIGHT) },
             Color(0.0f, 0.0f, 0.0f, 0.6f),
-            Utils::RectMode::RECT_CENTER
+            Utils::AnchorMode::CENTER
         };
         dim.Draw();
 
@@ -106,7 +106,7 @@ namespace PauseMenu {
         UIManager::Panel panel{
             { 500.0f, 800.0f },
             Color(0.1f, 0.1f, 0.14f, 0.92f),
-            Utils::RectMode::RECT_CENTER
+            Utils::AnchorMode::CENTER
         };
         panel.Draw();
 

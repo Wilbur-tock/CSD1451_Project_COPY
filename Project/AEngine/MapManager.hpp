@@ -15,7 +15,7 @@ namespace MapManager {
 	// Read map data from txt file and then update the data to 2D vector whatever or not barrier is needed
 	void ReadMapData(std::string const& fileName, std::vector<std::vector<Tile>>& map);
 	// Rendering of the map layout
-	void RenderMap(std::vector<std::vector<Tile>> const& map, bool drawCharacters = true);
+	void DrawMap(std::vector<std::vector<Tile>> const& map, bool drawCharacters = true);
 	Tile* FindTile(TileIndex const& tileId);
 }
 

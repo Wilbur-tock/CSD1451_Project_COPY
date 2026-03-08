@@ -26,7 +26,7 @@ public:
 	\param[in] pos
 	- use NORMALIZED COORDINATES range from -1.0f to 1.0f
 	*************************************************************************/
-	TextObject(std::string _text, float _scale = 1.0f, Color _color = Color{ 1,1,1 }, AEVec2 _pos = { 0,0 }, Utils::RectMode _rectMode = Utils::RectMode::RECT_TOP_LEFT);
+	TextObject(std::string _text, float _scale = 1.0f, Color _color = Color{ 1,1,1 }, AEVec2 _pos = { 0,0 }, Utils::AnchorMode _anchorMode = Utils::AnchorMode::TOP_LEFT);
 
 	/*!***********************************************************************
 	\brief
@@ -36,10 +36,10 @@ public:
 	\param[in] panelSize
 	- size of the panel
 	*************************************************************************/
-	void SetPos(AEVec2 panelPos, AEVec2 panelSize);
+	void SetPos(AEVec2 const& panelPos, AEVec2 const& panelSize);
 	void Draw();
 private:
-	Utils::RectMode rectMode = Utils::RectMode::RECT_CENTER;
+	Utils::AnchorMode anchorMode = Utils::AnchorMode::CENTER;
 };
 
 #endif // !TEXTOBJECT_HPP

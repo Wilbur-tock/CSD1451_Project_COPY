@@ -23,6 +23,8 @@ public:
 	// Default ctor
 	Level(int _leveId);
 
+	// Member functions
+
 	// Read level map data and load level resources
 	void Load();
 	void Initalize();
@@ -30,18 +32,23 @@ public:
 	void Draw();
 	void Free();
 
-	// Member functions
-
-	// Toggle turns between player and enemy once they have shot and a timer has been set and reduced to 0
-	void UpdateTurn();
-	void SetTurn(bool _isPlayerTurn);
-	void Debugger();
-
 	// Find the character object that is within the parameter tile, 
 	// return pointer to the chracter if a character object can be found otherwise return nullptr
 	Character* FindCharacterObj(Tile const& tile);
 	Character* FindEnemyCharacterObj(int characterId);
 	Character* FindPlayerCharacterObj(int characterId);
+private:
+	void DrawUI();
+
+	// Calculate and get the current and max health for all the player characters
+	void GetHealth(float& currentHP, float& maxHP, bool isGettingPlayerHP = true);
+
+	// Toggle turns between player and enemy once they have shot and a timer has been set and reduced to 0
+	void UpdateTurn();
+	void SetTurn(bool _isPlayerTurn);
+
+	void Debugger();
+
 private:
 	int levelId = 0;
 	std::string levelName; // Name of the level in the format (Level [INDEX])

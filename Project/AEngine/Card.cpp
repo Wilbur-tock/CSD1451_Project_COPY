@@ -11,7 +11,7 @@ Card::Card(std::string _name,
 	AEGfxTexture* _imageTexture,
 	Utils::FuncPtr _onClick,
 	AEVec2 _size) 
-	: button{ TextObject{ _name }, Utils::RectMode::RECT_BOTTOM_CENTER, _pos, _size, _color, _cardtexture, _onClick} {
+	: button{ TextObject{ _name }, Utils::AnchorMode::BOTTOM_CENTER, _pos, _size, _color, _cardtexture, _onClick} {
 	pos = _pos;
 	imageTexture = _imageTexture;
 }

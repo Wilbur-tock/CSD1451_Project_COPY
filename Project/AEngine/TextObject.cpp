@@ -2,8 +2,8 @@
 
 #include "AssetsManager.hpp"
 
-TextObject::TextObject(std::string _textContent, float _scale, Color _color, AEVec2 _pos, Utils::RectMode _rectMode)
-	: textContent{ _textContent }, textScale{ _scale }, color{ _color }, pos{ _pos }, rectMode{ _rectMode } {}
+TextObject::TextObject(std::string _textContent, float _scale, Color _color, AEVec2 _pos, Utils::AnchorMode _anchorMode)
+	: textContent{ _textContent }, textScale{ _scale }, color{ _color }, pos{ _pos }, anchorMode{ _anchorMode } {}
 
 void TextObject::Draw() {
 	if (textContent.empty()) return;
@@ -40,7 +40,7 @@ void TextObject::Draw() {
 	}
 }
 
-void TextObject::SetPos(AEVec2 panelPos, AEVec2 panelSize) {
+void TextObject::SetPos(AEVec2 const& panelPos, AEVec2 const& panelSize) {
 	f32 lineW, lineH;
 	AEGfxGetPrintSize(AssetsManager::textFont, textContent.c_str(), textScale, &lineW, &lineH);
 
@@ -56,34 +56,34 @@ void TextObject::SetPos(AEVec2 panelPos, AEVec2 panelSize) {
 	Utils::NormalizeCoordinates(x, y);
 
 	// Set position x
-	switch (rectMode) {
-	case Utils::RectMode::RECT_TOP_LEFT:
+	switch (anchorMode) {
+	case Utils::AnchorMode::TOP_LEFT:
 		break;
-	case Utils::RectMode::RECT_TOP_CENTER:
+	case Utils::AnchorMode::TOP_CENTER:
 		pos.x = x + halfPanelW - halfLineW;
 		break;
-	case Utils::RectMode::RECT_TOP_RIGHT:
+	case Utils::AnchorMode::TOP_RIGHT:
 		pos.x = x + (halfPanelW * 2.0f) - lineW;
 		break;
-	case Utils::RectMode::RECT_CENTER_LEFT:
+	case Utils::AnchorMode::CENTER_LEFT:
 		pos.y = y - halfPanelH + halfLineH;
 		break;
-	case Utils::RectMode::RECT_CENTER:
+	case Utils::AnchorMode::CENTER:
 		pos.y = y - halfPanelH + halfLineH;
 		pos.x = x + halfPanelW - halfLineW;
 		break;
-	case Utils::RectMode::RECT_CENTER_RIGHT:
+	case Utils::AnchorMode::CENTER_RIGHT:
 		pos.y = y - halfPanelH + halfLineH;
 		pos.x = x + (halfPanelW * 2.0f) - lineW;
 		break;
-	case Utils::RectMode::RECT_BOTTOM_LEFT:
+	case Utils::AnchorMode::BOTTOM_LEFT:
 		pos.y = y - (halfPanelH * 2.0f) + lineH;
 		break;
-	case Utils::RectMode::RECT_BOTTOM_CENTER:
+	case Utils::AnchorMode::BOTTOM_CENTER:
 		pos.y = y - (halfPanelH * 2.0f) + lineH;
 		pos.x = x + halfPanelW - halfLineW;
 		break;
-	case Utils::RectMode::RECT_BOTTOM_RIGHT:
+	case Utils::AnchorMode::BOTTOM_RIGHT:
 		pos.y = y - (halfPanelH * 2.0f) + lineH;
 		pos.x = x + (halfPanelW * 2.0f) - lineW;
 		break;

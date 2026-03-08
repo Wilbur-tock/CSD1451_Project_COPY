@@ -202,7 +202,7 @@ namespace MapManager {
 		ifs.close();
 	}
 
-	void RenderMap(std::vector<std::vector<Tile>> const& map, bool drawCharacters) {
+	void DrawMap(std::vector<std::vector<Tile>> const& map, bool drawCharacters) {
 		AEGfxSetBackgroundColor(0.92f, 0.92f, 0.95f);
 
 		int mapHeight = static_cast<int>(map.size());

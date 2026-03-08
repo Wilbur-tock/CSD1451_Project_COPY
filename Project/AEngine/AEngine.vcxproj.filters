@@ -85,6 +85,9 @@
     <Filter Include="Source Files\Audio">
       <UniqueIdentifier>{058351f8-1382-48bb-b6d3-7e06099ba2be}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\External Library">
+      <UniqueIdentifier>{a237e110-5856-42df-9657-4285851b6691}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Main.cpp">
@@ -197,7 +200,7 @@
     </ClCompile>
     <ClCompile Include="Pausemenu.cpp">
       <Filter>Source Files\Game States</Filter>
-	</ClCompile>
+    </ClCompile>
     <ClCompile Include="AudioManager.cpp">
       <Filter>Source Files\Audio</Filter>
     </ClCompile>
@@ -305,9 +308,6 @@
     <ClInclude Include="UICursor.hpp">
       <Filter>Header Files\UI</Filter>
     </ClInclude>
-    <ClInclude Include="json.hpp">
-      <Filter>Header Files\Game</Filter>
-    </ClInclude>
     <ClInclude Include="Loading.hpp">
       <Filter>Header Files\Game States</Filter>
     </ClInclude>
@@ -317,16 +317,23 @@
     <ClInclude Include="Pausemenu.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="..\Assets\Abils\Abilities.json" />
-    <None Include="..\Assets\Abils\AiAbilities.json" />
-    <ClInclude Include="AudioManager.hpp">
-      <Filter>Header Files\Audio</Filter>
+    <ClInclude Include="json.hpp">
+      <Filter>Header Files\External Library</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="AudioManager.hpp">
+      <Filter>Header Files\Audio</Filter>
+    </ClInclude>
     <None Include="..\Assets\Abils\Abilities.json">
+      <Filter>Resource Files</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\Assets\Abils\Abilities.json">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\Assets\Abils\AiAbilities.json">
       <Filter>Resource Files</Filter>
     </None>
     <None Include="..\Assets\Abils\AiAbilities.json">
