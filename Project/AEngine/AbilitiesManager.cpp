@@ -483,6 +483,9 @@ namespace AbilitiesManager {
 		for (int i = 0; i < inventory.size(); ++i) {
 			Ability* ability = inventory[i];
 			Color iconColor = ability->GetType() == AbilityType::OFFENSIVE ? Color(1, 0, 0) : Color(0, 0, 1);
+			if (currentAbility == ability) {
+				iconColor = Color(0, 0, 0); 
+			}
 			std::vector<std::string> toBeRemoved = { "Projectile" };
 			std::string AbilityName = ability->GetName();
 			for (const std::string& word : toBeRemoved) {
