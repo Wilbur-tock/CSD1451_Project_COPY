@@ -13,8 +13,17 @@ namespace AudioManager {
         Credits
     };
 
+    enum class SFX {
+        UIButton,
+        CannonFire,
+        Impact,
+        TurnSwitch
+    };
+
     // Init once at game start
     void Init();
+
+    void Update();
 
     // Stop any playing music and cleanup
     void Shutdown();
@@ -25,10 +34,11 @@ namespace AudioManager {
     // Stop background music
     void StopBGM();
 
-    // Optional: set output volume [0.0 .. 1.0]
+    void PlaySFX(SFX sfx);
+
     void SetVolume(float v);
 
-    Track GetCurrentTrack();
+    float GetVolume();
 }
 
 #endif // AUDIO_MANAGER_HPP

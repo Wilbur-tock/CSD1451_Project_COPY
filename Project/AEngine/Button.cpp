@@ -2,6 +2,7 @@
 #include "AssetsManager.hpp"
 #include "CollisionManager.hpp"
 #include "GraphicsManager.hpp"
+#include "AudioManager.hpp"
 
 Button::Button(AEVec2 _pos, AEVec2 _size, Color _color, AEGfxTexture* _texture, Utils::FuncPtr _onClick)
     : pos{ _pos }, size{_size}, color{_color}, texture{_texture}, onClick{_onClick} {}
@@ -87,15 +88,16 @@ Button::Button(TextObject _textObj, Utils::AnchorMode _anchorMode, AEVec2 _pos, 
 }
 
 void Button::Update() {
-     isHovered = CollisionManager::IsPointInRect(pos.x, pos.y, size.x, size.y);
+    isHovered = CollisionManager::IsPointInRect(pos.x, pos.y, size.x, size.y);
 
-     if (isHovered) {
-         if (AEInputCheckTriggered(AEVK_LBUTTON) && onClick) {
-             onClick();
-         }
-     }
+    if (isHovered) {
+        if (AEInputCheckTriggered(AEVK_LBUTTON) && onClick) {
+            AudioManager::PlaySFX(AudioManager::SFX::UIButton);
+            onClick();
+        }
+    }
 
-     Draw();
+    Draw();
 }
 
 void Button::Draw() {
