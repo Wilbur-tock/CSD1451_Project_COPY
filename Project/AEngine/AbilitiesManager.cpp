@@ -132,10 +132,10 @@ namespace AbilitiesManager {
 	// Load the starting abilities for the player and AI
 	void AbilityController::LoadStartingAbilities() {
 		if (!isAIController) { // Load player starting Abilities
-			AddAbility(0);
-			AddAbility(1);
-			AddAbility(2);
-			AddAbility(3);
+			AddAbility(AbilityRandomisator(offensiveAbilities).Id());
+			AddAbility(AbilityRandomisator(offensiveAbilities).Id());
+			AddAbility(AbilityRandomisator(defensiveAbilities).Id());
+			AddAbility(AbilityRandomisator(defensiveAbilities).Id());
 		}
 
 		std::cout << "[AbilitiesManager] List of starting abilities:" << '\n';
