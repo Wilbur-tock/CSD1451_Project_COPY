@@ -4,13 +4,13 @@
 #include "pch.hpp"
 #include "Color.hpp"
 
-struct Transform; 
+struct Transform;
 
 namespace Utils {
 	extern bool isDebuggerOn;
 	extern bool isInstructionOn;
 	extern bool isPaused;                                          // <-- NEW (pause menu)
-	extern bool returnToPause;                                     // <-- NEW (settings->pause return)
+	extern bool isSettingsOpen;                                     // settings overlay inside pause menu
 	extern float unpauseCooldown;                                  // <-- NEW (input delay after resume)
 	extern std::pair<float, Color> debuggerInfo; // Store the text scale and color
 	typedef std::function<void()> FuncPtr;

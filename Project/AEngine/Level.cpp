@@ -9,6 +9,7 @@
 #include "CameraManager.hpp"
 #include "LevelManager.hpp"
 #include "PhysicsManager.hpp"
+#include "AudioManager.hpp"
 
 #include "UIManager.hpp"
 #include "TextObject.hpp"
@@ -306,6 +307,7 @@ void Level::SetTurn(bool _isPlayerTurn) {
 		activeCannon = &enemyCannon;
 	}
 	activeCannon->ResetTurn();
+	AudioManager::PlaySFX(AudioManager::SFX::TurnSwitch);
 	std::cout << "[Level] Switch to " << std::string(isPlayerTurn ? "PLAYER" : "ENEMY") << " turn" << '\n';
 }
 

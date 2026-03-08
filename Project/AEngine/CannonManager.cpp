@@ -12,6 +12,7 @@
 #include "UIManager.hpp"
 #include "LevelManager.hpp"
 #include "PhysicsManager.hpp"
+#include "AudioManager.hpp"
 
 namespace CannonManager {
     Cannon::Cannon(AEVec2 _pos, AEGfxTexture* _texture, TileIndex _tileId, AEVec2 _size, bool _isShootingRight, bool _isPlayerControlled)
@@ -304,6 +305,8 @@ namespace CannonManager {
         activeProjectiles.push_back(projectile);
         activeProjectiles.back().id = static_cast<int>(activeProjectiles.size() - 1);
 
+        AudioManager::PlaySFX(AudioManager::SFX::CannonFire);
+
         // Set projectile ability effects here
         abilityController->UseAbility();
 
@@ -356,6 +359,7 @@ namespace CannonManager {
                             projectile.DamageTile(x, y);
 
                             if (!projectile.collisionTriggered) {
+                                AudioManager::PlaySFX(AudioManager::SFX::Impact);
                                 // If the projectile hit something, REDUCE the velocity by a percentage for the FIRST COLLISION ONLY
                                 // So that it does not continue having the same projectile velocity even if it hits and destroy something
                                 float percentage = 0.5f;

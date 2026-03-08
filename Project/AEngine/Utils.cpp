@@ -8,7 +8,7 @@ namespace Utils {
 	bool isDebuggerOn = true;
 	bool isInstructionOn = false;
 	bool isPaused = false;                                         // <-- NEW
-	bool returnToPause = false;                                    // <-- NEW
+	bool isSettingsOpen = false;                                    // settings overlay inside pause menu
 	float unpauseCooldown = 0.0f;                                  // <-- NEW
 	Color debuggerColor = Color{ 0,1.f,0 };
 
