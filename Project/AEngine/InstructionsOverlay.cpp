@@ -81,8 +81,8 @@ namespace UIInstructionsOverlay {
                 "MAIN MENU\n"
                 "[1] Play\n"
                 "[2] Map Editor\n"
-                "[3] Credits\n"
-                "[4] Settings\n"
+                "[3] Settings\n"
+                "[4] Credits\n"
                 "[Q] Quit\n";
         }
         else if (current == GameState::CREDITS) {

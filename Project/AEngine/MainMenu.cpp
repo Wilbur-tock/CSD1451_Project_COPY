@@ -35,15 +35,16 @@ namespace MainMenu {
         isInitialized = true;
 
         // Button dimensions
-        float btnWidth = 300.0f;
-        float btnHeight = 80.0f;
-        float btnSpacing = 100.0f;
+        float btnWidth = 300.0f;   // Width of every button in world units.
+        float btnHeight = 80.0f;   // Height of every button in world units.
+        float btnSpacing = 100.0f; // Vertical gap between button tops.
 
         // Calculate centered positions
         float centerX = -550.0f;  // Center of screen in world coordinates
         float startY = 200.0f; // Starting Y position for first button
 
         // Create Play Button
+        // Transitions to LEVEL_1. Blue tint
         AEVec2 playPos = { centerX - btnWidth / 2.0f, startY };
         playButton = Button(
             TextObject{ "PLAY" },
@@ -56,7 +57,8 @@ namespace MainMenu {
         );
 
         // Create Map Editor Button
-        AEVec2 editorPos = { centerX - btnWidth / 2.0f, startY - btnSpacing };
+        // Transitions to MAP_EDITOR. Green tint
+        AEVec2 editorPos = { centerX - btnWidth / 2.0f, startY - btnSpacing }; // One spacing unit below the Play button.
         mapEditorButton = Button(
             TextObject{ "MAP EDITOR" },
             Utils::AnchorMode::CENTER,
@@ -68,7 +70,8 @@ namespace MainMenu {
         );
 
         // Create Settings Button
-        AEVec2 settingsPos = { centerX - btnWidth / 2.0f, startY - btnSpacing * 2 };
+        // Transitions to SETTINGS. Yellow tint
+        AEVec2 settingsPos = { centerX - btnWidth / 2.0f, startY - btnSpacing * 2 }; // Two spacing units below Play.
         settingsButton = Button(
             TextObject{ "SETTINGS" },
             Utils::AnchorMode::CENTER,
@@ -80,7 +83,8 @@ namespace MainMenu {
         );
 
         // Create Credits Button
-        AEVec2 creditsPos = { centerX - btnWidth / 2.0f, startY - btnSpacing * 3 };
+        // Transitions to CREDITS. Purple tint
+        AEVec2 creditsPos = { centerX - btnWidth / 2.0f, startY - btnSpacing * 3 }; // Three spacing units below Play.
         creditsButton = Button(
             TextObject{ "CREDITS" },
             Utils::AnchorMode::CENTER,
@@ -92,7 +96,8 @@ namespace MainMenu {
         );
 
         // Create Quit Button
-        AEVec2 quitPos = { centerX - btnWidth / 2.0f, startY - btnSpacing * 4 };
+        // Sets GameState to QUIT. Red tint
+        AEVec2 quitPos = { centerX - btnWidth / 2.0f, startY - btnSpacing * 4 }; // Four spacing units below Play; bottom of the column.
         quitButton = Button(
             TextObject{ "QUIT" },
             Utils::AnchorMode::CENTER,
@@ -103,22 +108,27 @@ namespace MainMenu {
             OnQuitClicked
         );
 
+        // Game title text
+        // Position is in normalized screen space (0 > 1 range mapped to screen)
+        // Scale and color are re-written every frame by the animation in Update(),
         gameTitle = { "FORTRESS FIGHT",
             2.5f,
             Color(0.0f, 0.0f, 0.0f, 1.0f),  // White color
             { 0.1f, 0.75f }, // position (normalized)
         };
 
+        // Keyboard shortcut hint
+        // Rendered at the very bottom of the screen in small text
         instructions = {
-    "Click a button or use keyboard shortcuts:\n1 - Play Game | 2 - Map Editor | 3 - Credits | 4 - Settings | Q - Quit",
-    0.7f,
-    Color(0.0f, 0.0f, 0.0f, 1.0f),
-    { -0.98f, -0.9f },
+        "Click a button or use keyboard shortcuts:\n1 - Play Game | 2 - Map Editor | 3 - Settings | 4 - Credits | Q - Quit",
+        0.7f,
+        Color(0.0f, 0.0f, 0.0f, 1.0f),
+        { -0.98f, -0.9f },
         };
 
         // Reset camera to orgin pos and can't move
-        CameraManager::camera.SetPosition({ 0, 0 });
-        CameraManager::camera.SetState(CameraManager::CameraController::STATIC);
+        CameraManager::camera.SetPosition({ 0, 0 }); // Move the camera to the world origin so UI world-space coordinates map directly to screen positions.
+        CameraManager::camera.SetState(CameraManager::CameraController::STATIC); // Prevent the camera from moving; keeps UI elements from drifting.
     }
 
     void Draw() {
@@ -165,7 +175,7 @@ namespace MainMenu {
             flashAlpha
         );
 
-        // Keyboard shortcuts with sfx
+        // Keyboard shortcuts with sfx (on keyPressed, not held)
         if (AEInputCheckTriggered(AEVK_1)) {
             AudioManager::PlaySFX(AudioManager::SFX::UIButton);
             OnPlayClicked();
@@ -176,23 +186,25 @@ namespace MainMenu {
         }
         if (AEInputCheckTriggered(AEVK_3)) {
             AudioManager::PlaySFX(AudioManager::SFX::UIButton);
-            OnCreditsClicked();
+            OnSettingsClicked();
         }
         if (AEInputCheckTriggered(AEVK_4)) {
             AudioManager::PlaySFX(AudioManager::SFX::UIButton);
-            OnSettingsClicked();
+            OnCreditsClicked();
         }
         if (AEInputCheckTriggered(AEVK_Q)) {
             AudioManager::PlaySFX(AudioManager::SFX::UIButton);
             OnQuitClicked();
         }
 
-        Draw();
+        Draw(); // Render background, title, and instructions for this frame before buttons draw on top.
 
+        // Each button's Update() checks whether the mouse cursor is hovering over it,
+        // Draws the button with the appropriate highlight state, and fires its callback if clicked.
         playButton.Update();
         mapEditorButton.Update();
-        creditsButton.Update();
         settingsButton.Update();
+        creditsButton.Update();
         quitButton.Update();
     }
 
@@ -207,6 +219,8 @@ namespace MainMenu {
     }
 
     // Button callback functions
+    // Writing to GameStateManager::next does not switch states immediately.
+    // The game loop reads next at the end of the frame and performs the transition then.
     void OnPlayClicked() {
         // Transition to Level 1
         GameStateManager::next = GameStateManager::GameState::LEVEL_1;
@@ -217,14 +231,14 @@ namespace MainMenu {
         GameStateManager::next = GameStateManager::GameState::MAP_EDITOR;
     }
 
-    void OnCreditsClicked() {
-        // Transition to Credits screen
-        GameStateManager::next = GameStateManager::GameState::CREDITS;
-    }
-
     void OnSettingsClicked() {
         // Transition to Settings screen
         GameStateManager::next = GameStateManager::GameState::SETTINGS;
+    }
+
+    void OnCreditsClicked() {
+        // Transition to Credits screen
+        GameStateManager::next = GameStateManager::GameState::CREDITS;
     }
 
     void OnQuitClicked() {

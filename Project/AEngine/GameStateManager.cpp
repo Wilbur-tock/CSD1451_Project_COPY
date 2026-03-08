@@ -17,18 +17,23 @@
 #include "PauseMenu.hpp"                                           
 
 namespace GameStateManager {
-    Utils::FuncPtr gsLoad, gsIntialize, gsUpdate, gsDraw, gsFree, gsUnload;
-    GameState current, previous, next;
-    bool setNewState = false;
+    // State variables
+    Utils::FuncPtr gsLoad, gsIntialize, gsUpdate, gsDraw, gsFree, gsUnload; // Six function pointers
 
-    TextObject debugText;
+    GameState current, previous, next; // All three start uninitialised
 
-    // Helper: returns true when the current state supports pausing       // <-- NEW
-    static bool IsGameplayState() {                                       // <-- NEW
-        return current == GameState::LEVEL_1                              // <-- NEW
-            || current == GameState::LEVEL_2                              // <-- NEW
-            || current == GameState::MAP_EDITOR;                          // <-- NEW
-    }                                                                     // <-- NEW
+    bool setNewState = false;   // One-shot flag that becomes true the first frame a transition is detected
+                                // Prevents Loading::Init() from resetting the loading timer on every frame of the transition
+
+    TextObject debugText;       // Reusable TextObject for the debugger overlay
+    
+
+    // IsGameplayState (private helper), returns true if state supports pausing
+    static bool IsGameplayState() {
+        return current == GameState::LEVEL_1
+            || current == GameState::LEVEL_2
+            || current == GameState::MAP_EDITOR;
+    }
 
     void Load() {
         // Start with main menu
@@ -39,51 +44,60 @@ namespace GameStateManager {
         gsLoad = gsIntialize = gsUpdate = gsDraw = gsFree = gsUnload = nullptr;
 
         // Load all resources
-        AssetsManager::Load();
-        UICursor::Load();
-        GraphicsManager::Load();
-        LevelManager::Load();
-        MapManager::Load();
-        MainMenu::Load();
-        Credits::Load();
-        AudioManager::Init();
-        AudioManager::SetVolume(0.35f);
+        AssetsManager::Load(); // Must run before any state that calls GetTexture, including MainMenu::Load() below
+
+        UICursor::Load();               // Load the custom cursor texture
+                                        // Done globally so the cursor is always available regardless of state.
+        GraphicsManager::Load();        // Initialise the AEGfx rendering pipeline
+        LevelManager::Load();           // Pre-load level data structures so level transitions are fast
+        MapManager::Load();             // Load the tile map data needed by both LevelManager and MapEditor
+        MainMenu::Load();               // Pre-load the main menu's button and background textures into the asset cache
+        Credits::Load();                // Pre-load any assets required by the credits screen
+
+        AudioManager::Init();           // Initialise the FMOD audio engine
+        AudioManager::SetVolume(0.35f); // Set the master volume to 35% at startup
 
         // Initialize camera controller
-        CameraManager::camera.Init();
-        CameraManager::camera.SetMoveSpeed(1500.0f);
+        CameraManager::camera.Init();   // Initialise the camera controller with default values
+        CameraManager::camera.SetMoveSpeed(1500.0f); // Set how fast the camera scrolls in world units per second
 
-        // Set world boundaries
+        // Set world boundariesm, prevents player from scolling outside the playable area
         CameraManager::camera.SetBounds(
-            Config::WORLD_MIN_X,
-            Config::WORLD_MAX_X,
-            Config::WORLD_MIN_Y,
-            Config::WORLD_MAX_Y
+            Config::WORLD_MIN_X, // Left boundary
+            Config::WORLD_MAX_X, // Right boundary
+            Config::WORLD_MIN_Y, // Bottom boundary
+            Config::WORLD_MAX_Y  // Top boundary
         );
 
-        setNewState = false;
-        Loading::Init();
+        setNewState = false; // Explicitly clear the transition flag at startup so the first Update() starts cleanly
 
-        PauseMenu::Init();                                                // <-- NEW
-        Settings::Load();                                                     // init settings overlay
-        Settings::Initialize();                                               // init settings overlay
+        Loading::Init();            // Initialise the loading screen timer and animation variables
+
+        PauseMenu::Init();          // Build the pause menu's buttons and text objects once at startup, prevents construction delay
+        Settings::Load();           // Load assets needed by the settings screen
+        Settings::Initialize();     // Build the settings screen's UI elements
     }
 
     void Update() {
+        // Read the real elapsed time for this frame from the AE frame-rate controller
+        // so loading timers and audio keep running correctly even when the game is frozen
         float rawDt = static_cast<float>(AEFrameRateControllerGetFrameTime());
-        PhysicsManager::g_dt = rawDt;
-        AudioManager::Update();
+
+        PhysicsManager::g_dt = rawDt; // Copy rawDt into the physics delta-time 
+                                      // Setting it here first ensures physics runs at full speed during normal gameplay
+
+        AudioManager::Update(); // Pump the FMOD audio engine each frame. Must be called regardless of pause or transition state
 
         // Handle quit -- skip loading screen entirely 
         // When the Quit button sets next = QUIT, the very next frame hits the new check, 
         // immediately assigns current = QUIT, and returns no loading screen, no transition timer.
         if (next == GameState::QUIT || current == GameState::QUIT) {
-            current = next;
-            if (gsDraw != nullptr) gsDraw(); // render one last frame
+            current = next;  // Skips transition
+            if (gsDraw != nullptr) gsDraw(); // Renders one last frame
             return;
         }
 
-        // ================== STATE TRANSITION (LOADING SCREEN) ==================
+        // STATE TRANSITION (LOADING SCREEN) 
         if (next != current) {
             // Unpause when switching states so the new state starts clean
             Utils::isPaused = false;
@@ -169,13 +183,18 @@ namespace GameStateManager {
                 }
 
                 // IMPORTANT: call gsLoad before gsInitialize
+                // Initialize may reference assets that Load provides.
                 if (gsLoad != nullptr) {
                     gsLoad();
                 }
 
+                // Call the new state's Initialize() to build its scene objects using the loaded assets
                 if (gsIntialize != nullptr) {
                     gsIntialize();
                 }
+
+                // Start the correct background music for the new state
+                // Placed after gsLoad and gsIntialize so audio starts only once the state is fully ready
                 switch (current) {
                 case GameState::MAIN_MENU:
                     AudioManager::PlayBGM(AudioManager::Track::MainMenu);
@@ -210,9 +229,8 @@ namespace GameStateManager {
             // Always stop normal update/camera logic while transitioning
             return;
         }
-        // ======================================================================
 
-        // =================== PAUSE MENU (ESC) ================================
+        // PAUSE MENU (ESC)
         // Toggle pause only during gameplay states
         if (IsGameplayState() && !Utils::isInstructionOn && !Utils::isResultScreenOn) {
             if (AEInputCheckTriggered(AEVK_ESCAPE)) {
@@ -231,18 +249,17 @@ namespace GameStateManager {
 
             // Show either the settings overlay or the pause menu
             if (Utils::isSettingsOpen) {
-                Settings::Update();   // draws its own cursor before restoring camera
+                Settings::Update();   // Setting draws its own cursor before restoring camera
             }
             else {
                 PauseMenu::Update();
-                UICursor::Draw();
+                UICursor::Draw();     // Draw the custom cursor on top of everything after PauseMenu renders (prev bug)
             }
 
             return;
         }
-        // ======================================================================
 
-        // =================== UNPAUSE COOLDOWN =================================
+        // UNPAUSE COOLDOWN
         // Brief input-eating delay after resuming so the Resume click
         // does not register as a game action (e.g. firing a bullet).
         if (Utils::unpauseCooldown > 0.0f) {
@@ -257,7 +274,6 @@ namespace GameStateManager {
             UICursor::Draw();
             return;  // skip all normal input handling this frame
         }
-        // ======================================================================
 
         // Toggle instructions popup (only when NOT loading)
         if (AEInputCheckTriggered(AEVK_I)) {
@@ -310,10 +326,11 @@ namespace GameStateManager {
             return; // block camera movement while popup is open
         }
 
-        // Update camera
-        CameraManager::camera.Update(PhysicsManager::g_dt);
+        // Update the camera using g_dt 
+        CameraManager::camera.Update(PhysicsManager::g_dt); // freezes when physics freezes, consistent
     }
 
+    // Releases all globally owned resources in reverse dependency order
     void Exit() {
         MainMenu::Unload();
         AssetsManager::Unload();
