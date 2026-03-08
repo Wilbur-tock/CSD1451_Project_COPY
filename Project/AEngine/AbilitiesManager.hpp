@@ -51,7 +51,7 @@ namespace AbilitiesManager {
 		void AIAbilitySelection();
 
 		void AbilitySelector(bool& isOn);
-		void onClickAbilityCard(int abilityID, bool* isOn);
+		void onClickAbilityCard(Ability ability, bool* isOn);
 
 	private:
 
