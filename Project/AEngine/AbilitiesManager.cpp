@@ -103,8 +103,18 @@ namespace AbilitiesManager {
 			allAbilities.push_back(newAbil);
 		}
 
-		for (Ability ability : statsAbilities) { 
-			std::cout << "[AbilitiesManager] Loaded stats ability " << ability.Id() << " : " << ability.GetName() << std::endl; 
+		std::cout << "[AbilitiesManager] Successfully loaded " << statsAbilities.size() << " stats abilities." << std::endl;
+		std::cout << "[AbilitiesManager] Successfully loaded " << offensiveAbilities.size() << " offensive abilities." << std::endl;
+		std::cout << "[AbilitiesManager] Successfully loaded " << defensiveAbilities.size() << " defensive abilities." << std::endl;
+
+		LoadStartingAbilities();
+
+		//PrintAllAbilities();
+	}
+
+	void AbilityController::PrintAllAbilities() {
+		for (Ability ability : statsAbilities) {
+			std::cout << "[AbilitiesManager] Loaded stats ability " << ability.Id() << " : " << ability.GetName() << std::endl;
 		}
 		std::cout << "[AbilitiesManager] Successfully loaded " << statsAbilities.size() << " stats abilities." << std::endl;
 
@@ -117,8 +127,6 @@ namespace AbilitiesManager {
 			std::cout << "[AbilitiesManager] Loaded defensive ability " << ability.Id() << " : " << ability.GetName() << std::endl;
 		}
 		std::cout << "[AbilitiesManager] Successfully loaded " << defensiveAbilities.size() << " defensive abilities." << std::endl;
-
-		LoadStartingAbilities();
 	}
 
 	// Load the starting abilities for the player and AI
@@ -127,6 +135,7 @@ namespace AbilitiesManager {
 			AddAbility(0);
 			AddAbility(1);
 			AddAbility(2);
+			AddAbility(3);
 		}
 
 		std::cout << "[AbilitiesManager] List of starting abilities:" << '\n';
@@ -281,6 +290,33 @@ namespace AbilitiesManager {
 		}
 	}
 
+	// Return the type of ability that is lesser in inventory, 
+	// if 0 or equal then randomly return either offensive or defensive, 
+	// if one of them is lesser than the other, return that type
+	AbilityType AbilityController::OffensiveOrDefensive() {
+		int offensiveCount = 0;
+		int defensiveCount = 0;
+
+		for (Ability* ability : inventory) {
+			if (ability->GetType() == AbilityType::OFFENSIVE) {
+				offensiveCount++;
+			}
+			else if (ability->GetType() == AbilityType::DEFENSIVE) {
+				defensiveCount++;
+			}
+		}
+
+		if (offensiveCount == defensiveCount) {
+			return Utils::RandomValue(0, 1) == 0 ? AbilityType::OFFENSIVE : AbilityType::DEFENSIVE;
+		}
+		else if (offensiveCount < defensiveCount) {
+			return AbilityType::OFFENSIVE;
+		}
+		else {
+			return AbilityType::DEFENSIVE;
+		}
+	}
+
 	// Helper function to find and return the ability pointer based on the ability ID
 	Ability* AbilityController::FindAbility(int abilityId) {
 		for (Ability& ab : allAbilities) {
@@ -322,6 +358,81 @@ namespace AbilitiesManager {
 		ChangeAbility(abilityId);
 	}
 
+	const Ability AbilityController::AbilityRandomisator(const std::vector<Ability> &abilities) {
+		return abilities[Utils::RandomValue(0, static_cast<int>(abilities.size() - 1))];
+	}
+
+	// Randomly select abilities for the ability selector UI
+	void AbilityController::AbilitySelectionRandomisator() {
+
+		std::cout << "[AbilitiesManager] Randomising abilities for the selector..." << std::endl;
+
+		abilitiesCards.clear();
+
+		// Randomise Abilties
+		// Check inventory how many offensive and defensive abilities the player has and randomise based on that
+		std::cout << "[AbilitiesManager] Number of abilities in inventory: " << inventory.size() << std::endl;
+
+		if (inventory.size() == 5) {
+			std::cerr << "[AbilitiesManager] Enough abilities in inventory, randomise stats" << std::endl;
+			
+			// Currently only 3 stat cards so no need randomise, just push all 3 stat cards into the selector
+			for (int i = 0; i < 3; ++i) {
+				//abilitiesCards.push_back(AbilityRandomisator(statsAbilities));
+				abilitiesCards.push_back(statsAbilities[i]);
+			}
+		}
+		else {
+			std::cerr << "[AbilitiesManager] Not enough abilities in inventory, randomise offensive and defensive" << std::endl;
+			if (OffensiveOrDefensive() == AbilityType::OFFENSIVE) {
+				// 2 offensive and 1 defensive
+				abilitiesCards.push_back(AbilityRandomisator(offensiveAbilities));
+				abilitiesCards.push_back(AbilityRandomisator(offensiveAbilities));
+				abilitiesCards.push_back(AbilityRandomisator(defensiveAbilities));
+			}
+			else {
+				// 2 defensive and 1 offensive
+				abilitiesCards.push_back(AbilityRandomisator(defensiveAbilities));
+				abilitiesCards.push_back(AbilityRandomisator(defensiveAbilities));
+				abilitiesCards.push_back(AbilityRandomisator(offensiveAbilities));
+			}
+		}
+
+
+
+		if (abilitiesCards.size() != 3) {
+			std::cerr << "[AbilitiesManager] Incorrect abilities to display in selector!" << std::endl;
+
+			// Fallback to default abilities if there are not enough abilities to randomise
+			abilitiesCards.clear();
+			abilitiesCards.push_back(offensiveAbilities[0]);
+			abilitiesCards.push_back(offensiveAbilities[1]);
+			abilitiesCards.push_back(defensiveAbilities[0]);
+		}
+
+		// Display the randomised abilities in the console for testing purposes
+		int i = 1;
+		for (Ability ability : abilitiesCards) {
+			std::cout << "[AbilitiesManager] Ability Card " << i << " : "
+				<< ability.GetName()
+				<< " Type: "; 
+			switch (ability.GetType()) {
+			case AbilityType::STATISTICS:
+				std::cout << "Statistics";
+				break;
+			case AbilityType::OFFENSIVE:
+				std::cout << "Offensive";
+				break;
+			case AbilityType::DEFENSIVE:
+				std::cout << "Defensive";
+				break;
+			}
+			std::cout << std::endl;
+			i++;
+		}
+
+	}
+
 	// Display the ability selector UI for the player to select an ability
 	void AbilityController::AbilitySelector(bool& isOn) {
 		if (!isOn) return;
@@ -329,35 +440,16 @@ namespace AbilitiesManager {
 		//std::cout << "Player Selecting Abilities:\n";
 		CameraManager::camera.SetState(CameraManager::CameraController::STATIC);
 
-		// Randomise Abilties
-
-		// 2 offensive abilities for the player to choose from
-		// 1 defensive ability for the player to choose from
-
-		// randomise the attack abilities
-		
-		std::vector<Ability> abilitiesVec = {};
-
-		abilitiesVec.push_back(offensiveAbilities[0]);
-		abilitiesVec.push_back(offensiveAbilities[1]);
-		abilitiesVec.push_back(defensiveAbilities[0]);
-		
-
-
-		if (abilitiesVec.size() != 3) {
-			std::cerr << "[AbilitiesManager] Incorrect abilities to display in selector!" << std::endl;
-		}
-
 		UIManager::Panel background{ {1400.0f, 700.0f}, Color(0.6196f, 0.6196f, 0.6196f, 1.0f), Utils::AnchorMode::CENTER };
 		background.Draw();
 
 		AEVec2 cardSize{ CARD_WIDTH, CARD_HEIGHT }; // width and height
-		float gap = (1400.0f - (cardSize.x * abilitiesVec.size())) / (abilitiesVec.size() + 1);
+		float gap = (1400.0f - (cardSize.x * abilitiesCards.size())) / (abilitiesCards.size() + 1);
 		AEVec2 cardPos{ -cardSize.x * 1.5f - gap, cardSize.y / 2.0f };
 
 		int id = 1;
 
-		for (Ability ability : abilitiesVec) {
+		for (Ability ability : abilitiesCards) {
 			//std::cout << ability.GetName() << '\n';
 			AEGfxTexture* imageTexture = ability.GetTexture() == "" ? AssetsManager::squareTexture : AssetsManager::GetTexture(ability.GetTexture().c_str());
 			Card card{ ability.GetName(), cardPos, Color(1,0,0), AssetsManager::squareTexture, imageTexture, [this, ability, &isOn]() { onClickAbilityCard(ability, &isOn);  }};

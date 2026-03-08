@@ -51,8 +51,32 @@
         "Texture": "Assets/Card_Add_Health.png",
         "Base_Stats": {
             "HP": 50,
-            "ATK": 50,
+            "ATK": 0,
+            "DEF": 0
+        }
+    },
+
+    {
+        "Name": "DEF",
+        "Type": 1,
+        "Tier": 1,
+        "Texture": "",
+        "Base_Stats": {
+            "HP": 0,
+            "ATK": 0,
             "DEF": 50
+        }
+    },
+
+    {
+        "Name": "ATK",
+        "Type": 1,
+        "Tier": 1,
+        "Texture": "",
+        "Base_Stats": {
+            "HP": 0,
+            "ATK": 50,
+            "DEF": 0
         }
     },
 
