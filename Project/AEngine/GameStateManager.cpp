@@ -14,7 +14,7 @@
 #include "AudioManager.hpp"
 #include "InstructionsOverlay.hpp"
 #include "Loading.hpp"
-#include "PauseMenu.hpp"                                           
+#include "PauseMenu.hpp" 
 
 namespace GameStateManager {
     // State variables
@@ -28,12 +28,8 @@ namespace GameStateManager {
     TextObject debugText;       // Reusable TextObject for the debugger overlay
     
 
-    // IsGameplayState (private helper), returns true if state supports pausing
-    static bool IsGameplayState() {
-        return current == GameState::LEVEL_1
-            || current == GameState::LEVEL_2
-            || current == GameState::MAP_EDITOR;
-    }
+    static void DebugCommands();
+    static void DebugUI();
 
     void Load() {
         // Start with main menu
@@ -58,16 +54,7 @@ namespace GameStateManager {
         AudioManager::SetVolume(0.35f); // Set the master volume to 35% at startup
 
         // Initialize camera controller
-        CameraManager::camera.Init();   // Initialise the camera controller with default values
-        CameraManager::camera.SetMoveSpeed(1500.0f); // Set how fast the camera scrolls in world units per second
-
-        // Set world boundariesm, prevents player from scolling outside the playable area
-        CameraManager::camera.SetBounds(
-            Config::WORLD_MIN_X, // Left boundary
-            Config::WORLD_MAX_X, // Right boundary
-            Config::WORLD_MIN_Y, // Bottom boundary
-            Config::WORLD_MAX_Y  // Top boundary
-        );
+        CameraManager::camera.Init();
 
         setNewState = false; // Explicitly clear the transition flag at startup so the first Update() starts cleanly
 
@@ -75,7 +62,6 @@ namespace GameStateManager {
 
         PauseMenu::Init();          // Build the pause menu's buttons and text objects once at startup, prevents construction delay
         Settings::Load();           // Load assets needed by the settings screen
-        Settings::Initialize();     // Build the settings screen's UI elements
     }
 
     void Update() {
@@ -291,32 +277,8 @@ namespace GameStateManager {
             gsUpdate();
         }
 
-        // Global shortcuts should not trigger while instructions are open
-        if (!Utils::isInstructionOn) {
-            // Toggle debugger
-            if (AEInputCheckTriggered(AEVK_P)) {
-                Utils::isDebuggerOn = !Utils::isDebuggerOn;
-            }
-
-            // Return to main menu
-            if (AEInputCheckTriggered(AEVK_M)) {
-                AudioManager::PlaySFX(AudioManager::SFX::UIButton);
-                next = GameState::MAIN_MENU;
-            }
-        }
-
-        // Debugger display
-        if (Utils::isDebuggerOn && !Utils::isInstructionOn) {
-            UIManager::Panel debuggerPanel{ {200, 75}, {1.0f,1.0f,1.0f, 0.75f}, Utils::AnchorMode::BOTTOM_LEFT };
-            debugText = { "", Utils::debuggerInfo.first * 0.75f, Utils::debuggerInfo.second, {-1.f, -0.81f} };
-
-            debuggerPanel.Draw();
-
-            debugText.textContent = "\n[P] Debugger ON\nFPS: " + Utils::FormatFloat(AEFrameRateControllerGetFrameRate(), 2)
-                + "\nDeltaTime: " + Utils::FormatFloat(rawDt, 2)
-                + "\n[M] Main Menu";
-            debugText.Draw();
-        }
+        DebugCommands();
+        DebugUI();
 
         UICursor::Draw();
 
@@ -338,5 +300,33 @@ namespace GameStateManager {
         GraphicsManager::Unload();
         MapManager::Unload();
         AudioManager::Shutdown();
+    }
+
+    static void DebugCommands() {
+        // Toggle debugger
+        if (AEInputCheckTriggered(AEVK_TAB)) {
+            Utils::isDebuggerOn = !Utils::isDebuggerOn;
+            std::cout << static_cast<std::string>(Utils::isDebuggerOn ? "DEBUGGER ON\n" : "DEBUGGER OFF\n");
+        }
+
+        // Return to main menu
+        if (AEInputCheckTriggered(AEVK_M)) {
+            AudioManager::PlaySFX(AudioManager::SFX::UIButton);
+            next = GameState::MAIN_MENU;
+        }
+    }
+
+    static void DebugUI() {
+        if (!Utils::isDebuggerOn) return;
+
+        UIManager::Panel debuggerPanel{ {200, 75}, {1.0f,1.0f,1.0f, 0.75f}, Utils::AnchorMode::BOTTOM_LEFT };
+        debugText = { "", Utils::debuggerInfo.first * 0.75f, Utils::debuggerInfo.second, {-1.f, -0.81f} };
+
+        debuggerPanel.Draw();
+
+        debugText.textContent = "\n[P] Debugger ON\nFPS: " + Utils::FormatFloat(AEFrameRateControllerGetFrameRate(), 2)
+            + "\nDeltaTime: " + Utils::FormatFloat(PhysicsManager::g_dt, 2)
+            + "\n[M] Main Menu";
+        debugText.Draw();
     }
 }

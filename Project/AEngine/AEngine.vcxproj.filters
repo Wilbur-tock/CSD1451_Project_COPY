@@ -314,11 +314,11 @@
     <ClInclude Include="Settings.hpp">
       <Filter>Header Files\Game States</Filter>
     </ClInclude>
-    <ClInclude Include="Pausemenu.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="json.hpp">
       <Filter>Header Files\External Library</Filter>
+    </ClInclude>
+    <ClInclude Include="Pausemenu.hpp">
+      <Filter>Header Files\Game States</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

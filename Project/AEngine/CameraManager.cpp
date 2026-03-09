@@ -51,6 +51,16 @@ namespace CameraManager
         followTarget = nullptr;
 
         AEGfxSetCamPosition(position.x, position.y);
+
+        camera.SetMoveSpeed(1500.0f); // Set how fast the camera scrolls in world units per second
+
+        // Set world boundariesm, prevents player from scolling outside the playable area
+        camera.SetBounds(
+            Config::WORLD_MIN_X, // Left boundary
+            Config::WORLD_MAX_X, // Right boundary
+            Config::WORLD_MIN_Y, // Bottom boundary
+            Config::WORLD_MAX_Y  // Top boundary
+        );
     }
 
     void CameraController::Update(float dt)
