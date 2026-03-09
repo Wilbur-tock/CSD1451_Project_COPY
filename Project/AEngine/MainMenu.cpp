@@ -5,6 +5,7 @@
 #include "CollisionManager.hpp"
 #include "Utils.hpp"
 #include "AudioManager.hpp"
+#include "CameraManager.hpp"
 
 namespace MainMenu {
     // Menu buttons

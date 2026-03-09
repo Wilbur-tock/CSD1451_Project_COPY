@@ -3,7 +3,6 @@
 
 #include "pch.hpp"
 #include "Utils.hpp"
-#include "CameraManager.hpp"
 
 namespace GameStateManager {
 	enum class GameState {
@@ -22,19 +21,11 @@ namespace GameStateManager {
 	extern Utils::FuncPtr gsLoad, gsIntialize, gsUpdate, gsDraw, gsFree, gsUnload;
 	extern GameState current, previous, next;
 
-	// IsGameplayState (private helper), returns true if state supports pausing
-	static bool IsGameplayState() {
-		return current == GameState::LEVEL_1
-			|| current == GameState::LEVEL_2
-			|| current == GameState::MAP_EDITOR;
-	}
-
 	void Load();
 
 	void Update();
 
 	void Exit();
-
 }
 
 #endif //

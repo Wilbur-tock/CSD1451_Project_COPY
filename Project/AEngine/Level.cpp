@@ -1,6 +1,5 @@
 #include "Level.hpp"
 
-#include "AEInput.h"
 #include "AssetsManager.hpp"
 #include "MapManager.hpp"
 #include "Color.hpp"

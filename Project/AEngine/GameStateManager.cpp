@@ -2,6 +2,7 @@
 #include "MapManager.hpp"
 #include "MapEditor.hpp"
 #include "CannonManager.hpp"
+#include "CameraManager.hpp"
 #include "GraphicsManager.hpp"
 #include "AssetsManager.hpp"
 #include "LevelManager.hpp"
@@ -26,7 +27,13 @@ namespace GameStateManager {
                                 // Prevents Loading::Init() from resetting the loading timer on every frame of the transition
 
     TextObject debugText;       // Reusable TextObject for the debugger overlay
-    
+
+    // IsGameplayState (private helper), returns true if state supports pausing
+    static bool IsGameplayState() {
+        return current == GameState::LEVEL_1
+            || current == GameState::LEVEL_2
+            || current == GameState::MAP_EDITOR;
+    }
 
     static void DebugCommands();
     static void DebugUI();

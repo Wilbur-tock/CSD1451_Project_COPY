@@ -1,6 +1,7 @@
 #include "MapEditor.hpp"
 
 #include "MapManager.hpp"
+#include "CameraManager.hpp"
 #include "GraphicsManager.hpp"
 #include "AssetsManager.hpp"
 #include "Utils.hpp"
