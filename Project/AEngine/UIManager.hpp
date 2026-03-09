@@ -34,8 +34,9 @@ namespace UIManager {
 		// Draw a panel based on the rect mode with the the WORLD COORDINATES (0,0) as origin
 		Panel(AEVec2 _size, Color _color = { 1,1,1 }, Utils::AnchorMode _anchorMode = Utils::AnchorMode::CENTER, AEGfxTexture* _texture = nullptr);
 
-		AEVec2 Pos() const;
-		AEVec2 Size() const;
+		AEVec2 Pos() const { return transform.pos; }
+		void AddOffset(AEVec2 const& _pos) { transform.pos.x += _pos.x , transform.pos.y += _pos.y; }
+		AEVec2 Size() const { return transform.size; }
 
 		// Assign a parent panel/object to this panel object and it will set its position 
 		// based on the parent object and its rectMode

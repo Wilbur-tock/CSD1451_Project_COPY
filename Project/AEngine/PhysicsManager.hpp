@@ -14,6 +14,8 @@ namespace PhysicsManager {
 	constexpr float BIAS = 0.01f;
 	constexpr float BOUNCE = -0.1f; // Negative value because when moving left x velocity is negative -*- = positve (moving right)
 
+	// Calculate the ideal cannonAngle and shotPower to hit the target
+	void PerfectShotCalculation(Transform const& current, Transform const& target, float& cannonAngle, float& shotPower);
 	void ResolveHorizontalCollision(Transform& obj, AEVec2& velocity, Transform const& tileTransform);
 	void ResolveVerticalCollision(Transform& obj, AEVec2& velocity, bool& isGrounded, Transform const& tileTransform);
 	bool IsGrounded(Transform const& obj, Transform const& tile);

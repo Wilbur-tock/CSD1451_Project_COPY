@@ -154,13 +154,9 @@ void Level::Update() {
 
 	if (status == LevelStatus::PLAYING) {
 		if (!isPlayerTurn && !enemyCannon.IsTargetAlive()) {
+			std::cout << "[Level]" << '\n';
 			// Find new target if current target is not alive
-			for (Character& playerChars : playerCharacters) {
-				if (playerChars.attribute.IsActive()) {
-					enemyCannon.SetTarget(&playerChars);
-					break;
-				}
-			}
+			enemyCannon.SetTarget(RandomCharacterObj(true));
 		}
 
 		if (activeCannon) {
@@ -198,7 +194,8 @@ void Level::Update() {
 	}
 
 	// UI
-	if (isPlayerTurn) AbilitiesManager::playerAbilityController.abilityUI();
+	if (isPlayerTurn) AbilitiesManager::playerAbilityController.AbilityUI();
+	DrawUI();
 
 	Debugger();
 
@@ -221,15 +218,13 @@ void Level::Draw() {
 	playerCannon.Draw();
 	enemyCannon.Draw();
 
-	DrawUI();
+	//DrawUI();
 }
 
 void Level::Free() {
 }
 
 void Level::DrawUI() {
-	activeCannon->DrawUI();
-
 	// UI to display whose turn it is
 	UIManager::Panel turnStatusPanel{ {150,50}, {1,1,1}, Utils::AnchorMode::TOP_CENTER };
 	turnStatusPanel.Draw();
@@ -258,6 +253,8 @@ void Level::DrawUI() {
 	GetCurrentHP(currentHP, false);
 	GetMaxHP(maxHP, false);
 	enemyHPBar.Draw(currentHP, maxHP);
+
+	activeCannon->DrawUI();
 }
 
 void Level::GetCurrentHP(float& currentHP, bool isGettingPlayerHP) {
@@ -336,7 +333,8 @@ void Level::UpdateLevelStatus() {
 	GetCurrentHP(currentPlayerHP, true);
 	GetCurrentHP(currentEnemyHP, false);
 
-	if (currentEnemyHP <= 0) status = LevelStatus::PLAYER_WON;
+	// All the enemies and boss are dead or only the boss are dead player will won
+	if (EnemyBoss()->attribute.Health() <= 0 || currentEnemyHP <= 0) status = LevelStatus::PLAYER_WON;
 	if (currentPlayerHP <= 0) status = LevelStatus::ENEMY_WON;
 }
 
@@ -539,6 +537,8 @@ void Level::Debugger() {
 
 		debug += info;
 
+		UIManager::Panel{ {350, 500}, {1,1,1, 0.8f}, Utils::AnchorMode::TOP_LEFT }.Draw();
+
 		debugText.textContent = debug;
 		debugText.Draw();
 	}
@@ -568,4 +568,14 @@ Character* Level::FindEnemyCharacterObj(int characterId) {
 Character* Level::FindPlayerCharacterObj(int characterId) {
 	if (characterId < 0) return nullptr;
 	return &playerCharacters[characterId];
+}
+
+Character* Level::RandomCharacterObj(bool isPlayerObj) {
+	std::vector<Character>& characters = isPlayerObj ? playerCharacters : enemies;
+
+	if (characters.empty()) return nullptr;
+
+	int id = Utils::RandomValue(0, static_cast<int>(characters.size() - 1));
+	std::cout << "Found " << characters[id].TypeName() << '\n';
+	return &characters[id];
 }

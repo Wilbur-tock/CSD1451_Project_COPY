@@ -45,7 +45,11 @@ namespace AbilitiesManager {
 		// if the ability type is an offensive which affects the projectile
 		int FindProjectileId();
 
-		// True to toggle through all abilities or false to toggle through of all the active abilities this controller has in its inventory
+		// Reset to default ability if current ability if an offensive and charges remaining is 0 to 
+		// ensure that an ability with 0 charges cannot be used again
+		void ResetAbility();
+		// True to toggle through all abilities or 
+		// false to toggle through of all the inventory abilities this controller has
 		void ToggleAbility(bool isAllAbilities);
 
 		// AI Member functions
@@ -57,7 +61,7 @@ namespace AbilitiesManager {
 		void AbilitySelector(bool& isOn);
 		void onClickAbilityCard(Ability ability, bool* isOn);
 
-		void abilityUI();
+		void AbilityUI();
 
 	private:
 

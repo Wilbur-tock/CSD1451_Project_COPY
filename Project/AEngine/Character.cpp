@@ -5,6 +5,7 @@
 #include "AssetsManager.hpp"
 #include "PhysicsManager.hpp"
 #include "Utils.hpp"
+#include "CollisionManager.hpp"
 
 namespace {
 	// ---- Change these paths to your real filenames if different ----
@@ -130,9 +131,30 @@ void Character::Draw() {
 	GraphicsManager::DrawGameObject(*this);
 
 	// UI
-	float x = transform.pos.x, y = transform.pos.y + transform.size.y;
-	UIManager::Bar bar{ { x - transform.size.x * 0.5f, y}, { transform.size.x, 10 }, Color{1,0,0} };
-	bar.Draw(static_cast<float>(attribute.Health()), static_cast<float>(attribute.MaxHealth()), false);
+	float x = transform.pos.x - transform.size.x * 0.5f, y = transform.pos.y + transform.size.y;
+	UIManager::Bar healthBar{ { x, y}, { transform.size.x, 10 }, Color{1,0,0} };
+	healthBar.Draw(static_cast<float>(attribute.Health()), static_cast<float>(attribute.MaxHealth()), false);
+
+	if (attribute.Shield() > 0) {
+		float width = 5;
+		UIManager::Bar shieldBar{ {x,y + width + 2.5f} , { transform.size.x, width }, Color{1.0f,1.0f,0 } };
+		shieldBar.Draw(static_cast<float>(attribute.Shield()), static_cast<float>(attribute.MaxShield()), false);
+	}
+
+	//if (CollisionManager::IsPointInGameObject(*this)) {
+	//	float w = 250, h = 100;
+	//	UIManager::Panel statsPanel{ {w,h}, {1,1,1}, Utils::AnchorMode::TOP_LEFT };
+	//	statsPanel.AddOffset({0,-25});
+	//	statsPanel.Draw();
+
+	//	UIManager::Bar statsPanelHPBar{ statsPanel.Pos(), {w,15}, {1,0,0} };
+	//	statsPanelHPBar.Draw(static_cast<float>(attribute.Health()), static_cast<float>(attribute.MaxHealth()));
+
+	//	if (attribute.Shield() > 0) {
+	//		UIManager::Bar shieldBar{ {statsPanel.Pos().x, statsPanel.Pos().y - 15} , {w, 10}, Color{1.0f,1.0f,0}};
+	//		shieldBar.Draw(static_cast<float>(attribute.Shield()), static_cast<float>(attribute.MaxShield()));
+	//	}
+	//}
 }
 
 void Character::DebugInfo(std::string& str) {
@@ -145,21 +167,24 @@ void Character::DebugInfo(std::string& str) {
 		+ "\nPos x: " + Utils::FormatFloat(transform.pos.x, 2) + " y: " + Utils::FormatFloat(transform.pos.y, 2)
 		+ "\nSize x: " + Utils::FormatFloat(transform.size.x, 2) + " y: " + Utils::FormatFloat(transform.size.x, 2)
 		+ "\nIsGrounded: " + static_cast<std::string>(physics.IsGrounded() ? "true" : "false")
-		+ "\n\nStats:\nHP: " + std::to_string(attribute.Health()) + " Max HP: " + std::to_string(attribute.MaxHealth())
+		+ "\n\nStats:\nHP: " + std::to_string(attribute.Health()) + "/" + std::to_string(attribute.MaxHealth())
 		+ "\nDamage Multiplier: " + std::to_string(attribute.DamageMultiplier())
-		+ "\nShield: " + std::to_string(attribute.Shield());
+		+ "\nShield: " + std::to_string(attribute.Shield()) + "/" + std::to_string(attribute.MaxShield());
 }
 
 void Character::SetStats(int difficultyLevel) {
 	if (type == CharacterType::ENEMY_BOSS) {
-		++difficultyLevel; // Easy mode = 0, so plus 1
-		int maxHP = 100 * difficultyLevel;
+		int multipler = difficultyLevel + 1; 
+		int maxHP = 100 * multipler;
 		attribute.MaxHealth(maxHP);
 		attribute.Health(maxHP);
-		attribute.Shield(10 * difficultyLevel);
+
+		int shield = 10 * multipler;
+		attribute.Shield(shield);
+		attribute.MaxShield(shield);
 
 		float dmgReduc = 0.0f;
-		switch (difficultyLevel) {
+		switch (multipler) {
 		case 2:
 			dmgReduc = 0.25f;
 			break;

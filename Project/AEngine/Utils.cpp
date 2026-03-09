@@ -55,14 +55,14 @@ namespace Utils {
 		float worldMouseX = 0, worldMouseY = 0;
 		Utils::GetWorldMousePos(worldMouseX, worldMouseY);
 
-		GetGridIndex(x, y, { worldMouseX, worldMouseY });
+		GetTileIndex(x, y, { worldMouseX, worldMouseY });
 
 		// This is to ensure that the grid index does not go out of range
 		x = std::clamp(x, Config::MIN_GRID_X, Config::MAX_GRID_X);
 		y = std::clamp(y, Config::MIN_GRID_Y, Config::MAX_GRID_Y);
 	}
 
-	void GetGridIndex(int& x, int& y, AEVec2 const worldPos) {
+	void GetTileIndex(int& x, int& y, AEVec2 const worldPos) {
 		x = static_cast<int>((worldPos.x + Config::WORLD_MAX_X) / Config::TILE_SIZE);
 		y = static_cast<int>((Config::WORLD_MAX_Y - worldPos.y) / Config::TILE_SIZE);
 	}

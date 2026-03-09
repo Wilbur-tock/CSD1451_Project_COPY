@@ -21,10 +21,6 @@ namespace CannonManager {
 		// Member Functions
 
 		void SetAbilityController(AbilitiesManager::AbilityController* controller);
-		// Initialize all the different type of projectile abilities to the CANNON CLASS
-		// Switch between the projectileId to choose the different type of projectile abilities
-		// 0 - Default projectile, 1 - Nuke Projectile , etc
-		void ProjectileSettings();
 		// Calculate the angle of the cannon based on the mouse position, render the cannon sprite
 		// Calculate the charge shot power and update any shot projectiles
 		// map is used to check for collision with the tiles
@@ -38,10 +34,16 @@ namespace CannonManager {
 		void SetTarget(Character* _target);
 
 		void SetEnemyAI(int difficultyLevel);
+	private:
+		// Initialize all the different type of projectile abilities to the CANNON CLASS
+		// Switch between the projectileId to choose the different type of projectile abilities
+		// 0 - Default projectile, 1 - Nuke Projectile , etc
+		void ProjectileSettings();
+
 		void EnemyAI();
 		// Calculate the ideal cannonAngle and shotPower to hit the target,
 		// add some variance to it to ensure the AI aim and shot feels "human"
-		void EnemyAICalculation(AEVec2 const targetPos);
+		void EnemyAICalculation();
 
 		// Check for left mouse input the shot power will be increased/decreased based on the charge rate
 		void ChargeShot();
@@ -56,9 +58,15 @@ namespace CannonManager {
 		bool DestroyProjectile(Projectile& projectile);
 		// UI to display the charging shot power bar 
 
+		void AbilityExecution(Projectile& projectile);
+
 		void SetCamera(bool isFollowingProjectile);
 		void DrawTrajectory();
-		void Debugger();
+
+		void DebugCommands();
+		void DebugInfo();
+	public:
+		Character* Target() const { return target; }
 	private:
 		bool isPlayerControlled = true, isShootingRight = true;
 		bool hasCannonShot = false; // has projectile has been shot out of the cannon return true if yes
@@ -78,7 +86,7 @@ namespace CannonManager {
 		std::vector<Projectile> activeProjectiles; // vector of all the active projectiles (Projectiles that have been shot out of the cannon)
 
 		// Shot power charging system (how far the cannon shoots the projectile)
-		float minPower = 100, maxPower = 2500, chargeRate = maxPower * 1.5f;
+		float chargingRate = Config::CANNON_MAX_POWER * 1.5f;
 		float chargingPower = 0;
 		float shotPower = 0; // The amount of shot power player charged up
 		bool isPowerIncreasing = true;

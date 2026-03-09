@@ -9,6 +9,8 @@
 #include "Button.hpp"
 #include "AssetsManager.hpp"
 #include "CameraManager.hpp"
+#include "CollisionManager.hpp"
+#include "LevelManager.hpp"
 
 namespace {
 	// Helper function to read from JSON file and input the data into a JSON Object
@@ -138,10 +140,10 @@ namespace AbilitiesManager {
 			AddAbility(AbilityRandomisator(defensiveAbilities).Id());
 		}
 
-		std::cout << "[AbilitiesManager] List of starting abilities:" << '\n';
-		for (Ability* ability : inventory) {
-			std::cout << ability->GetName() << " Charges: " << ability->AbilityCharges() << '\n';
-		}
+		//std::cout << "[AbilitiesManager] List of starting abilities:" << '\n';
+		//for (Ability* ability : inventory) {
+		//	std::cout << ability->GetName() << " Charges: " << ability->AbilityCharges() << '\n';
+		//}
 	}
 
 	// Change the current projectile based on the projectile ID
@@ -245,9 +247,8 @@ namespace AbilitiesManager {
 		currentAbility->AbilityCharges(-1);
 		UpdateInventory(*currentAbility, false);
 
-		if (currentAbility->GetType() == AbilityType::OFFENSIVE && currentAbility->AbilityCharges() <= 0) {
-			ChangeAbility(0);
-		}
+		// Reset to default if trying to use an ability without any charges remaining
+		ResetAbility();
 
 		std::cout << "[AbilitiesManager] Ability used: " + currentAbility->GetName()
 			+ " Charges Remaining: " + std::to_string(currentAbility->AbilityCharges()) << '\n';
@@ -338,6 +339,13 @@ namespace AbilitiesManager {
 		return currentAbility->GetProj().projectileId;
 	}
 
+
+	void AbilityController::ResetAbility() {
+		if (currentAbility->AbilityCharges() <= 0) {
+			ChangeAbility(0); // Reset to default
+		}
+	}
+
 	// True to toggle through all abilities or false to toggle through of all the active abilities this controller has in its inventory
 	void AbilityController::ToggleAbility(bool isAllAbilities) {
 		int abilityId = currentAbility->Id();
@@ -346,14 +354,18 @@ namespace AbilitiesManager {
 			Utils::Wrap(++abilityId, 0, static_cast<int>(allAbilities.size()-1));
 		}
 		else {
+			bool found = false;
 			for (int i = 0; i < inventory.size(); ++i) {
 				if (inventory[i] == currentAbility) {
 					int selectedListId = i + 1;
 					Utils::Wrap(selectedListId, 0, static_cast<int>(inventory.size() - 1));
 					abilityId = inventory[selectedListId]->Id();
+					found = true;
 					break;
 				}
 			}
+
+			if(!found) abilityId = 0; // Reset to default ability if can't find any
 		}
 		ChangeAbility(abilityId);
 	}
@@ -475,9 +487,11 @@ namespace AbilitiesManager {
 		CameraManager::camera.SetState(CameraManager::CameraController::INPUT);
 	}
 
-	void AbilityController::abilityUI() {
+	void AbilityController::AbilityUI() {
 		UIManager::Panel background{ {600.0f, 90.0f}, Color(0.647f, 0.165f, 0.165f, 1.0f), Utils::AnchorMode::BOTTOM_CENTER };
 		background.Draw();
+
+		LevelManager::selectedLevel->SetHoveringOverUI(CollisionManager::IsPointInRect(background.Pos().x, background.Pos().y, background.Size().x, background.Size().y));
 
 		// Ability icons
 		for (int i = 0; i < inventory.size(); ++i) {

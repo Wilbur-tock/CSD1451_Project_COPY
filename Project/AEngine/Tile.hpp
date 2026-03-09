@@ -30,7 +30,8 @@ enum TileType {
 };
 
 inline std::vector<std::string> tileNames = { 
-	"Air", "Grass", "Dirt", "Dirt with Stones", "Block_1_TOP", "Block_1", "Block_2_TOP", "Block_2",
+	"Air", "Grass", "Dirt", "Dirt with Stones", 
+	"Block_1_TOP", "Block_1", "Block_2_TOP", "Block_2",
 	"Player Cannon", "Player Character",
 	"Enemy Cannon", "Enemy Minion", "Enemy Boss" 
 };
@@ -61,6 +62,7 @@ public:
 
 	bool IsDestructible() const { return IsEnemy() || IsPlayer() || IsBlocks(); }
 
+	// Damage tile and character inside the tile
 	void TakeDamage(int damage);
 private:
 	float const defaultSize = Config::TILE_SIZE;

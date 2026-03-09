@@ -45,7 +45,11 @@ public:
 	Character* FindCharacterObj(Tile const& tile);
 	Character* FindEnemyCharacterObj(int characterId);
 	Character* FindPlayerCharacterObj(int characterId);
+	Character* RandomCharacterObj(bool isPlayerObj);
+
 	Character* EnemyBoss() { return &enemies[bossId]; }
+
+	void SetHoveringOverUI(bool isHovering) { isHoveringUI = isHovering; }
 private:
 	void DrawUI();
 

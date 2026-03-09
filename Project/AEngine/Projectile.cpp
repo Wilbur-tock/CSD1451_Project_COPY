@@ -17,13 +17,40 @@ void Projectile::Render() {
     GraphicsManager::DrawGameObject(texture, mat, Color{ 0.5f, 0.5f, 0, 1 });
 }
 
-void Projectile::AbilityUpdate() {
+void Projectile::AbilityActivation() {
     if (Mode() == ProjectileMode::IDLE || Mode() == ProjectileMode::ATTACK) return;
 
-    if (Mode() == ProjectileMode::BOMB) {
+    switch (Mode()) {
+    case ProjectileMode::BOMB:
+        if (AEInputCheckTriggered(AEVK_LBUTTON)) {
+            // Bomb instant explode and damage tile blocks double its radius once activated
+            int tileX = 0, tileY = 0;
+            Utils::GetTileIndex(tileX, tileY, transform.pos);
+            int radius = attribute.DamageRadius();
+
+            if (!Utils::IsGridIndexOutOfBounds(tileX, tileY)) {
+                attribute.DamageRadius(radius * 2);
+                DamageTile(tileX, tileY);
+                Destroy();
+            }
+
+            // Reset stats back to default
+            attribute.DamageRadius(radius);
+
+            std::cout << "BOMB mode triggered";
+        }
+        break;
+    case ProjectileMode::NUKE:
         if (AEInputCheckTriggered(AEVK_LBUTTON)) {
             velocity = { 0,0 }; // fall straight down immediately
-            std::cout << "BOMB mode triggered";
+            std::cout << "NUKE mode triggered";
+        }
+        break;
+    case ProjectileMode::PIERCING:
+        if (!abilityTriggered && collisionTriggered) {
+            velocity.x *= 2;
+            velocity.y *= 2;
+            abilityTriggered = true;
         }
     }
 }
@@ -44,7 +71,22 @@ void Projectile::SetProjectileStats(std::string _projectileName, ProjectileModul
     attribute.DamageRadius(static_cast<int>(data.radius));
 
     // Set Charges
-    AttackCharges(1);
+    AttackCharges(data.charges);
+}
+
+void Projectile::Initialize(Transform cannonTrans, int _activeId, float cannonAngle, float shotPower) {
+    isActive = true;
+    id = _activeId;
+
+    // Set projectile spawn pos at the front of the cannon muzzle
+    // using cos and sin to calculate the direction of where the cannon is pointing at
+    transform.pos.x = cannonTrans.pos.x + (cos(cannonAngle) * cannonTrans.size.x);
+    transform.pos.y = cannonTrans.pos.y + (sin(cannonAngle) * cannonTrans.size.y);
+
+    // Convert power and angle to 2d vector
+    velocity.x = cos(cannonAngle) * shotPower;
+    velocity.y = sin(cannonAngle) * shotPower;
+    timer = Config::PROJECTILE_LIFESPAN;
 }
 
 void Projectile::MoveProjectile(float dt) {
@@ -62,6 +104,8 @@ void Projectile::MoveProjectile(float dt) {
 }
 
 void Projectile::OnCollision(Tile const& tile) {
+    if (Mode() == ProjectileMode::PIERCING && !abilityTriggered) return;
+
     if(CollisionManager::IsHorizontalCollision(transform, tile.transform)) {
         PhysicsManager::ResolveHorizontalCollision(transform, velocity, tile.transform);
     }
@@ -82,16 +126,17 @@ void Projectile::Destroy() {
     timer = 0.0f;
 }
 
-void Projectile::DamageTile(int x, int y) {
-    if (Mode() == ProjectileMode::IDLE) return;
+void Projectile::DamageTile(int tileX, int tileY) {
+    Tile& centerTile = (*MapManager::currentMap)[tileY][tileX];
+    if (Mode() == ProjectileMode::IDLE || !centerTile.IsDestructible()) return;
 
     int blastRadius = attribute.DamageRadius();
 
     std::cout << "===================== [Projectile] Damaging tiles =====================\n[Projectile] Damage Radius : " 
-        + std::to_string(blastRadius) + " Center Tile Id : " + std::to_string(x) + " " + std::to_string(y) 
+        + std::to_string(blastRadius) + " Center Tile " + GetTileName(centerTile.Type()) + " " + std::to_string(tileX) + " " + std::to_string(tileY)
         + "\n[Projectile] Remaining Attack Charges: " + std::to_string(AttackCharges()) << '\n';
 
-    int minDX = x, minDY = y, maxDX = x, maxDY = y;
+    int minDX = tileX, minDY = tileY, maxDX = tileX, maxDY = tileY;
     // Increased damage radius based on blast radius
     if (blastRadius > 1) {
         int addRadius = blastRadius - 1;
@@ -112,8 +157,7 @@ void Projectile::DamageTile(int x, int y) {
             Tile& tileToDamage = (*MapManager::currentMap)[dY][dX];
             //std::cout << "[Projectile] Checked tile " << tileToDamage << '\n';
 
-            // Only damage blocks or character tile
-            if (tileToDamage.IsEmpty() || tileToDamage.IsGround()) continue;
+            if (!tileToDamage.IsDestructible()) continue;
 
             // Damage Tiles that contain a character object
             //if (tileToDamage.IsCharacter()) {
@@ -137,7 +181,7 @@ void Projectile::DamageTile(int x, int y) {
         ConsumeAttackCharge();
 
         // Damage effect
-        Tile& tileToDamage = (*MapManager::currentMap)[y][x];
+        Tile& tileToDamage = (*MapManager::currentMap)[tileY][tileX];
 
         GraphicsManager::DrawGameObject(
             AssetsManager::circleTexture,

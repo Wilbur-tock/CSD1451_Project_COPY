@@ -52,7 +52,8 @@ namespace CannonManager {
             projectile = { AssetsManager::circleTexture };
             projectile.SetProjectileStats(ability.GetName(), ability.GetProj());
 
-            //std::cout << "[CannonManager] Set " << ability.Id() << " Mode: " << projectile.ModeName() << " " << ability.GetName() << " ability into the cannon projectile vector" << '\n';
+            //std::cout << "[CannonManager] Set " << ability.Id() << " Mode: " << projectile.ModeName() << " " 
+            // << ability.GetName() << " ability into the cannon projectile vector" << '\n';
         }
     }
     
@@ -77,7 +78,7 @@ namespace CannonManager {
         SelectProjectileAbility();
         ChargeShot();
         UpdateProjectile();
-        Debugger();
+        DebugCommands();
     }
 
     void Cannon::Draw() {
@@ -94,23 +95,28 @@ namespace CannonManager {
             if (!isShootingRight) x = transform.pos.x + (transform.size.x * 1.5f);
             UIManager::Bar bar{ { x, transform.pos.y + (transform.size.y * 1.5f) },
                 { 15,100 }, Color{ 0,1,0 }, UIManager::FillType::TOP_TO_BOTTOM };
-            bar.Draw(chargingPower, maxPower, false);
+            bar.Draw(chargingPower, Config::CANNON_MAX_POWER, false);
 
             if (!isPlayerControlled) return;
 
-            Transform trans{ { 0,0 }, {500,25} };
+            Transform trans{ { 0,0 }, {600,15} };
             Utils::SetAnchoredPosition(trans, Utils::AnchorMode::BOTTOM_CENTER);
+            trans.pos.y += 85;
 
             UIManager::Bar uiBar{ trans.pos,
                 trans.size, Color{ 0,1,0 }, UIManager::FillType::LEFT_TO_RIGHT };
-            uiBar.Draw(chargingPower, maxPower);
+            uiBar.Draw(chargingPower, Config::CANNON_MAX_POWER);
         }
+
+        DebugInfo();
     }
 
     void Cannon::ResetTurn() {
         isProjectileDestroyed = false;
         hasCannonShot = false;
         SetCamera(false);
+
+        abilityController->ResetAbility();
 
         // Reselect AI ability
         if (!isPlayerControlled && abilityController) {
@@ -120,13 +126,14 @@ namespace CannonManager {
 
     void Cannon::SetTarget(Character* _target) {
         target = _target;
-        std::cout << "[CannonManager] Target set" << '\n';
+        std::cout << "[CannonManager] " + static_cast<std::string>(isPlayerControlled ? "PLAYER" : "ENEMY") 
+            + " New Target Set: " + _target->TypeName() << '\n';
     }
 
     bool Cannon::IsTargetAlive() {
         if (!target) return false;
 
-        // Remove target ptr if current target has been destroyed
+        // Remove target ptr if current target has already been destroyed
         if (!target->attribute.IsActive()) {
             target = nullptr;
             return false;
@@ -163,7 +170,7 @@ namespace CannonManager {
 
         if (!canAIShoot) {
             abilityController->AIAbilitySelection();
-            EnemyAICalculation(target->transform.pos);
+            EnemyAICalculation();
 
             // Set shoot timer to add a delay between the start of the enemy turn and enemy shooting the projectile out
             float minTimer = 1.5f;
@@ -182,34 +189,21 @@ namespace CannonManager {
         }
     }
 
-    void Cannon::EnemyAICalculation(AEVec2 const targetPos) {
-        float dx = targetPos.x - transform.pos.x;
-        float dy = targetPos.y - transform.pos.y;
-        float distance = sqrt(dx * dx + dy * dy);
-
-        // Randomise angle between the min and max radian
-        float min = 30 * (PI / 180.0f);
-        float max = 60 * (PI / 180.0f);
-        float randomAngleBase = Utils::RandomValue(min, max);
-
-        // Adjust for direction (Shooting left or right)
-        float launchAngle = (dx > 0) ? randomAngleBase : (PI - randomAngleBase);
-
-        // Calculate required Power (Initial Velocity)
-        // Basic range formula: v = sqrt( (g * d) / sin(2 * theta) )
-        float neededVelocity = sqrt((PhysicsManager::GRAVITY * abs(distance)) / sin(2 * randomAngleBase));
+    void Cannon::EnemyAICalculation() {
+        float perfectAngle = 0, perfectPower = 0;
+        PhysicsManager::PerfectShotCalculation(transform, target->transform, perfectAngle, perfectPower);
 
         // Randomise offset to add a variance to 
         float inaccuracy = (1.0f - aiDifficulty);
         float randomOffset = Utils::RandomValue(-inaccuracy, inaccuracy);
 
         // Apply the variables to the cannon
-        cannonAngle = launchAngle;
-        shotPower = std::clamp(neededVelocity * (1.0f + randomOffset), minPower, maxPower);
+        cannonAngle = perfectAngle;
+        shotPower = std::clamp(perfectPower * (1.0f + randomOffset), Config::CANNON_MIN_POWER, Config::CANNON_MAX_POWER);
 
         std::cout << "======================= [CannonManager] Enemy AI Shot ========================\n"
-            << "[CannonManager] Enemy AI Target pos x: " << targetPos.x << " y: " << targetPos.y << '\n'
-            << "[CannonManager] Enemy AI Ideal: angle: " << launchAngle << " shot power: " << neededVelocity << '\n'
+            << "[CannonManager] Enemy AI Target pos x: " << target->transform.pos.x << " y: " << target->transform.pos.y << '\n'
+            << "[CannonManager] Enemy AI Ideal: angle: " << perfectAngle << " shot power: " << perfectPower << '\n'
             << "[CannonManager] Enemy AI Actual: angle: " << cannonAngle << " shot power: " << shotPower << '\n';
     }
 
@@ -224,7 +218,7 @@ namespace CannonManager {
             }
 
             // Reset for next shot
-            chargingPower = minPower;
+            chargingPower = Config::CANNON_MIN_POWER;
             canPlayerShoot = true;
         }
 
@@ -238,15 +232,15 @@ namespace CannonManager {
         if (AEInputCheckCurr(AEVK_LBUTTON) || canAIShoot == true) {
             isHoldingLeftClick = canPlayerShoot = true;
 
-            float chargeRateWithDT = chargeRate * PhysicsManager::g_dt;
+            float chargeRateWithDT = chargingRate * PhysicsManager::g_dt;
             chargingPower += isPowerIncreasing ? chargeRateWithDT : -chargeRateWithDT;
 
-            if (chargingPower > maxPower) {
-                chargingPower = maxPower;
+            if (chargingPower > Config::CANNON_MAX_POWER) {
+                chargingPower = Config::CANNON_MAX_POWER;
                 isPowerIncreasing = false;
             }
-            if (chargingPower < minPower) {
-                chargingPower = minPower;
+            if (chargingPower < Config::CANNON_MIN_POWER) {
+                chargingPower = Config::CANNON_MIN_POWER;
                 isPowerIncreasing = true;
             }
 
@@ -291,15 +285,10 @@ namespace CannonManager {
 
         // IMPORTANT: use a COPY here so we don't permanently modify the template projectile inside projectiles[].
         Projectile projectile = projectiles[selectedProjectileId];
-        projectile.isActive = true;
-        projectile.id = static_cast<int>(activeProjectiles.size());
 
-        projectile.transform.pos.x = transform.pos.x + (cos(cannonAngle) * transform.size.x);
-        projectile.transform.pos.y = transform.pos.y + (sin(cannonAngle) * transform.size.y);
+        AbilityExecution(projectile);
 
-        projectile.velocity.x = cos(cannonAngle) * shotPower;
-        projectile.velocity.y = sin(cannonAngle) * shotPower;
-        projectile.timer = Config::PROJECTILE_LIFESPAN;
+        projectile.Initialize(transform, static_cast<int>(activeProjectiles.size()), cannonAngle, shotPower);
 
         // Add the these projectile to the active projectile list
         activeProjectiles.push_back(projectile);
@@ -307,7 +296,7 @@ namespace CannonManager {
 
         AudioManager::PlaySFX(AudioManager::SFX::CannonFire);
 
-        // Set projectile ability effects here
+        // Use selected ability
         abilityController->UseAbility();
 
         SetCamera(true); // Follow the projectile that is shot out of the cannon
@@ -323,7 +312,7 @@ namespace CannonManager {
         for (Projectile& projectile : activeProjectiles) {
             if (!projectile.isActive) continue;
 
-            projectile.AbilityUpdate();
+            projectile.AbilityActivation();
 
             float dt = PhysicsManager::g_dt;
             // Increased the frequency of the collision check by using loops
@@ -340,7 +329,7 @@ namespace CannonManager {
 
                 // Check for collision in a 3x3 area with the projectile
                 int gridX = 0, gridY = 0;
-                Utils::GetGridIndex(gridX, gridY, projectile.transform.pos);
+                Utils::GetTileIndex(gridX, gridY, projectile.transform.pos);
 
                 int minX = gridX - 1, minY = gridY - 1, maxX = gridX + 1, maxY = gridY + 1;
                 for (int y = minY; y <= maxY; ++y) {
@@ -403,7 +392,7 @@ namespace CannonManager {
             projectile.Render();
         }
 
-        //Remove projectiles from the active projectiles list return if vector to destroy is empty
+        // Clean up projectiles from the active projectiles list return if vector to destroy is empty
         if (projPtrToDestroy.empty()) return;
 
         for (Projectile* projToDestroy : projPtrToDestroy) {
@@ -442,6 +431,20 @@ namespace CannonManager {
         return false;
     }
 
+    void Cannon::AbilityExecution(Projectile& projectile) {
+        switch (projectile.Mode()) {
+        case ProjectileMode::AUTO_AIM:
+            // Find new target if target is not alive
+            if (!IsTargetAlive()) {
+                std::cout << "[CannonManager]" << '\n';
+                SetTarget(LevelManager::selectedLevel->RandomCharacterObj(!isPlayerControlled)); // Randomly find a enemy target
+            }
+
+            // Calculate perfect shot angle and power
+            PhysicsManager::PerfectShotCalculation(transform, target->transform, cannonAngle, shotPower);
+        }
+    }
+
     void Cannon::SetCamera(bool isFollowingProjectile) {
         if (isFollowingProjectile) {
             // Set camera to follow the newly fired projectile
@@ -465,8 +468,8 @@ namespace CannonManager {
         float startY = transform.pos.y + sin(cannonAngle) * transform.size.x;
 
         // Initial velocity components
-        float vx = cos(cannonAngle) * maxPower;
-        float vy = sin(cannonAngle) * maxPower;
+        float vx = cos(cannonAngle) * Config::CANNON_MAX_POWER;
+        float vy = sin(cannonAngle) * Config::CANNON_MAX_POWER;
 
         // Time step between each dot (e.g., 0.1 seconds into the future)
         float timeStep = 0.05f;
@@ -483,7 +486,7 @@ namespace CannonManager {
         }
     }
 
-    void Cannon::Debugger() {
+    void Cannon::DebugCommands() {
         if (!Utils::isDebuggerOn) return;
 
         // Toggle through all the ability
@@ -502,6 +505,10 @@ namespace CannonManager {
             Utils::Wrap(++aiDifficulty, 0.0f, 1.0f);
             std::cout << "[CannonManager] AI Difficulty: " + std::to_string(aiDifficulty) << '\n';
         }
+    }
+
+    void Cannon::DebugInfo() {
+        if (!Utils::isDebuggerOn) return;
 
         float mX = 0, mY = 0;
         Utils::GetWorldMousePos(mX, mY);
@@ -528,6 +535,10 @@ namespace CannonManager {
             + "\nSelected Ability:\nId:" + std::to_string(selectedAbility.Id())
             + "\nName: " + selectedAbility.GetName()
             + "\nAbility Charges Remaining: " + std::to_string(selectedAbility.AbilityCharges());
+
+        if (target) {
+            debugStr += "\nTarget: " + target->TypeName();
+        }
                 
         if (!isPlayerControlled) {
             debugStr += "\nAI Shoot Timer: " + Utils::FormatFloat(aiShootTimer, 2);
@@ -551,6 +562,8 @@ namespace CannonManager {
                 + "\nCollisionTriggered: " + static_cast<std::string>(projectile.collisionTriggered ? "true" : "false");
         }
 
+        //UIManager::Panel panel{ {500,500}, {1,1,1,0.5f}, Utils::AnchorMode::TOP_RIGHT };
+        //panel.Draw();
         TextObject textObj{ debugStr, Utils::debuggerInfo.first * 0.8f, Utils::debuggerInfo.second, {0.5f, 0.99f} };
         textObj.Draw();
     }

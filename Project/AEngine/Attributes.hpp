@@ -15,8 +15,11 @@ public:
 	}
 
 	// Shield take 1 damage per attack regardless of damage value
-	int  Shield() const { return shield; }
+	int  Shield() const { return shield;  }
 	void Shield(int value) { shield = std::clamp(value, minValue, maxValue); }
+
+	int	 MaxShield() const { return maxShield; }
+	void MaxShield(int value) { maxShield = value; }
 
 	int	 MaxHealth() const { return maxHealth; }
 	void MaxHealth(int value) { maxHealth = value; }
@@ -43,7 +46,11 @@ private:
 	int damage = 10, damageRadius = 1;
 	bool canBeDamaged = true, isActive = true;
 
-	int health = maxValue, shield = 0;
+	int health = maxValue;
+
+	int shield = 0;
+	int maxShield = 0;
+
 	int damageMultiplier = 1; // multiply how much damage its taking, 1 - normal damage, 5 - times 5 of damage
 	// Percentages = 0.00 - 1.00
 	float damageReduction = 0, critReduction = 0;

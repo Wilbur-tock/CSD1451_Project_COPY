@@ -1,9 +1,28 @@
 #include "PhysicsManager.hpp"
 
 #include "BaseTypes.hpp"
+#include "Utils.hpp"
 
 namespace PhysicsManager {
 	float g_dt = 0.0f;
+
+    void PerfectShotCalculation(Transform const& current, Transform const& target, float& cannonAngle, float& shotPower) {
+        float dx = target.pos.x - current.pos.x;
+        float dy = target.pos.y - current.pos.y;
+        float distance = sqrt(dx * dx + dy * dy);
+
+        // Randomise angle between the min and max radian
+        float min = 30 * (PI / 180.0f);
+        float max = 60 * (PI / 180.0f);
+        float randomAngleBase = Utils::RandomValue(min, max);
+
+        // Adjust for direction (Shooting left or right)
+        cannonAngle = (dx > 0) ? randomAngleBase : (PI - randomAngleBase);
+
+        // Calculate required Power (Initial Velocity)
+        // Basic range formula: v = sqrt( (g * d) / sin(2 * theta) )
+        shotPower = sqrt((PhysicsManager::GRAVITY * abs(distance)) / sin(2 * randomAngleBase));
+    }
 
     void ResolveHorizontalCollision(Transform& obj, AEVec2& velocity, Transform const& tileTransform) {
         float halfW = obj.size.x * 0.5f;

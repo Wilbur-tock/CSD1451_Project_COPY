@@ -35,7 +35,7 @@ namespace Utils {
 	AEVec2 NormalizeCoordinates(AEVec2 vec2);
 	// Get the grid index based on mouse position
 	void GetMouseGridIndex(int& x, int& y);
-	void GetGridIndex(int& x, int& y, AEVec2 const worldPos);
+	void GetTileIndex(int& x, int& y, AEVec2 const worldPos);
 	// Return true if it is out of bounds
 	bool IsGridIndexOutOfBounds(int x, int y);
 

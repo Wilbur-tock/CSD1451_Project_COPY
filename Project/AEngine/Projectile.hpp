@@ -11,10 +11,12 @@
 struct ProjectileModule;
 
 enum class ProjectileMode {
-	IDLE,
-	ATTACK,
-	BOMB,
-	NUKE,
+	IDLE		= 0,
+	ATTACK		= 1,
+	BOMB		= 2,
+	NUKE		= 3,
+	PIERCING	= 4,
+	AUTO_AIM	= 5,
 };
 
 class Projectile : public GameObject {
@@ -42,11 +44,13 @@ public:
 
 	inline std::string ModeName() const {
 		switch (mode) {
-		case ProjectileMode::IDLE:		return "IDLE"; break;
-		case ProjectileMode::ATTACK:	return "DAMAGE"; break;
-		case ProjectileMode::BOMB:		return "BOMB"; break;
-		case ProjectileMode::NUKE:		return "NUKE"; break;
-		default:						return "YOU NEED TO ADD A PROJECTILE MODE NAME";
+		case ProjectileMode::IDLE:			return "IDLE"; break;
+		case ProjectileMode::ATTACK:		return "DAMAGE"; break;
+		case ProjectileMode::BOMB:			return "BOMB"; break;
+		case ProjectileMode::NUKE:			return "NUKE"; break;
+		case ProjectileMode::AUTO_AIM:      return "AUTO_AIM"; break;
+		case ProjectileMode::PIERCING:		return "PIERCING"; break;
+		default:							return "YOU NEED TO ADD A PROJECTILE MODE NAME";
 		}
 	}
 
@@ -54,9 +58,10 @@ public:
 
 	void SetProjectileStats(std::string _projectileName, ProjectileModule const& data);
 
+	void Initialize(Transform cannonTrans, int _activeId, float cannonAngle, float shotPower);
 	void Render();
 	// Check for inputs to activated PROJECTILE Abilities
-	void AbilityUpdate();
+	void AbilityActivation();
 	void MoveProjectile(float dt);
 	// Simulate the projectile physics of bouncing off the walls, checking if it is grounded
 	void OnCollision(Tile const& tile);
@@ -70,6 +75,7 @@ private:
 	int projectileId = 0, attackCharges = 1;
 	std::string projectileName;
 	ProjectileMode mode = ProjectileMode::ATTACK;
+	bool abilityTriggered = false;
 };
 
 #endif // !PROJECTILE_HPP

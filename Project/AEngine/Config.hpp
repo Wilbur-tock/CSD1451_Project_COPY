@@ -17,6 +17,7 @@ namespace Config {
 	constexpr float FONT_SCALE = 1.0f;
 
 	// CANNON
+	constexpr float CANNON_MIN_POWER = 100, CANNON_MAX_POWER = 2500;
 	constexpr float CANNON_SWITCH_COOLDOWN_TIMER = 1.5f, PROJECTILE_LIFESPAN = 2.0f;
 }
 

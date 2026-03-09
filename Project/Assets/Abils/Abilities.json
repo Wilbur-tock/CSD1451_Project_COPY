@@ -38,7 +38,37 @@
             "ProjectileID": 2,
             "Damage_Amp": 1.0,
             "Base_Damage": 100,
-            "Radius": 10,
+            "Radius": 15,
+            "Charges": 1,
+            "unlimited_charges": false
+        }
+    },
+
+    {
+        "Name": "Piercing Projectile",
+        "Type": 2,
+        "Tier": 1,
+        "Texture": "",
+        "Projectile_Stats": {
+            "ProjectileID": 3,
+            "Damage_Amp": 1.0,
+            "Base_Damage": 50,
+            "Radius": 2,
+            "Charges": 5,
+            "unlimited_charges": false
+        }
+    },
+
+    {
+        "Name": "Auto Aim Projectile",
+        "Type": 2,
+        "Tier": 1,
+        "Texture": "",
+        "Projectile_Stats": {
+            "ProjectileID": 4,
+            "Damage_Amp": 1.0,
+            "Base_Damage": 25,
+            "Radius": 2,
             "Charges": 1,
             "unlimited_charges": false
         }
@@ -222,6 +252,22 @@
         "Texture": "",
         "Defensive_Stats": {
             "ShieldHP": 50
+        }
+    },
+
+
+    {
+        "Name": "Test Ability",
+        "Type": 2,
+        "Tier": 1,
+        "Texture": "",
+        "Projectile_Stats": {
+            "ProjectileID": 0,
+            "Damage_Amp": 1.0,
+            "Base_Damage": 100,
+            "Radius": 10,
+            "Charges": 1,
+            "unlimited_charges": false
         }
     }
 ]
