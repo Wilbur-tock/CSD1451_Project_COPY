@@ -1,234 +1,271 @@
 ﻿#include "AudioManager.hpp"
 
-#ifdef _WIN32
-#define NOMINMAX
-#include <Windows.h>
-#include <mmsystem.h>
-#pragma comment(lib, "winmm.lib")
-#endif
-
 namespace AudioManager {
 
     static Track gCurrentTrack = Track::None;
-    static float gVolume = 1.0f;
+    static bool gIsInitialized = false;
 
-    static unsigned int gNextSfxId = 0;
-    static const std::string gBgmAlias = "bgm";
-    static std::vector<std::string> gActiveSfxAliases;
+    // Volume layers
+    static float gMasterVolume = 1.0f;
+    static float gBgmVolume = 1.0f;
+    static float gSfxVolume = 1.0f;
+
+    // Audio groups
+    static AEAudioGroup gBgmGroup{};
+    static AEAudioGroup gSfxGroup{};
 
     // ---------------- BGM ----------------
-    static const char* BGM_MAINMENU = "Assets/bgm_mainmenu.wav";
-    static const char* BGM_MAPEDITOR = "Assets/bgm_mapeditor.wav";
-    static const char* BGM_LEVEL = "Assets/bgm_level.wav";
-    static const char* BGM_CREDITS = "Assets/bgm_credits.wav";
+    static AEAudio gBgmMainMenu{};
+    static AEAudio gBgmMapEditor{};
+    static AEAudio gBgmLevel{};
+    static AEAudio gBgmCredits{};
 
     // ---------------- SFX ----------------
-    static const char* SFX_UI_CLICK = "Assets/sfx_ui_click.wav";
-    static const char* SFX_CANNON_FIRE = "Assets/sfx_cannon_fire.wav";
-    static const char* SFX_IMPACT = "Assets/sfx_impact.wav";
-    static const char* SFX_TURN_SWITCH = "Assets/sfx_turn.wav";
+    static AEAudio gSfxUIButton{};
+    static AEAudio gSfxCannonFire{};
+    static AEAudio gSfxImpact{};
+    static AEAudio gSfxTurnSwitch{};
 
-#ifdef _WIN32
-    static bool FileExists(const char* path) {
-        DWORD attrs = GetFileAttributesA(path);
-        return (attrs != INVALID_FILE_ATTRIBUTES &&
-            !(attrs & FILE_ATTRIBUTE_DIRECTORY));
+    // ---------------- Paths ----------------
+    static constexpr const char* BGM_MAINMENU = "Assets/bgm_mainmenu.wav";
+    static constexpr const char* BGM_MAPEDITOR = "Assets/bgm_mapeditor.wav";
+    static constexpr const char* BGM_LEVEL = "Assets/bgm_level.wav";
+    static constexpr const char* BGM_CREDITS = "Assets/bgm_credits.wav";
+
+    static constexpr const char* SFX_UI_CLICK = "Assets/sfx_ui_click.wav";
+    static constexpr const char* SFX_CANNON_FIRE = "Assets/sfx_cannon_fire.wav";
+    static constexpr const char* SFX_IMPACT = "Assets/sfx_impact.wav";
+    static constexpr const char* SFX_TURN_SWITCH = "Assets/sfx_turn.wav";
+
+    static bool IsValidAudio(AEAudio audio) {
+        return AEAudioIsValidAudio(audio) != 0;
     }
 
-    static void ApplyVolume(float v) {
-        if (v < 0.0f) v = 0.0f;
-        if (v > 1.0f) v = 1.0f;
-
-        DWORD vol = static_cast<DWORD>(v * 0xFFFF);
-        DWORD both = (vol & 0xFFFF) | (vol << 16);
-        waveOutSetVolume(nullptr, both);
+    static bool IsValidGroup(AEAudioGroup group) {
+        return AEAudioIsValidGroup(group) != 0;
     }
 
-    static bool MciCommand(const std::string& cmd, std::string* out = nullptr) {
-        char buffer[256] = {};
-        MCIERROR err = mciSendStringA(
-            cmd.c_str(),
-            out ? buffer : nullptr,
-            out ? static_cast<UINT>(sizeof(buffer)) : 0,
-            nullptr
-        );
+    static void WarnIfInvalidAudio(const char* label, AEAudio audio) {
+        if (!IsValidAudio(audio)) {
+            std::cerr << "[AudioManager] Failed to load audio: " << label << "\n";
+        }
+    }
 
-        if (err != 0) {
-            char errText[256] = {};
-            mciGetErrorStringA(err, errText, sizeof(errText));
-            std::cerr << "[AudioManager] MCI failed: " << cmd << "\n"
-                << "[AudioManager] Reason: " << errText << "\n";
-            return false;
+    static void ApplyVolumes() {
+        if (IsValidGroup(gBgmGroup)) {
+            AEAudioSetGroupVolume(gBgmGroup, gMasterVolume * gBgmVolume);
         }
 
-        if (out) {
-            *out = buffer;
+        if (IsValidGroup(gSfxGroup)) {
+            AEAudioSetGroupVolume(gSfxGroup, gMasterVolume * gSfxVolume);
         }
-        return true;
     }
 
-    static bool OpenWave(const char* path, const std::string& alias) {
-        return MciCommand("open \"" + std::string(path) + "\" type waveaudio alias " + alias);
-    }
-
-    static void CloseAlias(const std::string& alias) {
-        MciCommand("close " + alias);
-    }
-
-    static std::string GetMode(const std::string& alias) {
-        std::string mode;
-        if (!MciCommand("status " + alias + " mode", &mode)) {
-            return "";
-        }
-        return mode;
-    }
-
-    static const char* TrackToPath(Track t) {
+    static AEAudio GetTrackAudio(Track t) {
         switch (t) {
-        case Track::MainMenu:  return BGM_MAINMENU;
-        case Track::MapEditor: return BGM_MAPEDITOR;
-        case Track::Level:     return BGM_LEVEL;
-        case Track::Credits:   return BGM_CREDITS;
-        default:               return nullptr;
+        case Track::MainMenu:  return gBgmMainMenu;
+        case Track::MapEditor: return gBgmMapEditor;
+        case Track::Level:     return gBgmLevel;
+        case Track::Credits:   return gBgmCredits;
+        default:               return AEAudio{};
         }
     }
 
-    static const char* SfxToPath(SFX sfx) {
+    static AEAudio GetSfxAudio(SFX sfx) {
         switch (sfx) {
-        case SFX::UIButton:   return SFX_UI_CLICK;
-        case SFX::CannonFire: return SFX_CANNON_FIRE;
-        case SFX::Impact:     return SFX_IMPACT;
-        case SFX::TurnSwitch: return SFX_TURN_SWITCH;
-        default:              return nullptr;
+        case SFX::UIButton:   return gSfxUIButton;
+        case SFX::CannonFire: return gSfxCannonFire;
+        case SFX::Impact:     return gSfxImpact;
+        case SFX::TurnSwitch: return gSfxTurnSwitch;
+        default:              return AEAudio{};
         }
     }
-#endif
 
     void Init() {
-#ifdef _WIN32
-        ApplyVolume(gVolume);
-#endif
+        if (gIsInitialized) {
+            return;
+        }
+
+        gBgmGroup = AEAudioCreateGroup();
+        gSfxGroup = AEAudioCreateGroup();
+
+        if (!IsValidGroup(gBgmGroup)) {
+            std::cerr << "[AudioManager] Failed to create BGM group.\n";
+        }
+
+        if (!IsValidGroup(gSfxGroup)) {
+            std::cerr << "[AudioManager] Failed to create SFX group.\n";
+        }
+
+        gBgmMainMenu = AEAudioLoadMusic(BGM_MAINMENU);
+        gBgmMapEditor = AEAudioLoadMusic(BGM_MAPEDITOR);
+        gBgmLevel = AEAudioLoadMusic(BGM_LEVEL);
+        gBgmCredits = AEAudioLoadMusic(BGM_CREDITS);
+
+        WarnIfInvalidAudio(BGM_MAINMENU, gBgmMainMenu);
+        WarnIfInvalidAudio(BGM_MAPEDITOR, gBgmMapEditor);
+        WarnIfInvalidAudio(BGM_LEVEL, gBgmLevel);
+        WarnIfInvalidAudio(BGM_CREDITS, gBgmCredits);
+
+        gSfxUIButton = AEAudioLoadSound(SFX_UI_CLICK);
+        gSfxCannonFire = AEAudioLoadSound(SFX_CANNON_FIRE);
+        gSfxImpact = AEAudioLoadSound(SFX_IMPACT);
+        gSfxTurnSwitch = AEAudioLoadSound(SFX_TURN_SWITCH);
+
+        WarnIfInvalidAudio(SFX_UI_CLICK, gSfxUIButton);
+        WarnIfInvalidAudio(SFX_CANNON_FIRE, gSfxCannonFire);
+        WarnIfInvalidAudio(SFX_IMPACT, gSfxImpact);
+        WarnIfInvalidAudio(SFX_TURN_SWITCH, gSfxTurnSwitch);
+
+        gCurrentTrack = Track::None;
+
+        gMasterVolume = std::clamp(gMasterVolume, 0.0f, 1.0f);
+        gBgmVolume = std::clamp(gBgmVolume, 0.0f, 1.0f);
+        gSfxVolume = std::clamp(gSfxVolume, 0.0f, 1.0f);
+
+        ApplyVolumes();
+        gIsInitialized = true;
     }
 
     void Update() {
-#ifdef _WIN32
-        // Clean up finished SFX aliases
-        for (auto it = gActiveSfxAliases.begin(); it != gActiveSfxAliases.end(); ) {
-            std::string mode = GetMode(*it);
-
-            if (mode.empty() || mode == "stopped" || mode == "not ready") {
-                CloseAlias(*it);
-                it = gActiveSfxAliases.erase(it);
-            }
-            else {
-                ++it;
-            }
-        }
-
-        // Manual BGM looping
-        if (gCurrentTrack != Track::None) {
-            std::string bgmMode = GetMode(gBgmAlias);
-
-            if (bgmMode == "stopped") {
-                MciCommand("seek " + gBgmAlias + " to start");
-                MciCommand("play " + gBgmAlias);
-            }
-        }
-#endif
+        // AEAudioUpdate() is already handled by AlphaEngine
     }
 
     void Shutdown() {
-        StopBGM();
-
-#ifdef _WIN32
-        for (const std::string& alias : gActiveSfxAliases) {
-            CloseAlias(alias);
+        if (!gIsInitialized) {
+            return;
         }
-#endif
-        gActiveSfxAliases.clear();
-    }
 
-    void SetVolume(float v) {
-        gVolume = v;
-#ifdef _WIN32
-        ApplyVolume(gVolume);
-#endif
-    }
+        if (IsValidGroup(gBgmGroup)) {
+            AEAudioStopGroup(gBgmGroup);
+        }
 
-    float GetVolume() {
-        return gVolume;
+        if (IsValidGroup(gSfxGroup)) {
+            AEAudioStopGroup(gSfxGroup);
+        }
+
+        if (IsValidAudio(gBgmMainMenu))  AEAudioUnloadAudio(gBgmMainMenu);
+        if (IsValidAudio(gBgmMapEditor)) AEAudioUnloadAudio(gBgmMapEditor);
+        if (IsValidAudio(gBgmLevel))     AEAudioUnloadAudio(gBgmLevel);
+        if (IsValidAudio(gBgmCredits))   AEAudioUnloadAudio(gBgmCredits);
+
+        if (IsValidAudio(gSfxUIButton))   AEAudioUnloadAudio(gSfxUIButton);
+        if (IsValidAudio(gSfxCannonFire)) AEAudioUnloadAudio(gSfxCannonFire);
+        if (IsValidAudio(gSfxImpact))     AEAudioUnloadAudio(gSfxImpact);
+        if (IsValidAudio(gSfxTurnSwitch)) AEAudioUnloadAudio(gSfxTurnSwitch);
+
+        if (IsValidGroup(gBgmGroup)) AEAudioUnloadAudioGroup(gBgmGroup);
+        if (IsValidGroup(gSfxGroup)) AEAudioUnloadAudioGroup(gSfxGroup);
+
+        gBgmGroup = AEAudioGroup{};
+        gSfxGroup = AEAudioGroup{};
+
+        gBgmMainMenu = AEAudio{};
+        gBgmMapEditor = AEAudio{};
+        gBgmLevel = AEAudio{};
+        gBgmCredits = AEAudio{};
+
+        gSfxUIButton = AEAudio{};
+        gSfxCannonFire = AEAudio{};
+        gSfxImpact = AEAudio{};
+        gSfxTurnSwitch = AEAudio{};
+
+        gCurrentTrack = Track::None;
+        gIsInitialized = false;
     }
 
     void PlayBGM(Track t) {
-        if (t == gCurrentTrack) return;
+        if (!gIsInitialized) {
+            Init();
+        }
 
-        StopBGM();
-
-#ifdef _WIN32
-        const char* path = TrackToPath(t);
-        if (!path) {
-            gCurrentTrack = Track::None;
+        if (!gIsInitialized) {
             return;
         }
 
-        if (!FileExists(path)) {
-            std::cerr << "[AudioManager] Missing BGM file: " << path << "\n";
-            gCurrentTrack = Track::None;
+        if (t == Track::None) {
+            StopBGM();
             return;
         }
 
-        if (!OpenWave(path, gBgmAlias)) {
-            gCurrentTrack = Track::None;
+        if (t == gCurrentTrack) {
             return;
         }
 
-        if (!MciCommand("play " + gBgmAlias)) {
-            std::cerr << "[AudioManager] Failed to play BGM: " << path << "\n";
-            CloseAlias(gBgmAlias);
-            gCurrentTrack = Track::None;
+        if (!IsValidGroup(gBgmGroup)) {
+            std::cerr << "[AudioManager] Cannot play BGM: invalid BGM group.\n";
             return;
         }
+
+        AEAudio audio = GetTrackAudio(t);
+        if (!IsValidAudio(audio)) {
+            std::cerr << "[AudioManager] Cannot play BGM: track not loaded.\n";
+            return;
+        }
+
+        AEAudioStopGroup(gBgmGroup);
+        AEAudioPlay(audio, gBgmGroup, 1.0f, 1.0f, -1);
 
         gCurrentTrack = t;
-#else
-        (void)t;
-#endif
+        ApplyVolumes();
     }
 
     void StopBGM() {
-#ifdef _WIN32
-        if (gCurrentTrack != Track::None) {
-            MciCommand("stop " + gBgmAlias);
-            CloseAlias(gBgmAlias);
+        if (IsValidGroup(gBgmGroup)) {
+            AEAudioStopGroup(gBgmGroup);
         }
-#endif
+
         gCurrentTrack = Track::None;
     }
 
     void PlaySFX(SFX sfx) {
-#ifdef _WIN32
-        const char* path = SfxToPath(sfx);
-        if (!path) return;
+        if (!gIsInitialized) {
+            Init();
+        }
 
-        if (!FileExists(path)) {
-            std::cerr << "[AudioManager] Missing SFX file: " << path << "\n";
+        if (!gIsInitialized) {
             return;
         }
 
-        std::string alias = "sfx_" + std::to_string(++gNextSfxId);
-
-        if (!OpenWave(path, alias)) {
+        if (!IsValidGroup(gSfxGroup)) {
+            std::cerr << "[AudioManager] Cannot play SFX: invalid SFX group.\n";
             return;
         }
 
-        if (!MciCommand("play " + alias)) {
-            CloseAlias(alias);
+        AEAudio audio = GetSfxAudio(sfx);
+        if (!IsValidAudio(audio)) {
+            std::cerr << "[AudioManager] Cannot play SFX: sound not loaded.\n";
             return;
         }
 
-        gActiveSfxAliases.push_back(alias);
-#else
-        (void)sfx;
-#endif
+        AEAudioPlay(audio, gSfxGroup, 1.0f, 1.0f, 0);
+        ApplyVolumes();
+    }
+
+    void SetVolume(float v) {
+        gMasterVolume = std::clamp(v, 0.0f, 1.0f);
+        ApplyVolumes();
+    }
+
+    float GetVolume() {
+        return gMasterVolume;
+    }
+
+    void SetBGMVolume(float v) {
+        gBgmVolume = std::clamp(v, 0.0f, 1.0f);
+        ApplyVolumes();
+    }
+
+    float GetBGMVolume() {
+        return gBgmVolume;
+    }
+
+    void SetSFXVolume(float v) {
+        gSfxVolume = std::clamp(v, 0.0f, 1.0f);
+        ApplyVolumes();
+    }
+
+    float GetSFXVolume() {
+        return gSfxVolume;
     }
 }

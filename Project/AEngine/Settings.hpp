@@ -6,7 +6,6 @@
 #include "TextObject.hpp"
 
 namespace Settings {
-    // Game state functions
     void Load();
     void Initialize();
     void Update();
@@ -14,17 +13,31 @@ namespace Settings {
     void Free();
     void Unload();
 
-    // Callbacks
     void OnBackClicked();
-    void OnVolumeUpClicked();
-    void OnVolumeDownClicked();
 
-    // Volume state [0.0 .. 1.0]
-    extern float currentVolume;
+    void OnMasterVolumeUpClicked();
+    void OnMasterVolumeDownClicked();
+
+    void OnBGMVolumeUpClicked();
+    void OnBGMVolumeDownClicked();
+
+    void OnSFXVolumeUpClicked();
+    void OnSFXVolumeDownClicked();
+
+    extern float currentMasterVolume;
+    extern float currentBgmVolume;
+    extern float currentSfxVolume;
 
     extern Button backButton;
-    extern Button volumeUpButton;
-    extern Button volumeDownButton;
+
+    extern Button masterVolumeUpButton;
+    extern Button masterVolumeDownButton;
+
+    extern Button bgmVolumeUpButton;
+    extern Button bgmVolumeDownButton;
+
+    extern Button sfxVolumeUpButton;
+    extern Button sfxVolumeDownButton;
 }
 
 #endif // SETTINGS_HPP

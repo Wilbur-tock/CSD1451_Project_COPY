@@ -12,38 +12,48 @@
 
 namespace Settings {
 
-    // State 
-    float currentVolume = 0.5f;          // Default 50 %
+    float currentMasterVolume = 0.5f;
+    float currentBgmVolume = 1.0f;
+    float currentSfxVolume = 1.0f;
 
     Button backButton;
-    Button volumeUpButton;
-    Button volumeDownButton;
+
+    Button masterVolumeUpButton;
+    Button masterVolumeDownButton;
+
+    Button bgmVolumeUpButton;
+    Button bgmVolumeDownButton;
+
+    Button sfxVolumeUpButton;
+    Button sfxVolumeDownButton;
 
     AEGfxTexture* bgTexture = nullptr;
     AEGfxTexture* btnTexture = nullptr;
-    AEGfxTexture* sliderBgTex = nullptr; // nullptr -> drawn as solid rect
 
     TextObject titleText;
-    TextObject volumeLabel;
     TextObject hintText;
 
-    // Slider geometry (world coords, centred screen)
     static const float SLIDER_W = 400.0f;
     static const float SLIDER_H = 30.0f;
-    static const float SLIDER_Y = -30.0f;   // vertical centre of slider
     static const float SLIDER_LEFT_X = -SLIDER_W / 2.0f;
 
-    // Dragging state
-    bool  isDragging = false;
-    float dragOffsetX = 0.0f;   // unused - we set value directly from cursor X
+    static const float MASTER_Y = 70.0f;
+    static const float BGM_Y = -30.0f;
+    static const float SFX_Y = -130.0f;
 
-    // Helpers 
-    // Convert volume [0,1] -> slider knob X (world)
-    static float VolumeToKnobX() {
-        return SLIDER_LEFT_X + currentVolume * SLIDER_W;
+    enum class DragTarget {
+        None,
+        Master,
+        BGM,
+        SFX
+    };
+
+    static DragTarget currentDragTarget = DragTarget::None;
+
+    static float VolumeToKnobX(float volume) {
+        return SLIDER_LEFT_X + volume * SLIDER_W;
     }
 
-    // Convert world X -> volume [0,1], clamped
     static float WorldXToVolume(float worldX) {
         float t = (worldX - SLIDER_LEFT_X) / SLIDER_W;
         if (t < 0.0f) t = 0.0f;
@@ -51,21 +61,114 @@ namespace Settings {
         return t;
     }
 
-    // Lifecycle 
+    static bool IsMouseOverSlider(float worldX, float worldY, float sliderY) {
+        const float hitPad = 30.0f;
+        return worldX >= SLIDER_LEFT_X - hitPad &&
+            worldX <= SLIDER_LEFT_X + SLIDER_W + hitPad &&
+            worldY >= sliderY - SLIDER_H - hitPad &&
+            worldY <= sliderY + SLIDER_H + hitPad;
+    }
+
+    static void ApplyVolumesToAudio() {
+        AudioManager::SetVolume(currentMasterVolume);
+        AudioManager::SetBGMVolume(currentBgmVolume);
+        AudioManager::SetSFXVolume(currentSfxVolume);
+    }
+
+    static void DrawSliderRow(const char* label, float sliderY, float value) {
+        // Label
+        float labelX = SLIDER_LEFT_X - 220.0f;
+        float labelY = sliderY + 10.0f;
+        Utils::NormalizeCoordinates(labelX, labelY);
+
+        TextObject labelText = {
+            label,
+            0.9f,
+            Color(0.0f, 0.0f, 0.0f, 1.0f),
+            { labelX, labelY }
+        };
+        labelText.Draw();
+
+        // Slider track
+        GraphicsManager::DrawWorldUI(
+            nullptr,
+            GraphicsManager::CreateTransformMatrix(
+                SLIDER_LEFT_X, sliderY, 0,
+                SLIDER_W, SLIDER_H),
+            Color(0.2f, 0.2f, 0.2f, 0.5f)
+        );
+
+        // Slider fill
+        float fillW = value * SLIDER_W;
+        if (fillW > 1.0f) {
+            GraphicsManager::DrawWorldUI(
+                nullptr,
+                GraphicsManager::CreateTransformMatrix(
+                    SLIDER_LEFT_X, sliderY, 0,
+                    fillW, SLIDER_H),
+                Color(0.2f, 0.6f, 0.9f, 0.75f)
+            );
+        }
+
+        // Knob
+        float knobX = VolumeToKnobX(value);
+        float knobSz = 44.0f;
+        GraphicsManager::DrawWorldUI(
+            nullptr,
+            GraphicsManager::CreateTransformMatrix(
+                knobX - knobSz / 2.0f, sliderY - 7.0f, 0,
+                knobSz, knobSz),
+            Color(1.0f, 1.0f, 1.0f, 1.0f)
+        );
+
+        float innerSz = 22.0f;
+        GraphicsManager::DrawWorldUI(
+            nullptr,
+            GraphicsManager::CreateTransformMatrix(
+                knobX - innerSz / 2.0f, sliderY, 0,
+                innerSz, innerSz),
+            Color(0.2f, 0.6f, 0.9f, 1.0f)
+        );
+
+        // Percentage text
+        int pct = static_cast<int>(value * 100.0f + 0.5f);
+        std::string pctStr = std::to_string(pct) + "%";
+
+        float pctX = SLIDER_LEFT_X + SLIDER_W + 70.0f;
+        float pctY = sliderY + 10.0f;
+        Utils::NormalizeCoordinates(pctX, pctY);
+
+        TextObject pctText = {
+            pctStr,
+            0.9f,
+            Color(0.0f, 0.0f, 0.0f, 1.0f),
+            { pctX, pctY }
+        };
+        pctText.Draw();
+    }
+
+    static void AdjustVolume(float& value, float delta) {
+        value += delta;
+        if (value < 0.0f) value = 0.0f;
+        if (value > 1.0f) value = 1.0f;
+        ApplyVolumesToAudio();
+    }
+
     void Load() {
         bgTexture = AssetsManager::GetTexture("Assets/game_bg.png");
         btnTexture = AssetsManager::GetTexture("Assets/buttonTexture.png");
     }
 
     void Initialize() {
-        currentVolume = AudioManager::GetVolume();
-        // Reset camera to origin
+        currentMasterVolume = AudioManager::GetVolume();
+        currentBgmVolume = AudioManager::GetBGMVolume();
+        currentSfxVolume = AudioManager::GetSFXVolume();
+
         CameraManager::camera.SetPosition({ 0.0f, 0.0f });
         CameraManager::camera.SetState(CameraManager::CameraController::STATIC);
 
-        // Back button
         float btnW = 220.0f, btnH = 70.0f;
-        AEVec2 backPos = { -btnW / 2.0f, -160.0f };
+        AEVec2 backPos = { -btnW / 2.0f, -250.0f };
         backButton = Button(
             TextObject{ "< BACK" },
             Utils::AnchorMode::CENTER,
@@ -76,57 +179,86 @@ namespace Settings {
             OnBackClicked
         );
 
-        // Volume +/- buttons (beside the slider) 
         float smallBtnW = 60.0f, smallBtnH = 50.0f;
-        float btnY = SLIDER_Y * 0.75f;
+        float leftButtonX = -SLIDER_W / 2.0f - smallBtnW - 10.0f - smallBtnW / 2.0f;
+        float rightButtonX = SLIDER_W / 2.0f + 10.0f + smallBtnW / 2.0f;
 
-        AEVec2 volDownPos = { -SLIDER_W / 2.0f - smallBtnW - 10.0f - smallBtnW / 2.0f, btnY };
-        volumeDownButton = Button(
+        masterVolumeDownButton = Button(
             TextObject{ "-" },
             Utils::AnchorMode::CENTER,
-            volDownPos,
+            { leftButtonX, MASTER_Y - 8.0f },
             { smallBtnW, smallBtnH },
             Color(0.7f, 0.3f, 0.3f, 1.0f),
             btnTexture,
-            OnVolumeDownClicked
+            OnMasterVolumeDownClicked
         );
 
-        AEVec2 volUpPos = { SLIDER_W / 2.0f + 10.0f + smallBtnW / 2.0f, btnY };
-        volumeUpButton = Button(
+        masterVolumeUpButton = Button(
             TextObject{ "+" },
             Utils::AnchorMode::CENTER,
-            volUpPos,
+            { rightButtonX, MASTER_Y - 8.0f },
             { smallBtnW, smallBtnH },
             Color(0.3f, 0.7f, 0.3f, 1.0f),
             btnTexture,
-            OnVolumeUpClicked
+            OnMasterVolumeUpClicked
         );
 
-        // Text objects 
+        bgmVolumeDownButton = Button(
+            TextObject{ "-" },
+            Utils::AnchorMode::CENTER,
+            { leftButtonX, BGM_Y - 8.0f },
+            { smallBtnW, smallBtnH },
+            Color(0.7f, 0.3f, 0.3f, 1.0f),
+            btnTexture,
+            OnBGMVolumeDownClicked
+        );
+
+        bgmVolumeUpButton = Button(
+            TextObject{ "+" },
+            Utils::AnchorMode::CENTER,
+            { rightButtonX, BGM_Y - 8.0f },
+            { smallBtnW, smallBtnH },
+            Color(0.3f, 0.7f, 0.3f, 1.0f),
+            btnTexture,
+            OnBGMVolumeUpClicked
+        );
+
+        sfxVolumeDownButton = Button(
+            TextObject{ "-" },
+            Utils::AnchorMode::CENTER,
+            { leftButtonX, SFX_Y - 8.0f },
+            { smallBtnW, smallBtnH },
+            Color(0.7f, 0.3f, 0.3f, 1.0f),
+            btnTexture,
+            OnSFXVolumeDownClicked
+        );
+
+        sfxVolumeUpButton = Button(
+            TextObject{ "+" },
+            Utils::AnchorMode::CENTER,
+            { rightButtonX, SFX_Y - 8.0f },
+            { smallBtnW, smallBtnH },
+            Color(0.3f, 0.7f, 0.3f, 1.0f),
+            btnTexture,
+            OnSFXVolumeUpClicked
+        );
+
         titleText = {
             "SETTINGS",
             2.5f,
             Color(0.0f, 0.0f, 0.0f, 1.0f),
-            { -0.17f, 0.65f }
-        };
-
-        volumeLabel = {
-            "VOLUME",
-            1.0f,
-            Color(0.0f, 0.0f, 0.0f, 1.0f),
-            { -0.06f, 0.1f }
+            { -0.17f, 0.70f }
         };
 
         hintText = {
-            "Click & drag the slider, or use + / -  |  ESC - Back",
-            0.7f,
-            Color(0.0f, 0.0f, 0.0f, 0.8f),
+            "Drag any slider, or use + / -  |  Top = Master, Middle = BGM, Bottom = SFX  |  ESC - Back",
+            0.65f,
+            Color(0.0f, 0.0f, 0.0f, 0.85f),
             { -0.98f, -0.93f }
         };
     }
 
     void Draw() {
-        // Background
         if (bgTexture) {
             GraphicsManager::DrawWorldUI(
                 bgTexture,
@@ -141,68 +273,17 @@ namespace Settings {
         }
 
         titleText.Draw();
-        volumeLabel.Draw();
         hintText.Draw();
 
-        // Slider track (dark background)
-        GraphicsManager::DrawWorldUI(
-            nullptr,
-            GraphicsManager::CreateTransformMatrix(
-                SLIDER_LEFT_X, SLIDER_Y, 0,
-                SLIDER_W, SLIDER_H),
-            Color(0.2f, 0.2f, 0.2f, 0.5f)
-        );
-
-        // Slider fill (coloured portion = current volume)
-        float fillW = currentVolume * SLIDER_W;
-        if (fillW > 1.0f) {
-            GraphicsManager::DrawWorldUI(
-                nullptr,
-                GraphicsManager::CreateTransformMatrix(
-                    SLIDER_LEFT_X, SLIDER_Y, 0,
-                    fillW, SLIDER_H),
-                Color(0.2f, 0.6f, 0.9f, 0.75f)
-            );
-        }
-
-        // Slider knob
-        float knobX = VolumeToKnobX();
-        float knobSz = 44.0f;
-        GraphicsManager::DrawWorldUI(
-            nullptr,
-            GraphicsManager::CreateTransformMatrix(
-                knobX - knobSz / 2.0f, SLIDER_Y * 0.75f, 0,
-                knobSz, knobSz),
-            Color(1.0f, 1.0f, 1.0f, 1.0f)
-        );
-        // Inner knob accent
-        float innerSz = 22.0f;
-        GraphicsManager::DrawWorldUI(
-            nullptr,
-            GraphicsManager::CreateTransformMatrix(
-                knobX - innerSz / 2.0f, SLIDER_Y, 0,
-                innerSz, innerSz),
-            Color(0.2f, 0.6f, 0.9f, 1.0f)
-        );
-
-        // Percentage label 
-        int pct = static_cast<int>(currentVolume * 100.0f + 0.5f);
-        std::string pctStr = std::to_string(pct) + "%";
-        TextObject pctText = {
-            pctStr,
-            0.9f,
-            Color(0.0f, 0.0f, 0.0f, 1.0f),
-            { -0.03f, -0.22f }
-        };
-        pctText.Draw();
+        DrawSliderRow("MASTER", MASTER_Y, currentMasterVolume);
+        DrawSliderRow("BGM", BGM_Y, currentBgmVolume);
+        DrawSliderRow("SFX", SFX_Y, currentSfxVolume);
     }
 
     void Update() {
-        // Save camera position so the level resumes with it intact
         AEVec2 savedCamPos = CameraManager::camera.GetPosition();
         CameraManager::camera.SetPosition({ 0.0f, 0.0f });
 
-        // ESC -> back to pause menu
         if (AEInputCheckTriggered(AEVK_ESCAPE) || AEInputCheckTriggered(AEVK_BACK)) {
             AudioManager::PlaySFX(AudioManager::SFX::UIButton);
             OnBackClicked();
@@ -210,74 +291,101 @@ namespace Settings {
             return;
         }
 
-        // Slider mouse interaction 
-        // Get cursor world position directly
         float worldX = 0.0f, worldY = 0.0f;
         Utils::GetWorldMousePos(worldX, worldY);
 
-        // Hit-test: is cursor over the slider track + a bit of vertical padding?
-        float hitPad = 30.0f;
-        bool overSlider =
-            worldX >= SLIDER_LEFT_X - hitPad &&
-            worldX <= SLIDER_LEFT_X + SLIDER_W + hitPad &&
-            worldY >= SLIDER_Y - SLIDER_H - hitPad &&
-            worldY <= SLIDER_Y + SLIDER_H + hitPad;
-
-        if (AEInputCheckTriggered(AEVK_LBUTTON) && overSlider) {
-            isDragging = true;
+        if (AEInputCheckTriggered(AEVK_LBUTTON)) {
+            if (IsMouseOverSlider(worldX, worldY, MASTER_Y)) {
+                currentDragTarget = DragTarget::Master;
+            }
+            else if (IsMouseOverSlider(worldX, worldY, BGM_Y)) {
+                currentDragTarget = DragTarget::BGM;
+            }
+            else if (IsMouseOverSlider(worldX, worldY, SFX_Y)) {
+                currentDragTarget = DragTarget::SFX;
+            }
         }
+
         if (AEInputCheckReleased(AEVK_LBUTTON)) {
-            isDragging = false;
+            currentDragTarget = DragTarget::None;
         }
 
-        if (isDragging && AEInputCheckCurr(AEVK_LBUTTON)) {
-            currentVolume = WorldXToVolume(worldX);
-            AudioManager::SetVolume(currentVolume);
+        if (AEInputCheckCurr(AEVK_LBUTTON)) {
+            float newValue = WorldXToVolume(worldX);
+
+            switch (currentDragTarget) {
+            case DragTarget::Master:
+                currentMasterVolume = newValue;
+                ApplyVolumesToAudio();
+                break;
+            case DragTarget::BGM:
+                currentBgmVolume = newValue;
+                ApplyVolumesToAudio();
+                break;
+            case DragTarget::SFX:
+                currentSfxVolume = newValue;
+                ApplyVolumesToAudio();
+                break;
+            default:
+                break;
+            }
         }
 
         Draw();
 
-        // Buttons draw themselves
         backButton.Update();
-        volumeUpButton.Update();
-        volumeDownButton.Update();
 
-        // Draw cursor while camera is still at origin so it matches the UI
+        masterVolumeDownButton.Update();
+        masterVolumeUpButton.Update();
+
+        bgmVolumeDownButton.Update();
+        bgmVolumeUpButton.Update();
+
+        sfxVolumeDownButton.Update();
+        sfxVolumeUpButton.Update();
+
         UICursor::Draw();
-
-        // Restore camera position
         CameraManager::camera.SetPosition(savedCamPos);
     }
 
     void Free() {
-        isDragging = false;
+        currentDragTarget = DragTarget::None;
     }
 
     void Unload() {}
 
-    // Button callbacks
     void OnBackClicked() {
-        isDragging = false;
+        currentDragTarget = DragTarget::None;
 
-        // If we are an overlay on the pause menu, just close the overlay
         if (Utils::isSettingsOpen) {
             Utils::isSettingsOpen = false;
             return;
         }
 
-        // Otherwise we got here via a full state transition (e.g. MainMenu)
         GameStateManager::next = GameStateManager::GameState::MAIN_MENU;
     }
 
-    void OnVolumeUpClicked() {
-        currentVolume += 0.1f;
-        if (currentVolume > 1.0f) currentVolume = 1.0f;
-        AudioManager::SetVolume(currentVolume);
+    void OnMasterVolumeUpClicked() {
+        AdjustVolume(currentMasterVolume, 0.1f);
     }
 
-    void OnVolumeDownClicked() {
-        currentVolume -= 0.1f;
-        if (currentVolume < 0.0f) currentVolume = 0.0f;
-        AudioManager::SetVolume(currentVolume);
+    void OnMasterVolumeDownClicked() {
+        AdjustVolume(currentMasterVolume, -0.1f);
+    }
+
+    void OnBGMVolumeUpClicked() {
+        AdjustVolume(currentBgmVolume, 0.1f);
+    }
+
+    void OnBGMVolumeDownClicked() {
+        AdjustVolume(currentBgmVolume, -0.1f);
+    }
+
+    void OnSFXVolumeUpClicked() {
+        AdjustVolume(currentSfxVolume, 0.1f);
+    }
+
+    void OnSFXVolumeDownClicked() {
+        AdjustVolume(currentSfxVolume, -0.1f);
     }
 }

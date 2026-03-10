@@ -57,7 +57,7 @@ namespace GameStateManager {
         MainMenu::Load();               // Pre-load the main menu's button and background textures into the asset cache
         Credits::Load();                // Pre-load any assets required by the credits screen
 
-        AudioManager::Init();           // Initialise the FMOD audio engine
+        AudioManager::Init();           // Initialise the audio engine
         AudioManager::SetVolume(0.35f); // Set the master volume to 35% at startup
 
         // Initialize camera controller
@@ -79,7 +79,7 @@ namespace GameStateManager {
         PhysicsManager::g_dt = rawDt; // Copy rawDt into the physics delta-time 
                                       // Setting it here first ensures physics runs at full speed during normal gameplay
 
-        AudioManager::Update(); // Pump the FMOD audio engine each frame. Must be called regardless of pause or transition state
+        AudioManager::Update();
 
         // Handle quit -- skip loading screen entirely 
         // When the Quit button sets next = QUIT, the very next frame hits the new check, 
