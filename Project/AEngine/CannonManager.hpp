@@ -16,7 +16,7 @@ namespace CannonManager {
 		Cannon(AEVec2 _pos, AEGfxTexture* _texture, TileIndex _tileId, AEVec2 _size = { 30,10 }, bool _isShootingRight = true, bool _isPlayerControlled = true);
 
 		// return true if projectile has been shoot out of the cannon and be destroyed
-		inline bool IsProjectileDestroyed() const { return isProjectileDestroyed; }
+		inline bool IsProjectileDestroyed() const { return allProjectileDestroyed; }
 
 		// Member Functions
 
@@ -34,6 +34,9 @@ namespace CannonManager {
 		void SetTarget(Character* _target);
 
 		void SetEnemyAI(int difficultyLevel);
+
+		void DebugInfo();
+		Character* Target() const { return target; }
 	private:
 		// Initialize all the different type of projectile abilities to the CANNON CLASS
 		// Switch between the projectileId to choose the different type of projectile abilities
@@ -53,9 +56,8 @@ namespace CannonManager {
 		void ShootProjectile();
 		// Render and move the projectile once it has reach the end of its lifespan it is destroy
 		void UpdateProjectile();
-		// Destroy projectile once it reached the end of its lifespan or out of the map bounds
-		// return true if projectile should be removed from activeProjectiles
-		bool DestroyProjectile(Projectile& projectile);
+		// Remove inactive projectiles from active projectiles vector
+		void RemoveInactiveProjectiles();
 		// Ability effects checker for ability to take effect before projectile has been shot 
 		// Check for inputs to activated PROJECTILE Abilities
 		void AbilityActivation(Projectile& projectile);
@@ -64,15 +66,12 @@ namespace CannonManager {
 		void DrawTrajectory();
 
 		void DebugCommands();
-		void DebugInfo();
-	public:
-		Character* Target() const { return target; }
 	private:
 		bool isPlayerControlled = true, isShootingRight = true;
 		bool hasCannonShot = false; // has projectile has been shot out of the cannon return true if yes
 		bool isHoldingLeftClick = false; // player is holding left mouse click
 		bool canPlayerShoot = true; // can player shoot used for checking if player press right click to cancel his shot
-		bool isProjectileDestroyed = false; // projectile has been shot out and destroyed
+		bool allProjectileDestroyed = false; // projectile has been shot out and destroyed
 		bool resetCamWhenShooting = false; // When player press left mouse click, reset camera to position the cannon and unable to move the camera or not
 
 		// Cannon attributes

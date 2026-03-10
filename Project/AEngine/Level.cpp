@@ -254,6 +254,7 @@ void Level::DrawUI() {
 	enemyHPBar.Draw(currentHP, maxHP);
 
 	activeCannon->DrawUI();
+	activeCannon->DebugInfo();
 }
 
 void Level::GetCurrentHP(float& currentHP, bool isGettingPlayerHP) {

@@ -22,11 +22,10 @@ enum class ProjectileMode {
 
 class Projectile : public GameObject {
 public:
-	float timer = 0.0f;
-	bool isActive = false, isGrounded = false, toBeDestroyed = false;
-	bool collisionTriggered = false; // There is a collision triggered between the projectile and block
-
+	bool isGrounded = false;
 	Attributes attribute;
+
+	// Ctor
 
 	Projectile() = default;
 	Projectile(AEGfxTexture* _texture, ProjectileMode _mode = ProjectileMode::ATTACK, AEVec2 _pos = {0,0}, int _attackCharges = 1);
@@ -56,6 +55,10 @@ public:
 		}
 	}
 
+	bool IsActive() const { return isActive; }
+	bool ToBeDestroyed() const { return toBeDestroyed; }
+	bool IsCollisionTriggered() const { return isCollisionTriggered; }
+
 	// Member functions
 
 	void SetProjectileStats(std::string _projectileName, ProjectileModule const& data);
@@ -68,17 +71,31 @@ public:
 	void MoveProjectile(float dt);
 	// Simulate the projectile physics of bouncing off the walls, checking if it is grounded
 	void OnCollision(Tile const& tile);
+	// If the projectile hit something, REDUCE the velocity by a percentage for the FIRST COLLISION ONLY
+	// So that it does not continue having the same projectile velocity even if it hits and destroy something
+	void FirstTimeCollision();
+
 	// Damage tiles based on projectile damage (Blocks & Enemy included)
 	void DamageTile(int x, int y);
 	void ConsumeAttackCharge();
-	void Destroy();
+	// Check if projectile is set to be destroyed
+	void SetDestroy();
+	// Return true if projectile has been destroyed otherwise false
+	bool Destroy();
+
+	std::string DebugInfo();
 
 private:
 	static constexpr AEVec2 defaultSize{ 10,10 };
 	int projectileId = 0, attackCharges = 1;
 	std::string projectileName;
 	ProjectileMode mode = ProjectileMode::ATTACK;
-	bool abilityTriggered = false;
+
+	float timer = 0.0f; // lifespan timer
+	bool isActive = false; // is projectile still alive or dead
+	bool toBeDestroyed = false;
+	bool isCollisionTriggered = false; // There is a collision triggered between the projectile and block
+	bool isAbilityTriggered = false;
 };
 
 #endif // !PROJECTILE_HPP

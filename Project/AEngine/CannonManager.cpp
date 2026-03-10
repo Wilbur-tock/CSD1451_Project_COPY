@@ -28,6 +28,7 @@ namespace CannonManager {
     void Cannon::ProjectileSettings() {
         // Reset to default
         activeProjectiles.clear(); // ensure that there should not be any active ammo when cannon is reset
+        activeProjectiles.reserve(projectileCount * 2);
         projectiles.clear();
         projectiles.resize(projectileCount);
 
@@ -91,6 +92,7 @@ namespace CannonManager {
         if (hasCannonShot) return;
         // Render UI
         if (isHoldingLeftClick) {
+            // Drawing power bar beside the cannon in WORLD SPACE
             float x = transform.pos.x - (transform.size.x * 1.5f);
             if (!isShootingRight) x = transform.pos.x + (transform.size.x * 1.5f);
             UIManager::Bar bar{ { x, transform.pos.y + (transform.size.y * 1.5f) },
@@ -99,6 +101,7 @@ namespace CannonManager {
 
             if (!isPlayerControlled) return;
 
+            // Drawing power bar in the SCREEN SPACE
             Transform trans{ { 0,0 }, {600,15} };
             Utils::SetAnchoredPosition(trans, Utils::AnchorMode::BOTTOM_CENTER);
             trans.pos.y += 85;
@@ -107,12 +110,10 @@ namespace CannonManager {
                 trans.size, Color{ 0,1,0 }, UIManager::FillType::LEFT_TO_RIGHT };
             uiBar.Draw(chargingPower, Config::CANNON_MAX_POWER);
         }
-
-        DebugInfo();
     }
 
     void Cannon::ResetTurn() {
-        isProjectileDestroyed = false;
+        allProjectileDestroyed = false;
         hasCannonShot = false;
         SetCamera(false);
 
@@ -158,7 +159,7 @@ namespace CannonManager {
     }
 
     void Cannon::EnemyAI() {
-        if (hasCannonShot || isProjectileDestroyed) return;
+        if (hasCannonShot || allProjectileDestroyed) return;
         if (!target) {
             std::cerr << "[CannonManager] Can't find any player character targets for the enemy to shoot!" << '\n';
             return;
@@ -307,10 +308,8 @@ namespace CannonManager {
     void Cannon::UpdateProjectile() {
         if (activeProjectiles.empty()) return;
 
-        std::vector<Projectile*> projPtrToDestroy;
-
         for (Projectile& projectile : activeProjectiles) {
-            if (!projectile.isActive) continue;
+            if (!projectile.IsActive()) continue;
 
             projectile.AbilityActivation();
 
@@ -325,7 +324,7 @@ namespace CannonManager {
             for (int step = 0; step < SUB_STEPS; ++step) {
                 // Set movement first
                 projectile.MoveProjectile(subDt);
-                projectile.isGrounded = false;
+                projectile.isGrounded = false; // NEED TO RESET EVERYTIME FOR GROUNDED CHECKS
 
                 // Check for collision in a 3x3 area with the projectile
                 int gridX = 0, gridY = 0;
@@ -347,14 +346,9 @@ namespace CannonManager {
                             // Damage tile first, incase of destroying the blocks and bouncing back if damageTile is not called first
                             projectile.DamageTile(x, y);
 
-                            if (!projectile.collisionTriggered) {
+                            if (!projectile.IsCollisionTriggered()) {
                                 AudioManager::PlaySFX(AudioManager::SFX::Impact);
-                                // If the projectile hit something, REDUCE the velocity by a percentage for the FIRST COLLISION ONLY
-                                // So that it does not continue having the same projectile velocity even if it hits and destroy something
-                                float percentage = 0.5f;
-                                projectile.velocity.x *= percentage;
-                                projectile.velocity.y *= percentage;
-                                projectile.collisionTriggered = true;
+                                projectile.FirstTimeCollision();
                             }
                             else {
                                 projectile.OnCollision(tile);
@@ -385,50 +379,23 @@ namespace CannonManager {
                 }
             }
 
-            // Add to projectile to be destroyed list if true
-            if (DestroyProjectile(projectile)) {
-                projPtrToDestroy.push_back(&projectile);
-            }
+            // Check if projectile need to be destroy and destroy after it lifespan
+            projectile.Destroy();
             projectile.Render();
         }
 
-        // Clean up projectiles from the active projectiles list return if vector to destroy is empty
-        if (projPtrToDestroy.empty()) return;
-
-        for (Projectile* projToDestroy : projPtrToDestroy) {
-            // Find the index containing the projectile and erase from the active ammo vector
-            for (int i = 0; i < activeProjectiles.size(); i++) {
-                if (activeProjectiles[i].id == projToDestroy->id) {
-                    activeProjectiles.erase(activeProjectiles.begin() + i);
-                    //SetCamera(false); // DISABLE to not allow camera to move back to the cannon after projectile is destroyed
-                    std::cout << "[CannonManager] Remove projectile from vector. Active vector count: " << activeProjectiles.size() << '\n';
-                }
-            }
-        }
+        RemoveInactiveProjectiles();
     }
 
-    bool Cannon::DestroyProjectile(Projectile & projectile) {
-        float speedSq = (projectile.velocity.x * projectile.velocity.x) + (projectile.velocity.y * projectile.velocity.y);
-
-        // Start timer if it going to be destroy and projectile stops moving
-        if (projectile.toBeDestroyed) {
-            projectile.timer -= 1.0f * PhysicsManager::g_dt;
-        }
-        else {
-            if (projectile.isGrounded && speedSq <= 0.1f) {
-                projectile.timer = Config::PROJECTILE_LIFESPAN;
-                projectile.toBeDestroyed = true;
+    void Cannon::RemoveInactiveProjectiles() {
+        // Clean up projectiles from the active projectiles list return if vector to destroy is empty
+        if (activeProjectiles.empty()) return;
+        for (int i = static_cast<int>(activeProjectiles.size() - 1); i >= 0; --i) {
+            if (!activeProjectiles[i].IsActive()) {
+                activeProjectiles.erase(activeProjectiles.begin() + i);
+                std::cout << "[CannonManager] Remove projectile from vector. Active projectile vector count: " << activeProjectiles.size() << '\n';
             }
         }
-
-        // Destroy projectile
-        if (projectile.timer <= 0.0f || !projectile.IsInMapBounds()) {
-            projectile.Destroy();
-            //hasCannonShot = false; // reset cannon back to false to allow player to shoot again after projectile been destroyed
-            isProjectileDestroyed = true;
-            return true;
-        }
-        return false;
     }
 
     void Cannon::AbilityActivation(Projectile& projectile) {
@@ -523,7 +490,7 @@ namespace CannonManager {
         // Show cannon information
         std::string debugStr = "Cannon " + static_cast<std::string>(isPlayerControlled ? "PLAYER" : "ENEMY")
             + "\nIs Active : " + std::string(hasCannonShot ? "true" : "false")
-            + "\nIs Projectile destroyed : " + static_cast<std::string>(isProjectileDestroyed ? "true" : "false")
+            + "\nIs Projectile destroyed : " + static_cast<std::string>(allProjectileDestroyed ? "true" : "false")
             + "\nPos x: " + Utils::FormatFloat(transform.pos.x, 2) + " y: " + Utils::FormatFloat(transform.pos.y, 2)
             + "\nAngle: " + Utils::FormatFloat(cannonAngle * (180.0f / 3.14159265359), 2) + " " + Utils::FormatFloat(cannonAngle, 2)
             + "\n\nSelected Projectile\nId: " + std::to_string(selectedProjectile.ProjectileId())
@@ -550,17 +517,7 @@ namespace CannonManager {
 
         // Print projectile that is shoot out information
         if (activeProjectiles.size() > 0) {
-            Projectile const& projectile = activeProjectiles.back();
-            debugStr += "\n\nActive Projectile " + std::to_string(static_cast<int>(projectile.Mode())) + "\nSize: x: "
-                + Utils::FormatFloat(projectile.transform.size.x, 2) + " y: " + Utils::FormatFloat(projectile.transform.size.y, 2)
-                + "\nPos x: " + Utils::FormatFloat(projectile.transform.pos.x, 2) + " y " + Utils::FormatFloat(projectile.transform.pos.y, 2)
-                + "\nVelocity x: " + Utils::FormatFloat(activeProjectiles.back().velocity.x, 2) + " y: " + Utils::FormatFloat(projectile.velocity.y, 2)
-                + "\nGrounded: " + static_cast<std::string>(projectile.isGrounded ? "true" : "false")
-                + "\nTo Be Destroyed: " + static_cast<std::string>(projectile.toBeDestroyed ? "true" : "false")
-                + "\nTimer: " + Utils::FormatFloat(projectile.timer, 2)
-                + "\nAttack Charges: " + std::to_string(projectile.AttackCharges())
-                + "\nDamage Radius: " + std::to_string(projectile.attribute.DamageRadius())
-                + "\nCollisionTriggered: " + static_cast<std::string>(projectile.collisionTriggered ? "true" : "false");
+            debugStr += activeProjectiles.back().DebugInfo();
         }
 
         //UIManager::Panel panel{ {500,500}, {1,1,1,0.5f}, Utils::AnchorMode::TOP_RIGHT };

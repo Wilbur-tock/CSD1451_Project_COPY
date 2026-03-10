@@ -18,14 +18,14 @@ void Projectile::Render() {
 }
 
 void Projectile::AbilityActivation() {
-    if (Mode() == ProjectileMode::IDLE || Mode() == ProjectileMode::ATTACK || abilityTriggered) return;
+    if (Mode() == ProjectileMode::IDLE || Mode() == ProjectileMode::ATTACK || isAbilityTriggered) return;
 
     bool leftClick = AEInputCheckTriggered(AEVK_LBUTTON);
 
     switch (Mode()) {
     case ProjectileMode::BOMB:
         if (leftClick) {
-            abilityTriggered = true;
+            isAbilityTriggered = true;
             // Bomb instant explode and damage tile blocks double its radius once activated
             int tileX = 0, tileY = 0;
             Utils::GetTileIndex(tileX, tileY, transform.pos);
@@ -44,21 +44,21 @@ void Projectile::AbilityActivation() {
         break;
     case ProjectileMode::NUKE:
         if (leftClick) {
-            abilityTriggered = true;
+            isAbilityTriggered = true;
             velocity = { 0,0 }; // fall straight down immediately
             std::cout << "NUKE mode triggered";
         }
         break;
     case ProjectileMode::PENTA_BURST:
-        if (collisionTriggered) { // Give a velocity boost once only to continue hitting more stuff
-            abilityTriggered = true;
+        if (isCollisionTriggered) { // Give a velocity boost once only to continue hitting more stuff
+            isAbilityTriggered = true;
             velocity.x *= 2;
             velocity.y *= 2;
         }
         break;
     case ProjectileMode::WALL:
         if (leftClick) {
-            abilityTriggered = true;
+            isAbilityTriggered = true;
 
             // Create a 1 tile width wall 2 tiles X index behind current projectile X index
             int tileX = 0, tileY = 0;
@@ -114,6 +114,7 @@ void Projectile::Initialize(Transform cannonTrans, int _activeId, float cannonAn
 }
 
 void Projectile::MoveProjectile(float dt) {
+    // Movement
     if (isGrounded) {
         velocity.x *= pow(PhysicsManager::FRICTION, dt);
         velocity.y = 0; // ensure that the projectile stay on the ground
@@ -128,7 +129,7 @@ void Projectile::MoveProjectile(float dt) {
 }
 
 void Projectile::OnCollision(Tile const& tile) {
-    if (Mode() == ProjectileMode::PENTA_BURST && !abilityTriggered) return;
+    if (Mode() == ProjectileMode::PENTA_BURST && !isAbilityTriggered) return;
 
     if(CollisionManager::IsHorizontalCollision(transform, tile.transform)) {
         PhysicsManager::ResolveHorizontalCollision(transform, velocity, tile.transform);
@@ -138,6 +139,13 @@ void Projectile::OnCollision(Tile const& tile) {
     }
 }
 
+void Projectile::FirstTimeCollision() {
+    float percentage = 0.5f;
+    velocity.x *= percentage;
+    velocity.y *= percentage;
+    isCollisionTriggered = true;
+}
+
 void Projectile::ConsumeAttackCharge() {
     if (--attackCharges <= 0) {
         attackCharges = 0;
@@ -145,9 +153,32 @@ void Projectile::ConsumeAttackCharge() {
     }
 }
 
-void Projectile::Destroy() {
-    isActive = collisionTriggered = toBeDestroyed = false;
-    timer = 0.0f;
+void Projectile::SetDestroy() {
+    float speedSq = (velocity.x * velocity.x) + (velocity.y * velocity.y);
+
+    // Start timer if it going to be destroy and projectile stops moving
+    if (toBeDestroyed) {
+        timer -= 1.0f * PhysicsManager::g_dt;
+    }
+    else { 
+        // Check whatever or not projectile is set to be destroyed
+        // if it grounded or speedSq is very less destroyed the projectile after a timer
+        if (isGrounded && speedSq <= 0.1f) {
+            timer = Config::PROJECTILE_LIFESPAN;
+            toBeDestroyed = true;
+        }
+    }
+}
+
+bool Projectile::Destroy() {
+    SetDestroy();
+    // Destroy projectile
+    if (timer <= 0.0f || !IsInMapBounds()) {
+        isActive = isCollisionTriggered = toBeDestroyed = false;
+        timer = 0.0f;
+        return true;
+    }
+    return false;
 }
 
 void Projectile::DamageTile(int tileX, int tileY) {
@@ -214,4 +245,17 @@ void Projectile::DamageTile(int tileX, int tileY) {
             { 0.75,0.0f,0 }
         );
     }
+}
+
+std::string Projectile::DebugInfo() {
+    return "\n\nActive Projectile " + std::to_string(static_cast<int>(Mode())) + "\nSize: x: "
+        + Utils::FormatFloat(transform.size.x, 2) + " y: " + Utils::FormatFloat(transform.size.y, 2)
+        + "\nPos x: " + Utils::FormatFloat(transform.pos.x, 2) + " y " + Utils::FormatFloat(transform.pos.y, 2)
+        + "\nVelocity x: " + Utils::FormatFloat(velocity.x, 2) + " y: " + Utils::FormatFloat(velocity.y, 2)
+        + "\nGrounded: " + static_cast<std::string>(isGrounded ? "true" : "false")
+        + "\nTo Be Destroyed: " + static_cast<std::string>(toBeDestroyed ? "true" : "false")
+        + "\nTimer: " + Utils::FormatFloat(timer, 2)
+        + "\nAttack Charges: " + std::to_string(AttackCharges())
+        + "\nDamage Radius: " + std::to_string(attribute.DamageRadius())
+        + "\nCollisionTriggered: " + static_cast<std::string>(IsCollisionTriggered() ? "true" : "false");
 }
