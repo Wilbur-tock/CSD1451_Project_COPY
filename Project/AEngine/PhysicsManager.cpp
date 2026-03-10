@@ -12,8 +12,8 @@ namespace PhysicsManager {
         float distance = sqrt(dx * dx + dy * dy);
 
         // Randomise angle between the min and max radian
-        float min = 30 * (PI / 180.0f);
-        float max = 60 * (PI / 180.0f);
+        float min = 30.0f * (PI / 180.0f);
+        float max = 60.0f * (PI / 180.0f);
         float randomAngleBase = Utils::RandomValue(min, max);
 
         // Adjust for direction (Shooting left or right)

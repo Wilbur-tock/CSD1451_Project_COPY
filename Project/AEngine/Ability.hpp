@@ -6,7 +6,8 @@
 enum class AbilityType {
 	STATISTICS = 1,
 	OFFENSIVE = 2,
-	DEFENSIVE = 3
+	DEFENSIVE = 3,
+	COUNT = DEFENSIVE, // ALWAYS THE LAST ONE
 };
 
 enum class Tier {

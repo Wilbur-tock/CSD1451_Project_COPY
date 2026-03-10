@@ -15,9 +15,9 @@ namespace GraphicsManager {
 	void Unload();
 
 	// Create the transform matrix to be used to draw out the texture on the mesh,
-	// x,y - position of where the texture is going to be render at
+	// x,y - WORLD COORDINATES position of WHERE the texture is going to be render at
 	// rot - rotation, 
-	// scaleX, scaleY, scale of the texture no ranges
+	// scaleX, scaleY, size of the texture
 	AEMtx33 CreateTransformMatrix(float x, float y, float rot = 0.f, float scaleX = 100.f, float scaleY = 100.f);
 
 	// Draw game object on the map using pMeshMiddle rect mode middle
@@ -37,6 +37,7 @@ namespace GraphicsManager {
 	// screenX/Y – center position of the sprite (screen coordinates)
 	// w, h      – render size in pixels
 	void DrawSpriteFrame(AEGfxTexture* tex, int frame, float screenX, float screenY, float w, float h);
+	void DrawLine(AEVec2 pos, AEVec2 size);
 }
 
 #endif // !GRAPHICSMANAGER_HPP

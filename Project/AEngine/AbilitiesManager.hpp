@@ -47,7 +47,11 @@ namespace AbilitiesManager {
 
 		// Reset to default ability if current ability if an offensive and charges remaining is 0 to 
 		// ensure that an ability with 0 charges cannot be used again
-		void ResetAbility();
+		void ResetAbility() {
+			if (currentAbility->AbilityCharges() <= 0) {
+				ChangeAbility(0); // Reset to default
+			}
+		}
 		// True to toggle through all abilities or 
 		// false to toggle through of all the inventory abilities this controller has
 		void ToggleAbility(bool isAllAbilities);
@@ -57,6 +61,7 @@ namespace AbilitiesManager {
 		void AIAbilitySelection();
 
 		const Ability AbilityRandomisator(const std::vector<Ability>& abilities);
+
 		void AbilitySelectionRandomisator();
 		void AbilitySelector(bool& isOn);
 		void onClickAbilityCard(Ability ability, bool* isOn);
@@ -77,10 +82,12 @@ namespace AbilitiesManager {
 		std::vector<Ability> AIstatsAbilities; //vector for AI stats abils
 		std::vector<Ability> AIdefensiveAbilities; //vector for AI defensive abils
 
+		std::string controllerName; // use for debugging
 		Ability* currentAbility = nullptr;
 
 		std::vector<Ability*> inventory; // vector containing all the type of abilities this controller has in its inventory
 		std::vector<Ability> allAbilities; // vector containing all the different type of abilities
+		std::vector<int> inventoryTypeCount; // To keep track of how many of each ability type there is in the inventory
 
 		bool isAIController = false;
 		bool hasEnemySelectedAbility = false; // has enemy selected their ability

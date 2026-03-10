@@ -15,7 +15,7 @@
     },
 
     {
-        "Name": "Bomb Projectile",
+        "Name": "Bomb",
         "Type": 2,
         "Tier": 1,
         "Texture": "",
@@ -30,7 +30,7 @@
     },
 
     {
-        "Name": "NUKE EM ALL",
+        "Name": "Nuke",
         "Type": 2,
         "Tier": 1,
         "Texture": "",
@@ -45,7 +45,7 @@
     },
 
     {
-        "Name": "Piercing Projectile",
+        "Name": "Penta Burst",
         "Type": 2,
         "Tier": 1,
         "Texture": "",
@@ -60,7 +60,7 @@
     },
 
     {
-        "Name": "Auto Aim Projectile",
+        "Name": "Auto Aim",
         "Type": 2,
         "Tier": 1,
         "Texture": "",

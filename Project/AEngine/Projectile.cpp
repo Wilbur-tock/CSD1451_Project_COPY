@@ -18,11 +18,14 @@ void Projectile::Render() {
 }
 
 void Projectile::AbilityActivation() {
-    if (Mode() == ProjectileMode::IDLE || Mode() == ProjectileMode::ATTACK) return;
+    if (Mode() == ProjectileMode::IDLE || Mode() == ProjectileMode::ATTACK || abilityTriggered) return;
+
+    bool leftClick = AEInputCheckTriggered(AEVK_LBUTTON);
 
     switch (Mode()) {
     case ProjectileMode::BOMB:
-        if (AEInputCheckTriggered(AEVK_LBUTTON)) {
+        if (leftClick) {
+            abilityTriggered = true;
             // Bomb instant explode and damage tile blocks double its radius once activated
             int tileX = 0, tileY = 0;
             Utils::GetTileIndex(tileX, tileY, transform.pos);
@@ -36,22 +39,30 @@ void Projectile::AbilityActivation() {
 
             // Reset stats back to default
             attribute.DamageRadius(radius);
-
             std::cout << "BOMB mode triggered";
         }
         break;
     case ProjectileMode::NUKE:
-        if (AEInputCheckTriggered(AEVK_LBUTTON)) {
+        if (leftClick) {
+            abilityTriggered = true;
             velocity = { 0,0 }; // fall straight down immediately
             std::cout << "NUKE mode triggered";
         }
         break;
-    case ProjectileMode::PIERCING:
-        if (!abilityTriggered && collisionTriggered) {
+    case ProjectileMode::PENTA_BURST:
+        if (collisionTriggered) { // Give a velocity boost once only to continue hitting more stuff
+            abilityTriggered = true;
             velocity.x *= 2;
             velocity.y *= 2;
-            abilityTriggered = true;
         }
+        break;
+    case ProjectileMode::WALL:
+        if (leftClick) {
+            abilityTriggered = true;
+
+
+        }
+        break;
     }
 }
 
@@ -104,7 +115,7 @@ void Projectile::MoveProjectile(float dt) {
 }
 
 void Projectile::OnCollision(Tile const& tile) {
-    if (Mode() == ProjectileMode::PIERCING && !abilityTriggered) return;
+    if (Mode() == ProjectileMode::PENTA_BURST && !abilityTriggered) return;
 
     if(CollisionManager::IsHorizontalCollision(transform, tile.transform)) {
         PhysicsManager::ResolveHorizontalCollision(transform, velocity, tile.transform);

@@ -286,7 +286,7 @@ namespace CannonManager {
         // IMPORTANT: use a COPY here so we don't permanently modify the template projectile inside projectiles[].
         Projectile projectile = projectiles[selectedProjectileId];
 
-        AbilityExecution(projectile);
+        AbilityActivation(projectile);
 
         projectile.Initialize(transform, static_cast<int>(activeProjectiles.size()), cannonAngle, shotPower);
 
@@ -431,7 +431,7 @@ namespace CannonManager {
         return false;
     }
 
-    void Cannon::AbilityExecution(Projectile& projectile) {
+    void Cannon::AbilityActivation(Projectile& projectile) {
         switch (projectile.Mode()) {
         case ProjectileMode::AUTO_AIM:
             // Find new target if target is not alive

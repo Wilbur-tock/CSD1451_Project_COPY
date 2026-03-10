@@ -24,7 +24,8 @@ public:
 
 	void Update();
 	void Draw();
-	void DebugInfo(std::string &str);
+	void DrawUI();
+	void GetCharacterInfo(std::string &str);
 	void SetSquatAnimation(bool enabled); // Player only: toggles idle <-> squat animation
 
 	std::string TypeName() {
@@ -41,6 +42,10 @@ public:
 	}
 
 	void SetStats(int difficultyLevel);
+
+private:
+	// Print out information about the character and draw collision lines
+	void DebugInfo();
 
 private:
 	CharacterType type;

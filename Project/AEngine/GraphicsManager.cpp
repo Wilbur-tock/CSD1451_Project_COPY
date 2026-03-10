@@ -62,6 +62,8 @@ namespace GraphicsManager {
 			0.0f, 0.0f, 0xFFFFFFFF, 0.0f, 0.0f);
 
 		pMeshCorner = AEGfxMeshEnd();
+
+		AEGfxMeshStart();
 	}
 
 	static void DrawTexture(CoordinateType mode, AEGfxTexture* pTex, AEMtx33 transform, Color const& color) {
@@ -284,5 +286,30 @@ namespace GraphicsManager {
 		newTrans.m[1][2] += floorf(camY);
 
 		DrawTexture(CoordinateType::SCREEN_TOP_LEFT_CORNER, pTex, newTrans, color);
+	}
+
+	void DrawLine(AEVec2 pos, AEVec2 size) {
+		float halfW = size.x * 0.5f;
+		float halfH = size.y * 0.5f;
+		float lineSize = 1.0f;
+		Color lineColor = { 0,1,0 };
+
+		// Points
+		AEVec2 top		= { pos.x, pos.y + (size.y * 0.5f) };
+		AEVec2 btm		= { pos.x, pos.y - (size.y * 0.5f) };
+		AEVec2 right	= { pos.x + halfW, pos.y };
+		AEVec2 left		= { pos.x - halfW, pos.y };
+
+		AEMtx33 mat = CreateTransformMatrix(top.x, top.y, 0, halfW, lineSize);
+		DrawTexture(CoordinateType::WORLD_CENTER, AssetsManager::squareTexture, mat, lineColor);
+
+		mat = CreateTransformMatrix(btm.x, btm.y, 0, halfW, lineSize);
+		DrawTexture(CoordinateType::WORLD_CENTER, AssetsManager::squareTexture, mat, lineColor);
+
+		mat = CreateTransformMatrix(right.x, right.y, 0, lineSize, halfH);
+		DrawTexture(CoordinateType::WORLD_CENTER, AssetsManager::squareTexture, mat, lineColor);
+
+		mat = CreateTransformMatrix(left.x, left.y, 0, lineSize, halfH);
+		DrawTexture(CoordinateType::WORLD_CENTER, AssetsManager::squareTexture, mat, lineColor);
 	}
 }

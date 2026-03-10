@@ -75,6 +75,7 @@ void Character::Update() {
 
 	physics.Update(*this);
 	Draw();
+	DrawUI();
 }
 
 void Character::SetSquatAnimation(bool enabled) {
@@ -129,7 +130,9 @@ void Character::UpdateSprite() {
 void Character::Draw() {
 	UpdateSprite(); // Update character sprite texture
 	GraphicsManager::DrawGameObject(*this);
+}
 
+void Character::DrawUI() {
 	// UI
 	float x = transform.pos.x - transform.size.x * 0.5f, y = transform.pos.y + transform.size.y;
 	UIManager::Bar healthBar{ { x, y}, { transform.size.x, 10 }, Color{1,0,0} };
@@ -155,9 +158,11 @@ void Character::Draw() {
 	//		shieldBar.Draw(static_cast<float>(attribute.Shield()), static_cast<float>(attribute.MaxShield()));
 	//	}
 	//}
+
+	DebugInfo();
 }
 
-void Character::DebugInfo(std::string& str) {
+void Character::GetCharacterInfo(std::string& str) {
 	std::stringstream ss;
 	ss << &*this; // Display address of the character object
 	str = "\n\nCharacter Info: " + ss.str()
@@ -170,6 +175,13 @@ void Character::DebugInfo(std::string& str) {
 		+ "\n\nStats:\nHP: " + std::to_string(attribute.Health()) + "/" + std::to_string(attribute.MaxHealth())
 		+ "\nDamage Multiplier: " + std::to_string(attribute.DamageMultiplier())
 		+ "\nShield: " + std::to_string(attribute.Shield()) + "/" + std::to_string(attribute.MaxShield());
+}
+
+void Character::DebugInfo() {
+	if (!Utils::isDebuggerOn) return;
+
+	// Draw Collision line
+	GraphicsManager::DrawLine(transform.pos, collider.size);
 }
 
 void Character::SetStats(int difficultyLevel) {

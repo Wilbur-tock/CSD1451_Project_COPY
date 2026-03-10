@@ -320,12 +320,8 @@ void Level::SetTurn(bool _isPlayerTurn) {
 }
 
 void Level::UpdateLevelStatus() {
-	if (!isAbilitySelectorOn && !isHoveringUI && delayTimer <= 0.0f) {
-		status = LevelStatus::PLAYING;
-	}
-	else {
-		status = LevelStatus::PAUSED;
-	}
+	status = !isAbilitySelectorOn && !isHoveringUI && delayTimer <= 0.0f && !prevIsAbilitySelectorOn
+		? LevelStatus::PLAYING : LevelStatus::PAUSED;
 
 	// Checking win conditions for both enemy and player
 	float currentPlayerHP, currentEnemyHP;
@@ -498,7 +494,7 @@ void Level::Debugger() {
 			+ "\n[E] Skipping enemy turn " + static_cast<std::string>(isSkippingEnemyTurn ? "ON" : "OFF")
 			+ "\n[R] Skip to enemy turn"
 			+ "\n\nTile Map\nIndex X: " + std::to_string(gridX) + " Y: " + std::to_string(gridY)
-			+ "\n\nTile: " + GetTileName(tile.Type());
+			+ "\nTile: " + GetTileName(tile.Type());
 		// Display which character is currently at this tile type
 		if (tile.IsCharacter()) {
 			std::stringstream ss;
@@ -523,13 +519,13 @@ void Level::Debugger() {
 			// Display the character object information (All the stats, position , etc)
 			for (Character& enemy : enemies) {
 				if (CollisionManager::IsPointInGameObject(enemy)) {
-					enemy.DebugInfo(info);
+					enemy.GetCharacterInfo(info);
 				}
 			}
 
 			for (Character& characters : playerCharacters) {
 				if (CollisionManager::IsPointInGameObject(characters)) {
-					characters.DebugInfo(info);
+					characters.GetCharacterInfo(info);
 				}
 			}
 		}

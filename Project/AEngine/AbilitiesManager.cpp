@@ -65,7 +65,11 @@ namespace AbilitiesManager {
 
 		// Read enemies ONLY ability and merge it to the data
 		if (isAi) {
+			controllerName = "Enemy Ability Controller";
 			ReadAbilitiesFromFile(data, "Assets/Abils/AiAbilities.json");
+		}
+		else {
+			controllerName = "Player Ability Controller";
 		}
 
 		int id = 0;
@@ -108,6 +112,8 @@ namespace AbilitiesManager {
 		std::cout << "[AbilitiesManager] Successfully loaded " << statsAbilities.size() << " stats abilities." << std::endl;
 		std::cout << "[AbilitiesManager] Successfully loaded " << offensiveAbilities.size() << " offensive abilities." << std::endl;
 		std::cout << "[AbilitiesManager] Successfully loaded " << defensiveAbilities.size() << " defensive abilities." << std::endl;
+
+		inventoryTypeCount.resize(static_cast<int>(AbilityType::COUNT));
 
 		LoadStartingAbilities();
 
@@ -247,6 +253,9 @@ namespace AbilitiesManager {
 		currentAbility->AbilityCharges(-1);
 		UpdateInventory(*currentAbility, false);
 
+		int id = static_cast<int>(currentAbility->GetType()) - 1;
+		--inventoryTypeCount[id];
+
 		// Reset to default if trying to use an ability without any charges remaining
 		ResetAbility();
 
@@ -259,11 +268,15 @@ namespace AbilitiesManager {
 	void AbilityController::AddAbility(int abilityId, int chargesToAdd) {
 		Ability* found = FindAbility(abilityId);
 		if (!found) {
-			std::cerr << "[AbilitiesManager] Add Ability failed. abilityId=" << abilityId << '\n';
+			std::cerr << "[AbilitiesManager] Failed to add Ability Id: " + std::to_string(abilityId) << '\n';
 			return;
 		}
+		// Find ability and add the charges
 		Ability& ability = *found;
 		ability.AbilityCharges(chargesToAdd);
+
+		int id = static_cast<int>(ability.GetType()) - 1;
+		++inventoryTypeCount[id];
 
 		UpdateInventory(ability, true);
 	}
@@ -339,13 +352,6 @@ namespace AbilitiesManager {
 		return currentAbility->GetProj().projectileId;
 	}
 
-
-	void AbilityController::ResetAbility() {
-		if (currentAbility->AbilityCharges() <= 0) {
-			ChangeAbility(0); // Reset to default
-		}
-	}
-
 	// True to toggle through all abilities or false to toggle through of all the active abilities this controller has in its inventory
 	void AbilityController::ToggleAbility(bool isAllAbilities) {
 		int abilityId = currentAbility->Id();
@@ -368,9 +374,26 @@ namespace AbilitiesManager {
 			if(!found) abilityId = 0; // Reset to default ability if can't find any
 		}
 		ChangeAbility(abilityId);
+
+		std::cout << "==============" + controllerName + " Inventory Count" + "=============\n";
+		for (int i = 0; i < inventoryTypeCount.size(); ++i) {
+			std::string label;
+			switch (i) {
+			case 0:
+				label = "Stats:";
+				break;
+			case 1:
+				label = "Offensive:";
+				break;
+			case 2:
+				label = "Defensive:";
+				break;
+			}
+			std::cout << std::setw(15) << std::left << label << inventoryTypeCount[i] << '\n';
+		}
 	}
 
-	const Ability AbilityController::AbilityRandomisator(const std::vector<Ability> &abilities) {
+	const Ability AbilityController::AbilityRandomisator(const std::vector<Ability>& abilities) {
 		return abilities[Utils::RandomValue(0, static_cast<int>(abilities.size() - 1))];
 	}
 
@@ -410,8 +433,6 @@ namespace AbilitiesManager {
 			}
 		}
 
-
-
 		if (abilitiesCards.size() != 3) {
 			std::cerr << "[AbilitiesManager] Incorrect abilities to display in selector!" << std::endl;
 
@@ -442,7 +463,6 @@ namespace AbilitiesManager {
 			std::cout << std::endl;
 			i++;
 		}
-
 	}
 
 	// Display the ability selector UI for the player to select an ability

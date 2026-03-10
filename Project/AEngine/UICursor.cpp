@@ -15,7 +15,7 @@ namespace UICursor {
     static const char* CURSOR_PATH = "Assets/cursor.png";
 
     static AEGfxTexture* gCursorTex = nullptr;
-    static AEVec2 gSize = { 70.0f, 70.0f };      // pixels
+    static AEVec2 gSize = { 50.0f, 50.0f };      // pixels
     static AEVec2 gHotspot = { 0.0f, 0.0f };     // pixels from TOP-LEFT of sprite
     static bool gVisible = true;
 
@@ -68,8 +68,8 @@ namespace UICursor {
 
         // DrawScreenOverlay expects TOP-LEFT anchored transforms.
         // If hotspot is inside the sprite, offset so hotspot lands at (x,y).
-        float originX = x - gHotspot.x;
-        float originY = y + gHotspot.y;
+        float originX = x - (gSize.x * 0.25f);
+        float originY = y + (gSize.y * 0.25f);
 
         AEMtx33 mat = GraphicsManager::CreateTransformMatrix(originX, originY, 0.0f, gSize.x, gSize.y);
         GraphicsManager::DrawScreenOverlay(gCursorTex, mat, Color{ 1.0f, 1.0f, 1.0f, 1.0f });

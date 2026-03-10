@@ -15,15 +15,16 @@ enum class ProjectileMode {
 	ATTACK		= 1,
 	BOMB		= 2,
 	NUKE		= 3,
-	PIERCING	= 4,
+	PENTA_BURST	= 4,
 	AUTO_AIM	= 5,
+	WALL,
 };
 
 class Projectile : public GameObject {
 public:
 	float timer = 0.0f;
 	bool isActive = false, isGrounded = false, toBeDestroyed = false;
-	bool collisionTriggered = false; // collision is detected for the FIRST TIME
+	bool collisionTriggered = false; // There is a collision triggered between the projectile and block
 
 	Attributes attribute;
 
@@ -44,13 +45,14 @@ public:
 
 	inline std::string ModeName() const {
 		switch (mode) {
-		case ProjectileMode::IDLE:			return "IDLE"; break;
-		case ProjectileMode::ATTACK:		return "DAMAGE"; break;
-		case ProjectileMode::BOMB:			return "BOMB"; break;
-		case ProjectileMode::NUKE:			return "NUKE"; break;
-		case ProjectileMode::AUTO_AIM:      return "AUTO_AIM"; break;
-		case ProjectileMode::PIERCING:		return "PIERCING"; break;
-		default:							return "YOU NEED TO ADD A PROJECTILE MODE NAME";
+		case ProjectileMode::IDLE:				return "IDLE"; break;
+		case ProjectileMode::ATTACK:			return "DAMAGE"; break;
+		case ProjectileMode::BOMB:				return "BOMB"; break;
+		case ProjectileMode::NUKE:				return "NUKE"; break;
+		case ProjectileMode::PENTA_BURST:		return "PENTA_BURST"; break;
+		case ProjectileMode::AUTO_AIM:			return "AUTO_AIM"; break;
+		case ProjectileMode::WALL:				return "WALL"; break;
+		default:								return "YOU NEED TO ADD A PROJECTILE MODE NAME";
 		}
 	}
 
@@ -60,6 +62,7 @@ public:
 
 	void Initialize(Transform cannonTrans, int _activeId, float cannonAngle, float shotPower);
 	void Render();
+	// Ability effects checker for ability to take effect after projectile has been shot 
 	// Check for inputs to activated PROJECTILE Abilities
 	void AbilityActivation();
 	void MoveProjectile(float dt);
