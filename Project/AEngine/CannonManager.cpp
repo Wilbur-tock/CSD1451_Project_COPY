@@ -53,8 +53,8 @@ namespace CannonManager {
             projectile = { AssetsManager::circleTexture };
             projectile.SetProjectileStats(ability.GetName(), ability.GetProj());
 
-            std::cout << "[CannonManager] Set " << ability.Id() << " Mode: " << projectile.ModeName() << " " 
-             << ability.GetName() << " ability into the cannon projectile vector" << '\n';
+            //std::cout << "[CannonManager] Set " << ability.Id() << " Mode: " << projectile.ModeName() << " " 
+            // << ability.GetName() << " ability into the cannon projectile vector" << '\n';
         }
     }
     
@@ -147,13 +147,13 @@ namespace CannonManager {
         switch (difficultyLevel) {
         default:
         case 0: // Easy
-            aiDifficulty = 0.9f;
-            break;
-        case 1: // Medium
             aiDifficulty = 0.95f;
             break;
+        case 1: // Medium
+            aiDifficulty = 0.975f;
+            break;
         case 2: // Hard
-            aiDifficulty = 0.99f;
+            aiDifficulty = 1.0f;
             break;
         }
     }
@@ -306,6 +306,9 @@ namespace CannonManager {
     }
 
     void Cannon::UpdateProjectile() {
+        if (hasCannonShot) {
+            allProjectileDestroyed = activeProjectiles.empty();
+        }
         if (activeProjectiles.empty()) return;
 
         for (Projectile& projectile : activeProjectiles) {
@@ -324,13 +327,12 @@ namespace CannonManager {
             for (int step = 0; step < SUB_STEPS; ++step) {
                 // Set movement first
                 projectile.MoveProjectile(subDt);
-                projectile.isGrounded = false; // NEED TO RESET EVERYTIME FOR GROUNDED CHECKS
 
                 // Check for collision in a 3x3 area with the projectile
-                int gridX = 0, gridY = 0;
-                Utils::GetTileIndex(gridX, gridY, projectile.transform.pos);
+                int tileX = 0, tileY = 0;
+                Utils::GetTileIndex(tileX, tileY, projectile.transform.pos);
 
-                int minX = gridX - 1, minY = gridY - 1, maxX = gridX + 1, maxY = gridY + 1;
+                int minX = tileX - 1, minY = tileY - 1, maxX = tileX + 1, maxY = tileY + 1;
                 for (int y = minY; y <= maxY; ++y) {
                     for (int x = minX; x <= maxX; ++x) {
                         if (Utils::IsGridIndexOutOfBounds(x, y)) continue;
@@ -358,25 +360,25 @@ namespace CannonManager {
                 }
 
                 // SECONDARY CHECK IF THE PROJECTILE IS GROUNDED OR NOT
-                if (!projectile.isGrounded) {
-                    // Only and MUST check 2x3 for additonal checks
-                    for (int y = gridY; y <= maxY; ++y) {
-                        for (int x = minX; x <= maxX; ++x) {
-                            if (Utils::IsGridIndexOutOfBounds(x, y)) continue;
-
-                            Tile& tile = (*MapManager::currentMap)[y][x];
-
-                            if (!tile.IsEmpty()) {
-                                projectile.isGrounded = PhysicsManager::IsGrounded(projectile.transform, tile.transform);
-                                if (projectile.isGrounded) {
-                                    projectile.velocity.y = 0;
-                                    break;
-                                }
-                            }
-                        }
-                        //if (projectile.isGrounded) break;
-                    }
-                }
+                //if (!projectile.isGrounded) {
+                //    // Only and MUST check 2x3 for additonal checks
+                //    for (int y = tileY; y <= maxY; ++y) {
+                //        for (int x = minX; x <= maxX; ++x) {
+                //            if (Utils::IsGridIndexOutOfBounds(x, y)) continue;
+                //
+                //            Tile& tile = (*MapManager::currentMap)[y][x];
+                //
+                //            if (!tile.IsEmpty()) {
+                //                projectile.isGrounded = PhysicsManager::IsGrounded(projectile.transform, tile.transform);
+                //                if (projectile.isGrounded) {
+                //                    projectile.velocity.y = 0;
+                //                    break;
+                //                }
+                //            }
+                //        }
+                //        //if (projectile.isGrounded) break;
+                //    }
+                //}
             }
 
             // Check if projectile need to be destroy and destroy after it lifespan
@@ -403,7 +405,6 @@ namespace CannonManager {
         case ProjectileMode::AUTO_AIM:
             // Find new target if target is not alive
             if (!IsTargetAlive()) {
-                std::cout << "[CannonManager]" << '\n';
                 SetTarget(LevelManager::selectedLevel->RandomCharacterObj(!isPlayerControlled)); // Randomly find a enemy target
             }
 
@@ -490,7 +491,8 @@ namespace CannonManager {
         // Show cannon information
         std::string debugStr = "Cannon " + static_cast<std::string>(isPlayerControlled ? "PLAYER" : "ENEMY")
             + "\nIs Active : " + std::string(hasCannonShot ? "true" : "false")
-            + "\nIs Projectile destroyed : " + static_cast<std::string>(allProjectileDestroyed ? "true" : "false")
+            + "\nAll Projectile destroyed : " + static_cast<std::string>(allProjectileDestroyed ? "true" : "false")
+            + "\nActive Projectiles Count: " + std::to_string(activeProjectiles.size())
             + "\nPos x: " + Utils::FormatFloat(transform.pos.x, 2) + " y: " + Utils::FormatFloat(transform.pos.y, 2)
             + "\nAngle: " + Utils::FormatFloat(cannonAngle * (180.0f / 3.14159265359), 2) + " " + Utils::FormatFloat(cannonAngle, 2)
             + "\n\nSelected Projectile\nId: " + std::to_string(selectedProjectile.ProjectileId())
@@ -509,7 +511,8 @@ namespace CannonManager {
         }
                 
         if (!isPlayerControlled) {
-            debugStr += "\nAI Shoot Timer: " + Utils::FormatFloat(aiShootTimer, 2);
+            debugStr += "\nAI Shoot Timer: " + Utils::FormatFloat(aiShootTimer, 2)
+                + "\nAI Difficulty: " + std::to_string(aiDifficulty);
         }
         else {
             debugStr += "\n\nShortcuts:\n[CTRL + T] Toggle ALL Abilities\n[T] Toggle Inventory Abilities";

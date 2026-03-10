@@ -23,6 +23,7 @@ Level::Level(int _leveId)
 void Level::Load() {
 	levelMap.clear();
 	levelMap.resize(Config::GRID_HEIGHT, std::vector<Tile>(Config::GRID_WIDTH));
+	activeLevelMap.resize(Config::GRID_HEIGHT, std::vector<Tile>(Config::GRID_WIDTH));
 
 	enemies.clear();
 	playerCharacters.clear();
@@ -41,7 +42,17 @@ void Level::Load() {
 
 void Level::Initalize() {
 	status = LevelStatus::PLAYING;
-	MapManager::currentMap = &levelMap;
+	// Initialize map 
+	for (int i = 0; i < Config::GRID_HEIGHT; ++i) {
+		for (int j = 0; j < Config::GRID_WIDTH; ++j) {
+			activeLevelMap[i][j] = levelMap[i][j];
+		}
+	}
+	MapManager::currentMap = &activeLevelMap;
+
+	// Reset
+	playerCharacters.clear();
+	enemies.clear();
 
 	// Start of the turn should always be player turn
 	activeCannon = &playerCannon;
@@ -53,7 +64,7 @@ void Level::Initalize() {
 	// Initialize all the character object instance
 	for (int y = 0; y < Config::GRID_HEIGHT; ++y) {
 		for (int x = 0; x < Config::GRID_WIDTH; ++x) {
-			Tile& tile = levelMap[y][x];
+			Tile& tile = activeLevelMap[y][x];
 
 			if (tile.Type() == TILE_PLAYER_CANNON) {
 				playerCannonStartPos = { tile.transform.pos.x, tile.transform.pos.y + tile.transform.size.y * 0.5f };
@@ -127,7 +138,7 @@ void Level::Initalize() {
 	// Randomise at the start of the level the 3 abilities that the player can choose from in the ability selector UI
 	AbilitiesManager::playerAbilityController.AbilitySelectionRandomisator();
 
-	std::cout << "[Level] Initialize " + levelFileName << std::endl;
+	std::cout << "[Level] Initialize " + levelFileName << " Player Count: " << playerCharacters.size() <<  '\n';
 }
 
 bool prevIsAbilitySelectorOn = false;
@@ -135,21 +146,7 @@ float delayTimer = 0.0f, defaultDelayTimer = 0.5f;;
 
 void Level::Update() {
 	UpdateLevelStatus();
-
-	// For Debugging
-	if (isSkippingEnemyTurn) { // Skipping enemy turn
-		if (!isPlayerTurn) {
-			SetTurn(true);
-		}
-	}
-	else { // Skipping enemy turn is off and autoPlayOn
-		if (autoPlayOn) {
-			isAbilitySelectorOn = false;
-			if (isPlayerTurn) {
-				SetTurn(false);
-			}
-		}
-	}
+	DebugCommands();
 
 	if (status == LevelStatus::PLAYING) {
 		if (!isPlayerTurn && !enemyCannon.IsTargetAlive()) {
@@ -195,8 +192,7 @@ void Level::Update() {
 	// UI
 	if (isPlayerTurn) AbilitiesManager::playerAbilityController.AbilityUI();
 	DrawUI();
-
-	Debugger();
+	DebugInfo();
 
 	// Draw result screen LAST so it renders on top of everything
 	if (status == LevelStatus::PLAYER_WON || status == LevelStatus::ENEMY_WON) {
@@ -210,14 +206,12 @@ void Level::Update() {
 }
 
 void Level::Draw() {
-	MapManager::DrawMap(levelMap, false);
+	MapManager::DrawMap(activeLevelMap, false);
 
 	// Drawing of assets and UI
 	// Need to draw both player cannon and enemy cannon regardless of whose turn it is
 	playerCannon.Draw();
 	enemyCannon.Draw();
-
-	//DrawUI();
 }
 
 void Level::Free() {
@@ -286,7 +280,7 @@ void Level::GetMaxHP(float& maxHP, bool isGettingPlayerHP) {
 }
 
 void Level::UpdateTurn() {
-	if (!activeCannon->IsProjectileDestroyed()) return;
+	if (!activeCannon->AllProjectilesDestroyed()) return;
 
 	// Set timer to delay the transition from cannon to cannon
 	if (switchTurnCooldown <= 0.0f) {
@@ -444,100 +438,125 @@ void Level::DrawResultScreen() {
 	resultMainMenuButton.Update();
 }
 
-void Level::Debugger() {
-	if (Utils::isDebuggerOn) {
-		// Input R to change whose turn it is
-		if (AEInputCheckTriggered(AEVK_R)) {
-			SetTurn(!isPlayerTurn);
-		}
-		// Input CTRL + R to turn autoPlayOn on/off
-		if (AEInputCheckCurr(AEVK_LCTRL) || AEInputCheckCurr(AEVK_RCTRL)) {
-			if (AEInputCheckTriggered(AEVK_R)) {
-				autoPlayOn = !autoPlayOn;
-			}
-		}
+void Level::DebugCommands() {
+	if (!Utils::isDebuggerOn) return;
 
-		// Input E to skip enemy turn
-		if (AEInputCheckTriggered(AEVK_E)) {
-			isSkippingEnemyTurn = !isSkippingEnemyTurn;
-		}
-
-		int gridX = 0, gridY = 0;
-		Utils::GetMouseGridIndex(gridX, gridY);
-
-		// Input MOUSE RIGHT CLICK to remove tile blocks or damage characters during in game
-		Tile& tile = *(MapManager::FindTile({ gridX, gridY }));
-		if (CollisionManager::IsPointInGameObject(tile)) {
-			if (AEInputCheckCurr(AEVK_RBUTTON)) {
-				if (tile.IsBlocks()) {
-					tile.Type(TILE_EMPTY);
-				}
-			}
-
-			if (AEInputCheckTriggered(AEVK_RBUTTON)) {
-				// Damage characters
-				if (tile.IsCharacter()) {
-					tile.TakeDamage(10);
-				}
-			}
-		}
-
-		// Debug text
-		f32 x, y;
-		AEGfxGetCamPosition(&x, &y);
-
-		s32 mouseX, mouseY;
-		AEInputGetCursorPosition(&mouseX, &mouseY);
-		float mX = 0, mY = 0;
-		Utils::GetWorldMousePos(mX, mY);
-
-		std::string debug = "Shortcuts:\n[CTRL + R] Auto play " + static_cast<std::string>(autoPlayOn ? "ON" : "OFF")
-			+ "\n[E] Skipping enemy turn " + static_cast<std::string>(isSkippingEnemyTurn ? "ON" : "OFF")
-			+ "\n[R] Skip to enemy turn"
-			+ "\n\nTile Map\nIndex X: " + std::to_string(gridX) + " Y: " + std::to_string(gridY)
-			+ "\nTile: " + GetTileName(tile.Type());
-		// Display which character is currently at this tile type
-		if (tile.IsCharacter()) {
-			std::stringstream ss;
-			ss << FindCharacterObj(tile);
-			debug += " " + ss.str();
-		}
-
-		debug += "\nPos X: " + Utils::FormatFloat(tile.transform.pos.x, 2) + " Y: " + Utils::FormatFloat(tile.transform.pos.y, 2)
-			+ "\nHP: " + Utils::FormatFloat(tile.attribute.Health(), 2)
-			+ "\nDamage Multiplier: " + std::to_string(tile.attribute.DamageMultiplier())
-			+ "\n\nCamera " + std::to_string(CameraManager::camera.GetState())
-			+ "\nPos X : " + Utils::FormatFloat(x, 2) + " Y : " + Utils::FormatFloat(y, 2)
-			+ "\nCamera State: " + CameraManager::camera.PrintState() // Camera INFO
-			+ "\nZoom: " + Utils::FormatFloat(CameraManager::camera.GetZoom(), 2)
-			+ "\n" + CameraManager::camera.PrintVisibleTiles()
-			+ "\n\nMouse\nScreen Pos X: " + Utils::FormatFloat(mouseX, 2) + " Y: " + Utils::FormatFloat(mouseY, 2) // Mouse Info
-			+ "\nWorld Pos X: " + Utils::FormatFloat(mX, 2) + " Y: " + Utils::FormatFloat(mY, 2);
-
-		std::string info = "";
-
-		if (Utils::isDebuggerOn) {
-			// Display the character object information (All the stats, position , etc)
-			for (Character& enemy : enemies) {
-				if (CollisionManager::IsPointInGameObject(enemy)) {
-					enemy.GetCharacterInfo(info);
-				}
-			}
-
-			for (Character& characters : playerCharacters) {
-				if (CollisionManager::IsPointInGameObject(characters)) {
-					characters.GetCharacterInfo(info);
-				}
-			}
-		}
-
-		debug += info;
-
-		UIManager::Panel{ {350, 500}, {1,1,1, 0.8f}, Utils::AnchorMode::TOP_LEFT }.Draw();
-
-		debugText.textContent = debug;
-		debugText.Draw();
+	// Input R to change whose turn it is
+	if (AEInputCheckTriggered(AEVK_R)) {
+		SetTurn(!isPlayerTurn);
 	}
+	// Input CTRL + R to turn autoPlayOn on/off
+	if (AEInputCheckCurr(AEVK_LCTRL) || AEInputCheckCurr(AEVK_RCTRL)) {
+		if (AEInputCheckTriggered(AEVK_R)) {
+			autoPlayOn = !autoPlayOn;
+		}
+	}
+
+	// Input E to skip enemy turn
+	if (AEInputCheckTriggered(AEVK_E)) {
+		isSkippingEnemyTurn = !isSkippingEnemyTurn;
+	}
+
+	int gridX = 0, gridY = 0;
+	Utils::GetMouseGridIndex(gridX, gridY);
+
+	// Input MOUSE RIGHT CLICK to remove tile blocks or damage characters during in game
+	Tile& tile = *(MapManager::FindTile({ gridX, gridY }));
+	if (CollisionManager::IsPointInGameObject(tile)) {
+		if (AEInputCheckCurr(AEVK_RBUTTON)) {
+			if (tile.IsBlocks()) {
+				tile.Type(TILE_EMPTY);
+			}
+		}
+
+		if (AEInputCheckTriggered(AEVK_RBUTTON)) {
+			// Damage characters
+			if (tile.IsCharacter()) {
+				tile.TakeDamage(10);
+			}
+		}
+	}
+
+	if (isSkippingEnemyTurn) { // Skipping enemy turn
+		if (!isPlayerTurn) {
+			SetTurn(true);
+		}
+
+		if (autoPlayOn) autoPlayOn = false;
+	}
+
+	if (autoPlayOn) {
+		isAbilitySelectorOn = false;
+		if (isPlayerTurn) {
+			SetTurn(false);
+		}
+
+		isSkippingEnemyTurn = false;
+	}
+}
+
+void Level::DebugInfo() {
+	if (!Utils::isDebuggerOn) return;
+
+	int gridX = 0, gridY = 0;
+	Utils::GetMouseGridIndex(gridX, gridY);
+	Tile& tile = *(MapManager::FindTile({ gridX, gridY }));
+
+	// Debug text
+	f32 x, y;
+	AEGfxGetCamPosition(&x, &y);
+
+	s32 mouseX, mouseY;
+	AEInputGetCursorPosition(&mouseX, &mouseY);
+	float mX = 0, mY = 0;
+	Utils::GetWorldMousePos(mX, mY);
+
+	std::string debug = "Shortcuts:\n[CTRL + R] Auto play " + static_cast<std::string>(autoPlayOn ? "ON" : "OFF")
+		+ "\n[E] Skipping enemy turn " + static_cast<std::string>(isSkippingEnemyTurn ? "ON" : "OFF")
+		+ "\n[R] Skip to enemy turn\n\nLevel:\nLevel Status: " + std::to_string(static_cast<int>(status))
+		+ "\n\nTile Map\nIndex X: " + std::to_string(gridX) + " Y: " + std::to_string(gridY)
+		+ "\nTile: " + GetTileName(tile.Type());
+	// Display which character is currently at this tile type
+	if (tile.IsCharacter()) {
+		std::stringstream ss;
+		ss << FindCharacterObj(tile);
+		debug += " " + ss.str();
+	}
+
+	debug += "\nPos X: " + Utils::FormatFloat(tile.transform.pos.x, 2) + " Y: " + Utils::FormatFloat(tile.transform.pos.y, 2)
+		+ "\nHP: " + Utils::FormatFloat(tile.attribute.Health(), 2)
+		+ "\nDamage Multiplier: " + std::to_string(tile.attribute.DamageMultiplier())
+		+ "\n\nCamera " + std::to_string(CameraManager::camera.GetState())
+		+ "\nPos X : " + Utils::FormatFloat(x, 2) + " Y : " + Utils::FormatFloat(y, 2)
+		+ "\nCamera State: " + CameraManager::camera.PrintState() // Camera INFO
+		+ "\nZoom: " + Utils::FormatFloat(CameraManager::camera.GetZoom(), 2)
+		+ "\n" + CameraManager::camera.PrintVisibleTiles()
+		+ "\n\nMouse\nScreen Pos X: " + Utils::FormatFloat(mouseX, 2) + " Y: " + Utils::FormatFloat(mouseY, 2) // Mouse Info
+		+ "\nWorld Pos X: " + Utils::FormatFloat(mX, 2) + " Y: " + Utils::FormatFloat(mY, 2);
+
+	std::string info = "";
+
+	if (Utils::isDebuggerOn) {
+		// Display the character object information (All the stats, position , etc)
+		for (Character& enemy : enemies) {
+			if (CollisionManager::IsPointInGameObject(enemy)) {
+				enemy.GetCharacterInfo(info);
+			}
+		}
+
+		for (Character& characters : playerCharacters) {
+			if (CollisionManager::IsPointInGameObject(characters)) {
+				characters.GetCharacterInfo(info);
+			}
+		}
+	}
+
+	debug += info;
+
+	UIManager::Panel{ {350, 500}, {1,1,1, 0.8f}, Utils::AnchorMode::TOP_LEFT }.Draw();
+
+	debugText.textContent = debug;
+	debugText.Draw();
 }
 
 Character* Level::FindCharacterObj(Tile const& tile) {
@@ -548,10 +567,10 @@ Character* Level::FindCharacterObj(Tile const& tile) {
 
 	Character* character = nullptr;
 	if (tile.IsEnemy()) {
-		character = LevelManager::selectedLevel->FindEnemyCharacterObj(tile.CharacterId());
+		character = FindEnemyCharacterObj(tile.CharacterId());
 	}
 	else {
-		character = LevelManager::selectedLevel->FindPlayerCharacterObj(tile.CharacterId());
+		character = FindPlayerCharacterObj(tile.CharacterId());
 	}
 	return character;
 }

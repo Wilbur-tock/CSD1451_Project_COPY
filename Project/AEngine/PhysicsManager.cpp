@@ -2,6 +2,7 @@
 
 #include "BaseTypes.hpp"
 #include "Utils.hpp"
+#include "MapManager.hpp"
 
 namespace PhysicsManager {
 	float g_dt = 0.0f;
@@ -92,5 +93,32 @@ namespace PhysicsManager {
         bool overlapY = (objMaxY > tileMinY) && (objMinY <= tileMaxY);
 
         return overlapX && overlapY;
+    }
+
+    bool IsObjectGrounded(Transform const& trans) {
+        int tileX = 0, tileY = 0;
+        Utils::GetTileIndex(tileX, tileY, trans.pos);
+
+        int maxY = tileY + 1;
+        int minX = tileX - 1;
+        int maxX = tileX + 1;
+
+        // 010 
+        // 000
+        // Checks 2x3 with 1 - Projectile, 0 - tiles around the projectile
+
+        for (int y = tileY; y <= maxY; ++y) {
+            for (int x = minX; x <= maxX; ++x) {
+                if (Utils::IsGridIndexOutOfBounds(x, y)) continue;
+
+                Tile& tile = (*MapManager::currentMap)[y][x];
+
+                if (!tile.IsEmpty()) {
+                    if (IsGrounded(trans, tile.transform)) return true;
+                }
+            }
+        }
+
+        return false;
     }
 }

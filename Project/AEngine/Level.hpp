@@ -64,7 +64,8 @@ private:
 	void UpdateLevelStatus();
 	void DrawResultScreen();
 
-	void Debugger();
+	void DebugCommands();
+	void DebugInfo();
 
 private:
 	int levelId = 0;
@@ -89,7 +90,9 @@ private:
 	bool isHoveringUI = false;
 	float switchTurnCooldown = 0.0f; // Cooldown timer to add a delay between the destruction of the player projectile and starting of enemy turn
 
-	std::vector<std::vector<Tile>> levelMap; // Level tile map
+	std::vector<std::vector<Tile>> levelMap; // Default Level tile map loaded at the start
+	std::vector<std::vector<Tile>> activeLevelMap; // runtime level map
+
 	std::vector<Character> enemies; // contains all instance of the Enemy Character Object in the level
 	int bossId = 0; // enemies vector id which the boss is stored in
 	std::vector<Character> playerCharacters; // contains all instance of the Player Character Object in the level

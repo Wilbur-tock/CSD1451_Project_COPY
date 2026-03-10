@@ -65,7 +65,7 @@ public:
 	// Damage tile and character inside the tile
 	void TakeDamage(int damage);
 private:
-	float const defaultSize = Config::TILE_SIZE;
+	float defaultSize = Config::TILE_SIZE;
 	TileType prevType = TileType::TILE_EMPTY; // previous tile type
 	TileType type = TileType::TILE_EMPTY; // current tile type
 	int characterId = -1; // index of the character object stored in the vector list

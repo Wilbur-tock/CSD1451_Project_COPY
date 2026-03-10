@@ -114,6 +114,9 @@ void Projectile::Initialize(Transform cannonTrans, int _activeId, float cannonAn
 }
 
 void Projectile::MoveProjectile(float dt) {
+    // Grounded Check every frame
+    isGrounded = PhysicsManager::IsObjectGrounded(transform);
+
     // Movement
     if (isGrounded) {
         velocity.x *= pow(PhysicsManager::FRICTION, dt);
@@ -213,16 +216,6 @@ void Projectile::DamageTile(int tileX, int tileY) {
             //std::cout << "[Projectile] Checked tile " << tileToDamage << '\n';
 
             if (!tileToDamage.IsDestructible()) continue;
-
-            // Damage Tiles that contain a character object
-            //if (tileToDamage.IsCharacter()) {
-            //    Character* character = LevelManager::selectedLevel->FindCharacterObj(tileToDamage);
-
-            //    if (character) {
-            //        character->attribute.TakeDamage(projDamage);
-            //        std::cout << "[Projectile] Damaged character " << character->TypeName() << " new hp: " << character->attribute.Health() << '\n';
-            //    }
-            //}
 
             // Damage tile AFTER it has damage a CHARACTER compononent
             std::cout << "[Projectile] Damage Tile: " << tileToDamage << " Current hp: " << tileToDamage.attribute.Health() << " Damage: " << projDamage << '\n';

@@ -19,6 +19,7 @@ namespace PhysicsManager {
 	void ResolveHorizontalCollision(Transform& obj, AEVec2& velocity, Transform const& tileTransform);
 	void ResolveVerticalCollision(Transform& obj, AEVec2& velocity, bool& isGrounded, Transform const& tileTransform);
 	bool IsGrounded(Transform const& obj, Transform const& tile);
+	bool IsObjectGrounded(Transform const& trans);
 }
 
 #endif // !PHYSICSMANAGER_HPP

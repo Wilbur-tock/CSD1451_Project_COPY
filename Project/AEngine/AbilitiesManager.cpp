@@ -112,7 +112,7 @@ namespace AbilitiesManager {
 		}
 
 		inventoryTypeCount.resize(static_cast<int>(AbilityType::COUNT));
-		PrintAllAbilities();
+		//PrintAllAbilities();
 
 		LoadStartingAbilities();
 	}
