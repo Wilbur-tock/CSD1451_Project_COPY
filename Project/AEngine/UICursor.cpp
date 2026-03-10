@@ -35,7 +35,7 @@ namespace UICursor {
         gCursorTex = AssetsManager::GetTexture(CURSOR_PATH);
 
 #ifdef _WIN32
-        //HideSystemCursor();
+        HideSystemCursor();
 #endif
     }
 

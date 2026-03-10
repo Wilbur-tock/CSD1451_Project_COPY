@@ -10,6 +10,26 @@
 #include "LevelManager.hpp"
 #include "UIManager.hpp"
 
+struct MapConstraint {
+	TileType type;
+	int requiredCount = 0;
+	bool isMet = false;
+	int currentCount = 0;
+};
+
+std::vector<MapConstraint> constraints;
+
+namespace {
+	void UpdateConstraints(TileType type, int valueToModify) {
+		for (MapConstraint& constraint : constraints) {
+			if (type == constraint.type) {
+				constraint.currentCount += valueToModify;
+				return;
+			}
+		}
+	}
+}
+
 using namespace MapManager;
 
 namespace MapEditor {
@@ -39,6 +59,10 @@ namespace MapEditor {
 
 	// Draw out the graphics for MapEditor
 	static void Draw();
+	static void ChangeBlock(int idX, int idY, bool isDrawing = true);
+
+	// Check whatever or not the level satisfy the requirements for editing level
+	static bool ConstraintChecks();
 
 	// Ensure that the file path is going back to my project folder NOT THE BIN FOLDER
 	static std::string DebugFilePath(std::string filePath) { return "../../" + filePath; }
@@ -102,6 +126,15 @@ namespace MapEditor {
 	}
 
 	static void ResetEditor() {
+		// Reset requirements
+		// 0 - 1 Boss, 1 - 1 Player, 2 - Set Player Cannon pos, 3 - Set Enemy Cannon pos
+		constraints = {
+			{TileType::TILE_ENEMY_BOSS, 1, false},
+			{TileType::TILE_PLAYER_CHARACTER, 1, false},
+			{TileType::TILE_ENEMY_CANNON, 1, false},
+			{TileType::TILE_PLAYER_CANNON, 1, false},
+		};
+
 		// Reset settings
 		drawingTileType = defaultTile;
 		tileId = static_cast<int>(defaultTile);
@@ -117,8 +150,25 @@ namespace MapEditor {
 	static void ResetMap() {
 		for (std::vector<Tile> &list : newMap) {
 			for (Tile& tile : list) {
-				tile.Type(static_cast<TileType>(0));
+				ChangeBlock(tile.tileId.x, tile.tileId.y, false);
 			}
+		}
+	}
+
+	static void ChangeBlock(int idX, int idY, bool isDrawing) {
+		Tile& tile = newMap[idY][idX];
+		if ((tile.Type() == drawingTileType && isDrawing) 
+			|| (!isDrawing && tile.Type() == TileType::TILE_EMPTY) ) 
+			return; // Don't draw the same block type as the tile or erase air
+
+		if (isDrawing) {
+			UpdateConstraints(tile.Type(), -1);
+			tile.Type(drawingTileType);
+			UpdateConstraints(tile.Type(), 1);
+		}
+		else {
+			UpdateConstraints(tile.Type(), -1);
+			tile.Type(TileType::TILE_EMPTY);
 		}
 	}
 
@@ -144,38 +194,27 @@ namespace MapEditor {
 		Utils::GetMouseGridIndex(gridX, gridY);
 
 		// Check for input to draw the map editor
-		if (gridX >= 0 && gridX < Config::GRID_WIDTH && gridY >= 0 && gridY < Config::GRID_HEIGHT) {
-			if (AEInputCheckCurr(AEVK_LBUTTON)) {
-				newMap[gridY][gridX].Type(drawingTileType);
+		if (!Utils::IsGridIndexOutOfBounds(gridX, gridY)) {
+			bool leftHold = AEInputCheckCurr(AEVK_LBUTTON);
+			bool rightHold = AEInputCheckCurr(AEVK_RBUTTON);
+			bool ctrlHold = AEInputCheckCurr(AEVK_LCTRL) || AEInputCheckCurr(AEVK_RCTRL);
+			bool shiftHold = AEInputCheckCurr(AEVK_LSHIFT) || AEInputCheckCurr(AEVK_RSHIFT);
 
-				// Input to draw a column
-				if (AEInputCheckCurr(AEVK_LCTRL) || AEInputCheckCurr(AEVK_RCTRL)) {
+			if (leftHold || rightHold) {
+				bool isDrawing = leftHold;
+				ChangeBlock(gridX, gridY, isDrawing);
+
+				// Input to draw/erase a column
+				if (ctrlHold) {
 					for (int i = 0; i < Config::GRID_WIDTH; ++i) {
-						newMap[gridY][i].Type(drawingTileType);
+						ChangeBlock(i, gridY, isDrawing);
 					}
 				}
 
-				// Input to draw a row
-				if (AEInputCheckCurr(AEVK_LSHIFT) || AEInputCheckCurr(AEVK_RSHIFT)) {
+				// Input to draw/erase a column
+				if (shiftHold) {
 					for (int i = 0; i < Config::GRID_HEIGHT; ++i) {
-						newMap[i][gridX].Type(drawingTileType);
-					}
-				}
-			}
-			else if (AEInputCheckCurr(AEVK_RBUTTON)) { // Input to erase tile
-
-				newMap[gridY][gridX].Type(TileType::TILE_EMPTY);
-				// Input to erase a column
-				if (AEInputCheckCurr(AEVK_LCTRL) || AEInputCheckCurr(AEVK_RCTRL)) {
-					for (int i = 0; i < Config::GRID_WIDTH; ++i) {
-						newMap[gridY][i].Type(TileType::TILE_EMPTY);
-					}
-				}
-
-				// Input to erase a row
-				if (AEInputCheckCurr(AEVK_LSHIFT) || AEInputCheckCurr(AEVK_RSHIFT)) {
-					for (int i = 0; i < Config::GRID_HEIGHT; ++i) {
-						newMap[i][gridX].Type(TileType::TILE_EMPTY);
+						ChangeBlock(gridX, i, isDrawing);
 					}
 				}
 			}
@@ -186,14 +225,6 @@ namespace MapEditor {
 			ResetMap();
 		}
 
-		// Change drawing tile category
-		//s32 scroll = 0;
-		//AEInputMouseWheelDelta(&scroll);
-		//if (scroll != 0) {
-		//	tileId -= scroll;
-		//	Utils::Wrap(tileId, 1, TILE_COUNT - 1);
-		//	drawingTileType = static_cast<TileType>(tileId);
-		//}
 		if (AEInputCheckTriggered(AEVK_Q)) {
 			ChangeTile(--tileId);
 		}
@@ -205,7 +236,6 @@ namespace MapEditor {
 		if (AEInputCheckTriggered(AEVK_T)) {
 			isShowingTileList = !isShowingTileList;
 		}
-
 
 		if (AEInputCheckCurr(AEVK_LCTRL) || AEInputCheckCurr(AEVK_RCTRL)) {
 			// Input CTRL + {NUMBER} to load a new LEVEL MAP to edit
@@ -222,6 +252,8 @@ namespace MapEditor {
 			// Input CTRL + S
 			// Save file on both BIN folder and my project folder if debugger is on
 			if (AEInputCheckTriggered(AEVK_S)) {
+				if (!ConstraintChecks()) return;
+
 				SaveNewFile(savePath);
 				if (Utils::isDebuggerOn) {
 					SaveNewFile(DebugFilePath(savePath));
@@ -248,7 +280,14 @@ namespace MapEditor {
 		std::string helpStr =
 			"Current File: " + loadPath +
 			"\nSave File: " + savePath +
-			"\n\n[M] Back to MAIN MENU"
+			"\n\nMap Constraints:";
+
+		for (MapConstraint const& constraint : constraints) {
+			helpStr += "\n" + GetTileName(constraint.type) + ' ' + std::to_string(constraint.currentCount) + '/' + std::to_string(constraint.requiredCount);
+		}
+
+		helpStr +="\n\nShortcuts:"
+			"\n[M] Back to MAIN MENU"
 			"\n[CTRL + S] Save file"
 			"\n[R] Reset Map"
 			"\n[LEFT CLICK] Place Tile"
@@ -302,8 +341,32 @@ namespace MapEditor {
 		}
 	}
 
+	bool ConstraintChecks() {
+		//for (std::vector<Tile> const& vec : *MapManager::currentMap) {
+		//	for (Tile const& tile : vec) {
+		//		for (MapConstraint& constraint : constraints) {
+		//			if (constraint.isMet || constraint.type != tile.Type()) continue;
+
+		//			++constraint.currentCount;
+		//			constraint.isMet = constraint.currentCount == constraint.requiredCount;
+		//		}
+		//	}
+		//}
+
+		for (MapConstraint const& constraint : constraints) {
+			std::cout << "Your map have " + std::to_string(constraint.currentCount)
+				+ '/' + std::to_string(constraint.requiredCount) + ' ' + GetTileName(constraint.type) << '\n';
+			if (!constraint.isMet) {
+				std::cout << "[Error] You must have at least " + std::to_string(constraint.requiredCount) 
+					+ ' ' + GetTileName(constraint.type) + " in your map!" << '\n';
+				return false;
+			}
+		}
+
+		return true;
+	}
+
 	void Exit() {
 		isDrawingNewMap = true;
-		CameraManager::camera.SetZoomAllow(true);
 	}
 }

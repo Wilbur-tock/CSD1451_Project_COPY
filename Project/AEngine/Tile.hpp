@@ -21,12 +21,12 @@ enum class TileType {
 	TILE_BLOCK_2_TOP,
 	TILE_BLOCK_2, // Always the last destructible block
 
-	TILE_PLAYER_CANNON,
-	TILE_PLAYER_CHARACTER,
+	TILE_PLAYER_CANNON		= 10,
+	TILE_PLAYER_CHARACTER	= 11,
 
-	TILE_ENEMY_CANNON,
-	TILE_ENEMY_MINION,
-	TILE_ENEMY_BOSS,
+	TILE_ENEMY_CANNON		= 12,
+	TILE_ENEMY_MINION		= 13,
+	TILE_ENEMY_BOSS			= 14,
 
 	TILE_COUNT, // Count of the enum always at the last index
 };
