@@ -15,7 +15,8 @@ namespace MapManager {
 	static const char* TOWER_BLOCK_TOP_2_PATH = "Assets/towerBlockTop2.png"; // Tower Block Top (2)
 	static const char* TOWER_BLOCK_2_PATH = "Assets/towerBlockBody2.png"; // Tower Block Body (2)
 
-	static const char* CANNON_BASE_PATH = "Assets/cannonBase.png"; //Cannon (for testing now, not actual sprite)
+	static const char* CANNON_BASE_TOP_PATH = "Assets/cannonBaseTop.png";
+	static const char* CANNON_BASE_PATH = "Assets/cannonBase.png";
 	static const char* PLAYER_IDLE_PATH = "Assets/playerIdle.png";      //player
 	static const char* ENEMY_100_PATH = "Assets/enemy100.png";        //enemy (full hp)
 	//Cracks textures for blocks based on their health (light, medium, heavy)
@@ -30,6 +31,7 @@ namespace MapManager {
 	static AEGfxTexture* gTower1BodyTex = nullptr;
 	static AEGfxTexture* gTower2TopTex = nullptr;
 	static AEGfxTexture* gTower2BodyTex = nullptr;
+	static AEGfxTexture* gCannonBaseTopTex = nullptr;
 	static AEGfxTexture* gCannonBaseTex = nullptr;
 	static AEGfxTexture* gFallbackTex = nullptr;
 	static AEGfxTexture* gPlayerIdleTex = nullptr;
@@ -48,6 +50,7 @@ namespace MapManager {
 		gTower1BodyTex = AssetsManager::GetTexture(TOWER_BLOCK_1_PATH);
 		gTower2TopTex = AssetsManager::GetTexture(TOWER_BLOCK_TOP_2_PATH);
 		gTower2BodyTex = AssetsManager::GetTexture(TOWER_BLOCK_2_PATH);
+		gCannonBaseTopTex = AssetsManager::GetTexture(CANNON_BASE_TOP_PATH);
 		gCannonBaseTex = AssetsManager::GetTexture(CANNON_BASE_PATH);
 		gPlayerIdleTex = AssetsManager::GetTexture(PLAYER_IDLE_PATH);
 		gEnemy100Tex = AssetsManager::GetTexture(ENEMY_100_PATH);
@@ -60,10 +63,11 @@ namespace MapManager {
 		if (!gFloorFillTex) gFloorFillTex = gFallbackTex;
 		if (!gTower1TopTex)  gTower1TopTex = gFallbackTex;
 		if (!gTower1BodyTex)  gTower1BodyTex = gFallbackTex;
-		if (!gTower2TopTex)  gTower2TopTex = gFallbackTex;
-		if (!gTower2BodyTex)  gTower2BodyTex = gFallbackTex;
-		if (!gCannonBaseTex) gCannonBaseTex = gFallbackTex;
-		if (!gPlayerIdleTex) gPlayerIdleTex = gFallbackTex;
+		if (!gTower2TopTex)      gTower2TopTex = gFallbackTex;
+		if (!gTower2BodyTex)     gTower2BodyTex = gFallbackTex;
+		if (!gCannonBaseTopTex)  gCannonBaseTopTex = gFallbackTex;
+		if (!gCannonBaseTex)     gCannonBaseTex = gFallbackTex;
+		if (!gPlayerIdleTex)     gPlayerIdleTex = gFallbackTex;
 		if (!gEnemy100Tex)   gEnemy100Tex = gFallbackTex;
 
 		gTileTex[static_cast<int>(TileType::TILE_EMPTY)] = nullptr;
@@ -71,8 +75,8 @@ namespace MapManager {
 		gTileTex[static_cast<int>(TileType::TILE_BLOCK_GROUND_0)] = gFloorTopTex;
 		gTileTex[static_cast<int>(TileType::TILE_BLOCK_GROUND_1)] = gFloorFillTex;
 		gTileTex[static_cast<int>(TileType::TILE_BLOCK_GROUND_2)] = gFloorFillTex;
-		gTileTex[static_cast<int>(TileType::TILE_BLOCK_CANNON_BASE_TOP)] = gCannonBaseTex;
-		gTileTex[static_cast<int>(TileType::TILE_BLOCK_CANNON_BASE)] = gTower1BodyTex; // CHANGE THIS
+		gTileTex[static_cast<int>(TileType::TILE_BLOCK_CANNON_BASE_TOP)] = gCannonBaseTopTex;
+		gTileTex[static_cast<int>(TileType::TILE_BLOCK_CANNON_BASE)] = gCannonBaseTex;
 
 		// DO NOT overwrite these afterwards
 		gTileTex[static_cast<int>(TileType::TILE_BLOCK_1_TOP)] = gTower1TopTex;
@@ -81,8 +85,8 @@ namespace MapManager {
 		gTileTex[static_cast<int>(TileType::TILE_BLOCK_2)] = gTower2BodyTex;
 
 		// cannon base tile texture
-		gTileTex[static_cast<int>(TileType::TILE_PLAYER_CANNON)] = gCannonBaseTex;
-		gTileTex[static_cast<int>(TileType::TILE_ENEMY_CANNON)] = gCannonBaseTex;
+		gTileTex[static_cast<int>(TileType::TILE_PLAYER_CANNON)] = gCannonBaseTopTex;
+		gTileTex[static_cast<int>(TileType::TILE_ENEMY_CANNON)] = gCannonBaseTopTex;
 
 		// other types can stay fallback for now
 		gTileTex[static_cast<int>(TileType::TILE_PLAYER_CHARACTER)] = gPlayerIdleTex;
@@ -97,6 +101,10 @@ namespace MapManager {
 		if (gFloorFillTex == gFallbackTex) {
 			std::cerr << "[MapManager] WARNING: missing floor fill texture at "
 				<< FLOOR_FILL_PATH << std::endl;
+		}
+		if (gCannonBaseTopTex == gFallbackTex) {
+			std::cerr << "[MapManager] WARNING: missing cannon base top texture at "
+				<< CANNON_BASE_TOP_PATH << std::endl;
 		}
 		if (gCannonBaseTex == gFallbackTex) {
 			std::cerr << "[MapManager] WARNING: missing cannon base texture at "
@@ -114,8 +122,11 @@ namespace MapManager {
 		if (gTower2BodyTex == gFallbackTex)
 			std::cerr << "[MapManager] WARNING: missing towerBlockBody2 at " 
 			<< TOWER_BLOCK_2_PATH << "\n";
+		if (gCannonBaseTopTex == gFallbackTex)
+			std::cerr << "[MapManager] WARNING: missing cannonBaseTop at "
+			<< CANNON_BASE_TOP_PATH << "\n";
 		if (gCannonBaseTex == gFallbackTex)
-			std::cerr << "[MapManager] WARNING: missing cannonBase at " 
+			std::cerr << "[MapManager] WARNING: missing cannonBase at "
 			<< CANNON_BASE_PATH << "\n";
 
 		// Debug prints if missing cracks
@@ -137,6 +148,7 @@ namespace MapManager {
 		gTower1BodyTex = nullptr;
 		gTower2TopTex = nullptr;
 		gTower2BodyTex = nullptr;
+		gCannonBaseTopTex = nullptr;
 		gCannonBaseTex = nullptr;
 		gPlayerIdleTex = nullptr;
 		gEnemy100Tex = nullptr;
