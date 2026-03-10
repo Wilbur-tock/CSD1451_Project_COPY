@@ -60,7 +60,20 @@ void Projectile::AbilityActivation() {
         if (leftClick) {
             abilityTriggered = true;
 
+            // Create a 1 tile width wall 2 tiles X index behind current projectile X index
+            int tileX = 0, tileY = 0;
+            Utils::GetTileIndex(tileX, tileY, transform.pos);
+            tileX -= 2; 
 
+            if (!Utils::IsGridIndexOutOfBounds(tileX, tileY)) {
+                for (int i = 0; i <= Config::MAX_GRID_Y; ++i) {
+                    Tile& tile = (*MapManager::currentMap)[i][tileX];
+                    if (tile.Type() == TileType::TILE_EMPTY) {
+                        tile.Type(TileType::TILE_BLOCK_1);
+                    }
+                }
+            }
+            std::cout << "WALL mode triggered";
         }
         break;
     }

@@ -13,12 +13,14 @@
 #include "LevelManager.hpp"
 
 namespace {
+	std::string filePath = "Assets/Abilities/";
 	// Helper function to read from JSON file and input the data into a JSON Object
-	static void ReadAbilitiesFromFile(nlohmann::json& jsonData, std::string const& filePath) {
+	static void ReadAbilitiesFromFile(nlohmann::json& jsonData, std::string const& fileName) {
+		std::string filePathAndName = filePath + fileName;
 		// Open the file
-		std::ifstream file(filePath);
+		std::ifstream file(filePathAndName);
 		if (!file.is_open()) {
-			std::cerr << "[AbilitiesManager] ERROR: Could not open " << filePath << '\n';
+			std::cerr << "[AbilitiesManager] ERROR: Could not open " << filePathAndName << '\n';
 			return;
 		}
 
@@ -38,7 +40,7 @@ namespace {
 			jsonData.update(newData); // Merge objects
 		}
 		else {
-			std::cerr << "[AbilitiesManager] ERROR: JSON type mismatch when merging " << filePath << '\n';
+			std::cerr << "[AbilitiesManager] ERROR: JSON type mismatch when merging " << fileName << '\n';
 		}
 	}
 }
@@ -61,12 +63,12 @@ namespace AbilitiesManager {
 		isAIController = isAi;
 
 		nlohmann::json data;
-		ReadAbilitiesFromFile(data, "Assets/Abils/Abilities.json");
+		ReadAbilitiesFromFile(data, "Abilities.json");
 
 		// Read enemies ONLY ability and merge it to the data
 		if (isAi) {
 			controllerName = "Enemy Ability Controller";
-			ReadAbilitiesFromFile(data, "Assets/Abils/AiAbilities.json");
+			ReadAbilitiesFromFile(data, "AiAbilities.json");
 		}
 		else {
 			controllerName = "Player Ability Controller";
@@ -109,32 +111,29 @@ namespace AbilitiesManager {
 			allAbilities.push_back(newAbil);
 		}
 
-		std::cout << "[AbilitiesManager] Successfully loaded " << statsAbilities.size() << " stats abilities." << std::endl;
-		std::cout << "[AbilitiesManager] Successfully loaded " << offensiveAbilities.size() << " offensive abilities." << std::endl;
-		std::cout << "[AbilitiesManager] Successfully loaded " << defensiveAbilities.size() << " defensive abilities." << std::endl;
-
 		inventoryTypeCount.resize(static_cast<int>(AbilityType::COUNT));
+		PrintAllAbilities();
 
 		LoadStartingAbilities();
-
-		//PrintAllAbilities();
 	}
 
 	void AbilityController::PrintAllAbilities() {
-		for (Ability ability : statsAbilities) {
+		std::cout << "=================== Loaded " + controllerName + "==================\n";
+		for (Ability const& ability : statsAbilities) {
 			std::cout << "[AbilitiesManager] Loaded stats ability " << ability.Id() << " : " << ability.GetName() << std::endl;
 		}
 		std::cout << "[AbilitiesManager] Successfully loaded " << statsAbilities.size() << " stats abilities." << std::endl;
 
-		for (Ability ability : offensiveAbilities) {
+		for (Ability const& ability : offensiveAbilities) {
 			std::cout << "[AbilitiesManager] Loaded offensive ability " << ability.Id() << " : " << ability.GetName() << std::endl;
 		}
 		std::cout << "[AbilitiesManager] Successfully loaded " << offensiveAbilities.size() << " offensive abilities." << std::endl;
 
-		for (Ability ability : defensiveAbilities) {
+		for (Ability const& ability : defensiveAbilities) {
 			std::cout << "[AbilitiesManager] Loaded defensive ability " << ability.Id() << " : " << ability.GetName() << std::endl;
 		}
 		std::cout << "[AbilitiesManager] Successfully loaded " << defensiveAbilities.size() << " defensive abilities." << std::endl;
+		std::cout << "=======================================================================\n";
 	}
 
 	// Load the starting abilities for the player and AI
@@ -290,14 +289,14 @@ namespace AbilitiesManager {
 			// add into the activeAbilities vector
 			inventory.push_back(&ability);
 
-			std::cout << "[AbilitiesManager] Added " << ability << " into active abilities vector" << '\n';
+			std::cout << "[AbilitiesManager] Added " << ability << " into inventory" << '\n';
 		}
 		else {
 			if (ability.AbilityCharges() > 0) return;
 			for (int i = 0; i < inventory.size(); ++i) {
 				if (inventory[i] == &ability) {
 					inventory.erase(inventory.begin() + i);
-					std::cout << "[AbilitiesManager] Removed " << ability << " from active abilities vector" << '\n';
+					std::cout << "[AbilitiesManager] Removed " << ability << " from inventory" << '\n';
 					return;
 				}
 			}

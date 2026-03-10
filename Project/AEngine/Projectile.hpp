@@ -17,7 +17,7 @@ enum class ProjectileMode {
 	NUKE		= 3,
 	PENTA_BURST	= 4,
 	AUTO_AIM	= 5,
-	WALL,
+	WALL		= 6,
 };
 
 class Projectile : public GameObject {

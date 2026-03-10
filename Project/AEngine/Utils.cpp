@@ -30,7 +30,6 @@ namespace Utils {
 		GetWorldPos(x, y);
 	}
 
-	// values range from x = negative to positive max map width, y = 0 neagtive to positive max map height 
 	void GetWorldPos(float& x, float& y) {
 		f32 camX, camY;
 		AEGfxGetCamPosition(&camX, &camY);

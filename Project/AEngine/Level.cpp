@@ -50,6 +50,7 @@ void Level::Initalize() {
 
 	AEVec2 playerCannonStartPos = { 0,0 }, enemyCannonStartPos = { 0,0 };
 
+	// Initialize all the character object instance
 	for (int y = 0; y < Config::GRID_HEIGHT; ++y) {
 		for (int x = 0; x < Config::GRID_WIDTH; ++x) {
 			Tile& tile = levelMap[y][x];
@@ -57,12 +58,10 @@ void Level::Initalize() {
 			if (tile.Type() == TILE_PLAYER_CANNON) {
 				playerCannonStartPos = { tile.transform.pos.x, tile.transform.pos.y + tile.transform.size.y * 0.5f };
 			}
-
-			if (tile.Type() == TILE_ENEMY_CANNON) {
+			else if (tile.Type() == TILE_ENEMY_CANNON) {
 				enemyCannonStartPos = { tile.transform.pos.x, tile.transform.pos.y + tile.transform.size.y * 0.5f };
 			}
-
-			if (tile.Type() == TILE_PLAYER_CHARACTER || tile.Type() == TILE_ENEMY_MINION || tile.Type() == TILE_ENEMY_BOSS) {
+			else if (tile.Type() == TILE_PLAYER_CHARACTER || tile.Type() == TILE_ENEMY_MINION || tile.Type() == TILE_ENEMY_BOSS) {
 				Character characterObj{ tile.transform.pos, tile.transform.size, AssetsManager::squareTexture, {x,y}, CharacterType::PLAYER };
 				int listId = 0;
 
@@ -71,6 +70,7 @@ void Level::Initalize() {
 					playerCharacters.push_back(characterObj);
 					listId = static_cast<int>(playerCharacters.size() - 1);
 					playerCharacters[listId].id = listId;
+					playerCharacters[listId].SetStats(static_cast<int>(levelDifficulty));
 					break;
 
 				case TILE_ENEMY_MINION:
@@ -86,9 +86,9 @@ void Level::Initalize() {
 					enemies.push_back(characterObj);
 					listId = static_cast<int>(enemies.size() - 1);
 					enemies[listId].id = listId;
+					enemies[listId].SetStats(static_cast<int>(levelDifficulty));
 
 					bossId = listId;
-					enemies[listId].SetStats(static_cast<int>(levelDifficulty));
 					break;
 				}
 

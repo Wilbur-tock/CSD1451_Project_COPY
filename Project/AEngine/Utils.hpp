@@ -30,6 +30,8 @@ namespace Utils {
 
 	// Get world mouse position instead of the screen position due to camera movement
 	void GetWorldMousePos(float& x, float& y);
+	// Set world position according to the camera position
+	// values range from x = negative to positive max map width, y = 0 neagtive to positive max map height 
 	void GetWorldPos(float& x, float& y);
 	void NormalizeCoordinates(float& x, float& y);
 	AEVec2 NormalizeCoordinates(AEVec2 vec2);

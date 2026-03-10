@@ -22,7 +22,7 @@ namespace LevelManager {
 	}
 
 	void LoadLevel() {
-		selectedLevel->Load();
+		//selectedLevel->Load();
 	}
 
 	void InitializeLevel() {

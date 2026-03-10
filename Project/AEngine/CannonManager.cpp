@@ -52,8 +52,8 @@ namespace CannonManager {
             projectile = { AssetsManager::circleTexture };
             projectile.SetProjectileStats(ability.GetName(), ability.GetProj());
 
-            //std::cout << "[CannonManager] Set " << ability.Id() << " Mode: " << projectile.ModeName() << " " 
-            // << ability.GetName() << " ability into the cannon projectile vector" << '\n';
+            std::cout << "[CannonManager] Set " << ability.Id() << " Mode: " << projectile.ModeName() << " " 
+             << ability.GetName() << " ability into the cannon projectile vector" << '\n';
         }
     }
     
@@ -534,7 +534,8 @@ namespace CannonManager {
             + "\n\nAbilities Inventory Count: " + std::to_string(abilityController->InventoryCount())
             + "\nSelected Ability:\nId:" + std::to_string(selectedAbility.Id())
             + "\nName: " + selectedAbility.GetName()
-            + "\nAbility Charges Remaining: " + std::to_string(selectedAbility.AbilityCharges());
+            + "\nAbility Charges Remaining: " + std::to_string(selectedAbility.AbilityCharges())
+            + "\nSelected Projectile Id: " + std::to_string(selectedAbility.GetProj().projectileId);
 
         if (target) {
             debugStr += "\nTarget: " + target->TypeName();

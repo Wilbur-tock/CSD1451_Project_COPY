@@ -75,15 +75,15 @@
     },
 
     {
-        "Name": "AOE Projectile",
+        "Name": "Wall",
         "Type": 2,
         "Tier": 1,
         "Texture": "",
         "Projectile_Stats": {
-            "ProjectileID": 2,
+            "ProjectileID": 5,
             "Damage_Amp": 1.0,
-            "Base_Damage": 100,
-            "Radius": 10,
+            "Base_Damage": 10,
+            "Radius": 2,
             "Charges": 1,
             "unlimited_charges": false
         }
