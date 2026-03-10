@@ -204,6 +204,9 @@
     <ClCompile Include="AudioManager.cpp">
       <Filter>Source Files\Audio</Filter>
     </ClCompile>
+    <ClCompile Include="Guide.cpp">
+      <Filter>Source Files\Game States</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="UIManager.hpp">
@@ -320,14 +323,14 @@
     <ClInclude Include="Pausemenu.hpp">
       <Filter>Header Files\Game States</Filter>
     </ClInclude>
+    <ClInclude Include="Guide.hpp">
+      <Filter>Header Files\Game States</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AudioManager.hpp">
       <Filter>Header Files\Audio</Filter>
     </ClInclude>
-    <None Include="..\Assets\Abils\Abilities.json">
-      <Filter>Resource Files</Filter>
-    </None>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\Assets\Abils\Abilities.json">
@@ -336,8 +339,7 @@
     <None Include="..\Assets\Abils\AiAbilities.json">
       <Filter>Resource Files</Filter>
     </None>
-    <None Include="..\Assets\Abils\AiAbilities.json">
-      <Filter>Resource Files</Filter>
-    </None>
+    <None Include="..\Assets\Abilities\Abilities.json" />
+    <None Include="..\Assets\Abilities\AiAbilities.json" />
   </ItemGroup>
 </Project>

@@ -22,6 +22,7 @@ namespace MainMenu {
     void OnMapEditorClicked();
     void OnCreditsClicked();
     void OnSettingsClicked();
+    void OnGuideClicked();
     void OnQuitClicked();
 
     // Menu buttons
@@ -29,6 +30,7 @@ namespace MainMenu {
     extern Button mapEditorButton;
     extern Button creditsButton;
     extern Button settingsButton;
+    extern Button guideButton;
     extern Button quitButton;
 
     // Menu state

@@ -9,7 +9,7 @@
 
 namespace MainMenu {
     // Menu buttons
-    Button playButton, mapEditorButton, creditsButton, settingsButton, quitButton;
+    Button playButton, mapEditorButton, creditsButton, settingsButton, guideButton, quitButton;
     TextObject gameTitle, instructions;
 
     // Menu state
@@ -83,9 +83,22 @@ namespace MainMenu {
             OnSettingsClicked
         );
 
+        // Create Guide Button
+        // Transitions to GUIDE. Orange tint
+        AEVec2 guidePos = { centerX - btnWidth / 2.0f, startY - btnSpacing * 3 };
+        guideButton = Button(
+            TextObject{ "GUIDE" },
+            Utils::AnchorMode::CENTER,
+            guidePos,
+            { btnWidth, btnHeight },
+            Color(0.9f, 0.55f, 0.2f, 1.0f),
+            buttonTexture,
+            OnGuideClicked
+        );
+
         // Create Credits Button
         // Transitions to CREDITS. Purple tint
-        AEVec2 creditsPos = { centerX - btnWidth / 2.0f, startY - btnSpacing * 3 }; // Three spacing units below Play.
+        AEVec2 creditsPos = { centerX - btnWidth / 2.0f, startY - btnSpacing * 4 }; // Three spacing units below Play.
         creditsButton = Button(
             TextObject{ "CREDITS" },
             Utils::AnchorMode::CENTER,
@@ -98,7 +111,7 @@ namespace MainMenu {
 
         // Create Quit Button
         // Sets GameState to QUIT. Red tint
-        AEVec2 quitPos = { centerX - btnWidth / 2.0f, startY - btnSpacing * 4 }; // Four spacing units below Play; bottom of the column.
+        AEVec2 quitPos = { centerX - btnWidth / 2.0f, startY - btnSpacing * 5 }; // Four spacing units below Play; bottom of the column.
         quitButton = Button(
             TextObject{ "QUIT" },
             Utils::AnchorMode::CENTER,
@@ -121,7 +134,7 @@ namespace MainMenu {
         // Keyboard shortcut hint
         // Rendered at the very bottom of the screen in small text
         instructions = {
-        "Click a button or use keyboard shortcuts:\n1 - Play Game | 2 - Map Editor | 3 - Settings | 4 - Credits | Q - Quit",
+        "Click a button or use keyboard shortcuts:\n1 - Play | 2 - Map Editor | 3 - Settings | 4 - Guide | 5 - Credits | Q - Quit",
         0.7f,
         Color(0.0f, 0.0f, 0.0f, 1.0f),
         { -0.98f, -0.9f },
@@ -193,6 +206,10 @@ namespace MainMenu {
             AudioManager::PlaySFX(AudioManager::SFX::UIButton);
             OnCreditsClicked();
         }
+        if (AEInputCheckTriggered(AEVK_5)) {
+            AudioManager::PlaySFX(AudioManager::SFX::UIButton);
+            OnCreditsClicked();
+        }
         if (AEInputCheckTriggered(AEVK_Q)) {
             AudioManager::PlaySFX(AudioManager::SFX::UIButton);
             OnQuitClicked();
@@ -205,6 +222,7 @@ namespace MainMenu {
         playButton.Update();
         mapEditorButton.Update();
         settingsButton.Update();
+        guideButton.Update();
         creditsButton.Update();
         quitButton.Update();
     }
@@ -240,6 +258,11 @@ namespace MainMenu {
     void OnCreditsClicked() {
         // Transition to Credits screen
         GameStateManager::next = GameStateManager::GameState::CREDITS;
+    }
+
+    void OnGuideClicked() {
+        // Transition to Guide screen
+        GameStateManager::next = GameStateManager::GameState::GUIDE;
     }
 
     void OnQuitClicked() {

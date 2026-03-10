@@ -13,6 +13,7 @@ namespace GameStateManager {
 		LEVEL_2,
 		CREDITS,
 		SETTINGS,
+		GUIDE,
 		RESTART,
 		EXIT,
 		QUIT,

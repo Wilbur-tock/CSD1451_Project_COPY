@@ -16,6 +16,7 @@
 #include "InstructionsOverlay.hpp"
 #include "Loading.hpp"
 #include "PauseMenu.hpp" 
+#include "Guide.hpp"
 
 namespace GameStateManager {
     // State variables
@@ -56,9 +57,12 @@ namespace GameStateManager {
         MapManager::Load();             // Load the tile map data needed by both LevelManager and MapEditor
         MainMenu::Load();               // Pre-load the main menu's button and background textures into the asset cache
         Credits::Load();                // Pre-load any assets required by the credits screen
+        Guide::Load();                  // Pre-load assets and build guide text / ability info
 
-        AudioManager::Init();           // Initialise the audio engine
-        AudioManager::SetVolume(0.35f); // Set the master volume to 35% at startup
+        AudioManager::Init();           // Create AEAudio groups and load cached audio assets
+        AudioManager::SetVolume(0.35f); // Master volume
+        AudioManager::SetBGMVolume(1.0f);
+        AudioManager::SetSFXVolume(1.0f);
 
         // Initialize camera controller
         CameraManager::camera.Init();
@@ -122,6 +126,15 @@ namespace GameStateManager {
                 current = next;
                 setNewState = false;
 
+                // IMPORTANT: clear old state callbacks first.
+                // Otherwise the previous state can leak into the new one.
+                gsLoad = nullptr;
+                gsIntialize = nullptr;
+                gsUpdate = nullptr;
+                gsDraw = nullptr;
+                gsFree = nullptr;
+                gsUnload = nullptr;
+
                 // Update Game state function pointers based on current state
                 switch (current) {
                 case GameState::MAIN_MENU:
@@ -162,6 +175,13 @@ namespace GameStateManager {
                     gsFree = Settings::Free;
                     break;
 
+                case GameState::GUIDE:
+                    gsIntialize = Guide::Initialize;
+                    gsUpdate = Guide::Update;
+                    gsDraw = Guide::Draw;
+                    gsFree = Guide::Free;
+                    break;
+
                 case GameState::RESTART:
                     next = previous;
                     current = next;
@@ -191,6 +211,10 @@ namespace GameStateManager {
                 switch (current) {
                 case GameState::MAIN_MENU:
                     AudioManager::PlayBGM(AudioManager::Track::MainMenu);
+                    break;
+
+                case GameState::GUIDE:
+                    AudioManager::PlayBGM(AudioManager::Track::MapEditor);
                     break;
 
                 case GameState::MAP_EDITOR:
@@ -302,6 +326,7 @@ namespace GameStateManager {
     // Releases all globally owned resources in reverse dependency order
     void Exit() {
         MainMenu::Unload();
+        Guide::Unload();
         AssetsManager::Unload();
         UICursor::Unload();
         GraphicsManager::Unload();

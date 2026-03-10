@@ -19,6 +19,7 @@ namespace UIInstructionsOverlay {
         case GameState::LEVEL_2:    return "LEVEL 2";
         case GameState::CREDITS:    return "CREDITS";
         case GameState::SETTINGS:   return "SETTINGS";
+        case GameState::GUIDE:      return "GUIDE";
         case GameState::RESTART:    return "RESTART";
         case GameState::EXIT:       return "EXIT";
         case GameState::QUIT:       return "QUIT";
@@ -48,7 +49,7 @@ namespace UIInstructionsOverlay {
             "WHILE THIS POPUP IS OPEN\n"
             "[I] Close this popup\n\n"
             "WHEN THIS POPUP IS CLOSED\n"
-            "[P] Toggle Debugger\n";
+            "[TAB] Toggle Debugger\n";
        
         using GameStateManager::GameState;
         if (current == GameState::LEVEL_1 || current == GameState::LEVEL_2) {
@@ -82,8 +83,16 @@ namespace UIInstructionsOverlay {
                 "[1] Play\n"
                 "[2] Map Editor\n"
                 "[3] Settings\n"
-                "[4] Credits\n"
+                "[4] Guide\n"
+                "[5] Credits\n"
                 "[Q] Quit\n";
+        }
+        else if (current == GameState::GUIDE) {
+            msg +=
+                "GUIDE\n"
+                "[1] Game Guide page\n"
+                "[2] Abilities Guide page\n"
+                "[ESC] / [BACK]: Return to Main Menu\n";
         }
         else if (current == GameState::CREDITS) {
             msg +=
@@ -94,7 +103,7 @@ namespace UIInstructionsOverlay {
         else if (current == GameState::SETTINGS) {
             msg +=
                 "SETTINGS\n"
-                "Use the slider or +/- buttons to adjust volume.\n"
+                "Use the sliders or +/- buttons to adjust Master, BGM, and SFX volume.\n"
                 "[ESC] / [BACK]: Return\n";
         }
 
