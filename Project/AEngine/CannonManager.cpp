@@ -326,7 +326,7 @@ namespace CannonManager {
 
             for (int step = 0; step < SUB_STEPS; ++step) {
                 // Set movement first
-                projectile.MoveProjectile(subDt);
+                projectile.ProjectileMovement(subDt);
 
                 // Check for collision in a 3x3 area with the projectile
                 int tileX = 0, tileY = 0;
@@ -358,27 +358,6 @@ namespace CannonManager {
                         }
                     }
                 }
-
-                // SECONDARY CHECK IF THE PROJECTILE IS GROUNDED OR NOT
-                //if (!projectile.isGrounded) {
-                //    // Only and MUST check 2x3 for additonal checks
-                //    for (int y = tileY; y <= maxY; ++y) {
-                //        for (int x = minX; x <= maxX; ++x) {
-                //            if (Utils::IsGridIndexOutOfBounds(x, y)) continue;
-                //
-                //            Tile& tile = (*MapManager::currentMap)[y][x];
-                //
-                //            if (!tile.IsEmpty()) {
-                //                projectile.isGrounded = PhysicsManager::IsGrounded(projectile.transform, tile.transform);
-                //                if (projectile.isGrounded) {
-                //                    projectile.velocity.y = 0;
-                //                    break;
-                //                }
-                //            }
-                //        }
-                //        //if (projectile.isGrounded) break;
-                //    }
-                //}
             }
 
             // Check if projectile need to be destroy and destroy after it lifespan

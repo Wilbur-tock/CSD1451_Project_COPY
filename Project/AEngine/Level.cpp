@@ -66,25 +66,25 @@ void Level::Initalize() {
 		for (int x = 0; x < Config::GRID_WIDTH; ++x) {
 			Tile& tile = activeLevelMap[y][x];
 
-			if (tile.Type() == TILE_PLAYER_CANNON) {
+			if (tile.Type() == TileType::TILE_PLAYER_CANNON) {
 				playerCannonStartPos = { tile.transform.pos.x, tile.transform.pos.y + tile.transform.size.y * 0.5f };
 			}
-			else if (tile.Type() == TILE_ENEMY_CANNON) {
+			else if (tile.Type() == TileType::TILE_ENEMY_CANNON) {
 				enemyCannonStartPos = { tile.transform.pos.x, tile.transform.pos.y + tile.transform.size.y * 0.5f };
 			}
-			else if (tile.Type() == TILE_PLAYER_CHARACTER || tile.Type() == TILE_ENEMY_MINION || tile.Type() == TILE_ENEMY_BOSS) {
+			else if (tile.Type() == TileType::TILE_PLAYER_CHARACTER || tile.Type() == TileType::TILE_ENEMY_MINION || tile.Type() == TileType::TILE_ENEMY_BOSS) {
 				Character characterObj{ tile.transform.pos, tile.transform.size, AssetsManager::squareTexture, {x,y}, CharacterType::PLAYER };
 				int listId = 0;
 
 				switch (tile.Type()) {
-				case TILE_PLAYER_CHARACTER:
+				case TileType::TILE_PLAYER_CHARACTER:
 					playerCharacters.push_back(characterObj);
 					listId = static_cast<int>(playerCharacters.size() - 1);
 					playerCharacters[listId].id = listId;
 					playerCharacters[listId].SetStats(static_cast<int>(levelDifficulty));
 					break;
 
-				case TILE_ENEMY_MINION:
+				case TileType::TILE_ENEMY_MINION:
 					characterObj = { tile.transform.pos, tile.transform.size, AssetsManager::squareTexture, {x,y}, CharacterType::ENEMY_MINION };
 					enemies.push_back(characterObj);
 					listId = static_cast<int>(enemies.size() - 1);
@@ -92,7 +92,7 @@ void Level::Initalize() {
 					enemies[listId].SetStats(static_cast<int>(levelDifficulty));
 					break;
 
-				case TILE_ENEMY_BOSS:
+				case TileType::TILE_ENEMY_BOSS:
 					characterObj = { tile.transform.pos, tile.transform.size, AssetsManager::squareTexture, {x,y}, CharacterType::ENEMY_BOSS };
 					enemies.push_back(characterObj);
 					listId = static_cast<int>(enemies.size() - 1);
@@ -324,7 +324,13 @@ void Level::UpdateLevelStatus() {
 	GetCurrentHP(currentEnemyHP, false);
 
 	// All the enemies and boss are dead or only the boss are dead player will won
-	if (EnemyBoss()->attribute.Health() <= 0 || currentEnemyHP <= 0) status = LevelStatus::PLAYER_WON;
+	if (EnemyBoss()) {
+		if (EnemyBoss()->attribute.Health() <= 0 || currentEnemyHP <= 0) status = LevelStatus::PLAYER_WON;
+	}
+	else {
+		if (currentEnemyHP <= 0) status = LevelStatus::PLAYER_WON;
+	}
+	
 	if (currentPlayerHP <= 0) status = LevelStatus::ENEMY_WON;
 }
 
@@ -465,7 +471,7 @@ void Level::DebugCommands() {
 	if (CollisionManager::IsPointInGameObject(tile)) {
 		if (AEInputCheckCurr(AEVK_RBUTTON)) {
 			if (tile.IsBlocks()) {
-				tile.Type(TILE_EMPTY);
+				tile.Type(TileType::TILE_EMPTY);
 			}
 		}
 

@@ -21,7 +21,7 @@ namespace MapEditor {
 	std::string loadPath = "", savePath = "";
 	std::vector<std::vector<Tile>> newMap(Config::GRID_HEIGHT, std::vector<Tile>(Config::GRID_WIDTH));
 
-	TileType defaultTile = TILE_BLOCK_GROUND_0;
+	TileType defaultTile = TileType::TILE_BLOCK_GROUND_0;
 	TileType drawingTileType = defaultTile;
 	// Current selected tileId
 	int tileId = static_cast<int>(defaultTile);
@@ -44,7 +44,7 @@ namespace MapEditor {
 	static std::string DebugFilePath(std::string filePath) { return "../../" + filePath; }
 	// Change the drawing tile type
 	static void ChangeTile(int &newTileId) {
-		Utils::Wrap(newTileId, 1, TILE_COUNT - 1);
+		Utils::Wrap(newTileId, 1, static_cast<int>(TileType::TILE_COUNT) - 1);
 		drawingTileType = static_cast<TileType>(newTileId);
 	}
 
@@ -93,7 +93,7 @@ namespace MapEditor {
 		// Write into the text file and save the file
 		for (int y = 0; y < Config::GRID_HEIGHT; ++y) {
 			for (int x = 0; x < Config::GRID_WIDTH; ++x) {
-				output << newMap[y][x].Type() << " ";
+				output << static_cast<int>(newMap[y][x].Type()) << " ";
 			}
 			output << std::endl;
 		}
@@ -164,18 +164,18 @@ namespace MapEditor {
 			}
 			else if (AEInputCheckCurr(AEVK_RBUTTON)) { // Input to erase tile
 
-				newMap[gridY][gridX].Type(TILE_EMPTY);
+				newMap[gridY][gridX].Type(TileType::TILE_EMPTY);
 				// Input to erase a column
 				if (AEInputCheckCurr(AEVK_LCTRL) || AEInputCheckCurr(AEVK_RCTRL)) {
 					for (int i = 0; i < Config::GRID_WIDTH; ++i) {
-						newMap[gridY][i].Type(TILE_EMPTY);
+						newMap[gridY][i].Type(TileType::TILE_EMPTY);
 					}
 				}
 
 				// Input to erase a row
 				if (AEInputCheckCurr(AEVK_LSHIFT) || AEInputCheckCurr(AEVK_RSHIFT)) {
 					for (int i = 0; i < Config::GRID_HEIGHT; ++i) {
-						newMap[i][gridX].Type(TILE_EMPTY);
+						newMap[i][gridX].Type(TileType::TILE_EMPTY);
 					}
 				}
 			}
@@ -257,15 +257,15 @@ namespace MapEditor {
 
 		if (isShowingTileList) {
 			helpStr += "[SHOWING]\n[Q] Scroll UP\n[E] Scroll DOWN\nSelected Tile: "
-				+ GetTileName(tileId) + " (" + std::to_string(tileId) + ")";
+				+ GetTileName(static_cast<TileType>(tileId)) + " (" + std::to_string(tileId) + ")";
 			// List out the type of tiles able to be drawn
-			for (int i = 0; i < TILE_COUNT - 1; ++i) {
+			for (int i = 0; i < static_cast<int>(TileType::TILE_COUNT) - 1; ++i) {
 				int id = i + 1;
 				std::string str = "[ ] ";
 				if (tileId == id) {
 					str = "[O] ";
 				}
-				helpStr += "\n" + str + GetTileName(id);
+				helpStr += "\n" + str + GetTileName(static_cast<TileType>(id));
 			}
 		}
 		else {

@@ -68,7 +68,7 @@ public:
 	// Ability effects checker for ability to take effect after projectile has been shot 
 	// Check for inputs to activated PROJECTILE Abilities
 	void AbilityActivation();
-	void MoveProjectile(float dt);
+	void ProjectileMovement(float dt);
 	// Simulate the projectile physics of bouncing off the walls, checking if it is grounded
 	void OnCollision(Tile const& tile);
 	// If the projectile hit something, REDUCE the velocity by a percentage for the FIRST COLLISION ONLY

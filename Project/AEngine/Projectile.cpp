@@ -113,7 +113,7 @@ void Projectile::Initialize(Transform cannonTrans, int _activeId, float cannonAn
     timer = Config::PROJECTILE_LIFESPAN;
 }
 
-void Projectile::MoveProjectile(float dt) {
+void Projectile::ProjectileMovement(float dt) {
     // Grounded Check every frame
     isGrounded = PhysicsManager::IsObjectGrounded(transform);
 

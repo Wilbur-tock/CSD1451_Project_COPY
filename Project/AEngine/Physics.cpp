@@ -37,7 +37,7 @@ void Physics::Update(GameObject& obj) {
 
             // Swap tiles details
             btmTile.Type(currTile);
-            currTile.Type(TILE_EMPTY); // Maybe change to other tile type
+            currTile.Type(TileType::TILE_EMPTY); // Maybe change to other tile type
             obj.tileId = btmTileId;
         }
     }

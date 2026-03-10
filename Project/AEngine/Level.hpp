@@ -47,7 +47,10 @@ public:
 	Character* FindPlayerCharacterObj(int characterId);
 	Character* RandomCharacterObj(bool isPlayerObj);
 
-	Character* EnemyBoss() { return &enemies[bossId]; }
+	Character* EnemyBoss() { 
+		if (bossId < 0 || bossId > enemies.size()) return nullptr;
+		return &enemies[bossId];
+	}
 
 	void SetHoveringOverUI(bool isHovering) { isHoveringUI = isHovering; }
 private:

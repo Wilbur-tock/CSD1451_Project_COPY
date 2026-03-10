@@ -41,12 +41,14 @@ void Tile::TakeDamage(int damage) {
 	}
 }
 
+std::string GetTileName(TileType type) {
+	int id = static_cast<int>(type);
+	if (id < 0 || id >= static_cast<int>(tileNames.size())) return "INVALID";
+	return tileNames[id];
+}
+
 std::ostream& operator<<(std::ostream& os, Tile const& rhs) {
 	os << GetTileName(rhs.Type()) << " " << rhs.tileId;
 	return os;
 }
 
-std::string GetTileName(int id) {
-	if (id < 0 || id >= static_cast<int>(tileNames.size())) return "INVALID";
-	return tileNames[id];
-}

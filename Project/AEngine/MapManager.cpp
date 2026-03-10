@@ -9,10 +9,12 @@ namespace MapManager {
 
 	static const char* FLOOR_TOP_PATH = "Assets/floorTop.png";  // top layer floor
 	static const char* FLOOR_FILL_PATH = "Assets/floorBody.png";  // underground fill of floor
+
 	static const char* TOWER_BLOCK_TOP_1_PATH = "Assets/towerBlockTop1.png"; // Tower Block Top (1)
 	static const char* TOWER_BLOCK_1_PATH = "Assets/towerBlockBody1.png"; // Tower Block Body (1)
 	static const char* TOWER_BLOCK_TOP_2_PATH = "Assets/towerBlockTop2.png"; // Tower Block Top (2)
 	static const char* TOWER_BLOCK_2_PATH = "Assets/towerBlockBody2.png"; // Tower Block Body (2)
+
 	static const char* CANNON_BASE_PATH = "Assets/cannonBase.png"; //Cannon (for testing now, not actual sprite)
 	static const char* PLAYER_IDLE_PATH = "Assets/playerIdle.png";      //player
 	static const char* ENEMY_100_PATH = "Assets/enemy100.png";        //enemy (full hp)
@@ -21,7 +23,7 @@ namespace MapManager {
 	static const char* CRACKS_MEDIUM_PATH = "Assets/mediumCracks.png";
 	static const char* CRACKS_HEAVY_PATH = "Assets/heavyCracks.png";
 	// Cached textures
-	static AEGfxTexture* gTileTex[TILE_COUNT] = { nullptr };
+	static AEGfxTexture* gTileTex[static_cast<int>(TileType::TILE_COUNT)] = { nullptr };
 	static AEGfxTexture* gFloorTopTex = nullptr;
 	static AEGfxTexture* gFloorFillTex = nullptr;
 	static AEGfxTexture* gTower1TopTex = nullptr;
@@ -37,7 +39,7 @@ namespace MapManager {
 	static AEGfxTexture* gCracksHeavyTex = nullptr;
 
 	void Load() {
-		if (gTileTex[TILE_BLOCK_GROUND_0]) return;	
+		if (gTileTex[static_cast<int>(TileType::TILE_BLOCK_GROUND_0)]) return;	
 
 		gFallbackTex = AssetsManager::GetTexture("Assets/square.png");
 		gFloorTopTex = AssetsManager::GetTexture(FLOOR_TOP_PATH);
@@ -64,26 +66,28 @@ namespace MapManager {
 		if (!gPlayerIdleTex) gPlayerIdleTex = gFallbackTex;
 		if (!gEnemy100Tex)   gEnemy100Tex = gFallbackTex;
 
-		gTileTex[TILE_EMPTY] = nullptr;
+		gTileTex[static_cast<int>(TileType::TILE_EMPTY)] = nullptr;
 		// ground uses top/fill selection in RenderMap (this just marks “loaded”)
-		gTileTex[TILE_BLOCK_GROUND_0] = gFloorTopTex;
-		gTileTex[TILE_BLOCK_GROUND_1] = gFloorFillTex;
-		gTileTex[TILE_BLOCK_GROUND_2] = gFloorFillTex;
+		gTileTex[static_cast<int>(TileType::TILE_BLOCK_GROUND_0)] = gFloorTopTex;
+		gTileTex[static_cast<int>(TileType::TILE_BLOCK_GROUND_1)] = gFloorFillTex;
+		gTileTex[static_cast<int>(TileType::TILE_BLOCK_GROUND_2)] = gFloorFillTex;
+		gTileTex[static_cast<int>(TileType::TILE_BLOCK_CANNON_BASE_TOP)] = gCannonBaseTex;
+		gTileTex[static_cast<int>(TileType::TILE_BLOCK_CANNON_BASE)] = gTower1BodyTex; // CHANGE THIS
 
 		// DO NOT overwrite these afterwards
-		gTileTex[TILE_BLOCK_1_TOP] = gTower1TopTex;
-		gTileTex[TILE_BLOCK_1] = gTower1BodyTex;
-		gTileTex[TILE_BLOCK_2_TOP] = gTower2TopTex;
-		gTileTex[TILE_BLOCK_2] = gTower2BodyTex;
+		gTileTex[static_cast<int>(TileType::TILE_BLOCK_1_TOP)] = gTower1TopTex;
+		gTileTex[static_cast<int>(TileType::TILE_BLOCK_1)] = gTower1BodyTex;
+		gTileTex[static_cast<int>(TileType::TILE_BLOCK_2_TOP)] = gTower2TopTex;
+		gTileTex[static_cast<int>(TileType::TILE_BLOCK_2)] = gTower2BodyTex;
 
 		// cannon base tile texture
-		gTileTex[TILE_PLAYER_CANNON] = gCannonBaseTex;
-		gTileTex[TILE_ENEMY_CANNON] = gCannonBaseTex;
+		gTileTex[static_cast<int>(TileType::TILE_PLAYER_CANNON)] = gCannonBaseTex;
+		gTileTex[static_cast<int>(TileType::TILE_ENEMY_CANNON)] = gCannonBaseTex;
 
 		// other types can stay fallback for now
-		gTileTex[TILE_PLAYER_CHARACTER] = gPlayerIdleTex;
-		gTileTex[TILE_ENEMY_MINION] = gEnemy100Tex;
-		gTileTex[TILE_ENEMY_BOSS] = gFallbackTex;
+		gTileTex[static_cast<int>(TileType::TILE_PLAYER_CHARACTER)] = gPlayerIdleTex;
+		gTileTex[static_cast<int>(TileType::TILE_ENEMY_MINION)] = gEnemy100Tex;
+		gTileTex[static_cast<int>(TileType::TILE_ENEMY_BOSS)] = gFallbackTex;
 
 		// Debug prints if missing
 		if (gFloorTopTex == gFallbackTex) {
@@ -123,8 +127,6 @@ namespace MapManager {
 			std::cerr << "[MapManager] WARNING: missing heavyCracks at " << CRACKS_HEAVY_PATH << "\n";
 	}
 
-
-
 	void Unload() {
 		currentMap = nullptr;
 
@@ -142,7 +144,7 @@ namespace MapManager {
 		gCracksMediumTex = nullptr;
 		gCracksHeavyTex = nullptr;
 
-		for (int i = 0; i < TILE_COUNT; ++i) gTileTex[i] = nullptr;
+		for (int i = 0; i < static_cast<int>(TileType::TILE_COUNT); ++i) gTileTex[i] = nullptr;
 	}
 
 	void ReadMapData(std::string const& fileName, std::vector<std::vector<Tile>> &map) {
@@ -170,11 +172,11 @@ namespace MapManager {
 				int type = 0;
 				ifs >> type;
 
-				if (type < 0 || type >= TILE_COUNT) {
+				if (type < 0 || type >= static_cast<int>(TileType::TILE_COUNT)) {
 					std::cerr << "[MapManager] WARNING: invalid tile id " << type
 						<< " at (" << x << "," << y << ") in " << fileName
 						<< " -> forcing TILE_EMPTY\n";
-					type = TILE_EMPTY;
+					type = static_cast<int>(TileType::TILE_EMPTY);
 				}
 				else {
 					tileTexture = gTileTex[type];
@@ -222,10 +224,10 @@ namespace MapManager {
 
 		for (std::vector<Tile> const& row : map) {
 			for (Tile const& tile : row) {
-				if (tile.Type() == TILE_EMPTY) continue;
+				if (tile.Type() == TileType::TILE_EMPTY) continue;
 				if (!drawCharacters && tile.IsCharacter()) continue;
 
-				AEGfxTexture* baseTex = gTileTex[tile.Type()];
+				AEGfxTexture* baseTex = gTileTex[static_cast<int>(tile.Type())];
 				if (!baseTex) continue;
 
 				AEMtx33 tileMat = GraphicsManager::CreateTransformMatrix(

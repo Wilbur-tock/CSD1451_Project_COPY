@@ -331,7 +331,7 @@ namespace GameStateManager {
 
         debuggerPanel.Draw();
 
-        debugText.textContent = "\n[P] Debugger ON\nFPS: " + Utils::FormatFloat(AEFrameRateControllerGetFrameRate(), 2)
+        debugText.textContent = "\n[TAB] Debugger ON\nFPS: " + Utils::FormatFloat(AEFrameRateControllerGetFrameRate(), 2)
             + "\nDeltaTime: " + Utils::FormatFloat(PhysicsManager::g_dt, 2)
             + "\n[M] Main Menu";
         debugText.Draw();
