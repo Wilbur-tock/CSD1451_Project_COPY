@@ -1,6 +1,5 @@
 #include "InstructionsOverlay.hpp"
 #include "UIManager.hpp"
-#include "TextObject.hpp"
 #include "Utils.hpp"
 #include "Color.hpp"
 #include "GameStateManager.hpp"
@@ -28,7 +27,8 @@ namespace UIInstructionsOverlay {
         return "GAME";
     }
 
-    void Draw(GameStateManager::GameState current) {
+    void Draw() {
+        GameStateManager::GameState current = GameStateManager::current;
         UIManager::Panel dim{
             {static_cast<float>(Config::SCREEN_WIDTH), static_cast<float>(Config::SCREEN_HEIGHT)},
             Color(0.0f, 0.0f, 0.0f, 0.55f),
@@ -53,6 +53,7 @@ namespace UIInstructionsOverlay {
             "[TAB] Toggle Debugger\n";
        
         using GameStateManager::GameState;
+
         if (current == GameState::LEVEL_1 || current == GameState::LEVEL_2) {
             msg +=
                 "LEVEL\n"

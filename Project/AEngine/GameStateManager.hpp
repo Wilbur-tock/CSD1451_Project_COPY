@@ -2,7 +2,7 @@
 #define GAMESTATEMANAGER_HPP
 
 #include "pch.hpp"
-#include "Utils.hpp"
+#include "Utils.hpp" // Using FuncPtr
 
 namespace GameStateManager {
 	enum class GameState {

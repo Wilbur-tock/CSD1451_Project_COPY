@@ -9,7 +9,9 @@ namespace LevelManager {
 	extern Level* selectedLevel;
 	static std::vector<Level> levelDatas; // vector containing all the level data in the game
 
-	void Load(); // Load all the levels data (Map layout, all instance of player and enemy character object)
+	void LoadAllLevels(); // Load all the levels data (Map layout, all instance of player and enemy character object)
+	// Load specific level
+	void LoadLevel(int levelId);
 	void SelectLevel(int levelId); // Select level
 
 	void LoadLevel();

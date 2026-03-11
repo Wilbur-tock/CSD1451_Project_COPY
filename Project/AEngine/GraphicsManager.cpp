@@ -3,6 +3,7 @@
 #include "AssetsManager.hpp"
 #include "CameraManager.hpp"
 #include "Loading.hpp"
+#include "GameTrackingManager.hpp"
 
 #include "Color.hpp"
 #include "GameObject.hpp"
@@ -17,65 +18,58 @@ namespace GraphicsManager {
 		SCREEN_TOP_LEFT_CORNER
 	};
 	
-	// Mesh for WORLD environment instance such as tiles, blocks and character objects
-	AEGfxVertexList* pMeshMiddle = nullptr;
+	// Mesh for WORLD environment instance such as tiles, blocks objects
+	AEGfxVertexList* pMeshCenter = nullptr;
 	// Mesh for UI screen overlay and UI in the WORLD environment
-	AEGfxVertexList*pMeshCorner = nullptr;
+	AEGfxVertexList* pMeshTopLeftCorner = nullptr;
 	// Mesh for animated sprites
 	AEGfxVertexList* pSpriteMesh = nullptr;
-
-	// Generate the mesh to draw on e.g.paper to draw on. There are TWO mesh, 
-	// pMeshMiddle (RectMode Center) for game objects to draw on,
-	// pMeshCorner (RectMode Corner) for UI to draw on 
-	static void GenerateMesh();
 
 	// Use either WORLD or SCREEN based on which rectMode to use center or corner rectMode, texture to render (image/sprite),
 	// 3x3 matrix created using CreateTransformMatrix
 	// r,g,b,a - colour of the text values of 0.0f - 1.0f 
-	static void DrawTexture(CoordinateType renderMode, AEGfxTexture* pTex, AEMtx33 transform, Color const& color);
+	static void DrawTexture(CoordinateType renderMode, AEGfxTexture* pTex, AEMtx33 transform, Color const& color, AEGfxVertexList* pMesh = nullptr);
 
-	static void GenerateMesh() {
-		AEGfxMeshStart();
-
+	void GenerateMesh(AEGfxVertexList*& pMesh, bool isOriginCenter) {
 		float meshSize = 1.0f;
 
-		//Generate mesh with center rectmode
-		AEGfxTriAdd(-meshSize, -meshSize, 0xFFFFFFFF, 0.0f, 1.0f,  // Bottom-left
-			meshSize, -meshSize, 0xFFFFFFFF, 1.0f, 1.0f,  // Bottom-right
-			-meshSize, meshSize, 0xFFFFFFFF, 0.0f, 0.0f); // Top-left
-
-		AEGfxTriAdd(meshSize, -meshSize, 0xFFFFFFFF, 1.0f, 1.0f,  // Bottom-right
-			meshSize, meshSize, 0xFFFFFFFF, 1.0f, 0.0f,  // Top-right
-			-meshSize, meshSize, 0xFFFFFFFF, 0.0f, 0.0f); // Top-left
-
-		pMeshMiddle = AEGfxMeshEnd();
-
-		//Generate mesh with corner rectmode
 		AEGfxMeshStart();
+		if (isOriginCenter) { //Generate mesh with center origin
+			AEGfxTriAdd(-meshSize, -meshSize, 0xFFFFFFFF, 0.0f, 1.0f,  // Bottom-left
+				meshSize, -meshSize, 0xFFFFFFFF, 1.0f, 1.0f,  // Bottom-right
+				-meshSize, meshSize, 0xFFFFFFFF, 0.0f, 0.0f); // Top-left
 
-		AEGfxTriAdd(0.0f, -meshSize, 0xFFFFFFFF, 0.0f, 1.0f,
-			meshSize, -meshSize, 0xFFFFFFFF, 1.0f, 1.0f,
-			0.0f, 0.0f, 0xFFFFFFFF, 0.0f, 0.0f);
+			AEGfxTriAdd(meshSize, -meshSize, 0xFFFFFFFF, 1.0f, 1.0f,  // Bottom-right
+				meshSize, meshSize, 0xFFFFFFFF, 1.0f, 0.0f,  // Top-right
+				-meshSize, meshSize, 0xFFFFFFFF, 0.0f, 0.0f); // Top-left
 
-		AEGfxTriAdd(meshSize, -meshSize, 0xFFFFFFFF, 1.0f, 1.0f,
-			meshSize, 0.0f, 0xFFFFFFFF, 1.0f, 0.0f,
-			0.0f, 0.0f, 0xFFFFFFFF, 0.0f, 0.0f);
+			pMesh = AEGfxMeshEnd();
+		}
+		else { //Generate mesh with top left corner origin
+			AEGfxTriAdd(0.0f, -meshSize, 0xFFFFFFFF, 0.0f, 1.0f,
+				meshSize, -meshSize, 0xFFFFFFFF, 1.0f, 1.0f,
+				0.0f, 0.0f, 0xFFFFFFFF, 0.0f, 0.0f);
 
-		pMeshCorner = AEGfxMeshEnd();
+			AEGfxTriAdd(meshSize, -meshSize, 0xFFFFFFFF, 1.0f, 1.0f,
+				meshSize, 0.0f, 0xFFFFFFFF, 1.0f, 0.0f,
+				0.0f, 0.0f, 0xFFFFFFFF, 0.0f, 0.0f);
 
-		AEGfxMeshStart();
+			pMesh = AEGfxMeshEnd();
+		}
 	}
 
-	static void DrawTexture(CoordinateType mode, AEGfxTexture* pTex, AEMtx33 transform, Color const& color) {
-		// Set the texture and render mode
-		AEGfxVertexList* mesh = pMeshMiddle;
-		if (mode == CoordinateType::WORLD_TOP_LEFT_CORNER || mode == CoordinateType::SCREEN_TOP_LEFT_CORNER) {
-			mesh = pMeshCorner;
+	static void DrawTexture(CoordinateType mode, AEGfxTexture* pTex, AEMtx33 transform, Color const& color, AEGfxVertexList* pMesh) {
+		// If mesh is empty used the default mesh
+		if (!pMesh) {
+			pMesh = pMeshCenter;
+
+			if (mode == CoordinateType::WORLD_TOP_LEFT_CORNER || mode == CoordinateType::SCREEN_TOP_LEFT_CORNER) {
+				pMesh = pMeshTopLeftCorner;
+			}
 		}
 
+		// Calculate new transform matrix if camera zoom
 		if (mode != CoordinateType::SCREEN_TOP_LEFT_CORNER) {
-			// Apply camera zoom
-			// 
 			// AFTER (zooms toward screen/camera center):
 			float zoom = CameraManager::camera.GetZoom();
 
@@ -118,7 +112,9 @@ namespace GraphicsManager {
 		AEGfxSetTransform(transform.m);
 
 		// Draw the mesh
-		AEGfxMeshDraw(mesh, AE_GFX_MDM_TRIANGLES);
+		AEGfxMeshDraw(pMesh, AE_GFX_MDM_TRIANGLES);
+
+		++GameTrackingManager::data.meshDrawCount;
 	}
 
 	// Builds a custom quad mesh where the UV coordinates span exactly one frame width.
@@ -229,19 +225,20 @@ namespace GraphicsManager {
 	}
 
 	void Load() {
-		GenerateMesh();
+		GenerateMesh(pMeshCenter);
+		GenerateMesh(pMeshTopLeftCorner, false);
 		BuildSpriteMesh();
 		AEGfxSetTextureMode(AE_GFX_TM_PRECISE);
 	}
 
 	void Unload() {
-		if (pMeshMiddle) {
-			AEGfxMeshFree(pMeshMiddle);
-			pMeshMiddle = nullptr;
+		if (pMeshCenter) {
+			AEGfxMeshFree(pMeshCenter);
+			pMeshCenter = nullptr;
 		}
-		if (pMeshCorner) {
-			AEGfxMeshFree(pMeshCorner);
-			pMeshCorner = nullptr;
+		if (pMeshTopLeftCorner) {
+			AEGfxMeshFree(pMeshTopLeftCorner);
+			pMeshTopLeftCorner = nullptr;
 		}
 		if (pSpriteMesh) { 
 			AEGfxMeshFree(pSpriteMesh); 
@@ -269,8 +266,8 @@ namespace GraphicsManager {
 	}
 
 	void DrawGameObject(GameObject const& gameObject) {
-		AEMtx33 mat = CreateTransformMatrix(gameObject.transform.pos.x, gameObject.transform.pos.y, 0, gameObject.transform.size.x *0.5f, gameObject.transform.size.y * 0.5f);
-		DrawTexture(CoordinateType::WORLD_CENTER, gameObject.texture, mat, gameObject.textureColor);
+		AEMtx33 mat = CreateTransformMatrix(gameObject.transform.pos.x, gameObject.transform.pos.y, 0, gameObject.transform.size.x * 0.5f, gameObject.transform.size.y * 0.5f);
+		DrawTexture(CoordinateType::WORLD_CENTER, gameObject.texture, mat, gameObject.textureColor, gameObject.pMesh);
 	}
 
 	void DrawWorldUI(AEGfxTexture* pTex, AEMtx33 const& transform, Color const& color) {

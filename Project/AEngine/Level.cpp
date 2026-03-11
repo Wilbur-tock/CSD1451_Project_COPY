@@ -1,21 +1,27 @@
 #include "Level.hpp"
 
-#include "AssetsManager.hpp"
+#include "LevelManager.hpp"
 #include "MapManager.hpp"
-#include "Color.hpp"
+#include "AssetsManager.hpp"
 #include "Utils.hpp"
 #include "CollisionManager.hpp"
 #include "CameraManager.hpp"
-#include "LevelManager.hpp"
 #include "PhysicsManager.hpp"
 #include "AudioManager.hpp"
+#include "GameStateManager.hpp"
+#include "ParticlesManager.hpp"
+#include "EffectsManager.hpp"
 
 #include "UIManager.hpp"
-#include "TextObject.hpp"
-#include "GameStateManager.hpp"
 
 AEGfxTexture* playerCannonTex = nullptr;
 AEGfxTexture* enemyCannonTex = nullptr;
+
+TextObject debugText;
+
+bool resultScreenInitialized = false;
+Button resultRestartButton;
+Button resultMainMenuButton;
 
 Level::Level(int _leveId)
 	: levelId{ _leveId }, levelName{ "Level " + std::to_string(levelId + 1) }, levelFileName{ "level" + std::to_string(levelId) } {
@@ -32,8 +38,7 @@ void Level::Load() {
 	enemies.reserve(reserveCount);
 	playerCharacters.reserve(reserveCount);
 
-	std::string filePath = "Assets/Map/" + levelFileName + ".txt";
-	MapManager::ReadMapData(filePath, levelMap);
+	MapManager::ReadMapData(levelFileName, levelMap);
 
 	playerCannonTex = AssetsManager::GetTexture("Assets/cannonBarrel.png");
 	enemyCannonTex = AssetsManager::GetTexture("Assets/enemyCannon.png");
@@ -42,6 +47,8 @@ void Level::Load() {
 
 	if (!playerCannonTex) playerCannonTex = fallbackTex;
 	if (!enemyCannonTex)  enemyCannonTex = playerCannonTex ? playerCannonTex : fallbackTex;
+
+	debugText = { "", Utils::debuggerInfo.first * 0.8f, Utils::debuggerInfo.second, { -1.0f, 0.99f} };
 
 	std::cout << "[Level] Load " + levelFileName << '\n';
 }
@@ -137,15 +144,13 @@ void Level::Initalize() {
 	switchTurnCooldown = 0.0f;
 	isAbilitySelectorOn = true;
 
-	debugText = { "", Utils::debuggerInfo.first * 0.8f, Utils::debuggerInfo.second, { -1.0f, 0.99f} };
-
 	CameraManager::camera.SetPosition(playerCannon.transform.pos);
 	CameraManager::camera.SetState(CameraManager::CameraController::INPUT);
 
 	// Randomise at the start of the level the 3 abilities that the player can choose from in the ability selector UI
 	AbilitiesManager::playerAbilityController.AbilitySelectionRandomisator();
 
-	std::cout << "[Level] Initialize " + levelFileName << " Player Count: " << playerCharacters.size() <<  '\n';
+	std::cout << "[Level] Initialize " + levelFileName << '\n';
 }
 
 bool prevIsAbilitySelectorOn = false;
@@ -160,6 +165,7 @@ void Level::Update() {
 			std::cout << "[Level]" << '\n';
 			// Find new target if current target is not alive
 			enemyCannon.SetTarget(RandomCharacterObj(true));
+			if (!enemyCannon.IsTargetAlive()) std::cerr << "[Level] Enemy has no target!" << std::endl;
 		}
 
 		if (activeCannon) {
@@ -183,6 +189,7 @@ void Level::Update() {
 	}
 
 	Draw();
+	ParticleManager::particleController.Update(PhysicsManager::g_dt);
 
 	// Need to be below DrawLevel to ensure that the Ability Selector UI is shows up infront of the level
 	prevIsAbilitySelectorOn = isAbilitySelectorOn;
@@ -219,6 +226,8 @@ void Level::Draw() {
 	// Need to draw both player cannon and enemy cannon regardless of whose turn it is
 	playerCannon.Draw();
 	enemyCannon.Draw();
+
+	ParticleManager::particleController.Draw();
 }
 
 void Level::Free() {
@@ -234,7 +243,7 @@ void Level::DrawUI() {
 		turnText.textContent = "ENEMY TURN";
 		turnText.color = { 0.75f,0,0 };
 	}
-	turnText.SetPos(turnStatusPanel.Pos(), turnStatusPanel.Size());
+	turnText.SetAnchorPosition(turnStatusPanel.Pos(), turnStatusPanel.Size());
 	turnText.Draw();
 
 	float colorVal = 0.9f;
@@ -425,7 +434,7 @@ void Level::DrawResultScreen() {
 		{0.0f, 0.0f},
 		Utils::AnchorMode::CENTER
 	};
-	resultTitle.SetPos(centerPanel.Pos(), centerPanel.Size());
+	resultTitle.SetAnchorPosition(centerPanel.Pos(), centerPanel.Size());
 	// Shift title text upward inside the panel
 	resultTitle.pos.y += 0.15f;
 	resultTitle.Draw();
@@ -442,7 +451,7 @@ void Level::DrawResultScreen() {
 		{0.0f, 0.0f},
 		Utils::AnchorMode::CENTER
 	};
-	subtitle.SetPos(centerPanel.Pos(), centerPanel.Size());
+	subtitle.SetAnchorPosition(centerPanel.Pos(), centerPanel.Size());
 	subtitle.pos.y += 0.02f;
 	subtitle.Draw();
 
@@ -479,6 +488,7 @@ void Level::DebugCommands() {
 		if (AEInputCheckCurr(AEVK_RBUTTON)) {
 			if (tile.IsBlocks()) {
 				tile.Type(TileType::TILE_EMPTY);
+				EffectsManager::effectsController.PlayTileBreak(tile.transform.pos);
 			}
 		}
 
@@ -507,6 +517,8 @@ void Level::DebugCommands() {
 		isSkippingEnemyTurn = false;
 	}
 }
+
+UIManager::Panel debugPanel{ {350, 750}, {1,1,1, 0.8f}, Utils::AnchorMode::TOP_LEFT };
 
 void Level::DebugInfo() {
 	if (!Utils::isDebuggerOn) return;
@@ -566,7 +578,7 @@ void Level::DebugInfo() {
 
 	debug += info;
 
-	UIManager::Panel{ {350, 500}, {1,1,1, 0.8f}, Utils::AnchorMode::TOP_LEFT }.Draw();
+	debugPanel.Draw();
 
 	debugText.textContent = debug;
 	debugText.Draw();

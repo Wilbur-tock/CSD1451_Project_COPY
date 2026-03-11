@@ -70,54 +70,60 @@ namespace Utils {
 		return x < 0 || x >= Config::GRID_WIDTH || y < 0 || y >= Config::GRID_HEIGHT;
 	}
 
-	void SetAnchoredPosition(Transform& trans, AnchorMode const& anchorMode) {
-		// Set position based on screen width and height
-		float x = 0, y = 0, width = trans.size.x, height = trans.size.y;
-		float halfScreenW = Config::SCREEN_WIDTH * 0.5f, halfScreenH = Config::SCREEN_HEIGHT * 0.5f;
-		float halfW = width * 0.5f, halfH = height * 0.5f;
+	void SetAnchoredPosition(Transform const& parent, Transform& trans, AnchorMode const& anchorMode) {
+		// Set position based on screen width and height with its origin mode in the CENTER
+		float parentX = parent.pos.x, parentY = parent.pos.y;
+		float halfParentW = parent.size.x * 0.5f, halfParentH = parent.size.y * 0.5f;
 
-		// Set position based on rect mode
+		float chiildW = trans.size.x, childH = trans.size.y;
+		float halfW = chiildW * 0.5f, halfH = childH * 0.5f;
+
+		// Set position based on anchor mode
 		switch (anchorMode) {
 		case Utils::AnchorMode::TOP_LEFT:
-			x = -halfScreenW;
-			y = halfScreenH;
+			parentX = -halfParentW;
+			parentY = halfParentH;
 			break;
 		case Utils::AnchorMode::TOP_CENTER:
-			x = -halfW;
-			y = halfScreenH;
+			parentX = -halfW;
+			parentY = halfParentH;
 			break;
 		case Utils::AnchorMode::TOP_RIGHT:
-			x = halfScreenW - width;
-			y = halfScreenH;
+			parentX = halfParentW - chiildW;
+			parentY = halfParentH;
 			break;
 		case Utils::AnchorMode::CENTER_LEFT:
-			x = -halfScreenW;
-			y = halfH;
+			parentX = -halfParentW;
+			parentY = halfH;
 			break;
 		case Utils::AnchorMode::CENTER:
-			x = -halfW;
-			y = halfH;
+			parentX = -halfW;
+			parentY = halfH;
 			break;
 		case Utils::AnchorMode::CENTER_RIGHT:
-			x = halfScreenW - width;
-			y = halfH;
+			parentX = halfParentW - chiildW;
+			parentY = halfH;
 			break;
 		case Utils::AnchorMode::BOTTOM_LEFT:
-			x = -halfScreenW;
-			y = -halfScreenH + height;
+			parentX = -halfParentW;
+			parentY = -halfParentH + childH;
 			break;
 		case Utils::AnchorMode::BOTTOM_CENTER:
-			x = -halfW;
-			y = -halfScreenH + height;
+			parentX = -halfW;
+			parentY = -halfParentH + childH;
 			break;
 		case Utils::AnchorMode::BOTTOM_RIGHT:
-			x = halfScreenW - width;
-			y = -halfScreenH + height;
+			parentX = halfParentW - chiildW;
+			parentY = -halfParentH + childH;
 			break;
 		}
 
-		trans.pos.x = x;
-		trans.pos.y = y;
+		trans.pos.x = parentX;
+		trans.pos.y = parentY;
+	}
+
+	void SetAnchoredPosition(Transform& trans, AnchorMode const& anchorMode) {
+		SetAnchoredPosition(Transform{ {0,0}, {Config::SCREEN_WIDTH, Config::SCREEN_HEIGHT} }, trans, anchorMode);
 	}
 
 	std::string FormatFloat(double value, int precision) {

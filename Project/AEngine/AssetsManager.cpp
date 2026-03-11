@@ -7,15 +7,16 @@ namespace AssetsManager {
 
     // Common textures
     AEGfxTexture* squareTexture, *circleTexture;
-    s8 textFont;
+    s8 textFont, titleFont;
 
     void Load() {
         squareTexture = GetTexture("Assets/square.png");
-        textFont = AEGfxCreateFont("Assets/liberation-mono.ttf", Config::FONT_SIZE);
+        textFont = AEGfxCreateFont("Assets/Font/liberation-mono.ttf", Config::FONT_SIZE);
+        titleFont = AEGfxCreateFont("Assets/Font/liberation-mono.ttf", Config::FONT_SIZE * 2);
         circleTexture = AssetsManager::GetTexture("Assets/circle.png");
     }
 
-    AEGfxTexture* GetTexture(const char* filePath) {
+    AEGfxTexture* GetTexture(char const* filePath) {
         // Check if we already loaded this file
         auto it = textureCache.find(filePath);
         if (it != textureCache.end()) {
@@ -38,5 +39,9 @@ namespace AssetsManager {
         textureCache.clear();
         squareTexture = nullptr;
         circleTexture = nullptr;
+
+        // clear font
+        AEGfxDestroyFont(textFont);
+        AEGfxDestroyFont(titleFont);
     }
 }

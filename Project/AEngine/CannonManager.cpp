@@ -1,11 +1,11 @@
 #include "CannonManager.hpp"
 
+#include "Utils.hpp"
 #include "MapManager.hpp"
 #include "GraphicsManager.hpp"
 #include "AssetsManager.hpp"
 #include "CameraManager.hpp"
 #include "GameStateManager.hpp"
-#include "Utils.hpp"
 #include "CollisionManager.hpp"
 #include "Tile.hpp"
 #include "AbilitiesManager.hpp"
@@ -13,6 +13,8 @@
 #include "LevelManager.hpp"
 #include "PhysicsManager.hpp"
 #include "AudioManager.hpp"
+#include "GameTrackingManager.hpp"
+#include "EffectsManager.hpp"
 
 namespace CannonManager {
     Cannon::Cannon(AEVec2 _pos, AEGfxTexture* _texture, TileIndex _tileId, AEVec2 _size, bool _isShootingRight, bool _isPlayerControlled)
@@ -173,7 +175,7 @@ namespace CannonManager {
             abilityController->AIAbilitySelection();
             EnemyAICalculation();
 
-            // Set shoot timer to add a delay between the start of the enemy turn and enemy shooting the projectile out
+            // Set a random shoot timer to add a delay between the start of the enemy turn and enemy shooting
             float minTimer = 1.5f;
             float maxTimer = 3.0f;
 
@@ -209,7 +211,7 @@ namespace CannonManager {
     }
 
     void Cannon::ChargeShot() {
-        if (hasCannonShot == true) return;
+        if (!isPlayerControlled && hasCannonShot == true) return; // return if it not player controlled
 
         // Shoot when the button is RELEASED
         if (isPlayerControlled && AEInputCheckReleased(AEVK_LBUTTON)) {
@@ -228,7 +230,7 @@ namespace CannonManager {
             canPlayerShoot = isHoldingLeftClick = false;
         }
 
-        if (isPlayerControlled && !canPlayerShoot) return;
+        if (!canPlayerShoot) return; // return if is player controlled and they can't shoot
 
         if (AEInputCheckCurr(AEVK_LBUTTON) || canAIShoot == true) {
             isHoldingLeftClick = canPlayerShoot = true;
@@ -302,6 +304,9 @@ namespace CannonManager {
 
         SetCamera(true); // Follow the projectile that is shot out of the cannon
         hasCannonShot = true;
+
+        isPlayerControlled ? ++GameTrackingManager::data.playerShotsFired : ++GameTrackingManager::data.enemyShotsFired;
+
         std::cout << "[CannonManager] Projectile Fired!\n";
     }
 
@@ -350,6 +355,7 @@ namespace CannonManager {
 
                             if (!projectile.IsCollisionTriggered()) {
                                 AudioManager::PlaySFX(AudioManager::SFX::Impact);
+                                EffectsManager::effectsController.PlayExplosion(projectile.transform.pos);
                                 projectile.FirstTimeCollision();
                             }
                             else {
@@ -373,6 +379,11 @@ namespace CannonManager {
         if (activeProjectiles.empty()) return;
         for (int i = static_cast<int>(activeProjectiles.size() - 1); i >= 0; --i) {
             if (!activeProjectiles[i].IsActive()) {
+                activeProjectiles[i].HasHitSomething() ?
+                    isPlayerControlled ? ++GameTrackingManager::data.playerShotsHit : ++GameTrackingManager::data.enemyShotsHit :
+                    isPlayerControlled ? ++GameTrackingManager::data.playerShotsMiss : ++GameTrackingManager::data.enemyShotsMiss;
+
+                // Erase from vector
                 activeProjectiles.erase(activeProjectiles.begin() + i);
                 std::cout << "[CannonManager] Remove projectile from vector. Active projectile vector count: " << activeProjectiles.size() << '\n';
             }
@@ -488,7 +499,7 @@ namespace CannonManager {
         if (target) {
             debugStr += "\nTarget: " + target->TypeName();
         }
-                
+
         if (!isPlayerControlled) {
             debugStr += "\nAI Shoot Timer: " + Utils::FormatFloat(aiShootTimer, 2)
                 + "\nAI Difficulty: " + std::to_string(aiDifficulty);
@@ -504,7 +515,9 @@ namespace CannonManager {
 
         //UIManager::Panel panel{ {500,500}, {1,1,1,0.5f}, Utils::AnchorMode::TOP_RIGHT };
         //panel.Draw();
-        TextObject textObj{ debugStr, Utils::debuggerInfo.first * 0.8f, Utils::debuggerInfo.second, {0.5f, 0.99f} };
-        textObj.Draw();
+
+        TextObject debugText{"", Utils::debuggerInfo.first * 0.8f, Utils::debuggerInfo.second, { 0.5f, 0.99f } };
+        debugText.textContent = debugStr;
+        debugText.Draw();
     }
 }

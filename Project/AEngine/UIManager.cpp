@@ -2,6 +2,7 @@
 
 #include "GraphicsManager.hpp"
 #include "AssetsManager.hpp"
+#include "CollisionManager.hpp"
 
 namespace UIManager {
     Bar::Bar(AEVec2 _pos, AEVec2 _size, Color _color, FillType _type, AEGfxTexture* _texture)
@@ -69,5 +70,40 @@ namespace UIManager {
     void Panel::Draw() {
         AEMtx33 mat = GraphicsManager::CreateTransformMatrix(transform.pos.x, transform.pos.y, 0, transform.size.x, transform.size.y);
         GraphicsManager::DrawScreenOverlay(AssetsManager::squareTexture, mat, color);
+    }
+
+    PopupPanel::PopupPanel(std::string textContent, AEVec2 _size, Color _color, Utils::AnchorMode panelAnchorMode, AEGfxTexture* panelTexture, AEGfxTexture* btnTexture, Utils::FuncPtr onClick) 
+        : panel{ _size, _color, panelAnchorMode, panelTexture }, 
+        button{ {0,0}, {50,50}, Color{1,1,1}, btnTexture, onClick },
+        textObj{ textContent, 0.5f, Color{1,0,0}, {0,0}, Utils::AnchorMode::TOP_LEFT } {
+        // Set button position to be top right corner to close panel
+        button.SetAsChildObj({panel.Pos(), panel.Size()}, Utils::AnchorMode::TOP_RIGHT);
+
+        button.SetOnClick([this]() {
+            isActive = false;
+        });
+
+        textObj.SetAnchorPosition(panel.Pos(), panel.Size());
+    }
+
+    void PopupPanel::Draw() {
+        if (!isActive) return;
+        panel.Draw();
+        button.Draw();
+        textObj.Draw();
+    }
+
+    void PopupPanel::Update() {
+        if (!isActive) return;
+
+        isHovered = CollisionManager::IsPointInRect(panel.Pos().x, panel.Pos().y, panel.Size().x, panel.Size().y);
+
+        if (isHovered) {
+            button.Update();
+        }
+
+        if (button.IsClick()) {
+            isActive = false;
+        }
     }
 }

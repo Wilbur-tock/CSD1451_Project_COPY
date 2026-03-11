@@ -9,7 +9,7 @@ namespace AssetsManager {
 	extern std::map<std::string, AEGfxTexture*> textureCache;
 
 	extern AEGfxTexture* squareTexture, *circleTexture;
-	extern s8 textFont;
+	extern s8 textFont, titleFont;
 
 	void Load();
 

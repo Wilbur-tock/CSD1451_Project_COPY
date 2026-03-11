@@ -7,6 +7,7 @@
 #include "Character.hpp"
 #include "CollisionManager.hpp"
 #include "PhysicsManager.hpp"
+#include "Utils.hpp"
 
 Projectile::Projectile(AEGfxTexture* _texture, ProjectileMode _mode, AEVec2 _pos, int _attackCharges)
     : GameObject(_pos, defaultSize, _texture), timer{ 0.0f }, mode(_mode), attackCharges{_attackCharges} {
@@ -70,6 +71,7 @@ void Projectile::AbilityActivation() {
                     Tile& tile = (*MapManager::currentMap)[i][tileX];
                     if (tile.Type() == TileType::TILE_EMPTY) {
                         tile.Type(TileType::TILE_BLOCK_1);
+                        tile.attribute.Health(1);
                     }
                 }
             }
@@ -140,6 +142,10 @@ void Projectile::OnCollision(Tile const& tile) {
     else {
         PhysicsManager::ResolveVerticalCollision(transform, velocity, isGrounded, tile.transform);
     }
+
+    if (!hasHitSomething && tile.IsDestructible()) {
+        hasHitSomething = true;
+    }
 }
 
 void Projectile::FirstTimeCollision() {
@@ -179,7 +185,7 @@ bool Projectile::Destroy() {
     if (timer <= 0.0f || !IsInMapBounds()) {
         isActive = isCollisionTriggered = toBeDestroyed = false;
         timer = 0.0f;
-        return true;
+        return true; // projectile has been destroy
     }
     return false;
 }

@@ -4,7 +4,6 @@
 #include "pch.hpp"
 
 namespace AudioManager {
-
     enum class Track {
         None,
         MainMenu,
@@ -20,7 +19,7 @@ namespace AudioManager {
         TurnSwitch
     };
 
-    void Init();
+    void Load();
     void Update();
     void Shutdown();
 

@@ -207,6 +207,15 @@
     <ClCompile Include="Guide.cpp">
       <Filter>Source Files\Game States</Filter>
     </ClCompile>
+    <ClCompile Include="GameTrackingManager.cpp">
+      <Filter>Source Files\Game</Filter>
+    </ClCompile>
+    <ClCompile Include="ParticlesManager.cpp">
+      <Filter>Source Files\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="EffectsManager.cpp">
+      <Filter>Source Files\Graphics</Filter>
+    </ClCompile>
     <ClCompile Include="LevelSelect.cpp">
       <Filter>Source Files\Game States</Filter>
     </ClCompile>
@@ -328,6 +337,18 @@
     </ClInclude>
     <ClInclude Include="Guide.hpp">
       <Filter>Header Files\Game States</Filter>
+    </ClInclude>
+    <ClInclude Include="GameTrackingManager.hpp">
+      <Filter>Header Files\Game</Filter>
+    </ClInclude>
+    <ClInclude Include="Particles.hpp">
+      <Filter>Header Files\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="ParticlesManager.hpp">
+      <Filter>Header Files\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="EffectsManager.hpp">
+      <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="LevelSelect.hpp">
       <Filter>Header Files\Game States</Filter>
