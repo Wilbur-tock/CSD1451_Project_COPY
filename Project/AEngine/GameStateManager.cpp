@@ -17,6 +17,7 @@
 #include "Loading.hpp"
 #include "PauseMenu.hpp" 
 #include "Guide.hpp"
+#include "LevelSelect.hpp"
 
 namespace GameStateManager {
     // State variables
@@ -56,6 +57,7 @@ namespace GameStateManager {
         LevelManager::Load();           // Pre-load level data structures so level transitions are fast
         MapManager::Load();             // Load the tile map data needed by both LevelManager and MapEditor
         MainMenu::Load();               // Pre-load the main menu's button and background textures into the asset cache
+        LevelSelect::Load();
         Credits::Load();                // Pre-load any assets required by the credits screen
         Guide::Load();                  // Pre-load assets and build guide text / ability info
 
@@ -144,6 +146,13 @@ namespace GameStateManager {
                     gsFree = MainMenu::Free;
                     break;
 
+                case GameState::LEVEL_SELECT:
+                    gsIntialize = LevelSelect::Initialize;
+                    gsUpdate = LevelSelect::Update;
+                    gsDraw = LevelSelect::Draw;
+                    gsFree = LevelSelect::Free;
+                    break;
+
                 case GameState::MAP_EDITOR:
                     gsIntialize = MapEditor::Initialize;
                     gsUpdate = MapEditor::Update;
@@ -210,6 +219,10 @@ namespace GameStateManager {
                 // Placed after gsLoad and gsIntialize so audio starts only once the state is fully ready
                 switch (current) {
                 case GameState::MAIN_MENU:
+                    AudioManager::PlayBGM(AudioManager::Track::MainMenu);
+                    break;
+
+                case GameState::LEVEL_SELECT:
                     AudioManager::PlayBGM(AudioManager::Track::MainMenu);
                     break;
 
@@ -326,6 +339,7 @@ namespace GameStateManager {
     // Releases all globally owned resources in reverse dependency order
     void Exit() {
         MainMenu::Unload();
+        LevelSelect::Unload();
         Guide::Unload();
         AssetsManager::Unload();
         UICursor::Unload();

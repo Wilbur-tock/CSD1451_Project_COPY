@@ -8,6 +8,7 @@ namespace GameStateManager {
 	enum class GameState {
 		INITIALIZE,
 		MAIN_MENU,
+		LEVEL_SELECT,
 		MAP_EDITOR,
 		LEVEL_1,
 		LEVEL_2,

@@ -17,6 +17,7 @@ namespace {
 	static const char* ENEMY_75_PATH = "Assets/enemy75.png";
 	static const char* ENEMY_50_PATH = "Assets/enemy50.png";
 	static const char* ENEMY_25_PATH = "Assets/enemy25.png";
+	static const char* ENEMY_BOSS_PATH = "Assets/enemyBoss.png";
 
 	static bool gCharTexLoaded = false;
 
@@ -28,6 +29,7 @@ namespace {
 	static AEGfxTexture* gEnemy75Tex = nullptr;
 	static AEGfxTexture* gEnemy50Tex = nullptr;
 	static AEGfxTexture* gEnemy25Tex = nullptr;
+	static AEGfxTexture* gEnemyBossTex = nullptr;
 
 	static float PLAYER_SQUAT_FRAME_INTERVAL = 0.15f; // seconds per frame toggle
 
@@ -51,6 +53,7 @@ namespace {
 		gEnemy75Tex = AssetsManager::GetTexture(ENEMY_75_PATH);
 		gEnemy50Tex = AssetsManager::GetTexture(ENEMY_50_PATH);
 		gEnemy25Tex = AssetsManager::GetTexture(ENEMY_25_PATH);
+		gEnemyBossTex = AssetsManager::GetTexture(ENEMY_BOSS_PATH);
 
 		// Fallbacks (avoid nullptr crashes)
 		if (!gPlayerIdleTex)   gPlayerIdleTex = fallback;
@@ -61,6 +64,7 @@ namespace {
 		if (!gEnemy75Tex)  gEnemy75Tex = gEnemy100Tex;
 		if (!gEnemy50Tex)  gEnemy50Tex = gEnemy75Tex;
 		if (!gEnemy25Tex)  gEnemy25Tex = gEnemy50Tex;
+		if (!gEnemyBossTex) gEnemyBossTex = gEnemy100Tex;
 	}
 }
 
@@ -112,12 +116,12 @@ void Character::UpdateSprite() {
 			texture = baseFrame;
 		}
 	}
+	else if (type == CharacterType::ENEMY_BOSS) {
+		// Boss uses its own dedicated sprite
+		texture = gEnemyBossTex;
+	}
 	else {
-		// Enemy uses 4 sprites by HP range
-		// >75% -> 100 sprite
-		// >50% -> 75 sprite
-		// >25% -> 50 sprite
-		// else -> 25 sprite
+		// Regular enemy minion uses HP-based sprites 100%/75%/50%/25%
 		if (hpRatio > 0.75f)      texture = gEnemy100Tex;
 		else if (hpRatio > 0.50f) texture = gEnemy75Tex;
 		else if (hpRatio > 0.25f) texture = gEnemy50Tex;

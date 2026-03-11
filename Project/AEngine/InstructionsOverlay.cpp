@@ -14,6 +14,7 @@ namespace UIInstructionsOverlay {
         switch (s) {
         case GameState::INITIALIZE: return "INITIALIZE";
         case GameState::MAIN_MENU:  return "MAIN MENU";
+        case GameState::LEVEL_SELECT: return "LEVEL SELECT";
         case GameState::MAP_EDITOR: return "MAP EDITOR";
         case GameState::LEVEL_1:    return "LEVEL 1";
         case GameState::LEVEL_2:    return "LEVEL 2";
@@ -86,6 +87,13 @@ namespace UIInstructionsOverlay {
                 "[4] Guide\n"
                 "[5] Credits\n"
                 "[Q] Quit\n";
+        }
+        else if (current == GameState::LEVEL_SELECT) {
+            msg +=
+                "LEVEL SELECT\n"
+                "[1] Start Level 1\n"
+                "[2] Start Level 2\n"
+                "[ESC] / [BACK]: Return to Main Menu\n";
         }
         else if (current == GameState::GUIDE) {
             msg +=

@@ -241,8 +241,8 @@ namespace MainMenu {
     // Writing to GameStateManager::next does not switch states immediately.
     // The game loop reads next at the end of the frame and performs the transition then.
     void OnPlayClicked() {
-        // Transition to Level 1
-        GameStateManager::next = GameStateManager::GameState::LEVEL_1;
+        // Transition to Level Selector
+        GameStateManager::next = GameStateManager::GameState::LEVEL_SELECT;
     }
 
     void OnMapEditorClicked() {

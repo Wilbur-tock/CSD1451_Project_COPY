@@ -14,7 +14,8 @@
 #include "TextObject.hpp"
 #include "GameStateManager.hpp"
 
-AEGfxTexture* barrelTex = nullptr;
+AEGfxTexture* playerCannonTex = nullptr;
+AEGfxTexture* enemyCannonTex = nullptr;
 
 Level::Level(int _leveId)
 	: levelId{ _leveId }, levelName{ "Level " + std::to_string(levelId + 1) }, levelFileName{ "level" + std::to_string(levelId) } {
@@ -34,8 +35,13 @@ void Level::Load() {
 	std::string filePath = "Assets/Map/" + levelFileName + ".txt";
 	MapManager::ReadMapData(filePath, levelMap);
 
-	barrelTex = AssetsManager::GetTexture("Assets/cannonBarrel.png");
-	if (!barrelTex) barrelTex = AssetsManager::GetTexture("Assets/square.png");
+	playerCannonTex = AssetsManager::GetTexture("Assets/cannonBarrel.png");
+	enemyCannonTex = AssetsManager::GetTexture("Assets/enemyCannon.png");
+
+	AEGfxTexture* fallbackTex = AssetsManager::GetTexture("Assets/square.png");
+
+	if (!playerCannonTex) playerCannonTex = fallbackTex;
+	if (!enemyCannonTex)  enemyCannonTex = playerCannonTex ? playerCannonTex : fallbackTex;
 
 	std::cout << "[Level] Load " + levelFileName << '\n';
 }
@@ -110,14 +116,15 @@ void Level::Initalize() {
 
 	AEVec2 barrelHalfSize{ 60, 20 };
 
-	playerCannon = CannonManager::Cannon(playerCannonStartPos, barrelTex, { 0,0 }, barrelHalfSize, true, true);
+	playerCannon = CannonManager::Cannon(playerCannonStartPos, playerCannonTex, { 0,0 }, barrelHalfSize, true, true);
 	playerCannon.textureColor = Color{ 1, 1, 1, 1 };
 
 	AbilitiesManager::AbilityController& playerController = AbilitiesManager::playerAbilityController;
 	playerController.LoadAllAbilities(false);
 	playerCannon.SetAbilityController(&playerController);
 
-	enemyCannon = CannonManager::Cannon(enemyCannonStartPos, barrelTex, { 0,0 }, barrelHalfSize, false, false);
+	enemyCannon = CannonManager::Cannon(enemyCannonStartPos, enemyCannonTex, { 0,0 }, barrelHalfSize, false, false);
+	enemyCannon.textureColor = Color{ 1, 1, 1, 1 };
 	enemyCannon.SetEnemyAI(static_cast<int>(levelDifficulty));
 	AbilitiesManager::AbilityController& enemyController = AbilitiesManager::enemyAbilityController;
 	enemyController.LoadAllAbilities(true);
