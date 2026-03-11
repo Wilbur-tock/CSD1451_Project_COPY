@@ -61,6 +61,16 @@ namespace ParticleManager {
         AEGfxSetBlendMode(AE_GFX_BM_BLEND);
         AEGfxSetRenderMode(AE_GFX_RM_COLOR);
 
+        float  zoom = CameraManager::camera.GetZoom();
+        AEVec2 camPos = CameraManager::camera.GetPosition();
+
+        AEMtx33 matToOrigin, matScale, matBack, zoomMat;
+        AEMtx33Trans(&matToOrigin, -camPos.x, -camPos.y);
+        AEMtx33Scale(&matScale, zoom, zoom);
+        AEMtx33Trans(&matBack, camPos.x, camPos.y);
+        AEMtx33Concat(&zoomMat, &matScale, &matToOrigin);
+        AEMtx33Concat(&zoomMat, &matBack, &zoomMat);
+
         for (const Particle& p : pool) {
             if (!p.alive) continue;
 
@@ -82,6 +92,8 @@ namespace ParticleManager {
             AEMtx33Trans(&mtxTrans, p.position.x, p.position.y);
             AEMtx33Concat(&mtxResult, &mtxRot, &mtxScale);
             AEMtx33Concat(&mtxResult, &mtxTrans, &mtxResult);
+
+            AEMtx33Concat(&mtxResult, &zoomMat, &mtxResult);
 
             AEGfxSetColorToMultiply(color.Red(), color.Green(), color.Blue(), color.Alpha());
             AEGfxSetColorToAdd(0.f, 0.f, 0.f, 0.f);

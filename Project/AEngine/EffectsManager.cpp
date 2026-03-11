@@ -32,15 +32,10 @@ namespace EffectsManager {
         std::cout << "[EffectsManager] PlayExplosion at (" << position.x << ", " << position.y << ")\n";
     }
 
-    void EffectsController::PlayTileBreak(AEVec2 position, AEVec2 size) {
+    void EffectsController::PlayTileBreak(AEVec2 position) {
         ParticleEmitParams params;
 
-        AEVec2 center = {
-            position.x,
-            position.y - size.y * 0.5f
-        };
-
-        params.spawnPosition = center;
+        params.spawnPosition = position;
         params.spawnRadius = 20.f;  // Spread across the tile's area
         params.count = 25;
 

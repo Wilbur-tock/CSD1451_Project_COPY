@@ -3,6 +3,7 @@
 
 #include "pch.hpp"
 #include "Particles.hpp"
+#include "CameraManager.hpp"
 
 // Usage (per game-state):
 //     ParticleManager::ParticleController::Init(2048);  // GameState Load/Init

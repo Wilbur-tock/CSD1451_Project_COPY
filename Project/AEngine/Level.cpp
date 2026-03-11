@@ -481,7 +481,7 @@ void Level::DebugCommands() {
 		if (AEInputCheckCurr(AEVK_RBUTTON)) {
 			if (tile.IsBlocks()) {
 				tile.Type(TileType::TILE_EMPTY);
-				EffectsManager::effectsController.PlayTileBreak(tile.transform.pos, tile.transform.size);
+				EffectsManager::effectsController.PlayTileBreak(tile.transform.pos);
 			}
 		}
 
