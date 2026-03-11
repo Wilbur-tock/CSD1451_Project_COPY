@@ -67,7 +67,7 @@ namespace GameStateManager {
         UICursor::Load();               // Load the custom cursor texture
                                         // Done globally so the cursor is always available regardless of state.
         GraphicsManager::Load();        // Initialise the AEGfx rendering pipeline
-        LevelManager::Load();           // Pre-load level data structures so level transitions are fast
+        LevelManager::LoadLevel();           // Pre-load level data structures so level transitions are fast
         MapManager::Load();             // Load the tile map data needed by both LevelManager and MapEditor
         MainMenu::Load();               // Pre-load the main menu's button and background textures into the asset cache
         LevelSelect::Load();
