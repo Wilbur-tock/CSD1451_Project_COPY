@@ -10,6 +10,7 @@ namespace EffectsManager {
     class EffectsController {
     public:
         void PlayExplosion(AEVec2 position);
+        void PlayTileBreak(AEVec2 position, AEVec2 size);
 
     private:
         // Helper to fire off a fully configured params bundle

@@ -10,6 +10,7 @@
 #include "AudioManager.hpp"
 #include "GameStateManager.hpp"
 #include "ParticlesManager.hpp"
+#include "EffectsManager.hpp"
 
 #include "UIManager.hpp"
 
@@ -480,6 +481,7 @@ void Level::DebugCommands() {
 		if (AEInputCheckCurr(AEVK_RBUTTON)) {
 			if (tile.IsBlocks()) {
 				tile.Type(TileType::TILE_EMPTY);
+				EffectsManager::effectsController.PlayTileBreak(tile.transform.pos, tile.transform.size);
 			}
 		}
 
