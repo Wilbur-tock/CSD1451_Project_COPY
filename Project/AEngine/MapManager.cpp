@@ -160,9 +160,10 @@ namespace MapManager {
 	}
 
 	void ReadMapData(std::string const& fileName, std::vector<std::vector<Tile>> &map) {
-		std::ifstream ifs{fileName};
+		std::string filePath = mapFilePath + fileName + ".txt";
+		std::ifstream ifs{ filePath };
 		if (!ifs) {
-			std::cerr << "Error: Could not open map data file at " << fileName << std::endl;
+			std::cerr << "Error: Could not open map data file at " << filePath << std::endl;
 			return;
 		}
 
@@ -186,7 +187,7 @@ namespace MapManager {
 
 				if (type < 0 || type >= static_cast<int>(TileType::TILE_COUNT)) {
 					std::cerr << "[MapManager] WARNING: invalid tile id " << type
-						<< " at (" << x << "," << y << ") in " << fileName
+						<< " at (" << x << "," << y << ") in " << filePath
 						<< " -> forcing TILE_EMPTY\n";
 					type = static_cast<int>(TileType::TILE_EMPTY);
 				}

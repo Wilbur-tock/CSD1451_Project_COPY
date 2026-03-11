@@ -31,8 +31,7 @@ void Level::Load() {
 	enemies.reserve(reserveCount);
 	playerCharacters.reserve(reserveCount);
 
-	std::string filePath = "Assets/Map/" + levelFileName + ".txt";
-	MapManager::ReadMapData(filePath, levelMap);
+	MapManager::ReadMapData(levelFileName, levelMap);
 
 	barrelTex = AssetsManager::GetTexture("Assets/cannonBarrel.png");
 	if (!barrelTex) barrelTex = AssetsManager::GetTexture("Assets/square.png");

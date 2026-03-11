@@ -10,21 +10,23 @@
 #include "LevelManager.hpp"
 #include "UIManager.hpp"
 
-struct MapConstraint {
-	TileType type;
-	int requiredCount = 0;
-	bool isMet = false;
-	int currentCount = 0;
-};
-
-std::vector<MapConstraint> constraints;
-
 namespace {
-	void UpdateConstraints(TileType type, int valueToModify) {
-		for (MapConstraint& constraint : constraints) {
-			if (type == constraint.type) {
-				constraint.currentCount += valueToModify;
-				return;
+	struct MapConstraint {
+		TileType type;
+		int requiredCount = 0;
+		bool isMet = false;
+		int currentCount = 0;
+	};
+
+	std::vector<MapConstraint> constraints;
+
+	namespace {
+		void UpdateConstraints(TileType type, int valueToModify) {
+			for (MapConstraint& constraint : constraints) {
+				if (type == constraint.type) {
+					constraint.currentCount += valueToModify;
+					return;
+				}
 			}
 		}
 	}
@@ -37,7 +39,7 @@ namespace MapEditor {
 	int totalLevelMap = 5;
 	std::string const defaultMapLabel = "Editing Custom Map";
 	std::string currentMapLabel = defaultMapLabel;
-	std::string const defaultSavePath = "Assets/Map/level.txt", defaultLoadPath = "Assets/Map/default.txt";
+	std::string const defaultSavePath = MapManager::mapFilePath + "level.txt", defaultLoadPath = MapManager::mapFilePath + "default.txt";
 	std::string loadPath = "", savePath = "";
 	std::vector<std::vector<Tile>> newMap(Config::GRID_HEIGHT, std::vector<Tile>(Config::GRID_WIDTH));
 
@@ -50,7 +52,7 @@ namespace MapEditor {
 	UIManager::Panel mapLabelPanel{ {250,50}, {1,1,1}, Utils::AnchorMode::TOP_CENTER };
 	TextObject helpText, debugText, mapLabelText;
 
-	// If the Project/Assets/Map does not contain default.txt file it will create a new one if not just return
+	// If the project file does not contain default.txt file it will create a new one if not just return
 	static void CheckForDefault();
 	static void LoadNewFile(std::string filePath);
 	static void SaveNewFile(std::string filePath);
@@ -242,7 +244,7 @@ namespace MapEditor {
 			for (int i = 1; i <= totalLevelMap; ++i) {
 				if (AEInputCheckTriggered(static_cast<u8>(AEVK_0 + i))) {
 					// Load file from bin folder only
-					std::string newLoadPath = "Assets/Map/level" + std::to_string(i) + ".txt";
+					std::string newLoadPath = mapFilePath + "level" + std::to_string(i) + ".txt";
 					LoadNewFile(newLoadPath);
 
 					currentMapLabel = "Editing Level " + std::to_string(i) + " Map";
