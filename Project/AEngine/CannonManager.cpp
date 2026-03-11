@@ -14,6 +14,7 @@
 #include "PhysicsManager.hpp"
 #include "AudioManager.hpp"
 #include "GameTrackingManager.hpp"
+#include "EffectsManager.hpp"
 
 namespace CannonManager {
     Cannon::Cannon(AEVec2 _pos, AEGfxTexture* _texture, TileIndex _tileId, AEVec2 _size, bool _isShootingRight, bool _isPlayerControlled)
@@ -354,6 +355,7 @@ namespace CannonManager {
 
                             if (!projectile.IsCollisionTriggered()) {
                                 AudioManager::PlaySFX(AudioManager::SFX::Impact);
+                                EffectsManager::effectsController.PlayExplosion(projectile.transform.pos);
                                 projectile.FirstTimeCollision();
                             }
                             else {

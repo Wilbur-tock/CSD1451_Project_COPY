@@ -9,6 +9,7 @@
 #include "PhysicsManager.hpp"
 #include "AudioManager.hpp"
 #include "GameStateManager.hpp"
+#include "ParticlesManager.hpp"
 
 #include "UIManager.hpp"
 
@@ -180,6 +181,7 @@ void Level::Update() {
 	}
 
 	Draw();
+	ParticleManager::particleController.Update(PhysicsManager::g_dt);
 
 	// Need to be below DrawLevel to ensure that the Ability Selector UI is shows up infront of the level
 	prevIsAbilitySelectorOn = isAbilitySelectorOn;
@@ -216,6 +218,8 @@ void Level::Draw() {
 	// Need to draw both player cannon and enemy cannon regardless of whose turn it is
 	playerCannon.Draw();
 	enemyCannon.Draw();
+
+	ParticleManager::particleController.Draw();
 }
 
 void Level::Free() {

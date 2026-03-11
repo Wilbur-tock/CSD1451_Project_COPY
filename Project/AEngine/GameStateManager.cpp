@@ -19,6 +19,7 @@
 #include "PauseMenu.hpp" 
 #include "Guide.hpp"
 #include "GameTrackingManager.hpp"
+#include "ParticlesManager.hpp"
 
 namespace GameStateManager {
     // State variables
@@ -71,6 +72,9 @@ namespace GameStateManager {
 
         // Initialize camera controller
         CameraManager::camera.Init();
+
+		// Initialize particle controller with a pool size of 2048 (max concurrent particles)
+        ParticleManager::particleController.Init(2048);
     }
 
     void Update() {
@@ -282,6 +286,7 @@ namespace GameStateManager {
         GraphicsManager::Unload();
         MapManager::Unload();
         AudioManager::Shutdown();
+        ParticleManager::particleController.Shutdown();
 
         GameTrackingManager::GameEnd();
     }
