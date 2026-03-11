@@ -8,11 +8,16 @@
 
 // Contains all the drawing of graphics/UI functions in here
 namespace GraphicsManager {
-	extern AEGfxVertexList *pMeshMiddle, *pMeshCorner, *pSpriteMesh;
+	extern AEGfxVertexList *pMeshCenter, *pMeshTopLeftCorner, *pSpriteMesh;
+	extern size_t drawCount;
 
 	// Load all resources required and generate mesh
 	void Load();
 	void Unload();
+
+	// Generate the mesh to draw on e.g.paper to draw on. There are TWO type of mesh, 
+	// center origin and top left corner origin, two commonly used origin mode in the game
+	void GenerateMesh(AEGfxVertexList*& pMesh, bool isOriginCenter = true);
 
 	// Create the transform matrix to be used to draw out the texture on the mesh,
 	// x,y - WORLD COORDINATES position of WHERE the texture is going to be render at

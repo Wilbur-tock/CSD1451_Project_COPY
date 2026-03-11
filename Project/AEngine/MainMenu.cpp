@@ -126,10 +126,11 @@ namespace MainMenu {
         // Position is in normalized screen space (0 > 1 range mapped to screen)
         // Scale and color are re-written every frame by the animation in Update(),
         gameTitle = { "FORTRESS FIGHT",
-            2.5f,
+            1.0f,
             Color(0.0f, 0.0f, 0.0f, 1.0f),  // White color
             { 0.1f, 0.75f }, // position (normalized)
         };
+        gameTitle.font = AssetsManager::titleFont;
 
         // Keyboard shortcut hint
         // Rendered at the very bottom of the screen in small text

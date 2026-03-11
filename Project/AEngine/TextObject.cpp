@@ -3,10 +3,10 @@
 #include "AssetsManager.hpp"
 
 TextObject::TextObject()
-	: textContent{ "" }, textScale{ 1.0f }, color{ 1,1,1 }, pos{ 0,0 }, anchorMode{ Utils::AnchorMode::TOP_LEFT } {}
+	: textContent{ "" }, textScale{ 1.0f }, pos{ 0,0 }, color{ 1,1,1 }, font{ AssetsManager::textFont }, anchorMode{ Utils::AnchorMode::TOP_LEFT } {}
 
 TextObject::TextObject(std::string _textContent, float _scale, Color _color, AEVec2 _pos, Utils::AnchorMode _anchorMode)
-	: textContent{ _textContent }, textScale{ _scale }, color{ _color }, pos{ _pos }, anchorMode{ _anchorMode } {}
+	: textContent{ _textContent }, textScale{ _scale }, pos{ _pos }, color{ _color }, font{ AssetsManager::textFont }, anchorMode{ _anchorMode } {}
 
 void TextObject::Draw() {
 	if (textContent.empty()) return;
@@ -17,7 +17,7 @@ void TextObject::Draw() {
 
 	// Initial setup
 	f32 charW, charH;
-	AEGfxGetPrintSize(AssetsManager::textFont, "A", textScale, &charW, &charH);
+	AEGfxGetPrintSize(font, "A", textScale, &charW, &charH);
 
 	// Set position y
 	f32 currentY = pos.y - (charH * 1.0f); // minus charH because AEGfxPrint is BOTTOM-LEFT RECT MODE

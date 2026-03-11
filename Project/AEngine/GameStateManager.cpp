@@ -36,6 +36,7 @@ namespace GameStateManager {
 
     static void DebugCommands();
     static void DebugUI();
+    static void SetAndPlayBGM();
 
     void Load() {
         // Start with main menu
@@ -44,31 +45,24 @@ namespace GameStateManager {
 
         // Clear function pointers
         gsLoad = gsIntialize = gsUpdate = gsDraw = gsFree = gsUnload = nullptr;
+        setNewState = false;
 
         // Load all resources
-        AssetsManager::Load(); // Must run before any state that calls GetTexture, including MainMenu::Load() below
+        AssetsManager::Load();
+        UICursor::Load(); // Load the custom cursor texture               
+        GraphicsManager::Load();
+        LevelManager::Load();   
+        MapManager::Load();     
+        MainMenu::Load();       
+        Credits::Load();        
+        Guide::Load();          
 
-        UICursor::Load();               // Load the custom cursor texture
-                                        // Done globally so the cursor is always available regardless of state.
-        GraphicsManager::Load();        // Initialise the AEGfx rendering pipeline
-        LevelManager::Load();           // Pre-load level data structures so level transitions are fast
-        MapManager::Load();             // Load the tile map data needed by both LevelManager and MapEditor
-        MainMenu::Load();               // Pre-load the main menu's button and background textures into the asset cache
-        Credits::Load();                // Pre-load any assets required by the credits screen
-        Guide::Load();                  // Pre-load assets and build guide text / ability info
-
-        AudioManager::Init();           // Create AEAudio groups and load cached audio assets
-        AudioManager::SetVolume(0.35f); // Master volume
-        AudioManager::SetBGMVolume(1.0f);
-        AudioManager::SetSFXVolume(1.0f);
+        AudioManager::Load();           // Create AEAudio groups and load cached audio assets
 
         // Initialize camera controller
         CameraManager::camera.Init();
 
-        setNewState = false; // Explicitly clear the transition flag at startup so the first Update() starts cleanly
-
         Loading::Init();            // Initialise the loading screen timer and animation variables
-
         PauseMenu::Init();          // Build the pause menu's buttons and text objects once at startup, prevents construction delay
         Settings::Load();           // Load assets needed by the settings screen
     }
@@ -78,8 +72,7 @@ namespace GameStateManager {
         // so loading timers and audio keep running correctly even when the game is frozen
         float rawDt = static_cast<float>(AEFrameRateControllerGetFrameTime());
 
-        PhysicsManager::g_dt = rawDt; // Copy rawDt into the physics delta-time 
-                                      // Setting it here first ensures physics runs at full speed during normal gameplay
+        PhysicsManager::g_dt = rawDt;
 
         AudioManager::Update();
 
@@ -184,49 +177,12 @@ namespace GameStateManager {
                     break;
                 }
 
-                // IMPORTANT: call gsLoad before gsInitialize
-                // Initialize may reference assets that Load provides.
-                if (gsLoad != nullptr) {
-                    //gsLoad();
-                }
-
                 // Call the new state's Initialize() to build its scene objects using the loaded assets
                 if (gsIntialize != nullptr) {
                     gsIntialize();
                 }
 
-                // Start the correct background music for the new state
-                // Placed after gsLoad and gsIntialize so audio starts only once the state is fully ready
-                switch (current) {
-                case GameState::MAIN_MENU:
-                    AudioManager::PlayBGM(AudioManager::Track::MainMenu);
-                    break;
-
-                case GameState::GUIDE:
-                    AudioManager::PlayBGM(AudioManager::Track::MapEditor);
-                    break;
-
-                case GameState::MAP_EDITOR:
-                    AudioManager::PlayBGM(AudioManager::Track::MapEditor);
-                    break;
-
-                case GameState::LEVEL_1:
-                case GameState::LEVEL_2:
-                    AudioManager::PlayBGM(AudioManager::Track::Level);
-                    break;
-
-                case GameState::CREDITS:
-                    AudioManager::PlayBGM(AudioManager::Track::Credits);
-                    break;
-
-                case GameState::QUIT:
-                    AudioManager::StopBGM();
-                    break;
-
-                default:
-                    AudioManager::StopBGM();
-                    break;
-                }
+                SetAndPlayBGM();
 
                 // Apply camera immediately after state switch
                 CameraManager::camera.Update(0.0f);
@@ -321,6 +277,17 @@ namespace GameStateManager {
         GraphicsManager::Unload();
         MapManager::Unload();
         AudioManager::Shutdown();
+
+        // Track how many count of draw texture to a text file at when exiting
+        std::string filepath = "../../Assets/log.txt";
+        std::ofstream output{ filepath };
+        if (!output.is_open()) {
+            std::cerr << "Error: Could not open file at " << filepath << std::endl;
+            return;
+        }
+
+        output << "Draw Texture Count: " << GraphicsManager::drawCount << ' ';
+        output.close();
     }
 
     static void DebugCommands() {
@@ -348,5 +315,41 @@ namespace GameStateManager {
             + "\nDeltaTime: " + Utils::FormatFloat(PhysicsManager::g_dt, 2)
             + "\n[M] Main Menu";
         debugText.Draw();
+    }
+
+
+    void SetAndPlayBGM() {
+        // Start the correct background music for the new state
+        // Placed after gsLoad and gsIntialize so audio starts only once the state is fully ready
+        switch (current) {
+        case GameState::MAIN_MENU:
+            AudioManager::PlayBGM(AudioManager::Track::MainMenu);
+            break;
+
+        case GameState::GUIDE:
+            AudioManager::PlayBGM(AudioManager::Track::MapEditor);
+            break;
+
+        case GameState::MAP_EDITOR:
+            AudioManager::PlayBGM(AudioManager::Track::MapEditor);
+            break;
+
+        case GameState::LEVEL_1:
+        case GameState::LEVEL_2:
+            AudioManager::PlayBGM(AudioManager::Track::Level);
+            break;
+
+        case GameState::CREDITS:
+            AudioManager::PlayBGM(AudioManager::Track::Credits);
+            break;
+
+        case GameState::QUIT:
+            AudioManager::StopBGM();
+            break;
+
+        default:
+            AudioManager::StopBGM();
+            break;
+        }
     }
 }

@@ -1,11 +1,11 @@
 #include "CannonManager.hpp"
 
+#include "Utils.hpp"
 #include "MapManager.hpp"
 #include "GraphicsManager.hpp"
 #include "AssetsManager.hpp"
 #include "CameraManager.hpp"
 #include "GameStateManager.hpp"
-#include "Utils.hpp"
 #include "CollisionManager.hpp"
 #include "Tile.hpp"
 #include "AbilitiesManager.hpp"

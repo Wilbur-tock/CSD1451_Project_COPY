@@ -9,14 +9,14 @@
 
 namespace {
 	// ---- Change these paths to your real filenames if different ----
-	static const char* PLAYER_IDLE_PATH = "Assets/playerIdle.png";
-	static const char* PLAYER_HALFHP_PATH = "Assets/playerHalfHp.png";
-	static const char* PLAYER_SQUAT_PATH = "Assets/playerSquat.png";
+	static const char* PLAYER_IDLE_PATH		= "Assets/playerIdle.png";
+	static const char* PLAYER_HALFHP_PATH	= "Assets/playerHalfHp.png";
+	static const char* PLAYER_SQUAT_PATH	= "Assets/playerSquat.png";
 
-	static const char* ENEMY_100_PATH = "Assets/enemy100.png";
-	static const char* ENEMY_75_PATH = "Assets/enemy75.png";
-	static const char* ENEMY_50_PATH = "Assets/enemy50.png";
-	static const char* ENEMY_25_PATH = "Assets/enemy25.png";
+	static const char* ENEMY_100_PATH	= "Assets/enemy100.png";
+	static const char* ENEMY_75_PATH	= "Assets/enemy75.png";
+	static const char* ENEMY_50_PATH	= "Assets/enemy50.png";
+	static const char* ENEMY_25_PATH	= "Assets/enemy25.png";
 
 	static bool gCharTexLoaded = false;
 

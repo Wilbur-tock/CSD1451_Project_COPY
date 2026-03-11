@@ -12,6 +12,7 @@ public:
 	float textScale = 1.0f;
 	AEVec2 pos{ 0,0 };
 	Color color;
+	s8 font;
 
 	TextObject();
 	/*!***********************************************************************

@@ -81,7 +81,7 @@ namespace AudioManager {
         }
     }
 
-    void Init() {
+    void Load() {
         if (gIsInitialized) {
             return;
         }
@@ -124,6 +124,12 @@ namespace AudioManager {
         gSfxVolume = std::clamp(gSfxVolume, 0.0f, 1.0f);
 
         ApplyVolumes();
+
+        // Starting variables for audio
+        SetVolume(0.35f); // Master volume
+        SetBGMVolume(1.0f);
+        SetSFXVolume(1.0f);
+
         gIsInitialized = true;
     }
 
@@ -176,7 +182,7 @@ namespace AudioManager {
 
     void PlayBGM(Track t) {
         if (!gIsInitialized) {
-            Init();
+            Load();
         }
 
         if (!gIsInitialized) {
@@ -220,7 +226,7 @@ namespace AudioManager {
 
     void PlaySFX(SFX sfx) {
         if (!gIsInitialized) {
-            Init();
+            Load();
         }
 
         if (!gIsInitialized) {
