@@ -11,12 +11,12 @@ namespace AssetsManager {
 
     void Load() {
         squareTexture = GetTexture("Assets/square.png");
-        textFont = AEGfxCreateFont("Assets/liberation-mono.ttf", Config::FONT_SIZE);
-        titleFont = AEGfxCreateFont("Assets/liberation-mono.ttf", Config::FONT_SIZE * 2);
+        textFont = AEGfxCreateFont("Assets/Font/liberation-mono.ttf", Config::FONT_SIZE);
+        titleFont = AEGfxCreateFont("Assets/Font/liberation-mono.ttf", Config::FONT_SIZE * 2);
         circleTexture = AssetsManager::GetTexture("Assets/circle.png");
     }
 
-    AEGfxTexture* GetTexture(const char* filePath) {
+    AEGfxTexture* GetTexture(char const* filePath) {
         // Check if we already loaded this file
         auto it = textureCache.find(filePath);
         if (it != textureCache.end()) {

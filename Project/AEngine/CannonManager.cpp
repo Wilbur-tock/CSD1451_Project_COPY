@@ -13,6 +13,7 @@
 #include "LevelManager.hpp"
 #include "PhysicsManager.hpp"
 #include "AudioManager.hpp"
+#include "GameTrackingManager.hpp"
 
 namespace CannonManager {
     Cannon::Cannon(AEVec2 _pos, AEGfxTexture* _texture, TileIndex _tileId, AEVec2 _size, bool _isShootingRight, bool _isPlayerControlled)
@@ -209,7 +210,7 @@ namespace CannonManager {
     }
 
     void Cannon::ChargeShot() {
-        if (hasCannonShot == true) return;
+        if (!isPlayerControlled && hasCannonShot == true) return; // return if it not player controlled
 
         // Shoot when the button is RELEASED
         if (isPlayerControlled && AEInputCheckReleased(AEVK_LBUTTON)) {
@@ -228,7 +229,7 @@ namespace CannonManager {
             canPlayerShoot = isHoldingLeftClick = false;
         }
 
-        if (isPlayerControlled && !canPlayerShoot) return;
+        if (!canPlayerShoot) return; // return if is player controlled and they can't shoot
 
         if (AEInputCheckCurr(AEVK_LBUTTON) || canAIShoot == true) {
             isHoldingLeftClick = canPlayerShoot = true;
@@ -302,6 +303,9 @@ namespace CannonManager {
 
         SetCamera(true); // Follow the projectile that is shot out of the cannon
         hasCannonShot = true;
+
+        isPlayerControlled ? ++GameTrackingManager::data.playerShotsFired : ++GameTrackingManager::data.enemyShotsFired;
+
         std::cout << "[CannonManager] Projectile Fired!\n";
     }
 
@@ -373,6 +377,11 @@ namespace CannonManager {
         if (activeProjectiles.empty()) return;
         for (int i = static_cast<int>(activeProjectiles.size() - 1); i >= 0; --i) {
             if (!activeProjectiles[i].IsActive()) {
+                activeProjectiles[i].HasHitSomething() ?
+                    isPlayerControlled ? ++GameTrackingManager::data.playerShotsHit : ++GameTrackingManager::data.enemyShotsHit :
+                    isPlayerControlled ? ++GameTrackingManager::data.playerShotsMiss : ++GameTrackingManager::data.enemyShotsMiss;
+
+                // Erase from vector
                 activeProjectiles.erase(activeProjectiles.begin() + i);
                 std::cout << "[CannonManager] Remove projectile from vector. Active projectile vector count: " << activeProjectiles.size() << '\n';
             }

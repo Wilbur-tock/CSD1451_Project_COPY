@@ -9,7 +9,6 @@
 // Contains all the drawing of graphics/UI functions in here
 namespace GraphicsManager {
 	extern AEGfxVertexList *pMeshCenter, *pMeshTopLeftCorner, *pSpriteMesh;
-	extern size_t drawCount;
 
 	// Load all resources required and generate mesh
 	void Load();

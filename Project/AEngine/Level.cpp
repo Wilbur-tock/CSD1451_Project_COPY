@@ -153,6 +153,7 @@ void Level::Update() {
 			std::cout << "[Level]" << '\n';
 			// Find new target if current target is not alive
 			enemyCannon.SetTarget(RandomCharacterObj(true));
+			if (!enemyCannon.IsTargetAlive()) std::cerr << "[Level] Enemy has no target!" << std::endl;
 		}
 
 		if (activeCannon) {

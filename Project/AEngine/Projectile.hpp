@@ -58,6 +58,7 @@ public:
 	bool IsActive() const { return isActive; }
 	bool ToBeDestroyed() const { return toBeDestroyed; }
 	bool IsCollisionTriggered() const { return isCollisionTriggered; }
+	bool HasHitSomething() const { return hasHitSomething; }
 
 	// Member functions
 
@@ -96,6 +97,7 @@ private:
 	bool toBeDestroyed = false;
 	bool isCollisionTriggered = false; // There is a collision triggered between the projectile and block
 	bool isAbilityTriggered = false;
+	bool hasHitSomething = false; // has hit any things expect for the ground / undestructible blocks
 };
 
 #endif // !PROJECTILE_HPP

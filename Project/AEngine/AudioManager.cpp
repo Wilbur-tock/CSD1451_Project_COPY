@@ -27,15 +27,14 @@ namespace AudioManager {
     static AEAudio gSfxTurnSwitch{};
 
     // ---------------- Paths ----------------
-    static constexpr const char* BGM_MAINMENU = "Assets/bgm_mainmenu.wav";
-    static constexpr const char* BGM_MAPEDITOR = "Assets/bgm_mapeditor.wav";
-    static constexpr const char* BGM_LEVEL = "Assets/bgm_level.wav";
-    static constexpr const char* BGM_CREDITS = "Assets/bgm_credits.wav";
-
-    static constexpr const char* SFX_UI_CLICK = "Assets/sfx_ui_click.wav";
-    static constexpr const char* SFX_CANNON_FIRE = "Assets/sfx_cannon_fire.wav";
-    static constexpr const char* SFX_IMPACT = "Assets/sfx_impact.wav";
-    static constexpr const char* SFX_TURN_SWITCH = "Assets/sfx_turn.wav";
+    static constexpr const char* BGM_MAINMENU       = "Assets/Audio/bgm_mainmenu.wav";
+    static constexpr const char* BGM_MAPEDITOR      = "Assets/Audio/bgm_mapeditor.wav";
+    static constexpr const char* BGM_LEVEL          = "Assets/Audio/bgm_level.wav";
+    static constexpr const char* BGM_CREDITS        = "Assets/Audio/bgm_credits.wav";
+    static constexpr const char* SFX_UI_CLICK       = "Assets/Audio/sfx_ui_click.wav";
+    static constexpr const char* SFX_CANNON_FIRE    = "Assets/Audio/sfx_cannon_fire.wav";
+    static constexpr const char* SFX_IMPACT         = "Assets/Audio/sfx_impact.wav";
+    static constexpr const char* SFX_TURN_SWITCH    = "Assets/Audio/sfx_turn.wav";
 
     static bool IsValidAudio(AEAudio audio) {
         return AEAudioIsValidAudio(audio) != 0;

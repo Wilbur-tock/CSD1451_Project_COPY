@@ -3,6 +3,7 @@
 #include "AssetsManager.hpp"
 #include "CameraManager.hpp"
 #include "Loading.hpp"
+#include "GameTrackingManager.hpp"
 
 #include "Color.hpp"
 #include "GameObject.hpp"
@@ -23,8 +24,6 @@ namespace GraphicsManager {
 	AEGfxVertexList* pMeshTopLeftCorner = nullptr;
 	// Mesh for animated sprites
 	AEGfxVertexList* pSpriteMesh = nullptr;
-
-	size_t drawCount = 0;
 
 	// Use either WORLD or SCREEN based on which rectMode to use center or corner rectMode, texture to render (image/sprite),
 	// 3x3 matrix created using CreateTransformMatrix
@@ -115,7 +114,7 @@ namespace GraphicsManager {
 		// Draw the mesh
 		AEGfxMeshDraw(pMesh, AE_GFX_MDM_TRIANGLES);
 
-		++drawCount;
+		++GameTrackingManager::data.meshDrawCount;
 	}
 
 	// Builds a custom quad mesh where the UV coordinates span exactly one frame width.

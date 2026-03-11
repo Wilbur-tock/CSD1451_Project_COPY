@@ -17,6 +17,7 @@
 #include "Loading.hpp"
 #include "PauseMenu.hpp" 
 #include "Guide.hpp"
+#include "GameTrackingManager.hpp"
 
 namespace GameStateManager {
     // State variables
@@ -39,6 +40,8 @@ namespace GameStateManager {
     static void SetAndPlayBGM();
 
     void Load() {
+        GameTrackingManager::GameStart();
+
         // Start with main menu
         current = previous = GameState::INITIALIZE;
         next = GameState::MAIN_MENU;
@@ -278,16 +281,7 @@ namespace GameStateManager {
         MapManager::Unload();
         AudioManager::Shutdown();
 
-        // Track how many count of draw texture to a text file at when exiting
-        std::string filepath = "../../Assets/log.txt";
-        std::ofstream output{ filepath };
-        if (!output.is_open()) {
-            std::cerr << "Error: Could not open file at " << filepath << std::endl;
-            return;
-        }
-
-        output << "Draw Texture Count: " << GraphicsManager::drawCount << ' ';
-        output.close();
+        GameTrackingManager::GameEnd();
     }
 
     static void DebugCommands() {
