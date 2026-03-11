@@ -81,8 +81,8 @@ namespace AbilitiesManager {
 			Tier tier = static_cast<Tier>(item["Tier"].get<int>());
 			std::string texture = item["Texture"];
 
-			Ability newAbil(id, name, type, tier, texture);
-			++id;
+			// Increment Id after assigning it
+			Ability newAbil(id++, name, type, tier, texture);
 
 			// ROUTE based on Type
 			if (type == AbilityType::STATISTICS) {
@@ -117,25 +117,6 @@ namespace AbilitiesManager {
 		LoadStartingAbilities();
 	}
 
-	void AbilityController::PrintAllAbilities() {
-		std::cout << "=================== Loaded " + controllerName + "==================\n";
-		for (Ability const& ability : statsAbilities) {
-			std::cout << "[AbilitiesManager] Loaded stats ability " << ability.Id() << " : " << ability.GetName() << std::endl;
-		}
-		std::cout << "[AbilitiesManager] Successfully loaded " << statsAbilities.size() << " stats abilities." << std::endl;
-
-		for (Ability const& ability : offensiveAbilities) {
-			std::cout << "[AbilitiesManager] Loaded offensive ability " << ability.Id() << " : " << ability.GetName() << std::endl;
-		}
-		std::cout << "[AbilitiesManager] Successfully loaded " << offensiveAbilities.size() << " offensive abilities." << std::endl;
-
-		for (Ability const& ability : defensiveAbilities) {
-			std::cout << "[AbilitiesManager] Loaded defensive ability " << ability.Id() << " : " << ability.GetName() << std::endl;
-		}
-		std::cout << "[AbilitiesManager] Successfully loaded " << defensiveAbilities.size() << " defensive abilities." << std::endl;
-		std::cout << "=======================================================================\n";
-	}
-
 	// Load the starting abilities for the player and AI
 	void AbilityController::LoadStartingAbilities() {
 		if (!isAIController) { // Load player starting Abilities
@@ -150,61 +131,6 @@ namespace AbilitiesManager {
 		//	std::cout << ability->GetName() << " Charges: " << ability->AbilityCharges() << '\n';
 		//}
 	}
-
-	// Change the current projectile based on the projectile ID
-	void AbilityController::ChangeProjectile(s32 _projectileID) {
-		for (size_t i = 0; i < offensiveAbilities.size(); ++i) {
-			if (offensiveAbilities[i].GetProj().projectileId == _projectileID) {
-				ProjectileSelected = &offensiveAbilities[i];
-				std::cout << "[AbilitiesManager] Switched to: " << ProjectileSelected->GetName() << std::endl;
-				return;
-			}
-		}
-		std::cerr << "[AbilitiesManager] ERROR: Projectile ID " << _projectileID << " not found in offensive list!" << std::endl;
-	}
-
-	// Use the currently selected projectile if it has unlimited or any charges remaining
-	bool AbilityController::UseProjectile() {
-		if (ProjectileSelected == nullptr) return false;
-
-		auto projData = ProjectileSelected->GetProj();
-
-		if (!projData.unlimited_charges) {
-			if (projData.charges <= 0) {
-				std::cout << "Out of charges for " << ProjectileSelected->GetName() << "!" << std::endl;
-				return false;
-			}
-
-			ProjectileSelected->UpdateCharges(-1);
-		}
-
-		std::cout << "Used " << ProjectileSelected->GetName() << ". Charges left: " << ProjectileSelected->GetProj().charges << std::endl;
-
-		return true;
-	}
-
-	// Use the currently selected projectile for the AI if it has unlimited or any charges remaining
-	bool AbilityController::AIUseProjectile() {
-		if (AIProjectileSelected == nullptr) return false;
-
-		auto projData = AIProjectileSelected->GetProj();
-
-		if (!projData.unlimited_charges) {
-			if (projData.charges <= 0) {
-				std::cout << "Out of charges for " << AIProjectileSelected->GetName() << "!" << std::endl;
-				return false;
-			}
-
-			AIProjectileSelected->UpdateCharges(-1);
-		}
-
-		std::cout << "Used " << AIProjectileSelected->GetName() << ". Charges left: " << AIProjectileSelected->GetProj().charges << std::endl;
-
-		return true;
-	}
-
-	// AI Member functions
-	void AbilityController::ResetAIAbilitySelection() { hasEnemySelectedAbility = false; }
 
 	// Randomly select an ability for the AI if it has not already selected one
 	void AbilityController::AIAbilitySelection() {
@@ -374,22 +300,7 @@ namespace AbilitiesManager {
 		}
 		ChangeAbility(abilityId);
 
-		std::cout << "==============" + controllerName + " Inventory Count" + "=============\n";
-		for (int i = 0; i < inventoryTypeCount.size(); ++i) {
-			std::string label;
-			switch (i) {
-			case 0:
-				label = "Stats:";
-				break;
-			case 1:
-				label = "Offensive:";
-				break;
-			case 2:
-				label = "Defensive:";
-				break;
-			}
-			std::cout << std::setw(15) << std::left << label << inventoryTypeCount[i] << '\n';
-		}
+
 	}
 
 	const Ability AbilityController::AbilityRandomisator(const std::vector<Ability>& abilities) {
@@ -552,6 +463,93 @@ namespace AbilitiesManager {
 		}
 	}
 
+	void AbilityController::PrintAllAbilities() {
+		std::cout << "=================== Loaded " + controllerName + "==================\n";
+		for (Ability const& ability : statsAbilities) {
+			std::cout << "[AbilitiesManager] Loaded stats ability " << ability.Id() << " : " << ability.GetName() << std::endl;
+		}
+		std::cout << "[AbilitiesManager] Successfully loaded " << statsAbilities.size() << " stats abilities." << std::endl;
 
+		for (Ability const& ability : offensiveAbilities) {
+			std::cout << "[AbilitiesManager] Loaded offensive ability " << ability.Id() << " : " << ability.GetName() << std::endl;
+		}
+		std::cout << "[AbilitiesManager] Successfully loaded " << offensiveAbilities.size() << " offensive abilities." << std::endl;
+
+		for (Ability const& ability : defensiveAbilities) {
+			std::cout << "[AbilitiesManager] Loaded defensive ability " << ability.Id() << " : " << ability.GetName() << std::endl;
+		}
+		std::cout << "[AbilitiesManager] Successfully loaded " << defensiveAbilities.size() << " defensive abilities." << std::endl;
+		std::cout << "=======================================================================\n";
+	}
+
+	void AbilityController::PrintInventoryCount() {
+		std::cout << "==============" + controllerName + " Inventory Count" + "=============\n";
+		for (int i = 0; i < inventoryTypeCount.size(); ++i) {
+			std::string label;
+			switch (i) {
+			case 0:
+				label = "Stats:";
+				break;
+			case 1:
+				label = "Offensive:";
+				break;
+			case 2:
+				label = "Defensive:";
+				break;
+			}
+			std::cout << std::setw(15) << std::left << label << inventoryTypeCount[i] << '\n';
+		}
+	}
 }
 
+//// Change the current projectile based on the projectile ID
+//void AbilityController::ChangeProjectile(s32 _projectileID) {
+//	for (size_t i = 0; i < offensiveAbilities.size(); ++i) {
+//		if (offensiveAbilities[i].GetProj().projectileId == _projectileID) {
+//			ProjectileSelected = &offensiveAbilities[i];
+//			std::cout << "[AbilitiesManager] Switched to: " << ProjectileSelected->GetName() << std::endl;
+//			return;
+//		}
+//	}
+//	std::cerr << "[AbilitiesManager] ERROR: Projectile ID " << _projectileID << " not found in offensive list!" << std::endl;
+//}
+//
+//// Use the currently selected projectile if it has unlimited or any charges remaining
+//bool AbilityController::UseProjectile() {
+//	if (ProjectileSelected == nullptr) return false;
+//
+//	auto projData = ProjectileSelected->GetProj();
+//
+//	if (!projData.unlimited_charges) {
+//		if (projData.charges <= 0) {
+//			std::cout << "Out of charges for " << ProjectileSelected->GetName() << "!" << std::endl;
+//			return false;
+//		}
+//
+//		ProjectileSelected->UpdateCharges(-1);
+//	}
+//
+//	std::cout << "Used " << ProjectileSelected->GetName() << ". Charges left: " << ProjectileSelected->GetProj().charges << std::endl;
+//
+//	return true;
+//}
+//
+//// Use the currently selected projectile for the AI if it has unlimited or any charges remaining
+//bool AbilityController::AIUseProjectile() {
+//	if (AIProjectileSelected == nullptr) return false;
+//
+//	auto projData = AIProjectileSelected->GetProj();
+//
+//	if (!projData.unlimited_charges) {
+//		if (projData.charges <= 0) {
+//			std::cout << "Out of charges for " << AIProjectileSelected->GetName() << "!" << std::endl;
+//			return false;
+//		}
+//
+//		AIProjectileSelected->UpdateCharges(-1);
+//	}
+//
+//	std::cout << "Used " << AIProjectileSelected->GetName() << ". Charges left: " << AIProjectileSelected->GetProj().charges << std::endl;
+//
+//	return true;
+//}

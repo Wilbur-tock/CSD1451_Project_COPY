@@ -37,6 +37,8 @@ void Level::Load() {
 	barrelTex = AssetsManager::GetTexture("Assets/cannonBarrel.png");
 	if (!barrelTex) barrelTex = AssetsManager::GetTexture("Assets/square.png");
 
+	debugText = { "", Utils::debuggerInfo.first * 0.8f, Utils::debuggerInfo.second, { -1.0f, 0.99f} };
+
 	std::cout << "[Level] Load " + levelFileName << '\n';
 }
 
@@ -130,15 +132,13 @@ void Level::Initalize() {
 	switchTurnCooldown = 0.0f;
 	isAbilitySelectorOn = true;
 
-	debugText = { "", Utils::debuggerInfo.first * 0.8f, Utils::debuggerInfo.second, { -1.0f, 0.99f} };
-
 	CameraManager::camera.SetPosition(playerCannon.transform.pos);
 	CameraManager::camera.SetState(CameraManager::CameraController::INPUT);
 
 	// Randomise at the start of the level the 3 abilities that the player can choose from in the ability selector UI
 	AbilitiesManager::playerAbilityController.AbilitySelectionRandomisator();
 
-	std::cout << "[Level] Initialize " + levelFileName << " Player Count: " << playerCharacters.size() <<  '\n';
+	std::cout << "[Level] Initialize " + levelFileName << '\n';
 }
 
 bool prevIsAbilitySelectorOn = false;
@@ -501,6 +501,8 @@ void Level::DebugCommands() {
 	}
 }
 
+UIManager::Panel debugPanel{ {350, 750}, {1,1,1, 0.8f}, Utils::AnchorMode::TOP_LEFT };
+
 void Level::DebugInfo() {
 	if (!Utils::isDebuggerOn) return;
 
@@ -559,7 +561,7 @@ void Level::DebugInfo() {
 
 	debug += info;
 
-	UIManager::Panel{ {350, 500}, {1,1,1, 0.8f}, Utils::AnchorMode::TOP_LEFT }.Draw();
+	debugPanel.Draw();
 
 	debugText.textContent = debug;
 	debugText.Draw();

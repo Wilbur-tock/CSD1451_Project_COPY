@@ -27,8 +27,6 @@ namespace GameStateManager {
     bool setNewState = false;   // One-shot flag that becomes true the first frame a transition is detected
                                 // Prevents Loading::Init() from resetting the loading timer on every frame of the transition
 
-    TextObject debugText;       // Reusable TextObject for the debugger overlay
-
     // IsGameplayState (private helper), returns true if state supports pausing
     static bool IsGameplayState() {
         return current == GameState::LEVEL_1
@@ -126,15 +124,6 @@ namespace GameStateManager {
                 current = next;
                 setNewState = false;
 
-                // IMPORTANT: clear old state callbacks first.
-                // Otherwise the previous state can leak into the new one.
-                gsLoad = nullptr;
-                gsIntialize = nullptr;
-                gsUpdate = nullptr;
-                gsDraw = nullptr;
-                gsFree = nullptr;
-                gsUnload = nullptr;
-
                 // Update Game state function pointers based on current state
                 switch (current) {
                 case GameState::MAIN_MENU:
@@ -198,7 +187,7 @@ namespace GameStateManager {
                 // IMPORTANT: call gsLoad before gsInitialize
                 // Initialize may reference assets that Load provides.
                 if (gsLoad != nullptr) {
-                    gsLoad();
+                    //gsLoad();
                 }
 
                 // Call the new state's Initialize() to build its scene objects using the loaded assets
@@ -351,11 +340,10 @@ namespace GameStateManager {
     static void DebugUI() {
         if (!Utils::isDebuggerOn) return;
 
-        UIManager::Panel debuggerPanel{ {200, 75}, {1.0f,1.0f,1.0f, 0.75f}, Utils::AnchorMode::BOTTOM_LEFT };
-        debugText = { "", Utils::debuggerInfo.first * 0.75f, Utils::debuggerInfo.second, {-1.f, -0.81f} };
+        UIManager::Panel debugPanel{ {200, 75}, {1.0f,1.0f,1.0f, 0.75f}, Utils::AnchorMode::BOTTOM_LEFT };
+        debugPanel.Draw();
 
-        debuggerPanel.Draw();
-
+        TextObject debugText{ "", Utils::debuggerInfo.first * 0.75f, Utils::debuggerInfo.second, AEVec2{-1.f, -0.81f} };
         debugText.textContent = "\n[TAB] Debugger ON\nFPS: " + Utils::FormatFloat(AEFrameRateControllerGetFrameRate(), 2)
             + "\nDeltaTime: " + Utils::FormatFloat(PhysicsManager::g_dt, 2)
             + "\n[M] Main Menu";

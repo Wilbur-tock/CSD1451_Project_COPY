@@ -173,7 +173,7 @@ namespace CannonManager {
             abilityController->AIAbilitySelection();
             EnemyAICalculation();
 
-            // Set shoot timer to add a delay between the start of the enemy turn and enemy shooting the projectile out
+            // Set a random shoot timer to add a delay between the start of the enemy turn and enemy shooting
             float minTimer = 1.5f;
             float maxTimer = 3.0f;
 
@@ -488,7 +488,7 @@ namespace CannonManager {
         if (target) {
             debugStr += "\nTarget: " + target->TypeName();
         }
-                
+
         if (!isPlayerControlled) {
             debugStr += "\nAI Shoot Timer: " + Utils::FormatFloat(aiShootTimer, 2)
                 + "\nAI Difficulty: " + std::to_string(aiDifficulty);
@@ -504,7 +504,9 @@ namespace CannonManager {
 
         //UIManager::Panel panel{ {500,500}, {1,1,1,0.5f}, Utils::AnchorMode::TOP_RIGHT };
         //panel.Draw();
-        TextObject textObj{ debugStr, Utils::debuggerInfo.first * 0.8f, Utils::debuggerInfo.second, {0.5f, 0.99f} };
-        textObj.Draw();
+
+        TextObject debugText{"", Utils::debuggerInfo.first * 0.8f, Utils::debuggerInfo.second, { 0.5f, 0.99f } };
+        debugText.textContent = debugStr;
+        debugText.Draw();
     }
 }

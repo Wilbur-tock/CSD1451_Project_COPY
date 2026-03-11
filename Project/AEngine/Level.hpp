@@ -75,6 +75,8 @@ private:
 	std::string levelName; // Name of the level in the format (Level [INDEX])
 	std::string levelFileName; // file name to load in the levelMap in the format (level[INDEX])
 	LevelMode levelDifficulty = LevelMode::EASY;
+
+	// Debug UI elements
 	TextObject debugText;
 
 	LevelStatus status = LevelStatus::PLAYING;

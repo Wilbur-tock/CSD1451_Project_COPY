@@ -13,7 +13,7 @@ public:
 	AEVec2 pos{ 0,0 };
 	Color color;
 
-	TextObject() = default;
+	TextObject();
 	/*!***********************************************************************
 	\brief
 	To draw text UI object using noramlized coordinates

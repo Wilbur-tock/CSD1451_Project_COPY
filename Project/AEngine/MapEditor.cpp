@@ -342,17 +342,6 @@ namespace MapEditor {
 	}
 
 	bool ConstraintChecks() {
-		//for (std::vector<Tile> const& vec : *MapManager::currentMap) {
-		//	for (Tile const& tile : vec) {
-		//		for (MapConstraint& constraint : constraints) {
-		//			if (constraint.isMet || constraint.type != tile.Type()) continue;
-
-		//			++constraint.currentCount;
-		//			constraint.isMet = constraint.currentCount == constraint.requiredCount;
-		//		}
-		//	}
-		//}
-
 		for (MapConstraint const& constraint : constraints) {
 			std::cout << "Your map have " + std::to_string(constraint.currentCount)
 				+ '/' + std::to_string(constraint.requiredCount) + ' ' + GetTileName(constraint.type) << '\n';

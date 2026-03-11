@@ -22,11 +22,11 @@ struct StatsModule {
 };
 
 struct ProjectileModule {
-	s32 projectileId;
+	s32 projectileId; // to determine which projectile mode the ability is using
 	f32 damageAmp;
 	s32 baseDamage;
 	f32 radius;
-	s32 charges;
+	s32 charges; // projectile attack charges
 	bool unlimited_charges;
 };
 
@@ -51,7 +51,6 @@ public:
 	void SetStats(f32 _hp, f32 _atk, f32 _def);
 	void SetProjectile(s32 _id, f32 _amp, s32 _basedamage, f32 _radius, s32 _charges, bool _unlimited);
 	void SetDefense(s32 _shieldHP);
-	void UpdateCharges(s32 _amount);
 
 	int AbilityCharges() const;
 	void AbilityCharges(int toAdd);

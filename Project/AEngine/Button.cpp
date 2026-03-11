@@ -5,7 +5,7 @@
 #include "AudioManager.hpp"
 
 Button::Button(AEVec2 _pos, AEVec2 _size, Color _color, AEGfxTexture* _texture, Utils::FuncPtr _onClick)
-    : pos{ _pos }, size{_size}, color{_color}, texture{_texture}, onClick{_onClick} {}
+    : textObj{ "" }, pos{_pos}, size{_size}, color{_color}, texture{_texture}, onClick{_onClick} { }
 
 Button::Button(TextObject _textObj, Utils::AnchorMode _anchorMode, AEVec2 _pos, AEVec2 _size, Color _color, AEGfxTexture* _texture, Utils::FuncPtr _onClick)
     : textObj{_textObj}, pos{ _pos }, size{ _size }, color{ _color }, texture{ _texture }, onClick{ _onClick } {

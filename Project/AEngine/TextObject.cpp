@@ -2,6 +2,9 @@
 
 #include "AssetsManager.hpp"
 
+TextObject::TextObject()
+	: textContent{ "" }, textScale{ 1.0f }, color{ 1,1,1 }, pos{ 0,0 }, anchorMode{ Utils::AnchorMode::TOP_LEFT } {}
+
 TextObject::TextObject(std::string _textContent, float _scale, Color _color, AEVec2 _pos, Utils::AnchorMode _anchorMode)
 	: textContent{ _textContent }, textScale{ _scale }, color{ _color }, pos{ _pos }, anchorMode{ _anchorMode } {}
 
