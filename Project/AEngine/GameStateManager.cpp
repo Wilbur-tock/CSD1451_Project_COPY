@@ -1,4 +1,5 @@
 ﻿#include "GameStateManager.hpp"
+
 #include "MapManager.hpp"
 #include "MapEditor.hpp"
 #include "CannonManager.hpp"
@@ -54,20 +55,22 @@ namespace GameStateManager {
         AssetsManager::Load();
         UICursor::Load(); // Load the custom cursor texture               
         GraphicsManager::Load();
-        LevelManager::Load();   
-        MapManager::Load();     
-        MainMenu::Load();       
-        Credits::Load();        
-        Guide::Load();          
 
-        AudioManager::Load();           // Create AEAudio groups and load cached audio assets
+        LevelManager::LoadAllLevels();
+        MapManager::Load();
+        MainMenu::Load();
+        // Create AEAudio groups and load cached audio assets
+        AudioManager::Load();           
 
-        // Initialize camera controller
-        CameraManager::camera.Init();
+        Credits::Load();
+        Guide::Load();        
+        Settings::Load();           // Load assets needed by the settings screen
 
         Loading::Init();            // Initialise the loading screen timer and animation variables
         PauseMenu::Init();          // Build the pause menu's buttons and text objects once at startup, prevents construction delay
-        Settings::Load();           // Load assets needed by the settings screen
+
+        // Initialize camera controller
+        CameraManager::camera.Init();
     }
 
     void Update() {
@@ -139,7 +142,6 @@ namespace GameStateManager {
                 case GameState::LEVEL_1:
                 case GameState::LEVEL_2:
                     LevelManager::SelectLevel(static_cast<int>(current) - static_cast<int>(GameState::LEVEL_1));
-                    gsLoad = LevelManager::LoadLevel;
                     gsIntialize = LevelManager::InitializeLevel;
                     gsUpdate = LevelManager::UpdateLevel;
                     gsDraw = nullptr;
@@ -263,7 +265,7 @@ namespace GameStateManager {
 
         // Instructions overlay (draw last so it appears on top)
         if (Utils::isInstructionOn) {
-            UIInstructionsOverlay::Draw(current);
+            UIInstructionsOverlay::Draw();
             return; // block camera movement while popup is open
         }
 

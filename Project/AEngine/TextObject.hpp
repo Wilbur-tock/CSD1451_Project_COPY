@@ -11,7 +11,7 @@ public:
 	std::string textContent;
 	float textScale = 1.0f;
 	AEVec2 pos{ 0,0 };
-	Color color;
+	Color color{ 1,1,1 };
 	s8 font;
 
 	TextObject();
@@ -37,7 +37,7 @@ public:
 	\param[in] panelSize
 	- size of the panel
 	*************************************************************************/
-	void SetPos(AEVec2 const& panelPos, AEVec2 const& panelSize);
+	void SetAnchorPosition(AEVec2 const& panelPos, AEVec2 const& panelSize);
 	void Draw();
 private:
 	Utils::AnchorMode anchorMode = Utils::AnchorMode::CENTER;

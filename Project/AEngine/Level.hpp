@@ -5,9 +5,7 @@
 
 #include "CannonManager.hpp"
 #include "Tile.hpp"
-#include "TextObject.hpp"
 #include "Character.hpp"
-#include "Button.hpp"
 
 enum class LevelMode {
 	EASY,
@@ -76,13 +74,7 @@ private:
 	std::string levelFileName; // file name to load in the levelMap in the format (level[INDEX])
 	LevelMode levelDifficulty = LevelMode::EASY;
 
-	// Debug UI elements
-	TextObject debugText;
-
 	LevelStatus status = LevelStatus::PLAYING;
-	bool resultScreenInitialized = false;
-	Button resultRestartButton;
-	Button resultMainMenuButton;
 
 	CannonManager::Cannon* activeCannon = nullptr; // pointer to the active instance of the cannon object 
 	CannonManager::Cannon playerCannon; // instance of the player cannon

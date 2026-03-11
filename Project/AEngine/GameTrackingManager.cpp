@@ -2,6 +2,7 @@
 #include "GameTrackingManager.hpp"
 
 namespace GameTrackingManager {
+	bool needToUpdateLog = true;
 	GameTrackingData data;
 
 	void GameStart() {
@@ -9,6 +10,8 @@ namespace GameTrackingManager {
 	}
 
 	void GameEnd() {
+		if (!needToUpdateLog) return;
+
 		data.sessionDuration = AEGetTime(nullptr) - data.sessionStart;
 
 		// Write data into a log.txt

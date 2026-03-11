@@ -41,6 +41,8 @@ namespace Utils {
 	// Return true if it is out of bounds
 	bool IsGridIndexOutOfBounds(int x, int y);
 
+	void SetAnchoredPosition(Transform const& parent, Transform& trans, AnchorMode const& anchorMode);
+	// Set anchoredPosition with parent being the screen transform (width and height)
 	void SetAnchoredPosition(Transform& trans, AnchorMode const& anchorMode);
 
 	std::string FormatFloat(double value, int precision);

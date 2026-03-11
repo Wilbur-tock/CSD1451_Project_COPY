@@ -7,6 +7,7 @@
 #include "Character.hpp"
 #include "CollisionManager.hpp"
 #include "PhysicsManager.hpp"
+#include "Utils.hpp"
 
 Projectile::Projectile(AEGfxTexture* _texture, ProjectileMode _mode, AEVec2 _pos, int _attackCharges)
     : GameObject(_pos, defaultSize, _texture), timer{ 0.0f }, mode(_mode), attackCharges{_attackCharges} {

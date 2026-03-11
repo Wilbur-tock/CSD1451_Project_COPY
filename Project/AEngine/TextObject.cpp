@@ -15,6 +15,10 @@ void TextObject::Draw() {
 	std::stringstream ss(textContent);
 	std::string line;
 
+	if (font == 0) {
+		font = AssetsManager::textFont;
+	}
+
 	// Initial setup
 	f32 charW, charH;
 	AEGfxGetPrintSize(font, "A", textScale, &charW, &charH);
@@ -43,7 +47,7 @@ void TextObject::Draw() {
 	}
 }
 
-void TextObject::SetPos(AEVec2 const& panelPos, AEVec2 const& panelSize) {
+void TextObject::SetAnchorPosition(AEVec2 const& panelPos, AEVec2 const& panelSize) {
 	f32 lineW, lineH;
 	AEGfxGetPrintSize(AssetsManager::textFont, textContent.c_str(), textScale, &lineW, &lineH);
 

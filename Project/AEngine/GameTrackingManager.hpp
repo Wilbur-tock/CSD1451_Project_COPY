@@ -1,3 +1,4 @@
+#pragma once
 #ifndef GAMETRACKINGAMANAGER_HPP
 #define GAMETRACKINGAMANAGER_HPP
 

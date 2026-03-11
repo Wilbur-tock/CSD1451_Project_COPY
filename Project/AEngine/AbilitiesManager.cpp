@@ -6,7 +6,6 @@
 #include "Color.hpp"
 #include "UIManager.hpp"
 #include "Card.hpp"
-#include "Button.hpp"
 #include "AssetsManager.hpp"
 #include "CameraManager.hpp"
 #include "CollisionManager.hpp"

@@ -8,11 +8,15 @@
 // Contain enum TileType, class Tile
 namespace MapManager {
 	extern std::vector<std::vector<Tile>> *currentMap; // Current map layout that is being displayed onto the map
-	inline extern std::string const mapFilePath = "Assets/MapData/";
+	static std::string const mapFilePath = "Assets/MapData/";
 
+	inline std::string MapFilePath() { return mapFilePath; }
+
+	// Load all the textures required for the map
 	void Load();
 	void Unload();
-	// Read map data from txt file and then update the data to 2D vector whatever or not barrier is needed
+	// fileName - ONLY fileName NO fileName.txt DOES NOT WORK
+	// map - 2D vector of Tile type to store the data in
 	void ReadMapData(std::string const& fileName, std::vector<std::vector<Tile>>& map);
 	// Rendering of the map layout
 	void DrawMap(std::vector<std::vector<Tile>> const& map, bool drawCharacters = true);

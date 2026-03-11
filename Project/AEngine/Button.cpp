@@ -5,10 +5,10 @@
 #include "AudioManager.hpp"
 
 Button::Button(AEVec2 _pos, AEVec2 _size, Color _color, AEGfxTexture* _texture, Utils::FuncPtr _onClick)
-    : textObj{ "" }, pos{_pos}, size{_size}, color{_color}, texture{_texture}, onClick{_onClick} { }
+    : textObj{ "" }, transform {_pos, _size}, color{_color}, texture{_texture}, onClick{_onClick} {}
 
 Button::Button(TextObject _textObj, Utils::AnchorMode _anchorMode, AEVec2 _pos, AEVec2 _size, Color _color, AEGfxTexture* _texture, Utils::FuncPtr _onClick)
-    : textObj{_textObj}, pos{ _pos }, size{ _size }, color{ _color }, texture{ _texture }, onClick{ _onClick } {
+    : textObj{_textObj}, transform{ _pos, _size }, color{ _color }, texture{ _texture }, onClick{ _onClick } {
 
     // Must always get the size of the string to be printed out
     const char* myText = _textObj.textContent.c_str();
@@ -16,8 +16,8 @@ Button::Button(TextObject _textObj, Utils::AnchorMode _anchorMode, AEVec2 _pos, 
     f32 textW, textH;
     AEGfxGetPrintSize(AssetsManager::textFont, myText, textObj.textScale, &textW, &textH);
 
-    float x = pos.x, y = pos.y, borderGap = 0.01f;
-    anchorMode = _anchorMode;
+    float x = transform.pos.x, y = transform.pos.y, borderGap = 0.01f;
+    textObjAnchorMode = _anchorMode;
 
     switch (_anchorMode) {
         case Utils::AnchorMode::TOP_LEFT: {
@@ -27,21 +27,21 @@ Button::Button(TextObject _textObj, Utils::AnchorMode _anchorMode, AEVec2 _pos, 
             break;
         }
         case Utils::AnchorMode::TOP_CENTER: {
-            x += (size.x / 2.0f);
+            x += (transform.size.x / 2.0f);
             Utils::NormalizeCoordinates(x, y);
             textObj.pos.x = x - (textW / 2.0f);
             textObj.pos.y = y ;
             break;
         }
         case Utils::AnchorMode::TOP_RIGHT: {
-            x += size.x;
+            x += transform.size.x;
             Utils::NormalizeCoordinates(x, y);
             textObj.pos.x = x - (textW) - borderGap;
             textObj.pos.y = y - borderGap;
             break;
         }
         case Utils::AnchorMode::CENTER_LEFT: {
-            y -= (size.y / 2.0f);
+            y -= (transform.size.y / 2.0f);
             Utils::NormalizeCoordinates(x, y);
             textObj.pos.x = x + borderGap;
             textObj.pos.y = y + (textH / 2.0f);
@@ -51,35 +51,35 @@ Button::Button(TextObject _textObj, Utils::AnchorMode _anchorMode, AEVec2 _pos, 
             // Convert button position from corner rectmode to middle rectmode (world pos)
             // then convert to normalized position 
             // then minus half of the text width and height
-            x += (size.x / 2.0f), y -= (size.y / 2.0f);
+            x += (transform.size.x / 2.0f), y -= (transform.size.y / 2.0f);
             Utils::NormalizeCoordinates(x, y);
             textObj.pos.x = x - (textW / 2.0f);
             textObj.pos.y = y + (textH / 2.0f);
             break;
         }
         case Utils::AnchorMode::CENTER_RIGHT: {
-            x += size.x, y -= (size.y / 2.0f);
+            x += transform.size.x, y -= (transform.size.y / 2.0f);
             Utils::NormalizeCoordinates(x, y);
             textObj.pos.x = x - (textW) - borderGap;
             textObj.pos.y = y + (textH / 2.0f);
             break;
         }
         case Utils::AnchorMode::BOTTOM_LEFT: {
-            y -= (size.y);
+            y -= (transform.size.y);
             Utils::NormalizeCoordinates(x, y);
             textObj.pos.x = x + borderGap;
             textObj.pos.y = y + textH + borderGap;
             break;
         }
         case Utils::AnchorMode::BOTTOM_CENTER: {
-            x += (size.x / 2.0f), y -= (size.y);
+            x += (transform.size.x / 2.0f), y -= (transform.size.y);
             Utils::NormalizeCoordinates(x, y);
             textObj.pos.x = x - (textW / 2.0f);
             textObj.pos.y = y + textH + borderGap;
             break;
         }
         case Utils::AnchorMode::BOTTOM_RIGHT: {
-            x += size.x, y -= (size.y);
+            x += transform.size.x, y -= (transform.size.y);
             Utils::NormalizeCoordinates(x, y);
             textObj.pos.x = x - textW - borderGap;
             textObj.pos.y = y + textH + borderGap;
@@ -89,11 +89,14 @@ Button::Button(TextObject _textObj, Utils::AnchorMode _anchorMode, AEVec2 _pos, 
 }
 
 void Button::Update() {
-    isHovered = CollisionManager::IsPointInRect(pos.x, pos.y, size.x, size.y);
+    isClick = false;
+    isHovered = CollisionManager::IsPointInRect(transform.pos.x, transform.pos.y, transform.size.x, transform.size.y);
 
     if (isHovered) {
+        // Checking if user has click the button
         if (AEInputCheckTriggered(AEVK_LBUTTON) && onClick) {
             AudioManager::PlaySFX(AudioManager::SFX::UIButton);
+            isClick = true;
             onClick();
         }
     }
@@ -108,7 +111,7 @@ void Button::Draw() {
     }
 
     // Draw button object
-    GraphicsManager::DrawScreenOverlay(texture, GraphicsManager::CreateTransformMatrix(pos.x, pos.y, 0, size.x, size.y), btnColor);
+    GraphicsManager::DrawScreenOverlay(texture, GraphicsManager::CreateTransformMatrix(transform.pos.x, transform.pos.y, 0, transform.size.x, transform.size.y), btnColor);
 
     // Draw text if the string is not a empty string
     if (!textObj.textContent.empty()) {
@@ -126,14 +129,19 @@ void Button::SetTextScale(float scale) {
     RecalculateTextPos();
 }
 
+void Button::SetAsChildObj(Transform const& parent, Utils::AnchorMode mode) {
+    // Find the anchor position
+    Utils::SetAnchoredPosition(parent, transform, mode);
+}
+
 void Button::RecalculateTextPos() {
     const char* myText = textObj.textContent.c_str();
     f32 textW, textH;
     AEGfxGetPrintSize(AssetsManager::textFont, myText, textObj.textScale, &textW, &textH);
 
-    float x = pos.x, y = pos.y, borderGap = 0.01f;
+    float x = transform.pos.x, y = transform.pos.y, borderGap = 0.01f;
 
-    switch (anchorMode) {
+    switch (textObjAnchorMode) {
     case Utils::AnchorMode::TOP_LEFT: {
         Utils::NormalizeCoordinates(x, y);
         textObj.pos.x = x + borderGap;
@@ -141,56 +149,56 @@ void Button::RecalculateTextPos() {
         break;
     }
     case Utils::AnchorMode::TOP_CENTER: {
-        x += (size.x / 2.0f);
+        x += (transform.size.x / 2.0f);
         Utils::NormalizeCoordinates(x, y);
         textObj.pos.x = x - (textW / 2.0f);
         textObj.pos.y = y;
         break;
     }
     case Utils::AnchorMode::TOP_RIGHT: {
-        x += size.x;
+        x += transform.size.x;
         Utils::NormalizeCoordinates(x, y);
         textObj.pos.x = x - (textW)-borderGap;
         textObj.pos.y = y - borderGap;
         break;
     }
     case Utils::AnchorMode::CENTER_LEFT: {
-        y -= (size.y / 2.0f);
+        y -= (transform.size.y / 2.0f);
         Utils::NormalizeCoordinates(x, y);
         textObj.pos.x = x + borderGap;
         textObj.pos.y = y + (textH / 2.0f);
         break;
     }
     case Utils::AnchorMode::CENTER: {
-        x += (size.x / 2.0f), y -= (size.y / 2.0f);
+        x += (transform.size.x / 2.0f), y -= (transform.size.y / 2.0f);
         Utils::NormalizeCoordinates(x, y);
         textObj.pos.x = x - (textW / 2.0f);
         textObj.pos.y = y + (textH / 2.0f);
         break;
     }
     case Utils::AnchorMode::CENTER_RIGHT: {
-        x += size.x, y -= (size.y / 2.0f);
+        x += transform.size.x, y -= (transform.size.y / 2.0f);
         Utils::NormalizeCoordinates(x, y);
         textObj.pos.x = x - (textW)-borderGap;
         textObj.pos.y = y + (textH / 2.0f);
         break;
     }
     case Utils::AnchorMode::BOTTOM_LEFT: {
-        y -= (size.y);
+        y -= (transform.size.y);
         Utils::NormalizeCoordinates(x, y);
         textObj.pos.x = x + borderGap;
         textObj.pos.y = y + textH + borderGap;
         break;
     }
     case Utils::AnchorMode::BOTTOM_CENTER: {
-        x += (size.x / 2.0f), y -= (size.y);
+        x += (transform.size.x / 2.0f), y -= (transform.size.y);
         Utils::NormalizeCoordinates(x, y);
         textObj.pos.x = x - (textW / 2.0f);
         textObj.pos.y = y + textH + borderGap;
         break;
     }
     case Utils::AnchorMode::BOTTOM_RIGHT: {
-        x += size.x, y -= (size.y);
+        x += transform.size.x, y -= (transform.size.y);
         Utils::NormalizeCoordinates(x, y);
         textObj.pos.x = x - textW - borderGap;
         textObj.pos.y = y + textH + borderGap;

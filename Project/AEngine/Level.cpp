@@ -1,20 +1,24 @@
 #include "Level.hpp"
 
-#include "AssetsManager.hpp"
+#include "LevelManager.hpp"
 #include "MapManager.hpp"
-#include "Color.hpp"
+#include "AssetsManager.hpp"
 #include "Utils.hpp"
 #include "CollisionManager.hpp"
 #include "CameraManager.hpp"
-#include "LevelManager.hpp"
 #include "PhysicsManager.hpp"
 #include "AudioManager.hpp"
-
-#include "UIManager.hpp"
-#include "TextObject.hpp"
 #include "GameStateManager.hpp"
 
+#include "UIManager.hpp"
+
 AEGfxTexture* barrelTex = nullptr;
+
+TextObject debugText;
+
+bool resultScreenInitialized = false;
+Button resultRestartButton;
+Button resultMainMenuButton;
 
 Level::Level(int _leveId)
 	: levelId{ _leveId }, levelName{ "Level " + std::to_string(levelId + 1) }, levelFileName{ "level" + std::to_string(levelId) } {
@@ -227,7 +231,7 @@ void Level::DrawUI() {
 		turnText.textContent = "ENEMY TURN";
 		turnText.color = { 0.75f,0,0 };
 	}
-	turnText.SetPos(turnStatusPanel.Pos(), turnStatusPanel.Size());
+	turnText.SetAnchorPosition(turnStatusPanel.Pos(), turnStatusPanel.Size());
 	turnText.Draw();
 
 	float colorVal = 0.9f;
@@ -418,7 +422,7 @@ void Level::DrawResultScreen() {
 		{0.0f, 0.0f},
 		Utils::AnchorMode::CENTER
 	};
-	resultTitle.SetPos(centerPanel.Pos(), centerPanel.Size());
+	resultTitle.SetAnchorPosition(centerPanel.Pos(), centerPanel.Size());
 	// Shift title text upward inside the panel
 	resultTitle.pos.y += 0.15f;
 	resultTitle.Draw();
@@ -435,7 +439,7 @@ void Level::DrawResultScreen() {
 		{0.0f, 0.0f},
 		Utils::AnchorMode::CENTER
 	};
-	subtitle.SetPos(centerPanel.Pos(), centerPanel.Size());
+	subtitle.SetAnchorPosition(centerPanel.Pos(), centerPanel.Size());
 	subtitle.pos.y += 0.02f;
 	subtitle.Draw();
 

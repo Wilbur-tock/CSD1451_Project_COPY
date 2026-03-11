@@ -3,7 +3,7 @@
 namespace LevelManager {
 	Level* selectedLevel = nullptr;
 
-	void Load() {
+	void LoadAllLevels() {
 		int levelCount = 1;
 		levelDatas.clear();
 		levelDatas.reserve(levelCount);
@@ -15,6 +15,10 @@ namespace LevelManager {
 			levelDatas.push_back(data);
 			levelDatas[i].Load();
 		}
+	}
+
+	void LoadLevel(int levelId) {
+		levelDatas[levelId].Load();
 	}
 
 	void SelectLevel(int levelId) {

@@ -7,6 +7,9 @@
 #include "Color.hpp"
 #include "BaseTypes.hpp"
 
+#include "TextObject.hpp"
+#include "Button.hpp"
+
 namespace UIManager {
 	enum class FillType {
 		LEFT_TO_RIGHT,
@@ -47,5 +50,23 @@ namespace UIManager {
 		Color color;
 		AEGfxTexture* texture;
 		Utils::AnchorMode anchorMode;
+	};
+
+	class PopupPanel {
+	public:
+		Panel panel;
+		Button button;
+		TextObject textObj;
+		bool isActive = false;
+
+		PopupPanel(std::string textContent, AEVec2 _size, Color _color = { 1,1,1 }, Utils::AnchorMode panelAnchorMode = Utils::AnchorMode::CENTER, AEGfxTexture* _texture = nullptr,
+			AEGfxTexture* btnTexture = nullptr, Utils::FuncPtr onClick = nullptr);
+
+		bool IsHovered() const { return isHovered; }
+
+		void Draw();
+		void Update();
+	private:
+		bool isHovered = false;
 	};
 }
