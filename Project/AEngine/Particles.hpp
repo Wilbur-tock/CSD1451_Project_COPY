@@ -1,7 +1,7 @@
 #ifndef PARTICLE_HPP
 #define PARTICLE_HPP
 
-#include "pch.hpp"
+#include "AEEngine.h"
 #include "Color.hpp"
 
 struct Particle

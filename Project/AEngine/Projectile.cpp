@@ -8,6 +8,7 @@
 #include "CollisionManager.hpp"
 #include "PhysicsManager.hpp"
 #include "Utils.hpp"
+#include "EffectsManager.hpp"
 
 Projectile::Projectile(AEGfxTexture* _texture, ProjectileMode _mode, AEVec2 _pos, int _attackCharges)
     : GameObject(_pos, defaultSize, _texture), timer{ 0.0f }, mode(_mode), attackCharges{_attackCharges} {
@@ -153,6 +154,11 @@ void Projectile::FirstTimeCollision() {
     velocity.x *= percentage;
     velocity.y *= percentage;
     isCollisionTriggered = true;
+
+    switch (Mode()) {
+    case ProjectileMode::NUKE:
+        EffectsManager::effectsController.PlayEffects(EffectsManager::Effects::NUKE, transform.pos);
+    }
 }
 
 void Projectile::ConsumeAttackCharge() {

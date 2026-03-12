@@ -1,8 +1,15 @@
 #include "EffectsManager.hpp"
 
+#include "ParticlesManager.hpp"
+
 namespace EffectsManager {
 
     EffectsController effectsController;
+
+    // Helper function
+    void EffectsController::Emit(const ParticleEmitParams& params) {
+        ParticleManager::particleController.Emit(params);
+    }
 
     void EffectsController::PlayExplosion(AEVec2 position) {
         ParticleEmitParams params;
@@ -60,9 +67,34 @@ namespace EffectsManager {
         std::cout << "[EffectsManager] PlayTileBreak at (" << position.x << ", " << position.y << ")\n";
     }
 
-    // Helper function
-    void EffectsController::Emit(const ParticleEmitParams& params) {
-        ParticleManager::particleController.Emit(params);
+    void EffectsController::PlayEffects(Effects effect, AEVec2 pos) {
+        ParticleEmitParams particle;
+        switch (effect) {
+        case Effects::NUKE:
+            particle = {
+                pos,
+                1,
+
+                10,
+                40,
+                0.f,
+                PI,
+
+                -0.4f,
+                0.4f,
+
+                Color(1.0f, 0.0f, 0.0f),
+                Color(1.0f, 0.0f, 0.0f, 0.f),
+                0,
+                32.0f * 50,
+                0.8f,
+                1.0f, 
+                1,
+            };
+            break;
+        }
+
+        ParticleManager::particleController.Emit(particle);
     }
 
 } // namespace EffectsManager

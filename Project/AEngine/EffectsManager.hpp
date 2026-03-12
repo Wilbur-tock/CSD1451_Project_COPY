@@ -1,16 +1,19 @@
 #ifndef EFFECTSMANAGER_HPP
 #define EFFECTSMANAGER_HPP
 
-#include "pch.hpp"
-#include "ParticlesManager.hpp"
-
+#include "AEEngine.h"
+#include "Particles.hpp"
 
 namespace EffectsManager {
+    enum class Effects {
+        NUKE,
+    };
 
     class EffectsController {
     public:
         void PlayExplosion(AEVec2 position);
         void PlayTileBreak(AEVec2 position);
+        void PlayEffects(Effects effect, AEVec2 pos);
 
     private:
         // Helper to fire off a fully configured params bundle
