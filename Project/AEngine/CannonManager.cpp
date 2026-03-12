@@ -490,8 +490,13 @@ namespace CannonManager {
             + "\nMode: " + selectedProjectile.ModeName()
             + "\nDamage: " + std::to_string(selectedProjectile.attribute.Damage())
             + "\nRadius: " + std::to_string(selectedProjectile.attribute.DamageRadius())
-            + "\n\nAbilities Inventory Count: " + std::to_string(abilityController->InventoryCount())
-            + "\nSelected Ability:\nId:" + std::to_string(selectedAbility.Id())
+            + "\n\nAbilities Inventory Count: " + std::to_string(abilityController->InventoryCount());
+
+        for (Ability* const& ability : abilityController->Inventory()) {
+            debugStr += "\nAbility: " + ability->GetName() + " Charges: " + std::to_string(ability->AbilityCharges());
+        }
+
+        debugStr += "\n\nSelected Ability:\nId:" + std::to_string(selectedAbility.Id())
             + "\nName: " + selectedAbility.GetName()
             + "\nAbility Charges Remaining: " + std::to_string(selectedAbility.AbilityCharges())
             + "\nSelected Projectile Id: " + std::to_string(selectedAbility.GetProj().projectileId);
@@ -517,7 +522,7 @@ namespace CannonManager {
         //panel.Draw();
 
         TextObject debugText{"", Utils::debuggerInfo.first * 0.8f, Utils::debuggerInfo.second, { 0.5f, 0.99f } };
-        debugText.textContent = debugStr;
+        debugText.TextContent(debugStr);
         debugText.Draw();
     }
 }

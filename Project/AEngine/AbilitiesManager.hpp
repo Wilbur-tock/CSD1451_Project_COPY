@@ -29,6 +29,12 @@ namespace AbilitiesManager {
 
 		Ability CurrentAbility() const { return *currentAbility; }
 		int InventoryCount() const{ return static_cast<int>(inventory.size()); }
+
+		bool IsSelectingAbility() const { return isSelectingAbility; }
+		void IsSelectingAbility(bool _isSelectingAbility) { isSelectingAbility = _isSelectingAbility; }
+
+		std::vector<Ability*> const& Inventory() const { return inventory; }
+
 		AbilityType OffensiveOrDefensive();
 
 		// Change the type of ability this controller is current using
@@ -59,13 +65,15 @@ namespace AbilitiesManager {
 		void ResetAIAbilitySelection() { hasEnemySelectedAbility = false; }
 		void AIAbilitySelection();
 
-		const Ability AbilityRandomisator(const std::vector<Ability>& abilities);
+		const Ability AbilityRandomisator(std::vector<Ability> const& abilities);
 
 		void AbilitySelectionRandomisator();
-		void AbilitySelector(bool& isOn);
-		void onClickAbilityCard(Ability ability, bool* isOn);
+		void AbilitySelector();
+		void OnClickAbilityCard(Ability const& ability);
 
-		void AbilityUI();
+		void InitializeAllAbilityUI();
+		void AbilitySelectorUI();
+		void UpdateAbilityUI();
 
 	private:
 		void PrintAllAbilities();
@@ -89,6 +97,8 @@ namespace AbilitiesManager {
 		std::vector<Ability*> inventory; // vector containing all the type of abilities this controller has in its inventory
 		std::vector<Ability> allAbilities; // vector containing all the different type of abilities
 		std::vector<int> inventoryTypeCount; // To keep track of how many of each ability type there is in the inventory
+
+		bool isSelectingAbility = false;
 
 		bool isAIController = false;
 		bool hasEnemySelectedAbility = false; // has enemy selected their ability

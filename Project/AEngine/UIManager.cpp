@@ -75,15 +75,16 @@ namespace UIManager {
     PopupPanel::PopupPanel(std::string textContent, AEVec2 _size, Color _color, Utils::AnchorMode panelAnchorMode, AEGfxTexture* panelTexture, AEGfxTexture* btnTexture, Utils::FuncPtr onClick) 
         : panel{ _size, _color, panelAnchorMode, panelTexture }, 
         button{ {0,0}, {50,50}, Color{1,1,1}, btnTexture, onClick },
-        textObj{ textContent, 0.5f, Color{1,0,0}, {0,0}, Utils::AnchorMode::TOP_LEFT } {
+        textObj{ textContent, 0.5f, Color{1,0,0}, {0,0}, Utils::AnchorMode::CENTER } {
         // Set button position to be top right corner to close panel
-        button.SetAsChildObj({panel.Pos(), panel.Size()}, Utils::AnchorMode::TOP_RIGHT);
+        button.SetPosition({panel.Pos(), panel.Size()}, Utils::AnchorMode::TOP_RIGHT);
 
         button.SetOnClick([this]() {
             isActive = false;
         });
 
-        textObj.SetAnchorPosition(panel.Pos(), panel.Size());
+        textObj.SetPosition(Utils::AnchorMode::CENTER, panel.GetTransform());
+        std::cout << panel.Pos().x << ' ' << panel.Pos().y << " Pos: " << textObj.pos.x << ' ' << textObj.pos.y << '\n';
     }
 
     void PopupPanel::Draw() {

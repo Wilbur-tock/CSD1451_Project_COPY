@@ -157,7 +157,7 @@ void Projectile::FirstTimeCollision() {
 
     switch (Mode()) {
     case ProjectileMode::NUKE:
-        EffectsManager::effectsController.PlayEffects(EffectsManager::Effects::NUKE, transform.pos);
+        EffectsManager::effectsController.PlayProjectiileAbiltiesEffect(EffectsManager::Effects::NUKE, transform.pos);
     }
 }
 
@@ -240,15 +240,7 @@ void Projectile::DamageTile(int tileX, int tileY) {
     if (hasDamageAnyTile) {
         ConsumeAttackCharge();
 
-        // Damage effect
-        Tile& tileToDamage = (*MapManager::currentMap)[tileY][tileX];
-
-        GraphicsManager::DrawGameObject(
-            AssetsManager::circleTexture,
-            GraphicsManager::CreateTransformMatrix(tileToDamage.transform.pos.x, tileToDamage.transform.pos.y, 0,
-                (tileToDamage.transform.size.x * 0.5f) * blastRadius, (tileToDamage.transform.size.y * 0.5f) * blastRadius),
-            { 0.75,0.0f,0 }
-        );
+        EffectsManager::effectsController.PlayExplosion(transform.pos);
     }
 }
 

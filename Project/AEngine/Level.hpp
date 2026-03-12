@@ -52,6 +52,7 @@ public:
 
 	void SetHoveringOverUI(bool isHovering) { isHoveringUI = isHovering; }
 private:
+	void InitializeUI();
 	void DrawUI();
 
 	// Calculate and get the current health for all the player or enemies characters
@@ -83,7 +84,6 @@ private:
 	bool isPlayerTurn = true; // is player or enemy turn to shoot
 	bool autoPlayOn = false; // used for debugging let enemy play ONLY
 	bool isSkippingEnemyTurn = false;
-	bool isAbilitySelectorOn = true;
 	bool isHoveringUI = false;
 	float switchTurnCooldown = 0.0f; // Cooldown timer to add a delay between the destruction of the player projectile and starting of enemy turn
 

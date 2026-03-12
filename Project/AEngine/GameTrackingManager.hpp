@@ -4,7 +4,9 @@
 
 namespace GameTrackingManager {
 	struct GameTrackingData {
-		size_t meshDrawCount = 0;
+		size_t drawMeshCount = 0;
+		size_t drawMapCount = 0;
+		size_t drawTilesCount = 0;
 
 		size_t playerShotsFired = 0;
 		size_t playerShotsHit = 0;

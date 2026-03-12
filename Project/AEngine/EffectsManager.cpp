@@ -67,7 +67,7 @@ namespace EffectsManager {
         std::cout << "[EffectsManager] PlayTileBreak at (" << position.x << ", " << position.y << ")\n";
     }
 
-    void EffectsController::PlayEffects(Effects effect, AEVec2 pos) {
+    void EffectsController::PlayProjectiileAbiltiesEffect(Effects effect, AEVec2 pos) {
         ParticleEmitParams particle;
         switch (effect) {
         case Effects::NUKE:

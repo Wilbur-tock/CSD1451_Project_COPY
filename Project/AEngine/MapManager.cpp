@@ -3,6 +3,7 @@
 #include "GraphicsManager.hpp"
 #include "AssetsManager.hpp"
 #include "Color.hpp"
+#include "GameTrackingManager.hpp"
 
 namespace MapManager {
 	std::vector<std::vector<Tile>> *currentMap;
@@ -225,6 +226,7 @@ namespace MapManager {
 	}
 
 	void DrawMap(std::vector<std::vector<Tile>> const& map, bool drawCharacters) {
+		++GameTrackingManager::data.drawMapCount;
 		AEGfxSetBackgroundColor(0.92f, 0.92f, 0.95f);
 
 		int mapHeight = static_cast<int>(map.size());
@@ -235,17 +237,10 @@ namespace MapManager {
 			return;
 		}
 
-		// Small helper to clamp without relying on C++17 std::clamp (safe either way)
-		auto Clamp01 = [](float v) {
-			if (v < 0.0f) return 0.0f;
-			if (v > 1.0f) return 1.0f;
-			return v;
-			};
-
 		for (std::vector<Tile> const& row : map) {
 			for (Tile const& tile : row) {
-				if (tile.Type() == TileType::TILE_EMPTY) continue;
-				if (!drawCharacters && tile.IsCharacter()) continue;
+				if (tile.Type() == TileType::TILE_EMPTY) continue; // don't draw empty tiles
+				if (!drawCharacters && tile.IsCharacter()) continue; // don't draw character tiles
 
 				AEGfxTexture* baseTex = gTileTex[static_cast<int>(tile.Type())];
 				if (!baseTex) continue;
@@ -255,10 +250,10 @@ namespace MapManager {
 					tile.transform.size.x / 2.0f, tile.transform.size.y / 2.0f
 				);
 
-				// 1) Draw base tile
 				GraphicsManager::DrawGameObject(baseTex, tileMat, Color{ 1,1,1,1 });
+				++GameTrackingManager::data.drawTilesCount;
 
-				// 2) Draw cracks overlay (only for ground + blocks)
+				// Draw cracks on blocks based on tile hp
 				if (tile.IsBlocks()) {
 					int hp = tile.attribute.Health();
 					int maxHp = tile.attribute.MaxHealth();
@@ -266,7 +261,7 @@ namespace MapManager {
 					// Only show cracks once it has taken damage
 					if (maxHp > 0 && hp < maxHp) {
 						float damageFrac = 1.0f - (static_cast<float>(hp) / static_cast<float>(maxHp));
-						damageFrac = Clamp01(damageFrac);
+						damageFrac = std::clamp(damageFrac, 0.0f, 1.0f);
 
 						// pick crack stage
 						AEGfxTexture* cracksTex = nullptr;

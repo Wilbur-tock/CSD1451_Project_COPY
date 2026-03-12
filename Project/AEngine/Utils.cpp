@@ -72,7 +72,7 @@ namespace Utils {
 
 	void SetAnchoredPosition(Transform const& parent, Transform& trans, AnchorMode const& anchorMode) {
 		// Set position based on screen width and height with its origin mode in the CENTER
-		float parentX = parent.pos.x, parentY = parent.pos.y;
+		float newX = parent.pos.x, newY = parent.pos.y;
 		float halfParentW = parent.size.x * 0.5f, halfParentH = parent.size.y * 0.5f;
 
 		float chiildW = trans.size.x, childH = trans.size.y;
@@ -81,45 +81,45 @@ namespace Utils {
 		// Set position based on anchor mode
 		switch (anchorMode) {
 		case Utils::AnchorMode::TOP_LEFT:
-			parentX = -halfParentW;
-			parentY = halfParentH;
+			newX = -halfParentW;
+			newY = halfParentH;
 			break;
 		case Utils::AnchorMode::TOP_CENTER:
-			parentX = -halfW;
-			parentY = halfParentH;
+			newX = -halfW;
+			newY = halfParentH;
 			break;
 		case Utils::AnchorMode::TOP_RIGHT:
-			parentX = halfParentW - chiildW;
-			parentY = halfParentH;
+			newX = halfParentW - chiildW;
+			newY = halfParentH;
 			break;
 		case Utils::AnchorMode::CENTER_LEFT:
-			parentX = -halfParentW;
-			parentY = halfH;
+			newX = -halfParentW;
+			newY = halfH;
 			break;
 		case Utils::AnchorMode::CENTER:
-			parentX = -halfW;
-			parentY = halfH;
+			newX = -halfW;
+			newY = halfH;
 			break;
 		case Utils::AnchorMode::CENTER_RIGHT:
-			parentX = halfParentW - chiildW;
-			parentY = halfH;
+			newX = halfParentW - chiildW;
+			newY = halfH;
 			break;
 		case Utils::AnchorMode::BOTTOM_LEFT:
-			parentX = -halfParentW;
-			parentY = -halfParentH + childH;
+			newX = -halfParentW;
+			newY = -halfParentH + childH;
 			break;
 		case Utils::AnchorMode::BOTTOM_CENTER:
-			parentX = -halfW;
-			parentY = -halfParentH + childH;
+			newX = -halfW;
+			newY = -halfParentH + childH;
 			break;
 		case Utils::AnchorMode::BOTTOM_RIGHT:
-			parentX = halfParentW - chiildW;
-			parentY = -halfParentH + childH;
+			newX = halfParentW - chiildW;
+			newY = -halfParentH + childH;
 			break;
 		}
 
-		trans.pos.x = parentX;
-		trans.pos.y = parentY;
+		trans.pos.x = newX;
+		trans.pos.y = newY;
 	}
 
 	void SetAnchoredPosition(Transform& trans, AnchorMode const& anchorMode) {

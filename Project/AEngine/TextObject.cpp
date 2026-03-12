@@ -11,6 +11,20 @@ TextObject::TextObject(std::string _textContent, float _scale, Color _color, AEV
 void TextObject::Draw() {
 	if (textContent.empty()) return;
 
+	// If textContent is changed or position has not been set yet
+	if (isSettingAnchorPos && prevTextContent != textContent && !hasUpdatePos) {
+		std::cout << prevTextContent << " Setting Text Print Anchor Position " << textContent << '\n';
+		SetAnchorPosition();
+		hasUpdatePos = true;
+	}
+
+	// Update position
+	float x = pos.x, y = pos.y;
+	if (offsetPos.x != 0 || offsetPos.y != 0) {
+		x += offsetPos.x;
+		y += offsetPos.y;
+	}
+
 	// Use a stringstream to handle newline parsing automatically
 	std::stringstream ss(textContent);
 	std::string line;
@@ -24,7 +38,7 @@ void TextObject::Draw() {
 	AEGfxGetPrintSize(font, "A", textScale, &charW, &charH);
 
 	// Set position y
-	f32 currentY = pos.y - (charH * 1.0f); // minus charH because AEGfxPrint is BOTTOM-LEFT RECT MODE
+	f32 currentY = y - (charH * 1.0f); // minus charH because AEGfxPrint is BOTTOM-LEFT RECT MODE
 	const f32 lineSpacing = 1.5f; // Adjust vertical gap between lines
 
 	// Iterate through each line delimited by '\n'
@@ -33,7 +47,7 @@ void TextObject::Draw() {
 		if (!line.empty()) {
 			AEGfxPrint(AssetsManager::textFont,
 				line.c_str(),
-				pos.x,
+				x,
 				currentY,
 				textScale,
 				color.Red(),
@@ -47,20 +61,43 @@ void TextObject::Draw() {
 	}
 }
 
-void TextObject::SetAnchorPosition(AEVec2 const& panelPos, AEVec2 const& panelSize) {
+void TextObject::SetPosition(Utils::AnchorMode newMode, Transform const& parentTransform) {
+	anchorMode = newMode;
+	parent = parentTransform;
+	hasUpdatePos = false;
+	isSettingAnchorPos = true;
+}
+
+void TextObject::SetPosition(Transform const& parentTransform) {
+	SetPosition(anchorMode, parentTransform);
+}
+
+void TextObject::SetOffsetPosition(float x, float y) {
+	Utils::NormalizeCoordinates(x, y);
+	offsetPos = { x,y };
+}
+
+void TextObject::SetAnchorPosition() {
+	SetAnchorPosition(parent.pos, parent.size);
+}
+
+void TextObject::SetAnchorPosition(AEVec2 const& parentPos, AEVec2 const& parentSize) {
+	SetTextAnchorPosition();
 	f32 lineW, lineH;
 	AEGfxGetPrintSize(AssetsManager::textFont, textContent.c_str(), textScale, &lineW, &lineH);
 
+	// This is already normalize coordinates
 	float halfLineW = static_cast<float>(lineW * 0.5f);
 	float halfLineH = static_cast<float>(lineH * 0.5f);
 
-	float halfPanelW = panelSize.x * 0.5f;
-	float halfPanelH = panelSize.y * 0.5f;
-	Utils::NormalizeCoordinates(halfPanelW, halfPanelH);
-
-	float x = panelPos.x;
-	float y = panelPos.y;
+	// Need to normalize parent pos and size
+	float x = parentPos.x;
+	float y = parentPos.y;
 	Utils::NormalizeCoordinates(x, y);
+
+	float halfPanelW = parentSize.x * 0.5f;
+	float halfPanelH = parentSize.y * 0.5f;
+	Utils::NormalizeCoordinates(halfPanelW, halfPanelH);
 
 	// Set position x
 	switch (anchorMode) {
@@ -94,5 +131,87 @@ void TextObject::SetAnchorPosition(AEVec2 const& panelPos, AEVec2 const& panelSi
 		pos.y = y - (halfPanelH * 2.0f) + lineH;
 		pos.x = x + (halfPanelW * 2.0f) - lineW;
 		break;
+	}
+}
+
+void TextObject::SetTextAnchorPosition() {
+	// Get the normalized text width and height
+	f32 textW, textH;
+	AEGfxGetPrintSize(font, TextContent().c_str(), textScale, &textW, &textH);
+
+	float x = parent.pos.x, y = parent.pos.y, borderGap = 0.01f;
+	float halfW = parent.size.x * 0.5f, halfH = parent.size.y * 0.5f;
+
+	// Position text object anchor mode according to the button pos and size
+	switch (anchorMode) {
+	case Utils::AnchorMode::TOP_LEFT: {
+		Utils::NormalizeCoordinates(x, y);
+		pos.x = x + borderGap;
+		pos.y = y - borderGap;
+		break;
+	}
+	case Utils::AnchorMode::TOP_CENTER: {
+		x += halfW;
+		Utils::NormalizeCoordinates(x, y);
+		pos.x = x - (textW / 2.0f);
+		pos.y = y;
+		break;
+	}
+	case Utils::AnchorMode::TOP_RIGHT: {
+		x += halfW;
+		Utils::NormalizeCoordinates(x, y);
+		pos.x = x - (textW) - borderGap;
+		pos.y = y - borderGap;
+		break;
+	}
+	case Utils::AnchorMode::CENTER_LEFT: {
+		y -= halfH;
+		Utils::NormalizeCoordinates(x, y);
+		pos.x = x + borderGap;
+		pos.y = y + (textH / 2.0f);
+		break;
+	}
+	case Utils::AnchorMode::CENTER: {
+		// Convert button position from corner rectmode to middle rectmode (world pos)
+		// then convert to normalized position 
+		// then minus half of the text width and height
+		x += halfW;
+		y -= halfH;
+		Utils::NormalizeCoordinates(x, y);
+		pos.x = x - (textW / 2.0f);
+		pos.y = y + (textH / 2.0f);
+		break;
+	}
+	case Utils::AnchorMode::CENTER_RIGHT: {
+		x += x;
+		y -= halfH;
+		Utils::NormalizeCoordinates(x, y);
+		pos.x = x - (textW)-borderGap;
+		pos.y = y + (textH / 2.0f);
+		break;
+	}
+	case Utils::AnchorMode::BOTTOM_LEFT: {
+		y -= y;
+		Utils::NormalizeCoordinates(x, y);
+		pos.x = x + borderGap;
+		pos.y = y + textH + borderGap;
+		break;
+	}
+	case Utils::AnchorMode::BOTTOM_CENTER: {
+		x += halfW;
+		y -= y;
+		Utils::NormalizeCoordinates(x, y);
+		pos.x = x - (textW / 2.0f);
+		pos.y = y + textH + borderGap;
+		break;
+	}
+	case Utils::AnchorMode::BOTTOM_RIGHT: {
+		x += x;
+		y -= y;
+		Utils::NormalizeCoordinates(x, y);
+		pos.x = x - textW - borderGap;
+		pos.y = y + textH + borderGap;
+		break;
+	}
 	}
 }

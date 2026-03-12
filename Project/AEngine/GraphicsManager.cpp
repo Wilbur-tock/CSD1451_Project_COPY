@@ -114,7 +114,7 @@ namespace GraphicsManager {
 		// Draw the mesh
 		AEGfxMeshDraw(pMesh, AE_GFX_MDM_TRIANGLES);
 
-		++GameTrackingManager::data.meshDrawCount;
+		++GameTrackingManager::data.drawMeshCount;
 	}
 
 	// Builds a custom quad mesh where the UV coordinates span exactly one frame width.

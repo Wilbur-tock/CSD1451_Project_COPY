@@ -253,9 +253,9 @@ namespace Guide {
         );
         mainPanel.Draw();
 
-        titleText.textContent = (currentPage == GuidePage::GAME)
+        titleText.TextContent(currentPage == GuidePage::GAME
             ? "GUIDE - GAME"
-            : "GUIDE - ABILITIES";
+            : "GUIDE - ABILITIES");
 
         titleText.Draw();
         hintText.Draw();

@@ -22,7 +22,6 @@ void Card::Update() {
 }
 
 void Card::Draw() {
-	
 	button.Draw();
 	
 	// Draw the image of the ability on top of the card
@@ -30,4 +29,8 @@ void Card::Draw() {
 		AEVec2 imagePos = { pos.x + (CARD_WIDTH - IMAGE_WIDTH) / 2, pos.y - 50.0f};
 		GraphicsManager::DrawScreenOverlay(imageTexture, GraphicsManager::CreateTransformMatrix(imagePos.x, imagePos.y, 0, IMAGE_WIDTH, IMAGE_HEIGHT), Color(1,1,1));
 	}
+}
+
+void Card::SetTexture(AEGfxTexture* texture) {
+	imageTexture = texture;
 }

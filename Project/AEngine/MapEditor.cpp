@@ -222,7 +222,7 @@ namespace MapEditor {
 
 		// Display the label on which map is being editing 
 		mapLabelPanel.Draw();
-		mapLabelText.textContent = currentMapLabel;
+		mapLabelText.TextContent(currentMapLabel);
 		mapLabelText.Draw();
 
 		if (constraintsPopup.isActive) {
@@ -264,7 +264,7 @@ namespace MapEditor {
 			helpStr += "[HIDING]";
 		}
 
-		helpText.textContent = helpStr;
+		helpText.TextContent(helpStr);
 		helpText.Draw();
 
 		// Print out debugger information about the map editor
@@ -282,13 +282,13 @@ namespace MapEditor {
 
 			//std::cout << (*currentMap).size() << ' ' << (*currentMap)[0].size() << '\n';
 			Tile& tile = (*currentMap)[gridY][gridX];
-			debugText.textContent = "Grid\nIndex X: " + std::to_string(gridX) + " Y: " + std::to_string(gridY)
+			debugText.TextContent("Grid\nIndex X: " + std::to_string(gridX) + " Y: " + std::to_string(gridY)
 				+ "\nTile: " + GetTileName(tile.Type())
 				+ "\nPos X: " + Utils::FormatFloat(newMap[gridY][gridX].transform.pos.x, 2) + " Y: " + Utils::FormatFloat(newMap[gridY][gridX].transform.pos.y, 2)
 				+ "\nCamera " + std::to_string(CameraManager::camera.GetState()) +
 				+"\nPos X:" + Utils::FormatFloat(x, 2) + " Y: " + Utils::FormatFloat(y, 2)
 				+ "\nMouse\nScreen Pos X: " + Utils::FormatFloat(mouseX, 2) + " Y: " + Utils::FormatFloat(mouseY, 2)
-				+ "\nWorld Pos X: " + Utils::FormatFloat(mX, 2) + " Y: " + Utils::FormatFloat(mY, 2);
+				+ "\nWorld Pos X: " + Utils::FormatFloat(mX, 2) + " Y: " + Utils::FormatFloat(mY, 2) );
 
 			debugText.Draw();
 		}
@@ -300,7 +300,7 @@ namespace MapEditor {
 				std::string str = "You must have at least " + std::to_string(constraint.requiredCount)
 					+ ' ' + GetTileName(constraint.type) + " in your map!";
 				std::cout << "[Error] " + str << '\n';
-				constraintsPopup.textObj.textContent = str;
+				constraintsPopup.textObj.TextContent(str);
 				constraintsPopup.isActive = true;
 				return false;
 			}
@@ -383,7 +383,7 @@ namespace MapEditor {
 		helpText = { "",  Utils::debuggerInfo.first * 0.9f, Utils::debuggerInfo.second,{-1.0f,.99f} };
 		debugText = { "",  Utils::debuggerInfo.first * 0.8f, Utils::debuggerInfo.second, { 0.5f, 0.99f} };
 
-		constraintsPopup = { "", AEVec2{250,100}, Color{1,1,0.9f} };
+		constraintsPopup = { "", AEVec2{500,250}, Color{1,1,0.9f} };
 
 		mapLabelText = { currentMapLabel, 0.75f, {0,0,0}, {0,0}, Utils::AnchorMode::CENTER };
 		mapLabelText.SetAnchorPosition(mapLabelPanel.Pos(), mapLabelPanel.Size());

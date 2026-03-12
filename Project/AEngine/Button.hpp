@@ -19,21 +19,24 @@ public:
 	// _rectMode - set where the text content will be print out 
 	// e.g. RECT_CENTER will print text to align center of the button
 	Button(TextObject _textObj, Utils::AnchorMode _anchorMode, AEVec2 _pos, AEVec2 _size, Color _color,
-		AEGfxTexture* _texture, Utils::FuncPtr _onClick = nullptr);
+		AEGfxTexture* _texture = nullptr, Utils::FuncPtr _onClick = nullptr);
 
 	bool IsClick() const { return isClick; }
 	bool ISHovered() const { return isHovered; }
+	Transform GetTransform() const { return transform; }
+
 	void SetOnClick(Utils::FuncPtr _OnClick) { onClick = _OnClick; }
+
+	TextObject& GetTextObject() { return textObj; }
+	void SetColor(Color _color) { color = _color; }
 
 	// Check for player hover and whatever or not it is clicked
 	void Update();
 	void Draw();
 
-	void SetTextOffset(f32 offsetX, f32 offsetY);
-	void SetTextScale(float scale);
-	void SetAsChildObj(Transform const& parent, Utils::AnchorMode mode);
-	void RecalculateTextPos();
-
+	void SetTextOffset(float offsetX, float offsetY);
+	// Change the anchorPosition of the button based on the screen transform and anchorMode assigned
+	void SetPosition(Transform const& parent, Utils::AnchorMode mode);
 private:
 	TextObject textObj;
 	Transform transform = { {0,0}, {0,0} };
@@ -42,7 +45,6 @@ private:
 	Utils::FuncPtr onClick = nullptr;
 	bool isHovered = false;
 	bool isClick = false;
-	Utils::AnchorMode textObjAnchorMode = Utils::AnchorMode::TOP_LEFT;
 };
 
 #endif // !BUTTON_HPP

@@ -21,11 +21,3 @@ void Color::EditColorPercentage(float percentage) {
 		b *= percentage
 	);
 }
-
-float Color::Red() const { return r;}
-
-float Color::Green() const { return g; }
-
-float Color::Blue() const { return b;}
-
-float Color::Alpha() const { return a; }

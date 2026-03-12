@@ -1,6 +1,6 @@
 [
     {
-        "Name": "Default Projectile",
+        "Name": "Default",
         "Type": 2,
         "Tier": 1,
         "Texture": "",
@@ -90,7 +90,7 @@
     },
 
     {
-        "Name": "Cluster Projectile",
+        "Name": "Cluster",
         "Type": 2,
         "Tier": 1,
         "Texture": "",
@@ -105,7 +105,7 @@
     },
 
     {
-        "Name": "Booster Projectile",
+        "Name": "Booster",
         "Type": 2,
         "Tier": 1,
         "Texture": "",

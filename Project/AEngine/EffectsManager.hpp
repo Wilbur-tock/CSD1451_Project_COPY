@@ -13,7 +13,7 @@ namespace EffectsManager {
     public:
         void PlayExplosion(AEVec2 position);
         void PlayTileBreak(AEVec2 position);
-        void PlayEffects(Effects effect, AEVec2 pos);
+        void PlayProjectiileAbiltiesEffect(Effects effect, AEVec2 pos);
 
     private:
         // Helper to fire off a fully configured params bundle

@@ -302,7 +302,7 @@ namespace AbilitiesManager {
 
 	}
 
-	const Ability AbilityController::AbilityRandomisator(const std::vector<Ability>& abilities) {
+	const Ability AbilityController::AbilityRandomisator(std::vector<Ability> const& abilities) {
 		return abilities[Utils::RandomValue(0, static_cast<int>(abilities.size() - 1))];
 	}
 
@@ -375,33 +375,16 @@ namespace AbilitiesManager {
 	}
 
 	// Display the ability selector UI for the player to select an ability
-	void AbilityController::AbilitySelector(bool& isOn) {
-		if (!isOn) return;
+	void AbilityController::AbilitySelector() {
+		if (!isSelectingAbility) return;
 
 		//std::cout << "Player Selecting Abilities:\n";
 		CameraManager::camera.SetState(CameraManager::CameraController::STATIC);
 
-		UIManager::Panel background{ {1400.0f, 700.0f}, Color(0.6196f, 0.6196f, 0.6196f, 1.0f), Utils::AnchorMode::CENTER };
-		background.Draw();
-
-		AEVec2 cardSize{ CARD_WIDTH, CARD_HEIGHT }; // width and height
-		float gap = (1400.0f - (cardSize.x * abilitiesCards.size())) / (abilitiesCards.size() + 1);
-		AEVec2 cardPos{ -cardSize.x * 1.5f - gap, cardSize.y / 2.0f };
-
-		int id = 1;
-
-		for (Ability ability : abilitiesCards) {
-			//std::cout << ability.GetName() << '\n';
-			AEGfxTexture* imageTexture = ability.GetTexture() == "" ? AssetsManager::squareTexture : AssetsManager::GetTexture(ability.GetTexture().c_str());
-			Card card{ ability.GetName(), cardPos, Color(1,0,0), AssetsManager::squareTexture, imageTexture, [this, ability, &isOn]() { onClickAbilityCard(ability, &isOn);  }};
-			card.Update();
-			card.Draw();
-			cardPos.x += cardSize.x + gap;
-			id++;
-		}
+		AbilitySelectorUI();
 	}
 
-	void AbilityController::onClickAbilityCard(Ability ability, bool* isOn) {
+	void AbilityController::OnClickAbilityCard(Ability const& ability) {
 		std::cout << "Clicked ability card " << ability.Id() << std::endl;
 		if (ability.GetType() != AbilityType::STATISTICS) {
 			AddAbility(ability.Id());
@@ -410,55 +393,150 @@ namespace AbilitiesManager {
 			// Update stats
 
 		}
-		if (isOn) {
-			*isOn = false;
-		}
+
+		isSelectingAbility = false;
 		CameraManager::camera.SetState(CameraManager::CameraController::INPUT);
 	}
 
-	void AbilityController::AbilityUI() {
-		UIManager::Panel background{ {600.0f, 90.0f}, Color(0.647f, 0.165f, 0.165f, 1.0f), Utils::AnchorMode::BOTTOM_CENTER };
-		background.Draw();
+	// UI OBJECTS
+	static constexpr int inventoryMaxCount = 5;
+	static constexpr int selectorCount = 3;
+	UIManager::Panel inventoryBackground;
+	Button inventoryAbilityButton[inventoryMaxCount];
 
-		LevelManager::CurrentLevel()->SetHoveringOverUI(CollisionManager::IsPointInRect(background.Pos().x, background.Pos().y, background.Size().x, background.Size().y));
+	// Selecting Ability UI
+	UIManager::Panel abilitySelectorBG;
+	Card abilitySelectorCards[selectorCount];
 
-		// Ability icons
-		for (int i = 0; i < inventory.size(); ++i) {
-			Ability* ability = inventory[i];
-			Color iconColor = ability->GetType() == AbilityType::OFFENSIVE ? Color(1, 0, 0) : Color(0, 0, 1);
-			if (currentAbility == ability) {
-				iconColor = Color(0, 0, 0); 
-			}
-			std::vector<std::string> toBeRemoved = { "Projectile" };
-			std::string AbilityName = ability->GetName();
-			for (const std::string& word : toBeRemoved) {
-				size_t found = AbilityName.find(word);
-				if (found != std::string::npos) {
-					AbilityName.erase(found, std::string(word).length());
-				}
+	void AbilityController::InitializeAllAbilityUI() {
+		inventoryBackground = UIManager::Panel{ {600.0f, 100.0f}, Color(0.647f, 0.165f, 0.165f, 1.0f), Utils::AnchorMode::BOTTOM_CENTER };
+
+		Transform inventoryBGTrans = inventoryBackground.GetTransform();
+		float space = 15.0f;
+		float borderPaddingX = 25.0f;
+		float borderPaddingY = 10.0f;
+		float totalWidth = inventoryBGTrans.size.x;
+
+		// Calculate total width of spaces between buttons
+		// [BTN][SPACE][BTN][SPACE].....
+		float spaceTotalWidth = space * (inventoryMaxCount - 1);
+		float totalBtnWidth = totalWidth - spaceTotalWidth - (borderPaddingX * 2.0f);
+
+		float btnSizeX = totalBtnWidth / inventoryMaxCount;
+		float btnSizeY = inventoryBGTrans.size.y - (borderPaddingY * 2.0f);
+
+		// Set starting position
+		float startX = inventoryBGTrans.pos.x + borderPaddingX;
+		float startY = inventoryBGTrans.pos.y - borderPaddingY;
+
+		// Initialize Ability Icons at bottom showcasing the list of ability player has in its inventory
+		for (int i = 0; i < inventoryMaxCount; ++i) {
+			Button& btn = inventoryAbilityButton[i];
+
+			// Set button x and y position
+			float x = startX + (space * i) + (btnSizeX * i);
+			float y = startY;
+
+			btn = Button{ TextObject{"", 0.5f},
+				Utils::AnchorMode::BOTTOM_CENTER, AEVec2{ x, y },
+				AEVec2{ btnSizeX, btnSizeY }, Color{1,1,1}, AssetsManager::squareTexture
 			};
-
-			// Trim any trailing/leading spaces left behind
-			while (!AbilityName.empty() && AbilityName.back() == ' ') AbilityName.pop_back();
-			while (!AbilityName.empty() && AbilityName.front() == ' ') AbilityName.erase(AbilityName.begin());
-
-			Button abilityButton{ TextObject{ AbilityName },
-				Utils::AnchorMode::BOTTOM_CENTER, AEVec2{ -220.0f + i * 100.0f, -370.0f },
-				AEVec2{ 75.0f, 75.0f }, iconColor, AssetsManager::squareTexture };
-			abilityButton.SetTextScale(0.5f);
-			abilityButton.Update();
-			abilityButton.Draw();
 		}
-		
-		int i = static_cast<int>(inventory.size());
-		while (i < 5) {
-			Button emptyButton{ TextObject{ "Empty" },
-				Utils::AnchorMode::BOTTOM_CENTER, AEVec2{ -220.0f + i * 100.0f, -370.0f },
-				AEVec2{ 75.0f, 75.0f }, Color(0.5f,0.5f,0.5f), AssetsManager::squareTexture };
-			emptyButton.SetTextScale(0.5f);
-			emptyButton.Update();
-			emptyButton.Draw();
-			i++;
+
+		// Initialize Ability Selector
+		abilitySelectorBG = UIManager::Panel{ {1400.0f, 700.0f}, Color(0.6196f, 0.6196f, 0.6196f), Utils::AnchorMode::CENTER };
+
+		AEVec2 cardSize{ CARD_WIDTH, CARD_HEIGHT }; // width and height
+		float gap = (1400.0f - (cardSize.x * abilitiesCards.size())) / (abilitiesCards.size() + 1);
+		AEVec2 cardPos{ -cardSize.x * 1.5f - gap, cardSize.y / 2.0f };
+
+		for (int i = 0; i < selectorCount; ++i) {
+			Card& card = abilitySelectorCards[i];
+			card = Card{ "", cardPos, Color(1,0,0), AssetsManager::squareTexture, nullptr, nullptr };
+			cardPos.x += cardSize.x + gap;
+			// Set button text object anchor position
+			TextObject& textObj = card.GetButton().GetTextObject();
+			textObj.SetPosition(Utils::AnchorMode::CENTER, card.GetButton().GetTransform());
+			textObj.SetOffsetPosition(0, -25.0f);
+		}
+	}
+
+	void AbilityController::AbilitySelectorUI() {
+		abilitySelectorBG.Draw();
+
+		for (int i = 0; i < abilitiesCards.size(); ++i) {
+			Ability const& ability = abilitiesCards[i];
+			AEGfxTexture* imageTexture = ability.GetTexture() == "" ? AssetsManager::squareTexture : AssetsManager::GetTexture(ability.GetTexture().c_str());
+			Card& card = abilitySelectorCards[i];
+			// Update onClick and texture every frame
+			card.SetTexture(imageTexture);
+
+			Button& button = card.GetButton();
+			button.SetOnClick([this, ability]() {
+				OnClickAbilityCard(ability);
+				});
+			button.GetTextObject().TextContent(ability.GetName());
+			button.SetTextOffset(0, -50.0f);
+
+			// Update and draw
+			card.Update();
+			card.Draw();
+		}
+	}
+
+	void AbilityController::UpdateAbilityUI() {
+		inventoryBackground.Draw();
+
+		LevelManager::CurrentLevel()->SetHoveringOverUI(CollisionManager::IsPointInRect(
+			inventoryBackground.Pos().x, inventoryBackground.Pos().y, inventoryBackground.Size().x, inventoryBackground.Size().y));
+
+		//// Ability icons
+		//for (int i = 0; i < inventory.size(); ++i) {
+		//	//Ability* ability = inventory[i];
+		//	//Color iconColor = ability->GetType() == AbilityType::OFFENSIVE ? Color(1, 0, 0) : Color(0, 0, 1);
+		//	//if (currentAbility == ability) {
+		//	//	iconColor = Color(0, 0, 0); 
+		//	//}
+		//	//std::vector<std::string> toBeRemoved = { "Projectile" };
+		//	//std::string AbilityName = ability->GetName();
+		//	//for (const std::string& word : toBeRemoved) {
+		//	//	size_t found = AbilityName.find(word);
+		//	//	if (found != std::string::npos) {
+		//	//		AbilityName.erase(found, std::string(word).length());
+		//	//	}
+		//	//};
+
+		//	//// Trim any trailing/leading spaces left behind
+		//	//while (!AbilityName.empty() && AbilityName.back() == ' ') AbilityName.pop_back();
+		//	//while (!AbilityName.empty() && AbilityName.front() == ' ') AbilityName.erase(AbilityName.begin());
+
+		//	//Button abilityButton{ TextObject{ AbilityName, 0.5f },
+		//	//	Utils::AnchorMode::BOTTOM_CENTER, AEVec2{ -220.0f + i * 100.0f, -370.0f },
+		//	//	AEVec2{ 75.0f, 75.0f }, iconColor, AssetsManager::squareTexture };
+		//	//abilityButton.SetTextOffset(0, 150.0f);
+		//}
+
+		for (int i = 0; i < inventoryMaxCount; ++i) {
+			Button& btn = inventoryAbilityButton[i];
+
+			std::string iconName = "Empty";
+			Color iconColor{ 0.5f, 0.5f, 0.5f };
+
+			if (i < inventory.size()) {
+				Ability* ability = inventory[i];
+				iconName = ability->GetName();
+				iconColor = ability->GetType() == AbilityType::OFFENSIVE ? Color(1, 0, 0) : Color(0, 0, 1);
+				// Highlight current ability
+				if (currentAbility == ability) {
+					iconColor = Color(0, 0, 0);
+				}
+			}
+			// Update button name and color
+			btn.SetColor(iconColor);
+			btn.GetTextObject().TextContent(iconName);
+
+			btn.Update();
+			btn.Draw();
 		}
 	}
 

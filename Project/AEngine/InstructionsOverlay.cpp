@@ -120,7 +120,7 @@ namespace UIInstructionsOverlay {
         float y = panel.Pos().y - 40.0f;
         Utils::NormalizeCoordinates(x, y);
 
-        sInstructionText.textContent = msg;
+        sInstructionText.TextContent(msg);
         sInstructionText.textScale = 0.65f;
         sInstructionText.color = { 1.0f, 1.0f, 1.0f, 1.0f };
         sInstructionText.pos = { x, y };

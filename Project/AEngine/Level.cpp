@@ -19,9 +19,22 @@ AEGfxTexture* enemyCannonTex = nullptr;
 
 TextObject debugText;
 
+TextObject turnText;
+UIManager::Panel turnStatusPanel;
+
 bool resultScreenInitialized = false;
 Button resultRestartButton;
 Button resultMainMenuButton;
+
+void Level::InitializeUI() {
+	// Initialize UI objects in level
+	turnStatusPanel = { {150,50}, {1,1,1}, Utils::AnchorMode::TOP_CENTER };
+
+	turnText = { "PLAYER TURN", 0.75f,{0,0.75f,0}, Utils::NormalizeCoordinates(turnStatusPanel.Pos()), Utils::AnchorMode::CENTER };
+	turnText.SetPosition(turnStatusPanel.GetTransform());
+
+	AbilitiesManager::playerAbilityController.InitializeAllAbilityUI();
+}
 
 Level::Level(int _leveId)
 	: levelId{ _leveId }, levelName{ "Level " + std::to_string(levelId + 1) }, levelFileName{ "level" + std::to_string(levelId) } {
@@ -129,6 +142,7 @@ void Level::Initalize() {
 	AbilitiesManager::AbilityController& playerController = AbilitiesManager::playerAbilityController;
 	playerController.LoadAllAbilities(false);
 	playerCannon.SetAbilityController(&playerController);
+	AbilitiesManager::playerAbilityController.IsSelectingAbility(true);
 
 	enemyCannon = CannonManager::Cannon(enemyCannonStartPos, enemyCannonTex, { 0,0 }, barrelHalfSize, false, false);
 	enemyCannon.textureColor = Color{ 1, 1, 1, 1 };
@@ -142,13 +156,14 @@ void Level::Initalize() {
 	autoPlayOn = false;
 	isSkippingEnemyTurn = false;
 	switchTurnCooldown = 0.0f;
-	isAbilitySelectorOn = true;
 
 	CameraManager::camera.SetPosition(playerCannon.transform.pos);
 	CameraManager::camera.SetState(CameraManager::CameraController::INPUT);
 
 	// Randomise at the start of the level the 3 abilities that the player can choose from in the ability selector UI
 	AbilitiesManager::playerAbilityController.AbilitySelectionRandomisator();
+
+	InitializeUI();
 
 	std::cout << "[Level] Initialize " + levelFileName << '\n';
 }
@@ -192,10 +207,10 @@ void Level::Update() {
 	ParticleManager::particleController.Update(PhysicsManager::g_dt);
 
 	// Need to be below DrawLevel to ensure that the Ability Selector UI is shows up infront of the level
-	prevIsAbilitySelectorOn = isAbilitySelectorOn;
-	AbilitiesManager::playerAbilityController.AbilitySelector(isAbilitySelectorOn);
+	prevIsAbilitySelectorOn = AbilitiesManager::playerAbilityController.IsSelectingAbility();
+	AbilitiesManager::playerAbilityController.AbilitySelector();
 
-	if (isAbilitySelectorOn != prevIsAbilitySelectorOn) {
+	if (AbilitiesManager::playerAbilityController.IsSelectingAbility() != prevIsAbilitySelectorOn) {
 		delayTimer = defaultDelayTimer;
 	}
 
@@ -204,7 +219,7 @@ void Level::Update() {
 	}
 
 	// UI
-	if (isPlayerTurn) AbilitiesManager::playerAbilityController.AbilityUI();
+	if (isPlayerTurn) AbilitiesManager::playerAbilityController.UpdateAbilityUI();
 	DrawUI();
 	DebugInfo();
 
@@ -234,16 +249,14 @@ void Level::Free() {
 }
 
 void Level::DrawUI() {
-	// UI to display whose turn it is
-	UIManager::Panel turnStatusPanel{ {150,50}, {1,1,1}, Utils::AnchorMode::TOP_CENTER };
-	turnStatusPanel.Draw();
-
-	TextObject turnText = { "PLAYER TURN", 0.75f,{0,0.75f,0}, Utils::NormalizeCoordinates(turnStatusPanel.Pos()), Utils::AnchorMode::CENTER };
+	// Update UI before drawing it
 	if (!isPlayerTurn) {
-		turnText.textContent = "ENEMY TURN";
+		turnText.TextContent("ENEMY TURN");
 		turnText.color = { 0.75f,0,0 };
 	}
-	turnText.SetAnchorPosition(turnStatusPanel.Pos(), turnStatusPanel.Size());
+
+	// UI to display whose turn it is
+	turnStatusPanel.Draw();
 	turnText.Draw();
 
 	float colorVal = 0.9f;
@@ -317,7 +330,7 @@ void Level::SetTurn(bool _isPlayerTurn) {
 	isPlayerTurn = _isPlayerTurn;
 	if (isPlayerTurn) {
 		activeCannon = &playerCannon;
-		isAbilitySelectorOn = true;
+		AbilitiesManager::playerAbilityController.IsSelectingAbility(true);
 		// randomise the abilities available to the player for this turn
 		AbilitiesManager::playerAbilityController.AbilitySelectionRandomisator();
 
@@ -331,7 +344,7 @@ void Level::SetTurn(bool _isPlayerTurn) {
 }
 
 void Level::UpdateLevelStatus() {
-	status = !isAbilitySelectorOn && !isHoveringUI && delayTimer <= 0.0f && !prevIsAbilitySelectorOn
+	status = !AbilitiesManager::playerAbilityController.IsSelectingAbility() && !isHoveringUI && delayTimer <= 0.0f && !prevIsAbilitySelectorOn
 		? LevelStatus::PLAYING : LevelStatus::PAUSED;
 
 	// Checking win conditions for both enemy and player
@@ -509,7 +522,7 @@ void Level::DebugCommands() {
 	}
 
 	if (autoPlayOn) {
-		isAbilitySelectorOn = false;
+		AbilitiesManager::playerAbilityController.IsSelectingAbility(false);;
 		if (isPlayerTurn) {
 			SetTurn(false);
 		}
@@ -580,7 +593,7 @@ void Level::DebugInfo() {
 
 	debugPanel.Draw();
 
-	debugText.textContent = debug;
+	debugText.TextContent(debug);
 	debugText.Draw();
 }
 

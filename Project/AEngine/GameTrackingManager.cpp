@@ -25,9 +25,11 @@ namespace GameTrackingManager {
 		int mins = static_cast<int>(data.sessionDuration) / 60;
 		int secs = static_cast<int>(data.sessionDuration) % 60;
 
-		std::streamsize w{ 30 };
+		std::streamsize w{ 50 };
 		output << "=============== Code Tracking ==============="
-			<< std::left << std::setw(w) << "\nDraw Mesh Count: " << data.meshDrawCount 
+			<< std::left << std::setw(w) << "\nDraw Mesh Count: " << data.drawMeshCount 
+			<< std::left << std::setw(w) << "\nDrawMap() Count: " << data.drawMapCount
+			<< std::left << std::setw(w) << "\nDraw Tiles in DrawMap() Count: " << data.drawTilesCount
 			<< "\n=============== Game Data ==============="
 			<< std::left << std::setw(w) << "\nGame Duration: " << mins << " mins " << secs << " secs"
 			<< std::left << std::setw(w) << "\nPlayer shots: " << data.playerShotsFired

@@ -5,10 +5,10 @@
 
 #include "Color.hpp"
 #include "Utils.hpp"
+#include "BaseTypes.hpp"
 
 class TextObject {
 public:
-	std::string textContent;
 	float textScale = 1.0f;
 	AEVec2 pos{ 0,0 };
 	Color color{ 1,1,1 };
@@ -29,18 +29,45 @@ public:
 	*************************************************************************/
 	TextObject(std::string _text, float _scale = 1.0f, Color _color = Color{ 1,1,1 }, AEVec2 _pos = { 0,0 }, Utils::AnchorMode _anchorMode = Utils::AnchorMode::TOP_LEFT);
 
+	// Set a new anchorMode and set a new parent transform to update the position of this textObject (Called in Init)
+	void SetPosition(Utils::AnchorMode newMode, Transform const& parentTransform);
+	// Use the current anchorMode and set a new parent transform to update the position of this textObject (Called in Init)
+	void SetPosition(Transform const& parentTransform);
+	// Set the offset position to be used to offset from the anchor point that was set (Called in Init)
+	void SetOffsetPosition(float x, float y);
+
+	std::string TextContent() { return textContent; }
+	void TextContent(std::string newText) {
+		prevTextContent = textContent;
+		textContent = newText;
+		hasUpdatePos = false;
+	}
 	/*!***********************************************************************
 	\brief
-	Set text object position according to the parent panel
+	Set position of the textObject according to the parent panel if there is one
 	\param[in] panelPos
 	- position of the parent panel
 	\param[in] panelSize
 	- size of the panel
 	*************************************************************************/
-	void SetAnchorPosition(AEVec2 const& panelPos, AEVec2 const& panelSize);
+	void SetAnchorPosition(AEVec2 const& parentPos, AEVec2 const& parentSize);
+	void SetAnchorPosition();
+
 	void Draw();
 private:
+	// Set the anchor position of the text to be printed out (In Normalized coordinates)
+	void SetTextAnchorPosition();
+private:
+	std::string textContent = "";
+	std::string prevTextContent = "";
+	Transform parent{ {0,0}, {0,0} };
 	Utils::AnchorMode anchorMode = Utils::AnchorMode::CENTER;
+	// position of the textObject is affect by its text content and has a parent object like a panel 
+	// need to update its position whenever text is update
+	bool isSettingAnchorPos = false; 
+	bool hasUpdatePos = false;
+
+	AEVec2 offsetPos{ 0,0 };
 };
 
 #endif // !TEXTOBJECT_HPP
