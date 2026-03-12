@@ -56,8 +56,7 @@ namespace GameStateManager {
         // =============== WARNING DON'T CHANGE THE LOAD ORDER ===============
         // Load all resources
         AssetsManager::Load();
-        UICursor::Load(); // Load the custom cursor texture               
-        GraphicsManager::Load();
+        GraphicsManager::Load();            
 
         LevelManager::LoadAllLevels();
         MapManager::Load();
@@ -66,7 +65,6 @@ namespace GameStateManager {
         AudioManager::Load();           
 
         UICursor::Load();               // Load the custom cursor texture
-                                        // Done globally so the cursor is always available regardless of state.
         LevelSelect::Load();
         Credits::Load();                // Pre-load any assets required by the credits screen
         Guide::Load();                  // Pre-load assets and build guide text / ability info
