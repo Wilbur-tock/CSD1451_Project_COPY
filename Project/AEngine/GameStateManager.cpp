@@ -53,6 +53,7 @@ namespace GameStateManager {
         gsLoad = gsIntialize = gsUpdate = gsDraw = gsFree = gsUnload = nullptr;
         setNewState = false;
 
+        // =============== WARNING DON'T CHANGE THE LOAD ORDER ===============
         // Load all resources
         AssetsManager::Load();
         UICursor::Load(); // Load the custom cursor texture               
@@ -66,10 +67,6 @@ namespace GameStateManager {
 
         UICursor::Load();               // Load the custom cursor texture
                                         // Done globally so the cursor is always available regardless of state.
-        GraphicsManager::Load();        // Initialise the AEGfx rendering pipeline
-        LevelManager::LoadLevel();           // Pre-load level data structures so level transitions are fast
-        MapManager::Load();             // Load the tile map data needed by both LevelManager and MapEditor
-        MainMenu::Load();               // Pre-load the main menu's button and background textures into the asset cache
         LevelSelect::Load();
         Credits::Load();                // Pre-load any assets required by the credits screen
         Guide::Load();                  // Pre-load assets and build guide text / ability info
@@ -293,17 +290,18 @@ namespace GameStateManager {
 
     // Releases all globally owned resources in reverse dependency order
     void Exit() {
+        GameTrackingManager::GameEnd();
+        AssetsManager::Unload();
+
         MainMenu::Unload();
         LevelSelect::Unload();
         Guide::Unload();
-        AssetsManager::Unload();
         UICursor::Unload();
-        GraphicsManager::Unload();
         MapManager::Unload();
         AudioManager::Shutdown();
         ParticleManager::particleController.Shutdown();
 
-        GameTrackingManager::GameEnd();
+        GraphicsManager::Unload();
     }
 
     static void DebugCommands() {

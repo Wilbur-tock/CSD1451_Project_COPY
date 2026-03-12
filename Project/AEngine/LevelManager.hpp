@@ -5,16 +5,12 @@
 #include "Level.hpp"
 
 namespace LevelManager {
-	// current selected level
-	extern Level* selectedLevel;
-	static std::vector<Level> levelDatas; // vector containing all the level data in the game
-
 	void LoadAllLevels(); // Load all the levels data (Map layout, all instance of player and enemy character object)
 	// Load specific level
 	void LoadLevel(int levelId);
 	void SelectLevel(int levelId); // Select level
+	Level* CurrentLevel();
 
-	void LoadLevel();
 	void InitializeLevel();
 	void UpdateLevel();
 	void FreeLevel();

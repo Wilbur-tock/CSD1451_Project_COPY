@@ -1,10 +1,10 @@
 =============== Code Tracking ===============
-Draw Mesh Count:             4216747
+Draw Mesh Count:             780
 =============== Game Data ===============
-Game Duration:               1 mins 26 secs
-Player shots:                5
-Player hits:                 1
-Player miss:                 3
+Game Duration:               0 mins 5 secs
+Player shots:                0
+Player hits:                 0
+Player miss:                 0
 Enemy shots:                 0
 Enemy hits:                  0
 Enemy miss:                  0

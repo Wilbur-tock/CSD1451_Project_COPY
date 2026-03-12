@@ -172,7 +172,7 @@ namespace MapEditor {
 			SaveNewFile(DebugFilePath(savePath));
 		}
 
-		LevelManager::LoadLevel(); // Reload every level map
+		LevelManager::LoadAllLevels(); // Reload every level map
 		isDrawingNewMap = true;
 	}
 

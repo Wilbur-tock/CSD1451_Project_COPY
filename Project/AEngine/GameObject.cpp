@@ -50,7 +50,7 @@ GameObject& GameObject::operator=(const GameObject& other) {
 }
 
 GameObject::~GameObject() {
-	if (pMesh != nullptr) {
+	if (pMesh) {
 		AEGfxMeshFree(pMesh);
 		pMesh = nullptr;
 	}

@@ -1,7 +1,8 @@
 #include "LevelManager.hpp"
 
 namespace LevelManager {
-	Level* selectedLevel = nullptr;
+	Level* selectedLevel = nullptr; // current selected level
+	std::vector<Level> levelDatas; // vector containing all the level data in the game
 
 	void LoadAllLevels() {
 		int levelCount = 1;
@@ -25,8 +26,8 @@ namespace LevelManager {
 		selectedLevel = &(levelDatas[levelId]);
 	}
 
-	void LoadLevel() {
-		//selectedLevel->Load();
+	Level* CurrentLevel() {
+		return selectedLevel;
 	}
 
 	void InitializeLevel() {

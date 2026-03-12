@@ -24,7 +24,7 @@ void Tile::TakeDamage(int damage) {
 
 	// Damage character here
 	if (IsCharacter()) {
-		Character* character = LevelManager::selectedLevel->FindCharacterObj(*this);
+		Character* character = LevelManager::CurrentLevel()->FindCharacterObj(*this);
 		if (character) {
 			character->attribute.TakeDamage(damage);
 			std::cout << "[Tile] Damaged character " + character->TypeName() + " new hp: " + std::to_string(character->attribute.Health()) + '\n';

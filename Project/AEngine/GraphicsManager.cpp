@@ -166,7 +166,6 @@ namespace GraphicsManager {
 		// Finalise and store the mesh. pSpriteMesh is reused every frame by
 		// DrawSpriteFrame - it is only built once here during Load().
 		pSpriteMesh = AEGfxMeshEnd();
-
 	}
 
 	// Renders a single frame from a horizontal sprite sheet in screen space.
@@ -240,9 +239,14 @@ namespace GraphicsManager {
 			AEGfxMeshFree(pMeshTopLeftCorner);
 			pMeshTopLeftCorner = nullptr;
 		}
-		if (pSpriteMesh) { 
-			AEGfxMeshFree(pSpriteMesh); 
-			pSpriteMesh = nullptr; 
+
+		if (pSpriteMesh) {
+			AEGfxMeshFree(pSpriteMesh);
+			pSpriteMesh = nullptr;
+		}
+
+		if (pMeshCenter || pMeshTopLeftCorner || pSpriteMesh) {
+			std::cerr << "Graphics Mesh Failed to Free" << '\n';
 		}
 	}
 

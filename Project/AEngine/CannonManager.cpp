@@ -395,7 +395,7 @@ namespace CannonManager {
         case ProjectileMode::AUTO_AIM:
             // Find new target if target is not alive
             if (!IsTargetAlive()) {
-                SetTarget(LevelManager::selectedLevel->RandomCharacterObj(!isPlayerControlled)); // Randomly find a enemy target
+                SetTarget(LevelManager::CurrentLevel()->RandomCharacterObj(!isPlayerControlled)); // Randomly find a enemy target
             }
 
             // Calculate perfect shot angle and power

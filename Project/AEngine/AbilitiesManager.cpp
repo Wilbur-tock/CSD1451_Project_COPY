@@ -420,7 +420,7 @@ namespace AbilitiesManager {
 		UIManager::Panel background{ {600.0f, 90.0f}, Color(0.647f, 0.165f, 0.165f, 1.0f), Utils::AnchorMode::BOTTOM_CENTER };
 		background.Draw();
 
-		LevelManager::selectedLevel->SetHoveringOverUI(CollisionManager::IsPointInRect(background.Pos().x, background.Pos().y, background.Size().x, background.Size().y));
+		LevelManager::CurrentLevel()->SetHoveringOverUI(CollisionManager::IsPointInRect(background.Pos().x, background.Pos().y, background.Size().x, background.Size().y));
 
 		// Ability icons
 		for (int i = 0; i < inventory.size(); ++i) {
