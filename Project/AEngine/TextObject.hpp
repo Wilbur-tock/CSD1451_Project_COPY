@@ -9,11 +9,6 @@
 
 class TextObject {
 public:
-	float textScale = 1.0f;
-	AEVec2 pos{ 0,0 };
-	Color color{ 1,1,1 };
-	s8 font;
-
 	TextObject();
 	/*!***********************************************************************
 	\brief
@@ -36,30 +31,36 @@ public:
 	// Set the offset position to be used to offset from the anchor point that was set (Called in Init)
 	void SetOffsetPosition(float x, float y);
 
+	AEVec2 Pos() const { return pos; }
+	void Pos(AEVec2 _pos) { pos = _pos; }
+
+	void TextScale(float newScale) { textScale = newScale; }
+	void SetColor(Color const& newColor) { color = newColor; }
+	Color GetColor() const { return color; }
+	void SetFont(s8 newFont) { font = newFont; }
+
 	std::string TextContent() { return textContent; }
 	void TextContent(std::string newText) {
 		prevTextContent = textContent;
 		textContent = newText;
 		hasUpdatePos = false;
 	}
-	/*!***********************************************************************
-	\brief
-	Set position of the textObject according to the parent panel if there is one
-	\param[in] panelPos
-	- position of the parent panel
-	\param[in] panelSize
-	- size of the panel
-	*************************************************************************/
-	void SetAnchorPosition(AEVec2 const& parentPos, AEVec2 const& parentSize);
-	void SetAnchorPosition();
 
 	void Draw();
 private:
+	// Set the anchor position of the text object
+	void SetAnchorPosition(Transform const& transform);
 	// Set the anchor position of the text to be printed out (In Normalized coordinates)
 	void SetTextAnchorPosition();
 private:
 	std::string textContent = "";
 	std::string prevTextContent = "";
+
+	float textScale = 1.0f;
+	AEVec2 pos{ 0,0 };
+	Color color{ 1,1,1 };
+	s8 font;
+
 	Transform parent{ {0,0}, {0,0} };
 	Utils::AnchorMode anchorMode = Utils::AnchorMode::CENTER;
 	// position of the textObject is affect by its text content and has a parent object like a panel 

@@ -77,6 +77,9 @@ namespace GameStateManager {
 
 		// Initialize particle controller with a pool size of 2048 (max concurrent particles)
         ParticleManager::particleController.Init(2048);
+
+        // Initialize UI that can be display throughtout ALL GAME STATES
+        UIInstructionsOverlay::Initialize();
     }
 
     void Update() {
@@ -267,7 +270,7 @@ namespace GameStateManager {
         }
 
         // Update current state
-        if (gsUpdate != nullptr) {
+        if (gsUpdate && !Utils::isInstructionOn) {
             gsUpdate();
         }
 

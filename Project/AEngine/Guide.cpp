@@ -6,7 +6,6 @@
 #include "CameraManager.hpp"
 #include "UIManager.hpp"
 #include "AudioManager.hpp"
-#include "TextObject.hpp"
 #include "Color.hpp"
 #include "Utils.hpp"
 #include "json.hpp"
@@ -30,6 +29,8 @@ namespace Guide {
     static TextObject hintText;
     static TextObject bodyLeftText;
     static TextObject bodyRightText;
+
+    UIManager::Panel mainPanel;
 
     static AEGfxTexture* bgTexture = nullptr;
     static AEGfxTexture* buttonTexture = nullptr;
@@ -184,6 +185,12 @@ namespace Guide {
         CameraManager::camera.SetPosition({ 0.0f, 0.0f });
         CameraManager::camera.SetState(CameraManager::CameraController::STATIC);
 
+        mainPanel = UIManager::Panel{
+            { 1380.0f, 700.0f },
+            Color(0.96f, 0.96f, 0.96f, 0.92f),
+            Utils::AnchorMode::CENTER
+        };
+
         backButton = Button(
             TextObject{ "< BACK" },
             Utils::AnchorMode::CENTER,
@@ -246,11 +253,6 @@ namespace Guide {
             AEGfxSetBackgroundColor(0.1f, 0.1f, 0.15f);
         }
 
-        UIManager::Panel mainPanel(
-            { 1380.0f, 700.0f },
-            Color(0.96f, 0.96f, 0.96f, 0.92f),
-            Utils::AnchorMode::CENTER
-        );
         mainPanel.Draw();
 
         titleText.TextContent(currentPage == GuidePage::GAME

@@ -17,23 +17,96 @@
 AEGfxTexture* playerCannonTex = nullptr;
 AEGfxTexture* enemyCannonTex = nullptr;
 
-TextObject debugText;
-
-TextObject turnText;
+// UI Objects
+TextObject debugText, turnText;
 UIManager::Panel turnStatusPanel;
+UIManager::Bar playerHPBar, enemyHPBar;
 
 bool resultScreenInitialized = false;
-Button resultRestartButton;
-Button resultMainMenuButton;
+UIManager::Panel resultOverlay, centerPanel;
+Button resultRestartButton, resultMainMenuButton;
+TextObject resultTitle, subtitle;
+
+static void OnResultRestart() {
+	GameStateManager::next = GameStateManager::GameState::RESTART;
+}
+
+static void OnResultMainMenu() {
+	GameStateManager::next = GameStateManager::GameState::MAIN_MENU;
+}
 
 void Level::InitializeUI() {
 	// Initialize UI objects in level
 	turnStatusPanel = { {150,50}, {1,1,1}, Utils::AnchorMode::TOP_CENTER };
 
-	turnText = { "PLAYER TURN", 0.75f,{0,0.75f,0}, Utils::NormalizeCoordinates(turnStatusPanel.Pos()), Utils::AnchorMode::CENTER };
+	turnText = TextObject{ "", 0.75f,{0,0.75f,0}, {0,0}, Utils::AnchorMode::CENTER};
 	turnText.SetPosition(turnStatusPanel.GetTransform());
 
 	AbilitiesManager::playerAbilityController.InitializeAllAbilityUI();
+
+	float colorVal = 0.9f;
+	Transform barTrans = { {0,0}, {725,25} };
+	Utils::SetAnchoredPosition(barTrans, Utils::AnchorMode::TOP_LEFT);
+
+	playerHPBar= UIManager::Bar{ { barTrans.pos.x, barTrans.pos.y }, barTrans.size, {0,colorVal,0} };
+	enemyHPBar = UIManager::Bar{ { barTrans.pos.x + 150 + barTrans.size.x, barTrans.pos.y }, barTrans.size, {colorVal,0,0,}, UIManager::FillType::RIGHT_TO_LEFT };
+
+	// Initialize ResultsUI
+	AEGfxTexture* btnTex = AssetsManager::GetTexture("Assets/buttonTexture.png");
+	if (!btnTex) btnTex = AssetsManager::squareTexture;
+
+	float btnW = 250.0f;
+	float btnH = 70.0f;
+	float gap = 30.0f;
+
+	// Coordinates use world-origin where (0,0) = screen center
+	// pMeshCorner draws from top-left corner downward
+	// Total button area width: btnW + gap + btnW = 530
+	float totalW = btnW + gap + btnW;
+
+	// Restart button: left side of center
+	float restartX = -totalW * 0.5f;
+	float restartY = -20.0f;
+
+	resultRestartButton = Button(
+		TextObject{ "RESTART" },
+		Utils::AnchorMode::CENTER,
+		{ restartX, restartY },
+		{ btnW, btnH },
+		Color(0.2f, 0.6f, 0.9f, 1.0f),
+		btnTex,
+		OnResultRestart
+	);
+
+	// Main menu button: right side of center
+	float menuX = restartX + btnW + gap;
+	float menuY = restartY;
+
+	resultMainMenuButton = Button(
+		TextObject{ "MAIN MENU" },
+		Utils::AnchorMode::CENTER,
+		{ menuX, menuY },
+		{ btnW, btnH },
+		Color(0.8f, 0.2f, 0.2f, 1.0f),
+		btnTex,
+		OnResultMainMenu
+	);
+
+	// -- Draw dark semi-transparent full-screen overlay --
+	// Screen top-left in world-origin coords is (-SCREEN_WIDTH/2, SCREEN_HEIGHT/2)
+	resultOverlay = UIManager::Panel{ {(float)Config::SCREEN_WIDTH, (float)Config::SCREEN_HEIGHT},
+		Color(0.0f, 0.0f, 0.0f, 0.6f), Utils::AnchorMode::TOP_LEFT };
+
+	centerPanel = UIManager::Panel{ {600.0f, 300.0f}, Color{1,1,1}, Utils::AnchorMode::CENTER};
+
+	resultTitle = TextObject{ "", 2.0f, Color{1,1,1}, {0.0f, 0.0f}, Utils::AnchorMode::CENTER};
+	resultTitle.SetPosition(centerPanel.GetTransform());
+	// Shift title text upward inside the panel
+	resultTitle.SetOffsetPosition(0, 50.0f);
+
+	subtitle = TextObject{ "", 0.7f, Color{1,1,1, 0.9f}, {0.0f, 0.0f}, Utils::AnchorMode::CENTER};
+	subtitle.SetPosition(centerPanel.GetTransform());
+	subtitle.SetOffsetPosition(0, 0.2f);
 }
 
 Level::Level(int _leveId)
@@ -141,7 +214,7 @@ void Level::Initalize() {
 
 	AbilitiesManager::AbilityController& playerController = AbilitiesManager::playerAbilityController;
 	playerController.LoadAllAbilities(false);
-	playerCannon.SetAbilityController(&playerController);
+	playerCannon.Initialize(&playerController);
 	AbilitiesManager::playerAbilityController.IsSelectingAbility(true);
 
 	enemyCannon = CannonManager::Cannon(enemyCannonStartPos, enemyCannonTex, { 0,0 }, barrelHalfSize, false, false);
@@ -149,7 +222,7 @@ void Level::Initalize() {
 	enemyCannon.SetEnemyAI(static_cast<int>(levelDifficulty));
 	AbilitiesManager::AbilityController& enemyController = AbilitiesManager::enemyAbilityController;
 	enemyController.LoadAllAbilities(true);
-	enemyCannon.SetAbilityController(&enemyController);
+	enemyCannon.Initialize(&enemyController);
 
 	// Reset level flow variables
 	isPlayerTurn = true;
@@ -226,7 +299,7 @@ void Level::Update() {
 	// Draw result screen LAST so it renders on top of everything
 	if (status == LevelStatus::PLAYER_WON || status == LevelStatus::ENEMY_WON) {
 		Utils::isResultScreenOn = true;
-		DrawResultScreen();
+		DrawResultsUI();
 	}
 	else {
 		Utils::isResultScreenOn = false;
@@ -250,27 +323,23 @@ void Level::Free() {
 
 void Level::DrawUI() {
 	// Update UI before drawing it
-	if (!isPlayerTurn) {
+	if (isPlayerTurn) {
+		turnText.TextContent("PLAYER TURN");
+		turnText.SetColor(Color{ 0, 0.75f,0 });
+	}
+	else {
 		turnText.TextContent("ENEMY TURN");
-		turnText.color = { 0.75f,0,0 };
+		turnText.SetColor(Color{ 1.0f, 0, 0 });
 	}
 
 	// UI to display whose turn it is
 	turnStatusPanel.Draw();
 	turnText.Draw();
 
-	float colorVal = 0.9f;
-	Transform barTrans = { {0,0}, {725,25} };
-	Utils::SetAnchoredPosition(barTrans, Utils::AnchorMode::TOP_LEFT);
-
-	UIManager::Bar playerHPBar{ {barTrans.pos.x, barTrans.pos.y }, barTrans.size, {0,colorVal,0} };
-
 	float currentHP = 0, maxHP = 0;
 	GetCurrentHP(currentHP);
 	GetMaxHP(maxHP);
 	playerHPBar.Draw(currentHP, maxHP);
-
-	UIManager::Bar enemyHPBar{ { barTrans.pos.x + 150 + barTrans.size.x, barTrans.pos.y }, barTrans.size, {colorVal,0,0,}, UIManager::FillType::RIGHT_TO_LEFT };
 
 	GetCurrentHP(currentHP, false);
 	GetMaxHP(maxHP, false);
@@ -363,75 +432,14 @@ void Level::UpdateLevelStatus() {
 	if (currentPlayerHP <= 0) status = LevelStatus::ENEMY_WON;
 }
 
-static void OnResultRestart() {
-	GameStateManager::next = GameStateManager::GameState::RESTART;
-}
-
-static void OnResultMainMenu() {
-	GameStateManager::next = GameStateManager::GameState::MAIN_MENU;
-}
-
-void Level::DrawResultScreen() {
-	// Initialize buttons once when the result screen first appears
-	if (!resultScreenInitialized) {
-		resultScreenInitialized = true;
-
-		AEGfxTexture* btnTex = AssetsManager::GetTexture("Assets/buttonTexture.png");
-		if (!btnTex) btnTex = AssetsManager::squareTexture;
-
-		float btnW = 250.0f;
-		float btnH = 70.0f;
-		float gap = 30.0f;
-
-		// Coordinates use world-origin where (0,0) = screen center
-		// pMeshCorner draws from top-left corner downward
-		// Total button area width: btnW + gap + btnW = 530
-		float totalW = btnW + gap + btnW;
-
-		// Restart button: left side of center
-		float restartX = -totalW * 0.5f;
-		float restartY = -20.0f;
-
-		resultRestartButton = Button(
-			TextObject{ "RESTART" },
-			Utils::AnchorMode::CENTER,
-			{ restartX, restartY },
-			{ btnW, btnH },
-			Color(0.2f, 0.6f, 0.9f, 1.0f),
-			btnTex,
-			OnResultRestart
-		);
-
-		// Main menu button: right side of center
-		float menuX = restartX + btnW + gap;
-		float menuY = restartY;
-
-		resultMainMenuButton = Button(
-			TextObject{ "MAIN MENU" },
-			Utils::AnchorMode::CENTER,
-			{ menuX, menuY },
-			{ btnW, btnH },
-			Color(0.8f, 0.2f, 0.2f, 1.0f),
-			btnTex,
-			OnResultMainMenu
-		);
-	}
-
-	// -- Draw dark semi-transparent full-screen overlay --
-	// Screen top-left in world-origin coords is (-SCREEN_WIDTH/2, SCREEN_HEIGHT/2)
-	UIManager::Panel overlay{ {(float)Config::SCREEN_WIDTH, (float)Config::SCREEN_HEIGHT},
-		Color(0.0f, 0.0f, 0.0f, 0.6f), Utils::AnchorMode::TOP_LEFT };
-	overlay.Draw();
-
-	// -- Draw center panel background --
-	float panelW = 600.0f;
-	float panelH = 300.0f;
+void Level::DrawResultsUI() {
+	resultOverlay.Draw();
 
 	Color panelColor = (status == LevelStatus::PLAYER_WON)
 		? Color(0.1f, 0.3f, 0.1f, 0.9f)
 		: Color(0.3f, 0.1f, 0.1f, 0.9f);
 
-	UIManager::Panel centerPanel{ {panelW, panelH}, panelColor, Utils::AnchorMode::CENTER };
+	centerPanel.SetColor(panelColor);
 	centerPanel.Draw();
 
 	// -- Draw result title text --
@@ -440,16 +448,8 @@ void Level::DrawResultScreen() {
 		? Color(0.2f, 1.0f, 0.2f, 1.0f)
 		: Color(1.0f, 0.2f, 0.2f, 1.0f);
 
-	TextObject resultTitle{
-		resultStr,
-		2.0f,
-		textColor,
-		{0.0f, 0.0f},
-		Utils::AnchorMode::CENTER
-	};
-	resultTitle.SetAnchorPosition(centerPanel.Pos(), centerPanel.Size());
-	// Shift title text upward inside the panel
-	resultTitle.pos.y += 0.15f;
+	resultTitle.TextContent(resultStr);
+	resultTitle.SetColor(textColor);
 	resultTitle.Draw();
 
 	// -- Draw subtitle text --
@@ -457,15 +457,7 @@ void Level::DrawResultScreen() {
 		? "All enemies have been defeated!"
 		: "All your units have fallen!";
 
-	TextObject subtitle{
-		subStr,
-		0.7f,
-		Color(1.0f, 1.0f, 1.0f, 0.9f),
-		{0.0f, 0.0f},
-		Utils::AnchorMode::CENTER
-	};
-	subtitle.SetAnchorPosition(centerPanel.Pos(), centerPanel.Size());
-	subtitle.pos.y += 0.02f;
+	subtitle.TextContent(subStr);
 	subtitle.Draw();
 
 	// -- Draw buttons --

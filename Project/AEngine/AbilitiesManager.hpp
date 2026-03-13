@@ -28,7 +28,7 @@ namespace AbilitiesManager {
 		//Ability* GetCurrentAIProjectile() { return AIProjectileSelected; }
 
 		Ability CurrentAbility() const { return *currentAbility; }
-		int InventoryCount() const{ return static_cast<int>(inventory.size()); }
+		int InventoryCount() const{ return inventoryCount; }
 
 		bool IsSelectingAbility() const { return isSelectingAbility; }
 		void IsSelectingAbility(bool _isSelectingAbility) { isSelectingAbility = _isSelectingAbility; }
@@ -94,10 +94,15 @@ namespace AbilitiesManager {
 		std::string controllerName; // use for debugging
 		Ability* currentAbility = nullptr;
 
-		std::vector<Ability*> inventory; // vector containing all the type of abilities this controller has in its inventory
 		std::vector<Ability> allAbilities; // vector containing all the different type of abilities
+		std::vector<Ability*> inventory; // vector containing all the type of abilities this controller has in its inventory
 		std::vector<int> inventoryTypeCount; // To keep track of how many of each ability type there is in the inventory
 
+		int inventoryCount = 0; // total number of abilites the has stored in the inventory
+		// ids of all the ability that store in the inventory 
+		// for example inventory has 5 max space [0][0][1][2][3] < numbers represents the abilityId 
+		// has 2 charges of abilityId in inventory while the rest 1 charges only
+		std::vector<int> inventoryAbilityIds; 
 		bool isSelectingAbility = false;
 
 		bool isAIController = false;

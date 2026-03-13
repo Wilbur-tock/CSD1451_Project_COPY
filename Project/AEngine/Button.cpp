@@ -50,7 +50,5 @@ void Button::SetTextOffset(float offsetX, float offsetY) {
 
 void Button::SetPosition(Transform const& parent, Utils::AnchorMode mode) {
     // Find the anchor position
-    std::cout << textObj.TextContent() << ' ' << parent.pos.x << ' ' << parent.pos.y << ' ' << ' ' << transform.pos.x << ' ' << transform.pos.y << '\n';
     Utils::SetAnchoredPosition(parent, transform, mode);
-    std::cout << textObj.TextContent() << ' ' << transform.pos.x << ' ' << transform.pos.y << '\n';
 }

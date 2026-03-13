@@ -6,7 +6,13 @@
 
 namespace UIManager {
     Bar::Bar(AEVec2 _pos, AEVec2 _size, Color _color, FillType _type, AEGfxTexture* _texture)
-        : transform{ _pos, _size }, color{ _color }, type{ _type }, texture{_texture} {}
+        : transform{ _pos, _size }, fillColor{ _color }, bgColor{ _color }, type{ _type }, texture{_texture} {
+        bgColor.EditColorPercentage(0.8f);
+    }
+
+    Bar::Bar(AEVec2 _pos, AEVec2 _size, Color _color, Color _bgColor, FillType _type, AEGfxTexture* _texture)
+        : transform{ _pos, _size }, fillColor{ _color }, bgColor{_bgColor}, type{_type}, texture{_texture} {
+    }
 
 	void Bar::Draw(float currValue, float maxValue, bool isScreenOverlay) {
         AEGfxTexture* tex = AssetsManager::squareTexture;
@@ -18,9 +24,6 @@ namespace UIManager {
         //x -= halfWidth;
 
         // Lighter background bar
-        Color bgColor = { color.Red(), color.Green(), color.Blue() };
-        bgColor.EditColorPercentage(0.8f);
-
         if (isScreenOverlay) {
             GraphicsManager::DrawScreenOverlay(tex, GraphicsManager::CreateTransformMatrix(x, y, 0, w, h), bgColor);
         }
@@ -50,10 +53,10 @@ namespace UIManager {
 
         // Bar
         if (isScreenOverlay) {
-            GraphicsManager::DrawScreenOverlay(tex, GraphicsManager::CreateTransformMatrix(x, y, 0, newW, newH), color);
+            GraphicsManager::DrawScreenOverlay(tex, GraphicsManager::CreateTransformMatrix(x, y, 0, newW, newH), fillColor);
         }
         else {
-            GraphicsManager::DrawWorldUI(tex, GraphicsManager::CreateTransformMatrix(x, y, 0, newW, newH), color);
+            GraphicsManager::DrawWorldUI(tex, GraphicsManager::CreateTransformMatrix(x, y, 0, newW, newH), fillColor);
         }
 	}
 
@@ -84,7 +87,12 @@ namespace UIManager {
         });
 
         textObj.SetPosition(Utils::AnchorMode::CENTER, panel.GetTransform());
-        std::cout << panel.Pos().x << ' ' << panel.Pos().y << " Pos: " << textObj.pos.x << ' ' << textObj.pos.y << '\n';
+        //std::cout << panel.Pos().x << ' ' << panel.Pos().y << " Pos: " << textObj.Pos().x << ' ' << textObj.Pos().y << '\n';
+    }
+
+    void PopupPanel::Popup(std::string msg) {
+        textObj.TextContent(msg);
+        isActive = true;
     }
 
     void PopupPanel::Draw() {

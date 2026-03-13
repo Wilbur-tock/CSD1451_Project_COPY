@@ -64,7 +64,7 @@ private:
 	void UpdateTurn();
 	void SetTurn(bool _isPlayerTurn);
 	void UpdateLevelStatus();
-	void DrawResultScreen();
+	void DrawResultsUI();
 
 	void DebugCommands();
 	void DebugInfo();

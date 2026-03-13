@@ -8,6 +8,7 @@
 // this file is only responsible for drawing.
 
 namespace UIInstructionsOverlay {
+    void Initialize();
     void Draw();
 }
 

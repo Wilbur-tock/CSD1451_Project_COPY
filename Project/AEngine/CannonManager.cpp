@@ -21,10 +21,27 @@ namespace CannonManager {
         : GameObject(_pos, _size, _texture, _tileId, Color{ 1,1,1,1 }), isShootingRight{ _isShootingRight }, isPlayerControlled{ _isPlayerControlled } {
     }
 
-    void Cannon::SetAbilityController(AbilitiesManager::AbilityController* controller) {
+    TextObject debugText;
+    UIManager::Bar screenOverlayShotBar, worldSpaceShotBar;
+
+    void Cannon::Initialize(AbilitiesManager::AbilityController* controller) {
         abilityController = controller;
         controller->ChangeAbility(0); // Set default projectile as the default ability
         ProjectileSettings();
+
+        //Initialize UI Objects
+        debugText = { "", Utils::debuggerInfo.first * 0.8f, Utils::debuggerInfo.second, { 0.5f, 0.99f } };
+
+        float x = transform.pos.x - (transform.size.x * 1.5f);
+        if (!isShootingRight) x = transform.pos.x + (transform.size.x * 1.5f);
+
+        worldSpaceShotBar = UIManager::Bar{ { x, transform.pos.y + (transform.size.y * 1.5f) },
+            { 15,100 }, Color{ 0,1,0 }, UIManager::FillType::TOP_TO_BOTTOM };
+
+        Transform trans{ { 0,0 }, {600,15} };
+        Utils::SetAnchoredPosition(trans, Utils::AnchorMode::BOTTOM_CENTER);
+        trans.pos.y += 100 + 15;
+        screenOverlayShotBar = UIManager::Bar{ trans.pos, trans.size, Color{ 0,1,0 }, UIManager::FillType::LEFT_TO_RIGHT };
     }
     
     void Cannon::ProjectileSettings() {
@@ -95,22 +112,12 @@ namespace CannonManager {
         // Render UI
         if (isHoldingLeftClick) {
             // Drawing power bar beside the cannon in WORLD SPACE
-            float x = transform.pos.x - (transform.size.x * 1.5f);
-            if (!isShootingRight) x = transform.pos.x + (transform.size.x * 1.5f);
-            UIManager::Bar bar{ { x, transform.pos.y + (transform.size.y * 1.5f) },
-                { 15,100 }, Color{ 0,1,0 }, UIManager::FillType::TOP_TO_BOTTOM };
-            bar.Draw(chargingPower, Config::CANNON_MAX_POWER, false);
+            worldSpaceShotBar.Draw(chargingPower, Config::CANNON_MAX_POWER, false);
 
             if (!isPlayerControlled) return;
-
-            // Drawing power bar in the SCREEN SPACE
-            Transform trans{ { 0,0 }, {600,15} };
-            Utils::SetAnchoredPosition(trans, Utils::AnchorMode::BOTTOM_CENTER);
-            trans.pos.y += 85;
-
-            UIManager::Bar uiBar{ trans.pos,
-                trans.size, Color{ 0,1,0 }, UIManager::FillType::LEFT_TO_RIGHT };
-            uiBar.Draw(chargingPower, Config::CANNON_MAX_POWER);
+             
+            // Only draw power bar in the SCREEN SPACE for player cannon
+            screenOverlayShotBar.Draw(chargingPower, Config::CANNON_MAX_POWER);
         }
     }
 
@@ -521,7 +528,6 @@ namespace CannonManager {
         //UIManager::Panel panel{ {500,500}, {1,1,1,0.5f}, Utils::AnchorMode::TOP_RIGHT };
         //panel.Draw();
 
-        TextObject debugText{"", Utils::debuggerInfo.first * 0.8f, Utils::debuggerInfo.second, { 0.5f, 0.99f } };
         debugText.TextContent(debugStr);
         debugText.Draw();
     }

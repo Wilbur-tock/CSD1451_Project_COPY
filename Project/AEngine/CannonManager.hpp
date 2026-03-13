@@ -20,7 +20,7 @@ namespace CannonManager {
 
 		// Member Functions
 
-		void SetAbilityController(AbilitiesManager::AbilityController* controller);
+		void Initialize(AbilitiesManager::AbilityController* controller);
 		// Calculate the angle of the cannon based on the mouse position, render the cannon sprite
 		// Calculate the charge shot power and update any shot projectiles
 		// map is used to check for collision with the tiles

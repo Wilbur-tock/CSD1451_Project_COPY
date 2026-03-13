@@ -6,8 +6,6 @@
 
 namespace UIInstructionsOverlay {
 
-    static TextObject sInstructionText;
-
     static std::string GetStateName(GameStateManager::GameState s) {
         using GameStateManager::GameState;
         switch (s) {
@@ -27,21 +25,34 @@ namespace UIInstructionsOverlay {
         return "GAME";
     }
 
-    void Draw() {
-        GameStateManager::GameState current = GameStateManager::current;
-        UIManager::Panel dim{
+    UIManager::Panel dimPanel, mainPanel;
+    TextObject instructionText;
+
+    void Initialize() {
+        dimPanel = UIManager::Panel{
             {static_cast<float>(Config::SCREEN_WIDTH), static_cast<float>(Config::SCREEN_HEIGHT)},
             Color(0.0f, 0.0f, 0.0f, 0.55f),
             Utils::AnchorMode::CENTER
         };
-        dim.Draw();
 
-        UIManager::Panel panel{
+        mainPanel = UIManager::Panel{
             {1120.0f, 730.0f},
             Color(0.12f, 0.12f, 0.16f, 0.95f),
             Utils::AnchorMode::CENTER
         };
-        panel.Draw();
+
+        float x = mainPanel.Pos().x + 40.0f;
+        float y = mainPanel.Pos().y - 40.0f;
+        Utils::NormalizeCoordinates(x, y);
+
+        instructionText = TextObject{ "", 0.65f, Color{1,1,1}, {x,y} };
+    }
+
+    void Draw() {
+        GameStateManager::GameState current = GameStateManager::current;
+        
+        dimPanel.Draw();
+        mainPanel.Draw();
 
         std::string msg =
             "INSTRUCTIONS  (Press [I] to close)\n"
@@ -116,14 +127,7 @@ namespace UIInstructionsOverlay {
                 "[ESC] / [BACK]: Return\n";
         }
 
-        float x = panel.Pos().x + 40.0f;
-        float y = panel.Pos().y - 40.0f;
-        Utils::NormalizeCoordinates(x, y);
-
-        sInstructionText.TextContent(msg);
-        sInstructionText.textScale = 0.65f;
-        sInstructionText.color = { 1.0f, 1.0f, 1.0f, 1.0f };
-        sInstructionText.pos = { x, y };
-        sInstructionText.Draw();
+        instructionText.TextContent(msg);
+        instructionText.Draw();
     }
 }

@@ -13,8 +13,8 @@ void TextObject::Draw() {
 
 	// If textContent is changed or position has not been set yet
 	if (isSettingAnchorPos && prevTextContent != textContent && !hasUpdatePos) {
-		std::cout << prevTextContent << " Setting Text Print Anchor Position " << textContent << '\n';
-		SetAnchorPosition();
+		SetAnchorPosition(parent);
+		std::cout << prevTextContent << " Setting Text Print Anchor Position " << textContent << ' ' << pos.x << ' ' << pos.y << '\n';
 		hasUpdatePos = true;
 	}
 
@@ -29,6 +29,7 @@ void TextObject::Draw() {
 	std::stringstream ss(textContent);
 	std::string line;
 
+	// Use default font if no font found
 	if (font == 0) {
 		font = AssetsManager::textFont;
 	}
@@ -66,10 +67,13 @@ void TextObject::SetPosition(Utils::AnchorMode newMode, Transform const& parentT
 	parent = parentTransform;
 	hasUpdatePos = false;
 	isSettingAnchorPos = true;
+
+	SetAnchorPosition(parent);
 }
 
 void TextObject::SetPosition(Transform const& parentTransform) {
 	SetPosition(anchorMode, parentTransform);
+	//std::cout << "TextObject: " << textContent << " Prev:" << prevTextContent << ' ' << isSettingAnchorPos << hasUpdatePos <<  '\n';
 }
 
 void TextObject::SetOffsetPosition(float x, float y) {
@@ -77,11 +81,7 @@ void TextObject::SetOffsetPosition(float x, float y) {
 	offsetPos = { x,y };
 }
 
-void TextObject::SetAnchorPosition() {
-	SetAnchorPosition(parent.pos, parent.size);
-}
-
-void TextObject::SetAnchorPosition(AEVec2 const& parentPos, AEVec2 const& parentSize) {
+void TextObject::SetAnchorPosition(Transform const& transform) {
 	SetTextAnchorPosition();
 	f32 lineW, lineH;
 	AEGfxGetPrintSize(AssetsManager::textFont, textContent.c_str(), textScale, &lineW, &lineH);
@@ -91,12 +91,12 @@ void TextObject::SetAnchorPosition(AEVec2 const& parentPos, AEVec2 const& parent
 	float halfLineH = static_cast<float>(lineH * 0.5f);
 
 	// Need to normalize parent pos and size
-	float x = parentPos.x;
-	float y = parentPos.y;
+	float x = transform.pos.x;
+	float y = transform.pos.y;
 	Utils::NormalizeCoordinates(x, y);
 
-	float halfPanelW = parentSize.x * 0.5f;
-	float halfPanelH = parentSize.y * 0.5f;
+	float halfPanelW = transform.size.x * 0.5f;
+	float halfPanelH = transform.size.y * 0.5f;
 	Utils::NormalizeCoordinates(halfPanelW, halfPanelH);
 
 	// Set position x

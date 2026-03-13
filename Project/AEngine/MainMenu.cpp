@@ -130,7 +130,7 @@ namespace MainMenu {
             Color(0.0f, 0.0f, 0.0f, 1.0f),  // White color
             { 0.1f, 0.75f }, // position (normalized)
         };
-        gameTitle.font = AssetsManager::titleFont;
+        gameTitle.SetFont(AssetsManager::titleFont);
 
         // Keyboard shortcut hint
         // Rendered at the very bottom of the screen in small text
@@ -177,18 +177,18 @@ namespace MainMenu {
         // How big the scale bounce * How fast it grows/shrinks (pulse)
         // `sinf` returns a value that cycles smoothly between `-1.0` and `+1.0`.
         float pulseScale = baseTitleScale + 0.2f * sinf(titleAnimTimer * 2.0f);
-        gameTitle.textScale = pulseScale;
+        gameTitle.TextScale(pulseScale);
 
         // Flash: alpha oscillates between 0.5 and 1.0
         // Avg. brightness + How much brightness vary * How fast brightness vary
         // `sinf` returns a value that cycles smoothly between `-1.0` and `+1.0`.
         float flashAlpha = 0.75f + 0.25f * sinf(titleAnimTimer * 3.0f);
-        gameTitle.color.SetColor(
-            gameTitle.color.Red(),
-            gameTitle.color.Green(),
-            gameTitle.color.Blue(),
+        gameTitle.SetColor(Color{
+            gameTitle.GetColor().Red(),
+            gameTitle.GetColor().Green(),
+            gameTitle.GetColor().Blue(),
             flashAlpha
-        );
+        });
 
         // Keyboard shortcuts with sfx (on keyPressed, not held)
         if (AEInputCheckTriggered(AEVK_1)) {

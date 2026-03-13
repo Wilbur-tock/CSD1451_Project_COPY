@@ -20,16 +20,21 @@ namespace UIManager {
 
 	class Bar {
 	public:
+		Bar() = default;
 		// Filltype RTL - normal health bar
-		Bar(AEVec2 _pos, AEVec2 _size, Color _color, FillType _type = FillType::LEFT_TO_RIGHT, AEGfxTexture* _texture = nullptr);
+		Bar(AEVec2 _pos, AEVec2 _size, Color _fillColor, FillType _type = FillType::LEFT_TO_RIGHT, AEGfxTexture* _texture = nullptr);
+		Bar(AEVec2 _pos, AEVec2 _size, Color _fillColor, Color _bgColor, FillType _type = FillType::LEFT_TO_RIGHT, AEGfxTexture* _texture = nullptr);
+
+		Transform GetTransform() const { return transform; }
 
 		// Drawing bar on a screenoverlay or not
 		void Draw(float currValue, float maxValue, bool isScreenOverlay = true);
 	private:
-		Transform transform;
-		Color color;
-		AEGfxTexture* texture;
-		FillType type;
+		Transform transform{ {0,0},{0,0} };
+		Color fillColor{ 1,1,1 };
+		Color bgColor{ 1,1,1 };
+		AEGfxTexture* texture = nullptr;
+		FillType type = FillType::LEFT_TO_RIGHT;
 	};
 
 	class Panel {
@@ -42,6 +47,8 @@ namespace UIManager {
 		AEVec2 Pos() const { return transform.pos; }
 		void AddOffset(AEVec2 const& _pos) { transform.pos.x += _pos.x , transform.pos.y += _pos.y; }
 		AEVec2 Size() const { return transform.size; }
+
+		void SetColor(Color newColor) { color = newColor; }
 
 		// Assign a parent panel/object to this panel object and it will set its position 
 		// based on the parent object and its rectMode
@@ -59,16 +66,18 @@ namespace UIManager {
 		Panel panel;
 		Button button;
 		TextObject textObj;
-		bool isActive = false;
 
 		PopupPanel(std::string textContent, AEVec2 _size, Color _color = { 1,1,1 }, Utils::AnchorMode panelAnchorMode = Utils::AnchorMode::CENTER, AEGfxTexture* _texture = nullptr,
 			AEGfxTexture* btnTexture = nullptr, Utils::FuncPtr onClick = nullptr);
 
 		bool IsHovered() const { return isHovered; }
+		bool IsActive() const { return isActive; }
 
+		void Popup(std::string msg);
 		void Draw();
 		void Update();
 	private:
 		bool isHovered = false;
+		bool isActive = false;
 	};
 }

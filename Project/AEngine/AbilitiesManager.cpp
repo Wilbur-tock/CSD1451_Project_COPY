@@ -59,6 +59,9 @@ namespace AbilitiesManager {
 		inventory.clear();
 		currentAbility = nullptr;
 
+		inventory.reserve(Config::MAX_INVENTORY_COUNT);
+		inventoryAbilityIds.reserve(Config::MAX_INVENTORY_COUNT);
+
 		isAIController = isAi;
 
 		nlohmann::json data;
@@ -192,7 +195,7 @@ namespace AbilitiesManager {
 	void AbilityController::AddAbility(int abilityId, int chargesToAdd) {
 		Ability* found = FindAbility(abilityId);
 		if (!found) {
-			std::cerr << "[AbilitiesManager] Failed to add Ability Id: " + std::to_string(abilityId) << '\n';
+			std::cerr << "[AbilitiesManager] Can't find to add Ability Id: " + std::to_string(abilityId) << '\n';
 			return;
 		}
 		// Find ability and add the charges
@@ -201,6 +204,7 @@ namespace AbilitiesManager {
 
 		int id = static_cast<int>(ability.GetType()) - 1;
 		++inventoryTypeCount[id];
+		++inventoryCount;
 
 		UpdateInventory(ability, true);
 	}
@@ -208,6 +212,8 @@ namespace AbilitiesManager {
 	// Helper function to add or remove abilities from the inventory vector based on the ability charges
 	void AbilityController::UpdateInventory(Ability& ability, bool toAddToVector) {
 		if (toAddToVector) {
+			inventoryAbilityIds.push_back(ability.Id());
+
 			// if previous charges is already more than or equal to 1, means that it is already in the vector no need to add
 			if (ability.PreviousAbilityCharges() >= 1) return;
 
@@ -217,7 +223,9 @@ namespace AbilitiesManager {
 			std::cout << "[AbilitiesManager] Added " << ability << " into inventory" << '\n';
 		}
 		else {
-			if (ability.AbilityCharges() > 0) return;
+			inventoryAbilityIds.push_back(ability.Id());
+
+			if (ability.AbilityCharges() > 0) return; // if there is ability charges remanining no need to erase from inventory vector
 			for (int i = 0; i < inventory.size(); ++i) {
 				if (inventory[i] == &ability) {
 					inventory.erase(inventory.begin() + i);
@@ -298,8 +306,6 @@ namespace AbilitiesManager {
 			if(!found) abilityId = 0; // Reset to default ability if can't find any
 		}
 		ChangeAbility(abilityId);
-
-
 	}
 
 	const Ability AbilityController::AbilityRandomisator(std::vector<Ability> const& abilities) {
@@ -398,9 +404,9 @@ namespace AbilitiesManager {
 		CameraManager::camera.SetState(CameraManager::CameraController::INPUT);
 	}
 
+	static constexpr int inventoryMaxCount = Config::MAX_INVENTORY_COUNT;
+	static constexpr int selectorCount = Config::MAX_ABILITY_SELECTOR_COUNT;
 	// UI OBJECTS
-	static constexpr int inventoryMaxCount = 5;
-	static constexpr int selectorCount = 3;
 	UIManager::Panel inventoryBackground;
 	Button inventoryAbilityButton[inventoryMaxCount];
 
@@ -412,10 +418,12 @@ namespace AbilitiesManager {
 		inventoryBackground = UIManager::Panel{ {600.0f, 100.0f}, Color(0.647f, 0.165f, 0.165f, 1.0f), Utils::AnchorMode::BOTTOM_CENTER };
 
 		Transform inventoryBGTrans = inventoryBackground.GetTransform();
+		float totalWidth = inventoryBGTrans.size.x;
+
+		// Values to edit
 		float space = 15.0f;
 		float borderPaddingX = 25.0f;
-		float borderPaddingY = 10.0f;
-		float totalWidth = inventoryBGTrans.size.x;
+		float borderPaddingY = 5.0f;
 
 		// Calculate total width of spaces between buttons
 		// [BTN][SPACE][BTN][SPACE].....
@@ -454,6 +462,7 @@ namespace AbilitiesManager {
 			Card& card = abilitySelectorCards[i];
 			card = Card{ "", cardPos, Color(1,0,0), AssetsManager::squareTexture, nullptr, nullptr };
 			cardPos.x += cardSize.x + gap;
+
 			// Set button text object anchor position
 			TextObject& textObj = card.GetButton().GetTextObject();
 			textObj.SetPosition(Utils::AnchorMode::CENTER, card.GetButton().GetTransform());
@@ -475,8 +484,7 @@ namespace AbilitiesManager {
 			button.SetOnClick([this, ability]() {
 				OnClickAbilityCard(ability);
 				});
-			button.GetTextObject().TextContent(ability.GetName());
-			button.SetTextOffset(0, -50.0f);
+			button.GetTextObject().TextContent(ability.GetName()); // update text content
 
 			// Update and draw
 			card.Update();
@@ -522,8 +530,8 @@ namespace AbilitiesManager {
 			std::string iconName = "Empty";
 			Color iconColor{ 0.5f, 0.5f, 0.5f };
 
-			if (i < inventory.size()) {
-				Ability* ability = inventory[i];
+			if (i < inventoryCount) {
+				Ability* ability = FindAbility(inventoryAbilityIds[i]);
 				iconName = ability->GetName();
 				iconColor = ability->GetType() == AbilityType::OFFENSIVE ? Color(1, 0, 0) : Color(0, 0, 1);
 				// Highlight current ability

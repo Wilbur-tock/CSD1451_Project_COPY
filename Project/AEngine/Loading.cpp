@@ -2,9 +2,10 @@
 
 #include "GraphicsManager.hpp"
 #include "AssetsManager.hpp"
-#include "TextObject.hpp"
 #include "Color.hpp"
+#include "UIManager.hpp"
 #include "Config.hpp"
+#include "Utils.hpp"
 
 namespace Loading {
     // State variables
@@ -24,6 +25,10 @@ namespace Loading {
 
     static AEGfxTexture* gStickmanTex = nullptr; // Pointer to the loaded stickman texture
 
+    // UI Objects
+    TextObject loadingTextObj, percentageText;
+    UIManager::Bar loadingBar;
+
     void Init(float duration) {
         loadingTimer = duration; // Set the countdown timer to the requested duration (defined in .hpp)
         dotAnimTimer = 0.0f;
@@ -33,6 +38,28 @@ namespace Loading {
 
         // Load sprite sheet once (AssetsManager caches it, so repeated calls are free)
         gStickmanTex = AssetsManager::GetTexture(STICKMAN_SHEET_PATH);
+
+        // Initialize UI Objects
+        loadingTextObj = TextObject{
+            "",
+            1.5f,
+            Color(1.0f, 1.0f, 1.0f, 1.0f),
+            { -0.15f, 0.2f }
+        };
+
+        percentageText = TextObject{ "",
+            1.2f,
+            Color(1.0f, 1.0f, 1.0f, 1.0f),
+            { -0.03f, -0.15f }
+        };
+
+        Transform loadingBarTrans{ {0,0}, {600.0f, 40.0f} };
+        Utils::SetAnchoredPosition(loadingBarTrans, Utils::AnchorMode::CENTER);
+        loadingBar = UIManager::Bar{
+            loadingBarTrans.pos, loadingBarTrans.size, 
+            Color{0.3f, 0.7f, 1.0f},
+            Color{0.2f, 0.2f, 0.2f}
+        };
     }
 
     void Render() {
@@ -69,56 +96,52 @@ namespace Loading {
         std::string dots = "";      // Start with an empty string
         for (int i = 0; i < dotCount; i++) dots += "."; // Each iteration appends one dot
                                                         // Result: "", ".", "..", "..." cycling every 0.3s
-        
-        // Construct a TextObject in-place and draw it immediately
-        // "LOADING" + dots produces "LOADING", "LOADING.", "LOADING..", "LOADING..."
-        TextObject loadingTextObj{ 
-            "LOADING" + dots, 
-            1.5f, 
-            Color(1.0f, 1.0f, 1.0f, 1.0f), 
-            { -0.15f, 0.2f } 
-        };
+        loadingTextObj.TextContent("LOADING" + dots);
         loadingTextObj.Draw();  // Submit the text to the renderer
 
         // Loading bar
-        constexpr float barWidth = 600.0f;
-        constexpr float barHeight = 40.0f;
-        constexpr float barX = 0.0f;   // center of bar in screen X
-        constexpr float barY = 15.0f;  // top-left Y anchor
+        //constexpr float barWidth = 600.0f;
+        //constexpr float barHeight = 40.0f;
+        //constexpr float barX = 0.0f;   // center of bar in screen X
+        //constexpr float barY = 15.0f;  // top-left Y anchor
+        //
+        //// Loading Bar background (grey track) --
+        //AEMtx33 bgMat = GraphicsManager::CreateTransformMatrix(
+        //    barX - (barWidth / 2.0f), // Left edge X of the bar
+        //    barY,                     // Top edge Y of the bar
+        //    0,                        // No rotation
+        //    barWidth,                 // Full width of the grey background track
+        //    barHeight                 // Full height
+        //);
+        //// Draw the grey background quad using the shared white square texture tinted dark grey
+        //// Avoids needing a separate grey texture asset for a bar background
+        //GraphicsManager::DrawScreenOverlay(AssetsManager::squareTexture, bgMat, Color(0.2f, 0.2f, 0.2f, 1.0f));
+        ////Loading Bar fill (blue progress) --
+        //float progressWidth = barWidth * progress; // Scale the full bar width by progress (0.0 to 1.0)
+        //if (progressWidth > 0.0f) {                // Skip drawing the fill entirely when progress is 0 to avoid rendering a 0-width quad
+        //    AEMtx33 fillMat = GraphicsManager::CreateTransformMatrix(
+        //        barX - (barWidth / 2.0f), 
+        //        barY, 
+        //        0, 
+        //        progressWidth, 
+        //        barHeight
+        //    );
+        //    GraphicsManager::DrawScreenOverlay(AssetsManager::squareTexture, fillMat, Color(0.3f, 0.7f, 1.0f, 1.0f));
+        //}
 
-        // Loading Bar background (grey track) --
-        AEMtx33 bgMat = GraphicsManager::CreateTransformMatrix(
-            barX - (barWidth / 2.0f), // Left edge X of the bar
-            barY,                     // Top edge Y of the bar
-            0,                        // No rotation
-            barWidth,                 // Full width of the grey background track
-            barHeight                 // Full height
-        );
-        // Draw the grey background quad using the shared white square texture tinted dark grey
-        // Avoids needing a separate grey texture asset for a bar background
-        GraphicsManager::DrawScreenOverlay(AssetsManager::squareTexture, bgMat, Color(0.2f, 0.2f, 0.2f, 1.0f));
+        float barWidth  = loadingBar.GetTransform().size.x;
+        float barHeight = loadingBar.GetTransform().size.y;
+        float barX      = loadingBar.GetTransform().pos.x; 
+        float barY      = loadingBar.GetTransform().pos.y;
 
-        // Loading Bar fill (blue progress) --
         float progressWidth = barWidth * progress; // Scale the full bar width by progress (0.0 to 1.0)
-        if (progressWidth > 0.0f) {                // Skip drawing the fill entirely when progress is 0 to avoid rendering a 0-width quad
-            AEMtx33 fillMat = GraphicsManager::CreateTransformMatrix(
-                barX - (barWidth / 2.0f), 
-                barY, 
-                0, 
-                progressWidth, 
-                barHeight
-            );
-            GraphicsManager::DrawScreenOverlay(AssetsManager::squareTexture, fillMat, Color(0.3f, 0.7f, 1.0f, 1.0f));
-        }
+        loadingBar.Draw(progressWidth, barWidth);
+
 
         // Percentage label
         int percentage = static_cast<int>(progress * 100); //// Convert progress to an integer percentage (0-100) for display
-        TextObject percentText{ std::to_string(percentage) + "%", 
-            1.2f, 
-            Color(1.0f, 1.0f, 1.0f, 1.0f), 
-            { -0.03f, -0.15f } 
-        };
-        percentText.Draw();
+        percentageText.TextContent(std::to_string(percentage) + "%");
+        percentageText.Draw();
 
         // Stickman sprite animation
         // Advance frame at a fixed rate (independent of loading speed)
@@ -132,7 +155,7 @@ namespace Loading {
         }
 
         // spriteCenterX/Y are the CENTER of the sprite quad (center mesh).
-        float barLeft = barX - (barWidth / 2.0f);
+        float barLeft = barX;
 
         // Place the sprite's center X at the leading edge of the fill (barLeft + progressWidth)
         // This makes the stickman appear to be running at the tip of the blue fill bar

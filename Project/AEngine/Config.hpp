@@ -19,6 +19,10 @@ namespace Config {
 	// CANNON
 	constexpr float CANNON_MIN_POWER = 100, CANNON_MAX_POWER = 2500;
 	constexpr float CANNON_SWITCH_COOLDOWN_TIMER = 1.5f, PROJECTILE_LIFESPAN = 2.0f;
+
+	// Abilities
+	constexpr int MAX_INVENTORY_COUNT = 5; // Maximum number of ability charges has in it inventory
+	constexpr int MAX_ABILITY_SELECTOR_COUNT = 3; // Number of options to select ability at the start of each round
 }
 
 #endif // !CONFIG_HPP

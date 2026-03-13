@@ -126,7 +126,7 @@ namespace Credits {
         }
 
         // Draw credits text with scroll offset
-        creditsText.pos = { -0.3f, scrollOffset };
+        creditsText.Pos({ -0.3f, scrollOffset });
         creditsText.Draw();
 
         // Draw hint at 

@@ -220,12 +220,13 @@ namespace MapEditor {
 		// Render the map drawn
 		MapManager::DrawMap(newMap);
 
+		// Draw UI
 		// Display the label on which map is being editing 
 		mapLabelPanel.Draw();
 		mapLabelText.TextContent(currentMapLabel);
 		mapLabelText.Draw();
 
-		if (constraintsPopup.isActive) {
+		if (constraintsPopup.IsActive()) {
 			constraintsPopup.Draw();
 		}
 
@@ -300,8 +301,7 @@ namespace MapEditor {
 				std::string str = "You must have at least " + std::to_string(constraint.requiredCount)
 					+ ' ' + GetTileName(constraint.type) + " in your map!";
 				std::cout << "[Error] " + str << '\n';
-				constraintsPopup.textObj.TextContent(str);
-				constraintsPopup.isActive = true;
+				constraintsPopup.Popup(str);
 				return false;
 			}
 		}
@@ -383,12 +383,12 @@ namespace MapEditor {
 		helpText = { "",  Utils::debuggerInfo.first * 0.9f, Utils::debuggerInfo.second,{-1.0f,.99f} };
 		debugText = { "",  Utils::debuggerInfo.first * 0.8f, Utils::debuggerInfo.second, { 0.5f, 0.99f} };
 
-		constraintsPopup = { "", AEVec2{500,250}, Color{1,1,0.9f} };
+		constraintsPopup = UIManager::PopupPanel{ "", AEVec2{500,250}, Color{1,1,0.9f} };
 
-		mapLabelText = { currentMapLabel, 0.75f, {0,0,0}, {0,0}, Utils::AnchorMode::CENTER };
-		mapLabelText.SetAnchorPosition(mapLabelPanel.Pos(), mapLabelPanel.Size());
-
-		mapLabelPanel = { { 250, 50 }, { 1,1,1 }, Utils::AnchorMode::TOP_CENTER };
+		mapLabelPanel = UIManager::Panel{ { 250, 50 }, { 1,1,1 }, Utils::AnchorMode::TOP_CENTER };
+		// mapLabelText is a child object of the mapLabelPanel
+		mapLabelText = TextObject{ currentMapLabel, 0.75f, {0,0,0}, {0,0}, Utils::AnchorMode::CENTER};
+		mapLabelText.SetPosition(mapLabelPanel.GetTransform());
 
 		CameraManager::camera.SetPosition({ 0, 0 });
 		CameraManager::camera.SetState(CameraManager::CameraController::INPUT);
@@ -402,7 +402,7 @@ namespace MapEditor {
 		}
 
 		constraintsPopup.Update();
-		isHoveringOverUI = constraintsPopup.IsHovered() && constraintsPopup.isActive;
+		isHoveringOverUI = constraintsPopup.IsHovered() && constraintsPopup.IsActive();
 
 		Inputs();
 
