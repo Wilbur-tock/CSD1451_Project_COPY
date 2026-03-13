@@ -29,7 +29,8 @@ namespace AbilitiesManager {
 		//Ability* GetCurrentProjectile() { return ProjectileSelected; }
 		//Ability* GetCurrentAIProjectile() { return AIProjectileSelected; }
 
-		Ability CurrentAbility() const { return *currentAbility; }
+		//Ability CurrentAbility() const { return *currentAbility; }
+		Ability* CurrentAbility() const { return currentAbility; }
 		int InventoryCount() const{ return inventoryCount; }
 
 		bool IsSelectingAbility() const { return isSelectingAbility; }
@@ -55,8 +56,8 @@ namespace AbilitiesManager {
 		// Reset to default ability if current ability if an offensive and charges remaining is 0 to 
 		// ensure that an ability with 0 charges cannot be used again
 		void ResetAbility() {
-			if (currentAbility->AbilityCharges() <= 0) {
-				ChangeAbility(0); // Reset to default
+			if (currentAbility && currentAbility->AbilityCharges() <= 0) {
+				currentAbility = nullptr; // no default ability to reset to, just deselect
 			}
 		}
 		// True to toggle through all abilities or 

@@ -325,7 +325,9 @@ namespace CannonManager {
         for (Projectile& projectile : activeProjectiles) {
             if (!projectile.IsActive()) continue;
 
-            projectile.AbilityActivation(abilityController->CurrentAbility());
+            if (abilityController->CurrentAbility()) {
+                projectile.AbilityActivation(abilityController->CurrentAbility());
+            }
 
             float dt = PhysicsManager::g_dt;
             // Increased the frequency of the collision check by using loops
@@ -490,7 +492,7 @@ namespace CannonManager {
         AEInputGetCursorPosition(&mouseX, &mouseY);
 
         Projectile const& selectedProjectile = projectiles[selectedProjectileId];
-        Ability selectedAbility = abilityController->CurrentAbility();
+        Ability* selectedAbility = abilityController->CurrentAbility();
 
         // Show cannon information
         std::string debugStr = "Cannon " + static_cast<std::string>(isPlayerControlled ? "PLAYER" : "ENEMY")
@@ -510,11 +512,16 @@ namespace CannonManager {
             debugStr += "\nAbility: " + ability->GetName() + " Charges: " + std::to_string(ability->AbilityCharges());
         }
 
-        debugStr += "\n\nSelected Ability:\nId:" + std::to_string(selectedAbility.Id())
-            + "\nName: " + selectedAbility.GetName()
-            + "\nType: " + selectedAbility.GetTypeName()
-            + "\nAbility Charges Remaining: " + std::to_string(selectedAbility.AbilityCharges())
-            + "\nSelected Projectile Id: " + std::to_string(selectedAbility.GetProj().projectileId);
+        if (selectedAbility) {
+            debugStr += "\n\nSelected Ability:\nId:" + std::to_string(selectedAbility->Id())
+                + "\nName: " + selectedAbility->GetName()
+                + "\nType: " + selectedAbility->GetTypeName()
+                + "\nAbility Charges Remaining: " + std::to_string(selectedAbility->AbilityCharges())
+                + "\nSelected Projectile Id: " + std::to_string(selectedAbility->GetProj().projectileId);
+        }
+        else {
+            debugStr += "\n\nSelected Ability: None";
+        }
 
         if (target) {
             debugStr += "\nTarget: " + target->TypeName();

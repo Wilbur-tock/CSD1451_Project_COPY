@@ -535,6 +535,8 @@ namespace AbilitiesManager {
 				Utils::AnchorMode::BOTTOM_CENTER, AEVec2{ x, y },
 				AEVec2{ btnSizeX, btnSizeY }, Color{1,1,1}, AssetsManager::squareTexture
 			};
+
+			btn.SetTextOffset(0, 5);
 		}
 
 		// Initialize Ability Selector
@@ -584,32 +586,6 @@ namespace AbilitiesManager {
 		LevelManager::CurrentLevel()->SetHoveringOverUI(CollisionManager::IsPointInRect(
 			inventoryBackground.Pos().x, inventoryBackground.Pos().y, inventoryBackground.Size().x, inventoryBackground.Size().y));
 
-		//// Ability icons
-		//for (int i = 0; i < inventory.size(); ++i) {
-		//	//Ability* ability = inventory[i];
-		//	//Color iconColor = ability->GetType() == AbilityType::OFFENSIVE ? Color(1, 0, 0) : Color(0, 0, 1);
-		//	//if (currentAbility == ability) {
-		//	//	iconColor = Color(0, 0, 0); 
-		//	//}
-		//	//std::vector<std::string> toBeRemoved = { "Projectile" };
-		//	//std::string AbilityName = ability->GetName();
-		//	//for (const std::string& word : toBeRemoved) {
-		//	//	size_t found = AbilityName.find(word);
-		//	//	if (found != std::string::npos) {
-		//	//		AbilityName.erase(found, std::string(word).length());
-		//	//	}
-		//	//};
-
-		//	//// Trim any trailing/leading spaces left behind
-		//	//while (!AbilityName.empty() && AbilityName.back() == ' ') AbilityName.pop_back();
-		//	//while (!AbilityName.empty() && AbilityName.front() == ' ') AbilityName.erase(AbilityName.begin());
-
-		//	//Button abilityButton{ TextObject{ AbilityName, 0.5f },
-		//	//	Utils::AnchorMode::BOTTOM_CENTER, AEVec2{ -220.0f + i * 100.0f, -370.0f },
-		//	//	AEVec2{ 75.0f, 75.0f }, iconColor, AssetsManager::squareTexture };
-		//	//abilityButton.SetTextOffset(0, 150.0f);
-		//}
-
 		for (int i = 0; i < inventoryMaxCount; ++i) {
 			Button& btn = inventoryAbilityButton[i];
 
@@ -624,11 +600,23 @@ namespace AbilitiesManager {
 				if (currentAbility == ability) {
 					iconColor = Color(0, 0, 0);
 				}
+				// Set onclick to select this ability as active
+				btn.SetOnClick([this, ability]() {
+					if (currentAbility == ability) {
+						currentAbility = nullptr; // deselect
+					}
+					else {
+						ChangeAbility(ability->Id());
+					}
+					});
 			}
-			// Update button name and color
+			else {
+				// Empty slot — clear onclick so it does nothing
+				btn.SetOnClick(nullptr);
+			}
+
 			btn.SetColor(iconColor);
 			btn.GetTextObject().TextContent(iconName);
-
 			btn.Update();
 			btn.Draw();
 		}
