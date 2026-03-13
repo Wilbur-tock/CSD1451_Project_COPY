@@ -57,7 +57,7 @@ namespace AbilitiesManager {
 		// ensure that an ability with 0 charges cannot be used again
 		void ResetAbility() {
 			if (currentAbility && currentAbility->AbilityCharges() <= 0) {
-				currentAbility = nullptr; // no default ability to reset to, just deselect
+				currentAbility = nullptr;
 			}
 		}
 		// True to toggle through all abilities or 

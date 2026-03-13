@@ -271,11 +271,14 @@ namespace AbilitiesManager {
 		int id = static_cast<int>(currentAbility->GetType()) - 1;
 		--inventoryTypeCount[id];
 
-		// Reset to default if trying to use an ability without any charges remaining
-		ResetAbility();
+		// cache before ResetAbility
+		std::string abilityName = currentAbility->GetName();
+		int chargesLeft = currentAbility->AbilityCharges();        
 
-		std::cout << "[AbilitiesManager] Ability used: " + currentAbility->GetName()
-			+ " Charges Remaining: " + std::to_string(currentAbility->AbilityCharges()) << '\n';
+		ResetAbility(); // may set currentAbility to nullptr
+
+		std::cout << "[AbilitiesManager] Ability used: " + abilityName
+			+ " Charges Remaining: " + std::to_string(chargesLeft) << '\n';
 		return true;
 	}
 
@@ -409,7 +412,7 @@ namespace AbilitiesManager {
 		// Check inventory how many offensive and defensive abilities the player has and randomise based on that
 		std::cout << "[AbilitiesManager] Number of abilities in inventory: " << inventory.size() << std::endl;
 
-		if (inventory.size() == 5) {
+		if (inventory.size() >= 5) {
 			std::cerr << "[AbilitiesManager] Enough abilities in inventory, randomise stats" << std::endl;
 			
 			// Currently only 3 stat cards so no need randomise, just push all 3 stat cards into the selector
