@@ -125,6 +125,7 @@ namespace ParticleManager {
 
             Particle& p = pool[slot];
             p.alive = true;
+            p.emitParams = params;
 
             // ---- Position: random point within spawn radius ----------------
             float spawnAngle = RandRange(0.f, PI);
