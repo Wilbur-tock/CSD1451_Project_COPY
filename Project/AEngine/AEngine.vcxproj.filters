@@ -366,7 +366,11 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\Assets\Abilities\Abilities.json" />
-    <None Include="..\Assets\Abilities\AiAbilities.json" />
+    <None Include="..\Assets\Abilities\AiAbilities.json">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\Assets\Abilities\Abilities.json">
+      <Filter>Resource Files</Filter>
+    </None>
   </ItemGroup>
 </Project>
