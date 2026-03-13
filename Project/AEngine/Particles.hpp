@@ -4,6 +4,8 @@
 #include "AEEngine.h"
 #include "Color.hpp"
 
+enum class ParticleShape { SQUARE, CIRCLE };
+
 // ============================================================================
 // EmitParams
 // ============================================================================
@@ -39,6 +41,50 @@ public:
 
     // ---- Count ----------------------------------------------------------
     int     count{ 10 };          // Particles to spawn per Emit() call
+
+    // ---- Mesh ----------------------------------------------------------
+    ParticleShape shape{ ParticleShape::SQUARE }; // Shape of the particle
+
+    EmitParams() :
+        spawnPosition{ 0.f, 0.f },
+        spawnRadius{ 0.f },
+        speedMin{ 50.f },
+        speedMax{ 150.f },
+        directionMin{ 0.f },
+        directionMax{ PI },
+        rotationSpeedMin{ -PI },
+        rotationSpeedMax{ PI },
+        colorStart{ 1.f, 1.f, 1.f, 1.f },
+        colorEnd{ 1.f, 1.f, 1.f, 0.f },
+        scaleStart{ 10.f },
+        scaleEnd{ 0.f },
+        lifetimeMin{ 0.5f },
+        lifetimeMax{ 1.5f },
+        count{ 10 },
+        shape{ ParticleShape::SQUARE }
+    {}
+
+    EmitParams(
+        AEVec2 spawnPosition, float spawnRadius,
+        float speedMin, float speedMax,
+        float directionMin, float directionMax,
+        float rotationSpeedMin, float rotationSpeedMax,
+        Color colorStart, Color colorEnd,
+        float scaleStart, float scaleEnd,
+        float lifetimeMin, float lifetimeMax,
+        int count,
+        ParticleShape shape = ParticleShape::SQUARE  // defaulted
+    ) :
+        spawnPosition{ spawnPosition }, spawnRadius{ spawnRadius },
+        speedMin{ speedMin }, speedMax{ speedMax },
+        directionMin{ directionMin }, directionMax{ directionMax },
+        rotationSpeedMin{ rotationSpeedMin }, rotationSpeedMax{ rotationSpeedMax },
+        colorStart{ colorStart }, colorEnd{ colorEnd },
+        scaleStart{ scaleStart }, scaleEnd{ scaleEnd },
+        lifetimeMin{ lifetimeMin }, lifetimeMax{ lifetimeMax },
+        count{ count }, shape{ shape }
+    {
+    }
 };
 
 // ============================================================================

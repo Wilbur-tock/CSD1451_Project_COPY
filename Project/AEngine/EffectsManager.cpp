@@ -89,6 +89,7 @@ namespace EffectsManager {
                 0.8f,
                 1.0f, 
                 1,
+				ParticleShape::CIRCLE
             };
             std::cout << "[EffectsManager] NUKE at (" << pos.x << ", " << pos.y << ")\n";
             break;

@@ -18,7 +18,9 @@ namespace ParticleManager {
             p.alive = false;
         }
 
-        CreateMesh();
+        CreateSquareMesh();
+        CreateCircleMesh();
+
         //std::cout << "[ParticleManager] Initialised with pool size: " << poolSize << '\n';
     }
 
@@ -27,10 +29,8 @@ namespace ParticleManager {
         poolSize = 0;
         nextFree = 0;
 
-        if (mesh) {
-            AEGfxMeshFree(mesh);
-            mesh = nullptr;
-        }
+        if (meshSquare) { AEGfxMeshFree(meshSquare); meshSquare = nullptr; }
+        if (meshCircle) { AEGfxMeshFree(meshCircle); meshCircle = nullptr; }
 
         std::cout << "[ParticleManager] Shutdown complete.\n";
     }
@@ -57,7 +57,7 @@ namespace ParticleManager {
     }
 
     void ParticleController::Draw() {
-        if (pool.empty() || !mesh) return;
+        if (pool.empty() || (!meshSquare && !meshCircle)) return;
 
         AEGfxSetBlendMode(AE_GFX_BM_BLEND);
         AEGfxSetRenderMode(AE_GFX_RM_COLOR);
@@ -98,7 +98,8 @@ namespace ParticleManager {
             AEGfxSetColorToAdd(0.f, 0.f, 0.f, 0.f);
             AEGfxSetTransparency(color.Alpha());
             AEGfxSetTransform(mtxResult.m);
-            AEGfxMeshDraw(mesh, AE_GFX_MDM_TRIANGLES);
+            AEGfxVertexList* meshToDraw = (p.emitParams.shape == ParticleShape::CIRCLE) ? meshCircle : meshSquare;
+            AEGfxMeshDraw(meshToDraw, AE_GFX_MDM_TRIANGLES);
         }
 
         // Restore defaults
@@ -183,7 +184,7 @@ namespace ParticleManager {
         return -1; // Pool is full
     }
 
-    void ParticleController::CreateMesh() {
+    void ParticleController::CreateSquareMesh() {
         // Unit square centred at origin (-0.5 to 0.5 on both axes)
         AEGfxMeshStart();
 
@@ -198,8 +199,24 @@ namespace ParticleManager {
             -0.5f, 0.5f, 0xFFFFFFFF, 0.f, 0.f
         );
 
-        mesh = AEGfxMeshEnd();
-        assert(mesh && "[ParticleManager] Failed to create particle mesh.");
+        meshSquare = AEGfxMeshEnd();
+        assert(meshSquare && "[ParticleManager] Failed to create particle mesh.");
+    }
+
+    void ParticleController::CreateCircleMesh(int segments) {
+        AEGfxMeshStart();
+        float angleStep = 2.f * PI / static_cast<float>(segments);
+        for (int i = 0; i < segments; ++i) {
+            float a0 = i * angleStep;
+            float a1 = (i + 1) * angleStep;
+            AEGfxTriAdd(
+                0.f, 0.f, 0xFFFFFFFF, 0.5f, 0.5f,
+                cosf(a0) * 0.5f, sinf(a0) * 0.5f, 0xFFFFFFFF, 0.5f + cosf(a0) * 0.5f, 0.5f - sinf(a0) * 0.5f,
+                cosf(a1) * 0.5f, sinf(a1) * 0.5f, 0xFFFFFFFF, 0.5f + cosf(a1) * 0.5f, 0.5f - sinf(a1) * 0.5f
+            );
+        }
+        meshCircle = AEGfxMeshEnd();
+        assert(meshCircle && "[ParticleManager] Failed to create circle mesh.");
     }
 
     float ParticleController::RandRange(float min, float max) {

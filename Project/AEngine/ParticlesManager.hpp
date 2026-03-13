@@ -5,6 +5,8 @@
 #include "Particles.hpp"
 #include "CameraManager.hpp"
 
+#define CIRCLE_SEGMENTS 16
+
 // Usage (per game-state):
 //     ParticleManager::ParticleController::Init(2048);  // GameState Load/Init
 //     ParticleManager::particleController.Emit(params); // wherever effects spawn
@@ -50,14 +52,15 @@ namespace ParticleManager {
         std::vector<Particle>   pool{};     // Flat particle pool
         int                     poolSize{ 0 };  // Capacity
         int                     nextFree{ 0 };  // Rover index for free slot search
-
-        AEGfxVertexList* mesh{ nullptr }; // Unit quad shared by all particles
+        AEGfxVertexList* meshSquare{ nullptr };
+        AEGfxVertexList* meshCircle{ nullptr };
 
         // Rover search for a dead slot; returns -1 if pool is full.
         int  FindFreeSlot();
 
         // Build the unit-square mesh used for rendering.
-        void CreateMesh();
+        void CreateSquareMesh();
+        void CreateCircleMesh(int segments = CIRCLE_SEGMENTS);
 
         // Returns a random float in [min, max].
         static float RandRange(float min, float max);
