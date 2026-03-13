@@ -1,4 +1,5 @@
 #include "ParticlesManager.hpp"
+#include "pch.hpp"
 
 namespace ParticleManager {
 
@@ -60,7 +61,6 @@ namespace ParticleManager {
 
         AEGfxSetBlendMode(AE_GFX_BM_BLEND);
         AEGfxSetRenderMode(AE_GFX_RM_COLOR);
-
         float  zoom = CameraManager::camera.GetZoom();
         AEVec2 camPos = CameraManager::camera.GetPosition();
 
@@ -92,7 +92,6 @@ namespace ParticleManager {
             AEMtx33Trans(&mtxTrans, p.position.x, p.position.y);
             AEMtx33Concat(&mtxResult, &mtxRot, &mtxScale);
             AEMtx33Concat(&mtxResult, &mtxTrans, &mtxResult);
-
             AEMtx33Concat(&mtxResult, &zoomMat, &mtxResult);
 
             AEGfxSetColorToMultiply(color.Red(), color.Green(), color.Blue(), color.Alpha());
@@ -109,7 +108,7 @@ namespace ParticleManager {
         AEGfxSetTransparency(1.f);
     }
 
-    void ParticleController::Emit(const ParticleEmitParams& params) {
+    void ParticleController::Emit(const EmitParams& params) {
         if (pool.empty()) {
             std::cerr << "[ParticleManager] Emit called before Init!\n";
             return;

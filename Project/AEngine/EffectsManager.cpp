@@ -1,5 +1,4 @@
 #include "EffectsManager.hpp"
-
 #include "ParticlesManager.hpp"
 
 namespace EffectsManager {
@@ -7,12 +6,12 @@ namespace EffectsManager {
     EffectsController effectsController;
 
     // Helper function
-    void EffectsController::Emit(const ParticleEmitParams& params) {
+    void EffectsController::Emit(const EmitParams& params) {
         ParticleManager::particleController.Emit(params);
     }
 
     void EffectsController::PlayExplosion(AEVec2 position) {
-        ParticleEmitParams params;
+        EmitParams params;
 
         params.spawnPosition = position;
         params.spawnRadius = 10.f;
@@ -40,7 +39,7 @@ namespace EffectsManager {
     }
 
     void EffectsController::PlayTileBreak(AEVec2 position) {
-        ParticleEmitParams params;
+        EmitParams params;
 
         params.spawnPosition = position;
         params.spawnRadius = 20.f;  // Spread across the tile's area
@@ -68,7 +67,7 @@ namespace EffectsManager {
     }
 
     void EffectsController::PlayProjectiileAbiltiesEffect(Effects effect, AEVec2 pos) {
-        ParticleEmitParams particle;
+        EmitParams particle;
         switch (effect) {
         case Effects::NUKE:
             particle = {
@@ -91,6 +90,7 @@ namespace EffectsManager {
                 1.0f, 
                 1,
             };
+            std::cout << "[EffectsManager] NUKE at (" << pos.x << ", " << pos.y << ")\n";
             break;
         }
 

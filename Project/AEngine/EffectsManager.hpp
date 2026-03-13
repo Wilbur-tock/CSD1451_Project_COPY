@@ -17,7 +17,7 @@ namespace EffectsManager {
 
     private:
         // Helper to fire off a fully configured params bundle
-        void Emit(const ParticleEmitParams& params);
+        void Emit(const EmitParams& params);
     };
 
     extern EffectsController effectsController;

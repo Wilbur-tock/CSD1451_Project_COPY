@@ -35,7 +35,7 @@ namespace ParticleManager {
 
         // Spawn params.count new particles using the configuration in params.
         // Silently drops any particles that exceed the pool capacity.
-        void Emit(const ParticleEmitParams& params);
+        void Emit(const EmitParams& params);
 
         // Kill all living particles immediately (no Shutdown/Init needed).
         void Clear();
