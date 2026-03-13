@@ -202,6 +202,14 @@ namespace AbilitiesManager {
 
 	// Load the starting abilities for the player and AI
 	void AbilityController::LoadStartingAbilities() {
+
+		// Clear inventory state before adding starting abilities
+		inventory.clear();
+		inventoryAbilityIds.clear();
+		inventoryCount = 0;
+		std::fill(inventoryTypeCount.begin(), inventoryTypeCount.end(), 0);
+		currentAbility = nullptr;
+
 		if (!isAIController) { // Load player starting Abilities
 			AddAbility(AbilityRandomisator(offensiveAbilities).Id());
 			AddAbility(AbilityRandomisator(offensiveAbilities).Id());
