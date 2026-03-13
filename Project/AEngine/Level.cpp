@@ -18,7 +18,7 @@ AEGfxTexture* playerCannonTex = nullptr;
 AEGfxTexture* enemyCannonTex = nullptr;
 
 // UI Objects
-TextObject debugText, turnText;
+TextObject debugText, turnText, turnCountText;
 UIManager::Panel turnStatusPanel;
 UIManager::Bar playerHPBar, enemyHPBar;
 
@@ -37,19 +37,22 @@ static void OnResultMainMenu() {
 
 void Level::InitializeUI() {
 	// Initialize UI objects in level
-	turnStatusPanel = { {150,50}, {1,1,1}, Utils::AnchorMode::TOP_CENTER };
+	turnStatusPanel = { {150,75}, {1,1,1}, Utils::AnchorMode::TOP_CENTER };
 
-	turnText = TextObject{ "", 0.75f,{0,0.75f,0}, {0,0}, Utils::AnchorMode::CENTER};
+	turnText = TextObject{ "", 0.8f,{0,0.75f,0}, {0,0}, Utils::AnchorMode::CENTER};
 	turnText.SetPosition(turnStatusPanel.GetTransform());
+
+	turnCountText = TextObject{ "", 0.6f,{0,0,0}, {0,0}, Utils::AnchorMode::CENTER };
+	turnCountText.SetPosition(turnStatusPanel.GetTransform());
+	turnCountText.SetOffsetPosition(0, -20.0f);
 
 	AbilitiesManager::playerAbilityController.InitializeAllAbilityUI();
 
-	float colorVal = 0.9f;
 	Transform barTrans = { {0,0}, {725,25} };
 	Utils::SetAnchoredPosition(barTrans, Utils::AnchorMode::TOP_LEFT);
 
-	playerHPBar= UIManager::Bar{ { barTrans.pos.x, barTrans.pos.y }, barTrans.size, {0,colorVal,0} };
-	enemyHPBar = UIManager::Bar{ { barTrans.pos.x + 150 + barTrans.size.x, barTrans.pos.y }, barTrans.size, {colorVal,0,0,}, UIManager::FillType::RIGHT_TO_LEFT };
+	playerHPBar = UIManager::Bar{ { barTrans.pos.x, barTrans.pos.y }, barTrans.size, PlayerHPColor()};
+	enemyHPBar = UIManager::Bar{ { barTrans.pos.x + 150 + barTrans.size.x, barTrans.pos.y }, barTrans.size, EnemyHPColor(), UIManager::FillType::RIGHT_TO_LEFT};
 
 	// Initialize ResultsUI
 	AEGfxTexture* btnTex = AssetsManager::GetTexture("Assets/buttonTexture.png");
@@ -172,7 +175,7 @@ void Level::Initalize() {
 				enemyCannonStartPos = { tile.transform.pos.x, tile.transform.pos.y + tile.transform.size.y * 0.5f };
 			}
 			else if (tile.Type() == TileType::TILE_PLAYER_CHARACTER || tile.Type() == TileType::TILE_ENEMY_MINION || tile.Type() == TileType::TILE_ENEMY_BOSS) {
-				Character characterObj{ tile.transform.pos, tile.transform.size, AssetsManager::squareTexture, {x,y}, CharacterType::PLAYER };
+				Character characterObj{ tile.transform.pos, tile.transform.size, AssetsManager::GetCharacterTexture(0)[0], {x,y}, CharacterType::PLAYER};
 				int listId = 0;
 
 				switch (tile.Type()) {
@@ -184,7 +187,7 @@ void Level::Initalize() {
 					break;
 
 				case TileType::TILE_ENEMY_MINION:
-					characterObj = { tile.transform.pos, tile.transform.size, AssetsManager::squareTexture, {x,y}, CharacterType::ENEMY_MINION };
+					characterObj = { tile.transform.pos, tile.transform.size, AssetsManager::GetCharacterTexture(1)[0], {x,y}, CharacterType::ENEMY_MINION};
 					enemies.push_back(characterObj);
 					listId = static_cast<int>(enemies.size() - 1);
 					enemies[listId].id = listId;
@@ -192,7 +195,7 @@ void Level::Initalize() {
 					break;
 
 				case TileType::TILE_ENEMY_BOSS:
-					characterObj = { tile.transform.pos, tile.transform.size, AssetsManager::squareTexture, {x,y}, CharacterType::ENEMY_BOSS };
+					characterObj = { tile.transform.pos, tile.transform.size, AssetsManager::GetCharacterTexture(2)[0], {x,y}, CharacterType::ENEMY_BOSS};
 					enemies.push_back(characterObj);
 					listId = static_cast<int>(enemies.size() - 1);
 					enemies[listId].id = listId;
@@ -208,21 +211,21 @@ void Level::Initalize() {
 	}
 
 	AEVec2 barrelHalfSize{ 60, 20 };
-
+	// Initialize player cannon
 	playerCannon = CannonManager::Cannon(playerCannonStartPos, playerCannonTex, { 0,0 }, barrelHalfSize, true, true);
-	playerCannon.textureColor = Color{ 1, 1, 1, 1 };
 
 	AbilitiesManager::AbilityController& playerController = AbilitiesManager::playerAbilityController;
 	playerController.LoadAllAbilities(false);
 	playerCannon.Initialize(&playerController);
 	AbilitiesManager::playerAbilityController.IsSelectingAbility(true);
 
+	// Initialize enemy cannon
 	enemyCannon = CannonManager::Cannon(enemyCannonStartPos, enemyCannonTex, { 0,0 }, barrelHalfSize, false, false);
-	enemyCannon.textureColor = Color{ 1, 1, 1, 1 };
-	enemyCannon.SetEnemyAI(static_cast<int>(levelDifficulty));
+
 	AbilitiesManager::AbilityController& enemyController = AbilitiesManager::enemyAbilityController;
 	enemyController.LoadAllAbilities(true);
 	enemyCannon.Initialize(&enemyController);
+	enemyCannon.SetEnemyAI(static_cast<int>(levelDifficulty));
 
 	// Reset level flow variables
 	isPlayerTurn = true;
@@ -334,7 +337,11 @@ void Level::DrawUI() {
 
 	// UI to display whose turn it is
 	turnStatusPanel.Draw();
+
 	turnText.Draw();
+
+	turnCountText.TextContent("Turn " + std::to_string(turnCount));
+	turnCountText.Draw();
 
 	float currentHP = 0, maxHP = 0;
 	GetCurrentHP(currentHP);
@@ -403,6 +410,7 @@ void Level::SetTurn(bool _isPlayerTurn) {
 		// randomise the abilities available to the player for this turn
 		AbilitiesManager::playerAbilityController.AbilitySelectionRandomisator();
 
+		++turnCount; // always increment once after enemy has shot
 	}
 	else {
 		activeCannon = &enemyCannon;

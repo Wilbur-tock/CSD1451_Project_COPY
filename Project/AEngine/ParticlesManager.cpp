@@ -19,7 +19,7 @@ namespace ParticleManager {
         }
 
         CreateMesh();
-        std::cout << "[ParticleManager] Initialised with pool size: " << poolSize << '\n';
+        //std::cout << "[ParticleManager] Initialised with pool size: " << poolSize << '\n';
     }
 
     void ParticleController::Shutdown() {
@@ -200,7 +200,6 @@ namespace ParticleManager {
 
         mesh = AEGfxMeshEnd();
         assert(mesh && "[ParticleManager] Failed to create particle mesh.");
-        std::cout << "[ParticleManager] Mesh created successfully.\n";
     }
 
     float ParticleController::RandRange(float min, float max) {

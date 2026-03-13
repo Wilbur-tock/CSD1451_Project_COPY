@@ -1,7 +1,7 @@
-#include "pch.hpp"
+#ifndef UIMANAGER_HPP
+#define UIMANAGER_HPP
 
-//#include "TextObject.hpp"
-//#include "Button.hpp"
+#include "pch.hpp"
 
 #include "Utils.hpp"
 #include "Color.hpp"
@@ -81,3 +81,6 @@ namespace UIManager {
 		bool isActive = false;
 	};
 }
+
+#endif // !UIMANAGER_HPP
+

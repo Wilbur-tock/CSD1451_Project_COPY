@@ -22,7 +22,6 @@ namespace CannonManager {
     }
 
     TextObject debugText;
-    UIManager::Bar screenOverlayShotBar, worldSpaceShotBar;
 
     void Cannon::Initialize(AbilitiesManager::AbilityController* controller) {
         abilityController = controller;
@@ -51,7 +50,7 @@ namespace CannonManager {
         projectiles.clear();
         projectiles.resize(projectileCount);
 
-        std::vector<Ability>& allProjectileAbilities = abilityController->GetOffensiveAbilities();
+        std::vector<Ability> const& allProjectileAbilities = abilityController->GetProjectilesAbilties();
         projectileAbilitiesCount = static_cast<int>(allProjectileAbilities.size());
 
         // Initializing the default and ALL projectiles with abilities
@@ -69,11 +68,11 @@ namespace CannonManager {
             Projectile& projectile = projectiles[i];
 
             // Initialize projectile with its texture
-            projectile = { AssetsManager::circleTexture };
+            projectile = Projectile{ AssetsManager::circleTexture };
             projectile.SetProjectileStats(ability.GetName(), ability.GetProj());
 
-            //std::cout << "[CannonManager] Set " << ability.Id() << " Mode: " << projectile.ModeName() << " " 
-            // << ability.GetName() << " ability into the cannon projectile vector" << '\n';
+            //std::cout << "[CannonManager] Set AbilityId: " << ability.Id() << " Projectile Mode: " << projectile.ModeName() << " " 
+            // << projectile.ProjectileId() << " into the cannon projectile vector" << '\n';
         }
     }
     
@@ -95,7 +94,7 @@ namespace CannonManager {
             EnemyAI();
         }
 
-        SelectProjectileAbility();
+        SelectProjectileType();
         ChargeShot();
         UpdateProjectile();
         DebugCommands();
@@ -136,8 +135,8 @@ namespace CannonManager {
 
     void Cannon::SetTarget(Character* _target) {
         target = _target;
-        std::cout << "[CannonManager] " + static_cast<std::string>(isPlayerControlled ? "PLAYER" : "ENEMY") 
-            + " New Target Set: " + _target->TypeName() << '\n';
+        //std::cout << "[CannonManager] " + static_cast<std::string>(isPlayerControlled ? "PLAYER" : "ENEMY") 
+        //    + " New Target Set: " + _target->TypeName() << '\n';
     }
 
     bool Cannon::IsTargetAlive() {
@@ -281,13 +280,13 @@ namespace CannonManager {
         }
     }
 
-    void Cannon::SelectProjectileAbility() {
+    void Cannon::SelectProjectileType() {
         if (!abilityController) {
             std::cerr << "[CannonManager] Can't find any abilityController" << '\n';
             return;
         }
 
-        selectedProjectileId = abilityController->FindProjectileId();
+        selectedProjectileId = abilityController->GetProjectileId();
     }
 
     void Cannon::ShootProjectile() {
@@ -326,7 +325,7 @@ namespace CannonManager {
         for (Projectile& projectile : activeProjectiles) {
             if (!projectile.IsActive()) continue;
 
-            projectile.AbilityActivation();
+            projectile.AbilityActivation(abilityController->CurrentAbility());
 
             float dt = PhysicsManager::g_dt;
             // Increased the frequency of the collision check by using loops
@@ -456,13 +455,21 @@ namespace CannonManager {
 
         // Toggle through all the ability
         if (AEInputCheckCurr(AEVK_LCTRL) || AEInputCheckCurr(AEVK_RCTRL)) {
-            if (AEInputCheckTriggered(AEVK_T)) {
-                abilityController->ToggleAbility(true);
+            if (AEInputCheckTriggered(AEVK_X)) {
+                abilityController->ToggleAbility(true, 1);
+            }
+
+            if (AEInputCheckTriggered(AEVK_Z)) {
+                abilityController->ToggleAbility(true, -1);
             }
         }
         else {
-            if (AEInputCheckTriggered(AEVK_T)) {
-                abilityController->ToggleAbility(false);
+            if (AEInputCheckTriggered(AEVK_X)) {
+                abilityController->ToggleAbility(false, 1);
+            }
+
+            if (AEInputCheckTriggered(AEVK_Z)) {
+                abilityController->ToggleAbility(false, -1);
             }
         }
 
@@ -505,6 +512,7 @@ namespace CannonManager {
 
         debugStr += "\n\nSelected Ability:\nId:" + std::to_string(selectedAbility.Id())
             + "\nName: " + selectedAbility.GetName()
+            + "\nType: " + selectedAbility.GetTypeName()
             + "\nAbility Charges Remaining: " + std::to_string(selectedAbility.AbilityCharges())
             + "\nSelected Projectile Id: " + std::to_string(selectedAbility.GetProj().projectileId);
 
@@ -517,7 +525,8 @@ namespace CannonManager {
                 + "\nAI Difficulty: " + std::to_string(aiDifficulty);
         }
         else {
-            debugStr += "\n\nShortcuts:\n[CTRL + T] Toggle ALL Abilities\n[T] Toggle Inventory Abilities";
+            debugStr += "\n\nShortcuts:\n[CTRL + Z] < Toggle ALL Abilities > [CTRL + X]"
+                "\n[Z] < Toggle Inventory Abilities > [X]";
         }
 
         // Print projectile that is shoot out information

@@ -14,11 +14,11 @@ void TextObject::Draw() {
 	// If textContent is changed or position has not been set yet
 	if (isSettingAnchorPos && prevTextContent != textContent && !hasUpdatePos) {
 		SetAnchorPosition(parent);
-		std::cout << prevTextContent << " Setting Text Print Anchor Position " << textContent << ' ' << pos.x << ' ' << pos.y << '\n';
+		//std::cout << prevTextContent << " Setting Text Print Anchor Position " << textContent << ' ' << pos.x << ' ' << pos.y << '\n';
 		hasUpdatePos = true;
 	}
 
-	// Update position
+	// Update position if there is a offset need to constantly updated if textContent is updated
 	float x = pos.x, y = pos.y;
 	if (offsetPos.x != 0 || offsetPos.y != 0) {
 		x += offsetPos.x;
@@ -86,7 +86,7 @@ void TextObject::SetAnchorPosition(Transform const& transform) {
 	f32 lineW, lineH;
 	AEGfxGetPrintSize(AssetsManager::textFont, textContent.c_str(), textScale, &lineW, &lineH);
 
-	// This is already normalize coordinates
+	// Get the normalize size of the text object
 	float halfLineW = static_cast<float>(lineW * 0.5f);
 	float halfLineH = static_cast<float>(lineH * 0.5f);
 

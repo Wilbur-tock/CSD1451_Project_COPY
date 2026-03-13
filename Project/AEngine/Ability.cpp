@@ -8,10 +8,11 @@ Ability::Ability(int _id, std::string _name, AbilityType _type, Tier _tier, std:
 	defense = { 0 }; // Shield HP
 }
 
-void Ability::SetStats(f32 _hp, f32 _atk, f32 _def) {
+void Ability::SetStats(f32 _hp, f32 _atk, f32 _def, f32 _turns) {
 	stats.hp = _hp;
 	stats.atk = _atk;
 	stats.def = _def;
+	stats.turns = _turns;
 }
 
 void Ability::SetProjectile(s32 _id, f32 _amp, s32 _basedamage, f32 _radius, s32 _charges, bool _unlimited) {

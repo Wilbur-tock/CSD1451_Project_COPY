@@ -21,4 +21,8 @@ private:
 	float min = 0.f, max = 1.f;
 };
 
+inline Color PlayerHPColor()	{ return Color{ 0.0f,1.0f,0.0f }; }
+inline Color EnemyHPColor()		{ return Color{ 1.0f,0.0f,0.0f }; }
+inline Color ShieldColor()		{ return Color{ 1.0f,1.0f,0.0f }; }
+
 #endif // ! COLOR_HPP

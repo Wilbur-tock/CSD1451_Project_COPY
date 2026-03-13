@@ -6,9 +6,9 @@
 #include "GameObject.hpp"
 #include "Attributes.hpp"
 #include "Tile.hpp"
-#include "AbilitiesManager.hpp"
 
 struct ProjectileModule;
+class Ability;
 
 enum class ProjectileMode {
 	IDLE		= 0,
@@ -68,7 +68,7 @@ public:
 	void Render();
 	// Ability effects checker for ability to take effect after projectile has been shot 
 	// Check for inputs to activated PROJECTILE Abilities
-	void AbilityActivation();
+	void AbilityActivation(Ability const& ability);
 	void ProjectileMovement(float dt);
 	// Simulate the projectile physics of bouncing off the walls, checking if it is grounded
 	void OnCollision(Tile const& tile);

@@ -76,9 +76,12 @@
 
     {
         "Name": "Wall",
-        "Type": 2,
+        "Type": 3,
         "Tier": 1,
         "Texture": "",
+        "Defensive_Stats": {
+            "ShieldHP": 1
+        },
         "Projectile_Stats": {
             "ProjectileID": 5,
             "Damage_Amp": 1.0,
@@ -90,177 +93,41 @@
     },
 
     {
-        "Name": "Cluster",
-        "Type": 2,
-        "Tier": 1,
-        "Texture": "",
-        "Projectile_Stats": {
-            "ProjectileID": 2,
-            "Damage_Amp": 1.0,
-            "Base_Damage": 100,
-            "Radius": 10,
-            "Charges": 1,
-            "unlimited_charges": false
-        }
-    },
-
-    {
-        "Name": "Booster",
-        "Type": 2,
-        "Tier": 1,
-        "Texture": "",
-        "Projectile_Stats": {
-            "ProjectileID": 2,
-            "Damage_Amp": 1.0,
-            "Base_Damage": 100,
-            "Radius": 10,
-            "Charges": 1,
-            "unlimited_charges": false
-        }
-    },
-
-    {
-        "Name": "Piercing Projectile",
-        "Type": 2,
-        "Tier": 1,
-        "Texture": "",
-        "Projectile_Stats": {
-            "ProjectileID": 2,
-            "Damage_Amp": 1.0,
-            "Base_Damage": 100,
-            "Radius": 10,
-            "Charges": 1,
-            "unlimited_charges": false
-        }
-    },
-
-    {
-        "Name": "Decay",
-        "Type": 2,
-        "Tier": 1,
-        "Texture": "",
-        "Projectile_Stats": {
-            "ProjectileID": 2,
-            "Damage_Amp": 1.0,
-            "Base_Damage": 100,
-            "Radius": 10,
-            "Charges": 1,
-            "unlimited_charges": false
-        }
-    },
-
-    {
-        "Name": "Earthquake",
-        "Type": 2,
-        "Tier": 1,
-        "Texture": "",
-        "Projectile_Stats": {
-            "ProjectileID": 2,
-            "Damage_Amp": 1.0,
-            "Base_Damage": 100,
-            "Radius": 10,
-            "Charges": 1,
-            "unlimited_charges": false
-        }
-    },
-
-    {
-        "Name": "Go to bed",
-        "Type": 2,
-        "Tier": 1,
-        "Texture": "",
-        "Projectile_Stats": {
-            "ProjectileID": 2,
-            "Damage_Amp": 1.0,
-            "Base_Damage": 100,
-            "Radius": 10,
-            "Charges": 1,
-            "unlimited_charges": false
-        }
-    },
-
-    {
-        "Name": "HP",
-        "Type": 1,
-        "Tier": 1,
-        "Texture": "Assets/Card_Add_Health.png",
-        "Base_Stats": {
-            "HP": 50,
-            "ATK": 0,
-            "DEF": 0
-        }
-    },
-
-    {
-        "Name": "DEF",
-        "Type": 1,
-        "Tier": 1,
-        "Texture": "",
-        "Base_Stats": {
-            "HP": 0,
-            "ATK": 0,
-            "DEF": 50
-        }
-    },
-
-    {
-        "Name": "ATK",
+        "Name": "STATS",
         "Type": 1,
         "Tier": 1,
         "Texture": "",
         "Base_Stats": {
             "HP": 0,
             "ATK": 50,
-            "DEF": 0
+            "DEF": 0,
+            "TURNS": 0
         }
     },
 
     {
-        "Name": "Shield",
-        "Type": 3,
-        "Tier": 1,
-        "Texture": "Assets/Card_Shield.png",
-        "Defensive_Stats": {
-            "ShieldHP": 50
-        }
-    },
-
-    {
-        "Name": "Gravity",
-        "Type": 3,
-        "Tier": 1,
-        "Texture": "Assets/Card_Gravity.png",
-        "Defensive_Stats": {
-            "ShieldHP": 50
-        }
-    },
-
-    {
-        "Name": "Rebuild",
-        "Type": 3,
-        "Tier": 1,
-        "Texture": "",
-        "Defensive_Stats": {
-            "ShieldHP": 50
-        }
-    },
-
-    {
-        "Name": "Invisibility",
-        "Type": 3,
-        "Tier": 1,
-        "Texture": "",
-        "Defensive_Stats": {
-            "ShieldHP": 50
-        }
-    },
-
-
-    {
-        "Name": "Test Ability",
+        "Name": "OFFENSIVE",
         "Type": 2,
         "Tier": 1,
         "Texture": "",
+        "Projectile_Stats": {
+            "ProjectileID": 0,
+            "Damage_Amp": 1.0,
+            "Base_Damage": 100,
+            "Radius": 10,
+            "Charges": 1,
+            "unlimited_charges": false
+        }
+    },
+
+    {
+        "Name": "DEFENSIVE",
+        "Type": 3,
+        "Tier": 1,
+        "Texture": "",
+        "Defensive_Stats": {
+            "ShieldHP": 50
+        },
         "Projectile_Stats": {
             "ProjectileID": 0,
             "Damage_Amp": 1.0,

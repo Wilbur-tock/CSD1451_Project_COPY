@@ -55,16 +55,3 @@ GameObject::~GameObject() {
 		pMesh = nullptr;
 	}
 }
-
-bool GameObject::IsInMapBounds() const {
-	return transform.pos.x >= Config::WORLD_MIN_X && transform.pos.x <= Config::WORLD_MAX_X 
-		&& transform.pos.y >= Config::WORLD_MIN_Y && transform.pos.y <= Config::WORLD_MAX_Y;
-}
-
-bool GameObject::IsInMapBoundsX() const {
-	return transform.pos.x >= Config::WORLD_MIN_X && transform.pos.x <= Config::WORLD_MAX_X;
-}
-
-bool GameObject::IsInMapBoundsY() const {
-	return transform.pos.y >= Config::WORLD_MIN_Y && transform.pos.y <= Config::WORLD_MAX_Y;
-}

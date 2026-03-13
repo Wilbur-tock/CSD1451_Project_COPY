@@ -55,7 +55,6 @@ namespace AbilitiesManager {
 		defensiveAbilities.clear();
 
 		allAbilities.clear();
-		allAbilities.reserve(64);
 		inventory.clear();
 		currentAbility = nullptr;
 
@@ -76,6 +75,14 @@ namespace AbilitiesManager {
 			controllerName = "Player Ability Controller";
 		}
 
+		totalAbilityCount = data.size();
+		// Reserve space for all vector used in these controller
+		allProjectilesAbilties.reserve(totalAbilityCount);
+		allAbilities.reserve(totalAbilityCount);
+		offensiveAbilities.reserve(totalAbilityCount);
+		statsAbilities.reserve(totalAbilityCount);
+		defensiveAbilities.reserve(totalAbilityCount);
+
 		int id = 0;
 		for (auto& item : data) { // Your JSON is an array at the root
 			std::string name = item["Name"];
@@ -84,17 +91,19 @@ namespace AbilitiesManager {
 			std::string texture = item["Texture"];
 
 			// Increment Id after assigning it
-			Ability newAbil(id++, name, type, tier, texture);
+			Ability newAbility(id++, name, type, tier, texture);
 
-			// ROUTE based on Type
-			if (type == AbilityType::STATISTICS) {
-				auto& s = item["Base_Stats"];
-				newAbil.SetStats(s["HP"], s["ATK"], s["DEF"]);
-				statsAbilities.push_back(newAbil);
+			// Load different stats if can find
+			std::string statsName = "Base_Stats";
+			if (item.contains(statsName) && !item[statsName].is_null()) {
+				auto& s = item[statsName];
+				newAbility.SetStats(s["HP"], s["ATK"], s["DEF"], s["TURNS"]);
 			}
-			else if (type == AbilityType::OFFENSIVE) {
-				auto& p = item["Projectile_Stats"];
-				newAbil.SetProjectile(
+
+			std::string projectileName = "Projectile_Stats";
+			if (item.contains(projectileName) && !item[projectileName].is_null()) {
+				auto& p = item[projectileName];
+				newAbility.SetProjectile(
 					p["ProjectileID"],
 					p["Damage_Amp"],
 					p["Base_Damage"],
@@ -102,15 +111,87 @@ namespace AbilitiesManager {
 					p["Charges"],
 					p["unlimited_charges"]
 				);
-				offensiveAbilities.push_back(newAbil);
-			}
-			else if (type == AbilityType::DEFENSIVE) {
-				auto& d = item["Defensive_Stats"];
-				newAbil.SetDefense(d["ShieldHP"]);
-				defensiveAbilities.push_back(newAbil);
 			}
 
-			allAbilities.push_back(newAbil);
+			std::string defensiveName = "Defensive_Stats";
+			if (item.contains(defensiveName) && !item[defensiveName].is_null()) {
+				auto& d = item[defensiveName];
+				newAbility.SetDefense(d["ShieldHP"]);
+			}
+
+			// Add to the type of ability list
+			switch (type) {
+			case AbilityType::STATISTICS:
+				statsAbilities.push_back(newAbility);
+				break;
+			case AbilityType::OFFENSIVE:
+				offensiveAbilities.push_back(newAbility);
+				break;
+			case AbilityType::DEFENSIVE:
+				defensiveAbilities.push_back(newAbility);
+				break;
+			}
+
+			//// ROUTE based on Type
+			//if (type == AbilityType::STATISTICS) {
+			//	std::string title = "Base_Stats";
+			//	if (item.contains(title) && !item[title].is_null()) {
+			//		auto& s = item[title];
+			//		newAbil.SetStats(s["HP"], s["ATK"], s["DEF"], s["TURNS"]);
+			//	}
+
+			//	statsAbilities.push_back(newAbil);
+			//}
+			//else if (type == AbilityType::OFFENSIVE) {
+			//	std::string title = "Projectile_Stats";
+			//	if (item.contains(title) && !item[title].is_null()) {
+			//		auto& p = item[title];
+			//		newAbil.SetProjectile(
+			//			p["ProjectileID"],
+			//			p["Damage_Amp"],
+			//			p["Base_Damage"],
+			//			p["Radius"],
+			//			p["Charges"],
+			//			p["unlimited_charges"]
+			//		);
+			//	}
+
+			//	offensiveAbilities.push_back(newAbil);
+			//}
+			//else if (type == AbilityType::DEFENSIVE) {
+			//	std::string title = "Defensive_Stats";
+			//	if (item.contains(title) && !item[title].is_null()) {
+			//		auto& d = item[title];
+			//		newAbil.SetDefense(d["ShieldHP"]);
+			//	}
+
+			//	title = "Projectile_stats";
+			//	if (item.contains(title) && !item[title].is_null()) {
+			//		auto& d = item[title];
+			//		newAbil.SetProjectile(
+			//			d["ProjectileID"],
+			//			d["Damage_Amp"],
+			//			d["Base_Damage"],
+			//			d["Radius"],
+			//			d["Charges"],
+			//			d["unlimited_charges"]
+			//		);
+			//	}
+
+			//	defensiveAbilities.push_back(newAbil);
+			//}
+
+			allAbilities.push_back(newAbility);
+
+			// Only add the default projectile ability as non-projectile abiility would use default projectile id
+			if (newAbility.GetProj().projectileId == 0 && id != 0) {
+				allProjectilesAbilties.push_back(newAbility);
+			}
+
+			// Do not adding default projectile again after it has been added
+			if (newAbility.GetProj().projectileId != 0) { 
+				allProjectilesAbilties.push_back(newAbility);
+			}
 		}
 
 		inventoryTypeCount.resize(static_cast<int>(AbilityType::COUNT));
@@ -128,10 +209,10 @@ namespace AbilitiesManager {
 			AddAbility(AbilityRandomisator(defensiveAbilities).Id());
 		}
 
-		//std::cout << "[AbilitiesManager] List of starting abilities:" << '\n';
-		//for (Ability* ability : inventory) {
-		//	std::cout << ability->GetName() << " Charges: " << ability->AbilityCharges() << '\n';
-		//}
+		std::cout << "[AbilitiesManager] List of starting abilities:" << '\n';
+		for (Ability* ability : inventory) {
+			std::cout << ability->GetName() << " Charges: " << ability->AbilityCharges() << '\n';
+		}
 	}
 
 	// Randomly select an ability for the AI if it has not already selected one
@@ -158,14 +239,13 @@ namespace AbilitiesManager {
 	void AbilityController::ChangeAbility(int abilityId) {
 		Ability* found = FindAbility(abilityId);
 		if (!found) {
-			std::cerr << "[AbilitiesManager] ChangeAbility failed. abilityId=" << abilityId << '\n';
+			std::cerr << "[AbilitiesManager] Change Ability failed. abilityId: " << abilityId << '\n';
 			return;
 		}
 		currentAbility = found;
 
-		std::cout << "[AbilitiesManager] Current ability: " + currentAbility->GetName()
-			+ " Charges Remaining: " + std::to_string(currentAbility->AbilityCharges())
- 			<< '\n';
+		//std::cout << "[AbilitiesManager] Current ability: " + currentAbility->GetName()
+		//	+ " Charges Remaining: " + std::to_string(currentAbility->AbilityCharges()) << '\n';
 	}
 
 	// Use the currently select ability if it has unlimited or any charges remaining
@@ -276,26 +356,24 @@ namespace AbilitiesManager {
 	}
 
 	// return the projectile Id to change the type of projectile the CANNON is currently using
-	int AbilityController::FindProjectileId() {
+	int AbilityController::GetProjectileId() {
 		if (!currentAbility) return 0;
-		// if current ability is a offensive one return the projectile id 
-		// otherwise just return the default projectile id which is 0
-		if (currentAbility->GetType() != AbilityType::OFFENSIVE) return 0;
 		return currentAbility->GetProj().projectileId;
 	}
 
 	// True to toggle through all abilities or false to toggle through of all the active abilities this controller has in its inventory
-	void AbilityController::ToggleAbility(bool isAllAbilities) {
+	void AbilityController::ToggleAbility(bool isAllAbilities, int addValue) {
 		int abilityId = currentAbility->Id();
+		abilityId += addValue;
 
 		if (isAllAbilities) {
-			Utils::Wrap(++abilityId, 0, static_cast<int>(allAbilities.size()-1));
+			Utils::Wrap(abilityId, 0, static_cast<int>(allAbilities.size()-1));
 		}
 		else {
 			bool found = false;
 			for (int i = 0; i < inventory.size(); ++i) {
 				if (inventory[i] == currentAbility) {
-					int selectedListId = i + 1;
+					int selectedListId = i + addValue;
 					Utils::Wrap(selectedListId, 0, static_cast<int>(inventory.size() - 1));
 					abilityId = inventory[selectedListId]->Id();
 					found = true;
