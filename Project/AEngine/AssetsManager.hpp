@@ -11,6 +11,9 @@ namespace AssetsManager {
 	extern AEGfxTexture* squareTexture, *circleTexture;
 	extern s8 textFont, titleFont;
 
+	// Type: 0 - player, 1 - enemy, 2 - boss
+	std::vector<AEGfxTexture*> const& GetCharacterTexture(int type);
+
 	void Load();
 
 	// Find the texture inside the storage or else load the texture

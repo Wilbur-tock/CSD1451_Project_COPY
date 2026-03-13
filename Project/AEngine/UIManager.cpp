@@ -72,7 +72,11 @@ namespace UIManager {
 
     void Panel::Draw() {
         AEMtx33 mat = GraphicsManager::CreateTransformMatrix(transform.pos.x, transform.pos.y, 0, transform.size.x, transform.size.y);
-        GraphicsManager::DrawScreenOverlay(AssetsManager::squareTexture, mat, color);
+        AEGfxTexture* _texture = AssetsManager::squareTexture;
+        if (texture) {
+            _texture = texture;
+        }
+        GraphicsManager::DrawScreenOverlay(_texture, mat, color);
     }
 
     PopupPanel::PopupPanel(std::string textContent, AEVec2 _size, Color _color, Utils::AnchorMode panelAnchorMode, AEGfxTexture* panelTexture, AEGfxTexture* btnTexture, Utils::FuncPtr onClick) 

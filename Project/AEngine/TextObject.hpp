@@ -48,7 +48,7 @@ public:
 
 	void Draw();
 private:
-	// Set the anchor position of the text object
+	// Set the anchor position of the text object (the size is based on the text content string width and height)
 	void SetAnchorPosition(Transform const& transform);
 	// Set the anchor position of the text to be printed out (In Normalized coordinates)
 	void SetTextAnchorPosition();

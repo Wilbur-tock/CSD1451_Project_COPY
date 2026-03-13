@@ -6,6 +6,7 @@
 #include "Attributes.hpp"
 #include "GameObject.hpp" // Using GameObject and TileIndex.hpp
 #include "Physics.hpp"
+#include "UIManager.hpp"
 
 enum class CharacterType {
 	PLAYER,
@@ -46,6 +47,7 @@ public:
 private:
 	// Print out information about the character and draw collision lines
 	void DebugInfo();
+	void UpdateSprite(); // Select correct sprite based on HP / animation state
 
 private:
 	CharacterType type;
@@ -55,7 +57,13 @@ private:
 	float squatAnimTimer = 0.0f;
 	bool squatAnimShowSquat = false;
 
-	void UpdateSprite(); // Select correct sprite based on HP / animation state
+	// UI Objects
+
+	UIManager::Panel characterStatsPanel, characterIconBG, characterIcon;
+	// ws = world space
+	UIManager::Bar wsHPBar, wsShieldBar;
+	// so = screen overlay
+	UIManager::Bar soHPBar, soShieldBar;
 };
 
 #endif // !CHARACTER_HPP

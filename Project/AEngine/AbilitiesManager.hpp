@@ -17,6 +17,8 @@ namespace AbilitiesManager {
 		std::vector<Ability>& GetStatsAbilities() { return statsAbilities; }
 		std::vector<Ability>& GetDefensiveAbilities() { return defensiveAbilities; }
 
+		std::vector<Ability>& GetProjectilesAbilties() { return allProjectilesAbilties; }
+
 		//std::vector<Ability>& GetAIOffensiveAbilities() { return AIoffensiveAbilities; }
 		//std::vector<Ability>& GetAIStatsAbilities() { return statsAbilities; }
 		//std::vector<Ability>& GetAIDefensiveAbilities() { return defensiveAbilities; }
@@ -48,7 +50,7 @@ namespace AbilitiesManager {
 		Ability* FindAbility(int abilityId);
 		// return the projectile Id to change the type of projectile the CANNON is currently using
 		// if the ability type is an offensive which affects the projectile
-		int FindProjectileId();
+		int GetProjectileId();
 
 		// Reset to default ability if current ability if an offensive and charges remaining is 0 to 
 		// ensure that an ability with 0 charges cannot be used again
@@ -59,7 +61,7 @@ namespace AbilitiesManager {
 		}
 		// True to toggle through all abilities or 
 		// false to toggle through of all the inventory abilities this controller has
-		void ToggleAbility(bool isAllAbilities);
+		void ToggleAbility(bool isAllAbilities, int addValue);
 
 		// AI Member functions
 		void ResetAIAbilitySelection() { hasEnemySelectedAbility = false; }
@@ -95,10 +97,14 @@ namespace AbilitiesManager {
 		Ability* currentAbility = nullptr;
 
 		std::vector<Ability> allAbilities; // vector containing all the different type of abilities
+		std::vector<Ability> allProjectilesAbilties; // vector containing all the ability that uses it own projectile mode
+
 		std::vector<Ability*> inventory; // vector containing all the type of abilities this controller has in its inventory
 		std::vector<int> inventoryTypeCount; // To keep track of how many of each ability type there is in the inventory
 
+		size_t totalAbilityCount = 0;
 		int inventoryCount = 0; // total number of abilites the has stored in the inventory
+		int currentInventoryId = 0;
 		// ids of all the ability that store in the inventory 
 		// for example inventory has 5 max space [0][0][1][2][3] < numbers represents the abilityId 
 		// has 2 charges of abilityId in inventory while the rest 1 charges only

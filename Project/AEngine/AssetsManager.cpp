@@ -9,11 +9,50 @@ namespace AssetsManager {
     AEGfxTexture* squareTexture, *circleTexture;
     s8 textFont, titleFont;
 
+    std::vector<AEGfxTexture*> playerCharacters;
+    std::vector<AEGfxTexture*> enemyCharacters;
+    std::vector<AEGfxTexture*> bossCharacters;
+
+    // Type: 0 - player, 1 - enemy, 2 - boss
+    std::vector<AEGfxTexture*> const& GetCharacterTexture(int type) {
+        if (type == 0) return playerCharacters;
+        if (type == 1) return enemyCharacters;
+        else return bossCharacters;
+    }
+
+    static void LoadFromPath(std::vector<char const*> const& paths, std::vector<AEGfxTexture*>& textureList) {
+        for (char const* path : paths) {
+            textureList.push_back(GetTexture(path));
+        }
+    }
+
     void Load() {
         squareTexture = GetTexture("Assets/square.png");
         textFont = AEGfxCreateFont("Assets/Font/liberation-mono.ttf", Config::FONT_SIZE);
         titleFont = AEGfxCreateFont("Assets/Font/liberation-mono.ttf", Config::FONT_SIZE * 2);
         circleTexture = AssetsManager::GetTexture("Assets/circle.png");
+
+        // Load Characters texture
+        std::vector<char const*> playerPaths = {
+            "Assets/playerIdle.png",
+            "Assets/playerHalfHp.png",
+            "Assets/playerSquat.png",
+        };
+
+        std::vector<char const*> enemyPaths = {
+            "Assets/enemy100.png",
+            "Assets/enemy75.png",
+            "Assets/enemy50.png",
+            "Assets/enemy25.png",
+        };
+
+        std::vector<char const*> bossPaths = {
+            "Assets/enemyBoss.png",
+        };
+
+        LoadFromPath(playerPaths, playerCharacters);
+        LoadFromPath(enemyPaths, enemyCharacters);
+        LoadFromPath(bossPaths, bossCharacters);
     }
 
     AEGfxTexture* GetTexture(char const* filePath) {

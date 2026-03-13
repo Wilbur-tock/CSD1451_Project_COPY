@@ -7,6 +7,7 @@
 #include "GameObject.hpp"
 #include "Projectile.hpp"
 #include "Character.hpp"
+#include "UIManager.hpp"
 
 namespace CannonManager {
 	class Cannon : public GameObject {
@@ -52,7 +53,7 @@ namespace CannonManager {
 		void ChargeShot();
 		void ClampAngle(float &angle);
 		// Select the type of projectile ability based on the ability chosen by the player or ENEMY
-		void SelectProjectileAbility();
+		void SelectProjectileType();
 		void ShootProjectile();
 		// Render and move the projectile once it has reach the end of its lifespan it is destroy
 		void UpdateProjectile();
@@ -98,6 +99,9 @@ namespace CannonManager {
 		float aiShootTimer = 0.0f; // randomise timer to visualise a delay for when the enemy when shoot out the prorjectile
 		bool canAIShoot = false;
 		Character* target = nullptr;
+
+		//UI Object tied to this class
+		UIManager::Bar screenOverlayShotBar, worldSpaceShotBar;
 	};
 }
 

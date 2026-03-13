@@ -9,6 +9,7 @@
 #include "PhysicsManager.hpp"
 #include "Utils.hpp"
 #include "EffectsManager.hpp"
+#include "AbilitiesManager.hpp"
 
 Projectile::Projectile(AEGfxTexture* _texture, ProjectileMode _mode, AEVec2 _pos, int _attackCharges)
     : GameObject(_pos, defaultSize, _texture), timer{ 0.0f }, mode(_mode), attackCharges{_attackCharges} {
@@ -19,7 +20,7 @@ void Projectile::Render() {
     GraphicsManager::DrawGameObject(texture, mat, Color{ 0.5f, 0.5f, 0, 1 });
 }
 
-void Projectile::AbilityActivation() {
+void Projectile::AbilityActivation(Ability const& ability) {
     if (Mode() == ProjectileMode::IDLE || Mode() == ProjectileMode::ATTACK || isAbilityTriggered) return;
 
     bool leftClick = AEInputCheckTriggered(AEVK_LBUTTON);
@@ -33,6 +34,7 @@ void Projectile::AbilityActivation() {
             Utils::GetTileIndex(tileX, tileY, transform.pos);
             int radius = attribute.DamageRadius();
 
+            // Increased radius damage
             if (!Utils::IsGridIndexOutOfBounds(tileX, tileY)) {
                 attribute.DamageRadius(radius * 2);
                 DamageTile(tileX, tileY);
@@ -72,7 +74,7 @@ void Projectile::AbilityActivation() {
                     Tile& tile = (*MapManager::currentMap)[i][tileX];
                     if (tile.Type() == TileType::TILE_EMPTY) {
                         tile.Type(TileType::TILE_BLOCK_1);
-                        tile.attribute.Health(1);
+                        tile.attribute.Health(ability.GetDefense().shieldHP);
                     }
                 }
             }

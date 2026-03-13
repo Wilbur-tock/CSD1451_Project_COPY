@@ -19,6 +19,7 @@ enum class Tier {
 
 struct StatsModule {
 	f32 hp, atk, def;
+	f32 turns; // number of turns the ability last
 };
 
 struct ProjectileModule {
@@ -43,12 +44,27 @@ public:
 	AbilityType			GetType() const { return type; }
 	Tier				GetTier() const { return tier; }
 	std::string			GetTexture() const { return texture; }
+	std::string	GetTypeName() {
+		switch (type) {
+		case AbilityType::STATISTICS:
+			return "STATISTICS";
+			break;
+		case AbilityType::OFFENSIVE:
+			return "OFFENSIVE";
+			break;
+		case AbilityType::DEFENSIVE:
+			return "DEFENSIVE";
+			break;
+		}
+
+		return "NULL ABILITY TYPE";
+	}
 						
 	StatsModule			GetStats() const { return stats; }
 	ProjectileModule	GetProj() const { return proj; }
 	DefenseModule		GetDefense() const { return defense; }
 
-	void SetStats(f32 _hp, f32 _atk, f32 _def);
+	void SetStats(f32 _hp, f32 _atk, f32 _def, f32 _turns);
 	void SetProjectile(s32 _id, f32 _amp, s32 _basedamage, f32 _radius, s32 _charges, bool _unlimited);
 	void SetDefense(s32 _shieldHP);
 

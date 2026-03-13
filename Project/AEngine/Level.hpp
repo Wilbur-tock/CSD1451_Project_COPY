@@ -76,6 +76,7 @@ private:
 	LevelMode levelDifficulty = LevelMode::EASY;
 
 	LevelStatus status = LevelStatus::PLAYING;
+	int turnCount = 1; // Number of turn after both player has shot
 
 	CannonManager::Cannon* activeCannon = nullptr; // pointer to the active instance of the cannon object 
 	CannonManager::Cannon playerCannon; // instance of the player cannon

@@ -10,7 +10,7 @@
 
 class GameObject {
 public:
-	int id = 0; // index of the object
+	int id = 0; // index of the gameoObject
 	TileIndex tileId{ 0,0 }; // x and y tile index of where the gameobject is position according to the tile map
 	Transform transform{ {0,0}, { 0,0 } };
 	AEVec2 velocity = { 0,0 }; // Vector rate of change of displacement (direction * speed)
@@ -18,6 +18,7 @@ public:
 	AEGfxVertexList* pMesh = nullptr;
 	AEGfxTexture* texture = nullptr; // Image texture to drawn
 	Color textureColor{ 0,0,0 };
+
 	Collider collider{ CollisionType::COLLIDER_BOX, {0,0} };
 
 	// CTOR 
@@ -27,9 +28,18 @@ public:
 	GameObject& operator=(GameObject const& other);
 	~GameObject();
 
-	bool IsInMapBounds() const;
-	bool IsInMapBoundsX() const;
-	bool IsInMapBoundsY() const;
+	bool IsInMapBounds() const {
+		return transform.pos.x >= Config::WORLD_MIN_X && transform.pos.x <= Config::WORLD_MAX_X
+			&& transform.pos.y >= Config::WORLD_MIN_Y && transform.pos.y <= Config::WORLD_MAX_Y;
+	}
+
+	bool IsInMapBoundsX() const {
+		return transform.pos.x >= Config::WORLD_MIN_X && transform.pos.x <= Config::WORLD_MAX_X;
+	}
+
+	bool IsInMapBoundsY() const {
+		return transform.pos.y >= Config::WORLD_MIN_Y && transform.pos.y <= Config::WORLD_MAX_Y;
+	}
 };
 
 #endif // GAMEOBJECT_HPP
