@@ -26,6 +26,7 @@ namespace AbilitiesManager {
 		void IsSelectingAbility(bool _isSelectingAbility) { isSelectingAbility = _isSelectingAbility; }
 
 		std::vector<Ability*> const& Inventory() const { return inventory; }
+		bool IsInventoryFull() const { return inventoryCount >= Config::MAX_INVENTORY_COUNT; }
 
 		AbilityType OffensiveOrDefensive();
 
