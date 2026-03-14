@@ -6,6 +6,7 @@
 
 namespace EffectsManager {
     enum class Effects {
+        DEFAULT,
         NUKE,
     };
 

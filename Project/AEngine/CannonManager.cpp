@@ -124,23 +124,18 @@ namespace CannonManager {
         }
     }
 
-    void Cannon::ResetTurn() {
+    void Cannon::ResetForNewTurn() {
         allProjectileDestroyed = false;
         hasCannonShot = false;
         SetCamera(false);
 
-        abilityController->ResetAbility();
+        // ALWAYS Reset cannon ability back to default after at the start off a a new turn
+        abilityController->ChangeAbility(0);
 
         // Reselect AI ability
         if (!isPlayerControlled && abilityController) {
             abilityController->ResetAIAbilitySelection();
         }
-    }
-
-    void Cannon::SetTarget(Character* _target) {
-        target = _target;
-        //std::cout << "[CannonManager] " + static_cast<std::string>(isPlayerControlled ? "PLAYER" : "ENEMY") 
-        //    + " New Target Set: " + _target->TypeName() << '\n';
     }
 
     bool Cannon::IsTargetAlive() {
@@ -361,7 +356,6 @@ namespace CannonManager {
 
                             if (!projectile.IsCollisionTriggered()) {
                                 AudioManager::PlaySFX(AudioManager::SFX::Impact);
-                                EffectsManager::effectsController.PlayExplosion(projectile.transform.pos);
                                 projectile.FirstTimeCollision();
                             }
                             else {

@@ -43,14 +43,14 @@ void Projectile::AbilityActivation(Ability const* ability) {
 
             // Reset stats back to default
             attribute.DamageRadius(radius);
-            std::cout << "BOMB mode triggered";
+            std::cout << "BOMB mode triggered\n";
         }
         break;
     case ProjectileMode::NUKE:
         if (leftClick) {
             isAbilityTriggered = true;
             velocity = { 0,0 }; // fall straight down immediately
-            std::cout << "NUKE mode triggered";
+            std::cout << "NUKE mode triggered\n";
         }
         break;
     case ProjectileMode::PENTA_BURST:
@@ -78,7 +78,7 @@ void Projectile::AbilityActivation(Ability const* ability) {
                     }
                 }
             }
-            std::cout << "WALL mode triggered";
+            std::cout << "WALL mode triggered\n";
         }
         break;
     }
@@ -157,10 +157,16 @@ void Projectile::FirstTimeCollision() {
     velocity.y *= percentage;
     isCollisionTriggered = true;
 
+    // Set effect
+    using EffectsManager::Effects;
+    Effects projectileEffect = Effects::DEFAULT;
     switch (Mode()) {
     case ProjectileMode::NUKE:
-        EffectsManager::effectsController.PlayProjectiileAbiltiesEffect(EffectsManager::Effects::NUKE, transform.pos);
+        projectileEffect = Effects::NUKE;
+        break;
     }
+
+    EffectsManager::effectsController.PlayProjectiileAbiltiesEffect(projectileEffect, transform.pos);
 }
 
 void Projectile::ConsumeAttackCharge() {
@@ -241,8 +247,6 @@ void Projectile::DamageTile(int tileX, int tileY) {
     // Consume 1 attack charge if projectile has damaged a tile 
     if (hasDamageAnyTile) {
         ConsumeAttackCharge();
-
-        EffectsManager::effectsController.PlayExplosion(transform.pos);
     }
 }
 

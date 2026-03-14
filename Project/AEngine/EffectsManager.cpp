@@ -37,27 +37,29 @@ namespace EffectsManager {
             18.f,       40.f,                               // scale start, end
             0.8f,       1.0f,                               // lifetime min, max
             25,                                             // count
-            ParticleShape::SQUARE
+            ParticleShape::CIRCLE
             });
         std::cout << "[EffectsManager] PlayTileBreak at (" << position.x << ", " << position.y << ")\n";
     }
 
     void EffectsController::PlayProjectiileAbiltiesEffect(Effects effect, AEVec2 spawnPos) {
+        // Default variables for an EXPLOSION effect
         float originOffset = 0;
 
-        float speedMin{ 50.f };
-        float speedMax{ 150.f };
+        float speedMin{ 80.0f };
+        float speedMax{ 250.f };
+
         float directionMin{ 0.f };
         float directionMax{ PI };       
 
         float rotationSpeedMin{ -PI };
         float rotationSpeedMax{ PI };
 
-        Color colorStart{ 1.f, 1.f, 1.f, 1.f };
-        Color colorEnd{ 1.f, 1.f, 1.f, 0.f }; 
+        Color colorStart{ 1.f, 0.5f, 0.f, 1.f };
+        Color colorEnd{ 0.8f, 0.1f, 0.f, 0.f };
 
-        float scaleStart{ 10.f };
-        float scaleEnd{ 0.f };
+        float scaleStart{ 20.0f };
+        float scaleEnd{ 0.0f };
 
         float lifetimeMin{ 0.5f };
         float lifetimeMax{ 1.5f };
@@ -66,14 +68,24 @@ namespace EffectsManager {
         ParticleShape shape{ ParticleShape::SQUARE };
 
         switch (effect) {
+        case Effects::DEFAULT:
+            originOffset = 10.0f;
+            std::cout << "[EffectsManager] Play Explosion at (" << spawnPos.x << ", " << spawnPos.y << ")\n";
+            break;
         case Effects::NUKE:
             colorStart = { 1.0f, 0, 0, 1.0f };
-            colorStart = { 1.0f, 0, 0, 0.0f };
-            scaleStart = 32.0f * 10;
 
-            count = 1000;
+            speedMin = 0.0f;
+            speedMax = 0.0f;
+
+            scaleStart = 32.0f;
+            scaleEnd = 32.0f * 15.0f;
+
+            lifetimeMin = 3.0f;
+            lifetimeMax = 5.0f;
+            count = 1;
             shape = ParticleShape::CIRCLE;
-            std::cout << "[EffectsManager] Player Nuke Explosion at (" << spawnPos.x << ", " << spawnPos.y << ")\n";
+            std::cout << "[EffectsManager] Play Nuke Explosion at (" << spawnPos.x << ", " << spawnPos.y << ")\n";
             break;
         }
 

@@ -55,9 +55,7 @@ namespace AbilitiesManager {
 		// Reset to default ability if current ability if an offensive and charges remaining is 0 to 
 		// ensure that an ability with 0 charges cannot be used again
 		void ResetAbility() {
-			if (currentAbility && currentAbility->AbilityCharges() <= 0) {
-				ChangeAbility(0);
-			}
+			ChangeAbility(0);
 		}
 		// True to toggle through all abilities or 
 		// false to toggle through of all the inventory abilities this controller has
@@ -78,6 +76,7 @@ namespace AbilitiesManager {
 		void UpdateAbilityUI();
 
 	private:
+		void PrintInventory();
 		void PrintAllAbilities();
 		void PrintInventoryCount();
 

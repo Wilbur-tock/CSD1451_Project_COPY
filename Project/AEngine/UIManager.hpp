@@ -26,6 +26,9 @@ namespace UIManager {
 		Bar(AEVec2 _pos, AEVec2 _size, Color _fillColor, Color _bgColor, FillType _type = FillType::LEFT_TO_RIGHT, AEGfxTexture* _texture = nullptr);
 
 		Transform GetTransform() const { return transform; }
+		void UpdatePos(AEVec2 const& newPos) {
+			transform.pos = newPos;
+		}
 
 		// Drawing bar on a screenoverlay or not
 		void Draw(float currValue, float maxValue, bool isScreenOverlay = true);

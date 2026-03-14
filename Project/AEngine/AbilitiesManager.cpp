@@ -265,12 +265,20 @@ namespace AbilitiesManager {
 		if (currentAbility->AbilityCharges() <= 0) return false; // has no ability charges can't use this ability
 
 		currentAbility->AbilityCharges(-1);
+		std::cout << "Before\n";
+		PrintInventory();
+
 		UpdateInventory(*currentAbility, false);
 
+		// Update inventory count of ability type
 		int id = static_cast<int>(currentAbility->GetType()) - 1;
 		--inventoryTypeCount[id]; 
+		--inventoryCount;
 		// Reset to default if trying to use an ability without any charges remaining
 		ResetAbility();
+
+		std::cout << "After\n";
+		PrintInventory();
 
 		std::cout << "[AbilitiesManager] Ability used: " + currentAbility->GetName()
 			+ " Charges Remaining: " + std::to_string(currentAbility->AbilityCharges()) << '\n';
@@ -279,6 +287,7 @@ namespace AbilitiesManager {
 
 	// Add ability charges from the based on selection
 	void AbilityController::AddAbility(int abilityId, int chargesToAdd) {
+		if (inventoryCount >= Config::MAX_INVENTORY_COUNT) return; // Don't add any new ability after inventory count has reach the max
 		Ability* found = FindAbility(abilityId);
 		if (!found) {
 			std::cerr << "[AbilitiesManager] Can't find to add Ability Id: " + std::to_string(abilityId) << '\n';
@@ -298,6 +307,7 @@ namespace AbilitiesManager {
 	// Helper function to add or remove abilities from the inventory vector based on the ability charges
 	void AbilityController::UpdateInventory(Ability& ability, bool toAddToVector) {
 		if (toAddToVector) {
+			std::cout << "[AbilitiesManager] Added " << ability << " into inventory" << '\n';
 			inventoryAbilityIds.push_back(ability.Id());
 
 			// if previous charges is already more than or equal to 1, means that it is already in the vector no need to add
@@ -306,16 +316,24 @@ namespace AbilitiesManager {
 			// add into the activeAbilities vector
 			inventory.push_back(&ability);
 
-			std::cout << "[AbilitiesManager] Added " << ability << " into inventory" << '\n';
 		}
 		else {
-			inventoryAbilityIds.push_back(ability.Id());
+			std::cout << "[AbilitiesManager] Removed " << ability << " from inventory" << '\n';
+			// Remove from inventoryAbilityIds vector
+			for (int i = currentInventoryId; i < Config::MAX_INVENTORY_COUNT; ++i) {
+				if (i < Config::MAX_INVENTORY_COUNT - 1) {
+					inventoryAbilityIds[i] = inventoryAbilityIds[i + 1]; // shift every currentInventoryId + 1 foward by 1
+				}
+				else {
+					inventoryAbilityIds.pop_back(); // remove the last vector
+				}
+			}
 
+			// Erase from inventoryAbilties Vector
 			if (ability.AbilityCharges() > 0) return; // if there is ability charges remanining no need to erase from inventory vector
 			for (int i = 0; i < inventory.size(); ++i) {
 				if (inventory[i] == &ability) {
 					inventory.erase(inventory.begin() + i);
-					std::cout << "[AbilitiesManager] Removed " << ability << " from inventory" << '\n';
 					return;
 				}
 			}
@@ -466,7 +484,6 @@ namespace AbilitiesManager {
 	}
 
 	void AbilityController::OnClickAbilityCard(Ability const& ability) {
-		std::cout << "Clicked ability card " << ability.Id() << std::endl;
 		if (ability.GetType() != AbilityType::STATISTICS) {
 			AddAbility(ability.Id());
 		}
@@ -629,6 +646,13 @@ namespace AbilitiesManager {
 		}
 		std::cout << "[AbilitiesManager] Successfully loaded " << defensiveAbilities.size() << " defensive abilities." << std::endl;
 		std::cout << "=======================================================================\n";
+	}
+
+	void AbilityController::PrintInventory() {
+		std::cout << "==============" + controllerName + " Inventory Count:" + std::to_string(inventoryCount) + "=============\n";
+		for (int id : inventoryAbilityIds) {
+			std::cout << std::setw(15) << std::left << "Id: " << id << " Name: " << FindAbility(id)->GetName() << '\n';
+		}
 	}
 
 	void AbilityController::PrintInventoryCount() {

@@ -72,10 +72,11 @@ Character::Character(AEVec2 _pos, AEVec2 _size, AEGfxTexture* _texture, TileInde
 		hpBarColor = PlayerHPColor();
 	}
 	float wsBarX = transform.pos.x - transform.size.x * 0.5f, wsBarY = transform.pos.y + transform.size.y;
-	float wsBarWidth = 5;
+	float wsShieldBarWidth = 5;
+	float wsShieldBarY = wsBarY + wsShieldBarWidth + 2.5f;
 
 	wsHPBar = UIManager::Bar{ { wsBarX, wsBarY}, { transform.size.x, 10 }, hpBarColor }; // Position just on top of the character
-	wsShieldBar = UIManager::Bar{ {wsBarX,wsBarY + wsBarWidth + 2.5f} , { transform.size.x, wsBarWidth }, ShieldColor()};
+	wsShieldBar = UIManager::Bar{ {wsBarX,wsShieldBarY} , { transform.size.x, wsShieldBarWidth }, ShieldColor()};
 
 	float panelYOffset = -25.0f;// add Y offset based on the level player/enemy hp bar
 	characterStatsPanel = UIManager::Panel{ {300,100}, Color{0.75f,0.75f,0.75f}, Utils::AnchorMode::TOP_LEFT };
@@ -173,8 +174,11 @@ void Character::DrawUI() {
 
 	bool drawShieldStats = attribute.Shield() > 0;
 
+	// Draw and update position according to the character pos
+	wsHPBar.UpdatePos({ transform.pos.x - transform.size.x * 0.5f, transform.pos.y + transform.size.y });
 	wsHPBar.Draw(hp, maxHp, false);
 	if (drawShieldStats) {
+		wsHPBar.UpdatePos({ wsHPBar.GetTransform().pos.x, wsHPBar.GetTransform().pos.y + wsHPBar.GetTransform().pos.y + 2.5f });
 		wsShieldBar.Draw(shield, maxShield, false);
 	}
 

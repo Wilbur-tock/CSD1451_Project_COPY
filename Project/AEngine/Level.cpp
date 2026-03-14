@@ -414,7 +414,7 @@ void Level::SetTurn(bool _isPlayerTurn) {
 	else {
 		activeCannon = &enemyCannon;
 	}
-	activeCannon->ResetTurn();
+	activeCannon->ResetForNewTurn();
 	AudioManager::PlaySFX(AudioManager::SFX::TurnSwitch);
 	std::cout << "[Level] Switch to " << std::string(isPlayerTurn ? "PLAYER" : "ENEMY") << " turn" << '\n';
 }

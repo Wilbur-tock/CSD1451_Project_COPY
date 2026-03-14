@@ -3,10 +3,12 @@
 #include "AssetsManager.hpp"
 
 TextObject::TextObject()
-	: textContent{ "" }, textScale{ 1.0f }, pos{ 0,0 }, color{ 1,1,1 }, font{ AssetsManager::textFont }, anchorMode{ Utils::AnchorMode::TOP_LEFT } {}
+	: textContent{ "" }, textScale{ 1.0f }, pos{ 0,0 }, color{ 1,1,1 }, font{ AssetsManager::textFont }, 
+	anchorMode{ Utils::AnchorMode::TOP_LEFT } {}
 
 TextObject::TextObject(std::string _textContent, float _scale, Color _color, AEVec2 _pos, Utils::AnchorMode _anchorMode)
-	: textContent{ _textContent }, textScale{ _scale }, pos{ _pos }, color{ _color }, font{ AssetsManager::textFont }, anchorMode{ _anchorMode } {}
+	: textContent{ _textContent }, textScale{ _scale }, pos{ _pos }, color{ _color }, font{ AssetsManager::textFont }, 
+	anchorMode{ _anchorMode } {}
 
 void TextObject::Draw() {
 	if (textContent.empty()) return;
