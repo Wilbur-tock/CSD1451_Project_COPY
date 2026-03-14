@@ -28,6 +28,8 @@ public:
 	GameObject& operator=(GameObject const& other);
 	~GameObject();
 
+	void DrawCollisionLine();
+
 	bool IsInMapBounds() const {
 		return transform.pos.x >= Config::WORLD_MIN_X && transform.pos.x <= Config::WORLD_MAX_X
 			&& transform.pos.y >= Config::WORLD_MIN_Y && transform.pos.y <= Config::WORLD_MAX_Y;

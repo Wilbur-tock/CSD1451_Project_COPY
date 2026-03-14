@@ -55,3 +55,13 @@ GameObject::~GameObject() {
 		pMesh = nullptr;
 	}
 }
+
+void GameObject::DrawCollisionLine() {
+    if (collider.type == CollisionType::COLLIDER_BOX) {
+        // Draw Collision line
+        GraphicsManager::DrawLine(transform.pos, collider.size);
+    }
+    else {
+        GraphicsManager::DrawCircle(transform.pos, collider.size.x * 0.5f);
+    }
+}

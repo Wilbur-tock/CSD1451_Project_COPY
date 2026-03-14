@@ -44,6 +44,7 @@ public:
 
 	Tile() = default;
 	Tile(AEVec2 _pos, AEGfxTexture* _texture, TileType _type);
+	Tile(AEVec2 _pos, AEVec2 _size, AEGfxTexture* _texture, TileType _type);
 
 	TileType Type() const { return type; }
 

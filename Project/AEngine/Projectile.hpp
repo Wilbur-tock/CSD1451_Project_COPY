@@ -65,11 +65,14 @@ public:
 	void SetProjectileStats(std::string _projectileName, ProjectileModule const& data);
 
 	void Initialize(Transform cannonTrans, int _activeId, float cannonAngle, float shotPower);
-	void Render();
+	void Update(bool isPlayerShot, float dt);
+	void Draw();
+
 	// Ability effects checker for ability to take effect after projectile has been shot 
 	// Check for inputs to activated PROJECTILE Abilities
 	void AbilityActivation(Ability const* ability);
 	void ProjectileMovement(float dt);
+
 	// Simulate the projectile physics of bouncing off the walls, checking if it is grounded
 	void OnCollision(Tile const& tile);
 	// If the projectile hit something, REDUCE the velocity by a percentage for the FIRST COLLISION ONLY
@@ -87,6 +90,11 @@ public:
 	std::string DebugInfo();
 
 private:
+	// Instantly destroy the projectile after the timer runs out or
+	// it has hit a shield or some blocks that instant destroy projectiles
+	void InstantDestroy();
+
+private:
 	static constexpr AEVec2 defaultSize{ 10,10 };
 	int projectileId = 0, attackCharges = 1;
 	std::string projectileName;
@@ -98,6 +106,7 @@ private:
 	bool isCollisionTriggered = false; // There is a collision triggered between the projectile and block
 	bool isAbilityTriggered = false;
 	bool hasHitSomething = false; // has hit any things expect for the ground / undestructible blocks
+	bool hasHitShield = false;
 };
 
 #endif // !PROJECTILE_HPP

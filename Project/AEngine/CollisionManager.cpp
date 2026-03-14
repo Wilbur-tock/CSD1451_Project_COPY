@@ -55,10 +55,10 @@ namespace CollisionManager {
     }
 
     bool IsPointInGameObject(GameObject const& obj) {
-        if (obj.collider.type == CollisionType::COLLIDER_BOX) {
-            float mouseX = 0, mouseY = 0;
-            Utils::GetWorldMousePos(mouseX, mouseY);
+        float mouseX = 0, mouseY = 0;
+        Utils::GetWorldMousePos(mouseX, mouseY);
 
+        if (obj.collider.type == CollisionType::COLLIDER_BOX) {
             float halfW = obj.transform.size.x * 0.5f;
             float halfH = obj.transform.size.y * 0.5f;
 
@@ -69,6 +69,20 @@ namespace CollisionManager {
             float bottom    = obj.transform.pos.y - halfH;
 
             return (mouseX >= left && mouseX <= right && mouseY <= top && mouseY >= bottom);
+        }
+        else if (obj.collider.type == CollisionType::COLLIDER_CIRCLE) {
+            // Calculate the distance on each axis
+            float dx = mouseX - obj.transform.pos.x;
+            float dy = mouseY - obj.transform.pos.y;
+
+            // Use the squared distance to avoid a slow square root (sqrt) operation
+            float distanceSquared = (dx * dx) + (dy * dy);
+
+            // Compare against the squared radius
+            float radius = obj.transform.size.x * 0.5f;
+            float radiusSquared = radius * radius;
+
+            return distanceSquared <= radiusSquared;
         }
 
         return false;
@@ -97,5 +111,41 @@ namespace CollisionManager {
         float overlapX = (radius + square.size.x / 2.0f) - std::abs(circle.pos.x - square.pos.x);
         float overlapY = (radius + square.size.y / 2.0f) - std::abs(circle.pos.y - square.pos.y);
         return overlapX < (overlapY + bias);
+    }
+
+    bool CheckContinuousCollision(AEVec2 start, AEVec2 end, Transform const& target) {
+        AEVec2 path = { end.x - start.x, end.y - start.y };
+        AEVec2 toTarget = { target.pos.x - start.x, target.pos.y - start.y };
+
+        float pathLenSq = (path.x * path.x) + (path.y * path.y);
+        float projRadius = 5.0f; 
+        float targetRadius = target.size.x * 0.5f;
+        float totalRadiusSq = (projRadius + targetRadius) * (projRadius + targetRadius);
+
+        // If the projectile didn't move, just do a normal circle check
+        if (pathLenSq == 0) {
+            float dx = end.x - target.pos.x;
+            float dy = end.y - target.pos.y;
+            return (dx * dx + dy * dy) <= totalRadiusSq;
+        }
+
+        // Project toTarget onto path, clamped between 0 and 1
+        float t = std::clamp((toTarget.x * path.x + toTarget.y * path.y) / pathLenSq, 0.0f, 1.0f);
+        AEVec2 closestPoint = { start.x + t * path.x, start.y + t * path.y };
+
+        float dx = target.pos.x - closestPoint.x;
+        float dy = target.pos.y - closestPoint.y;
+        float distSq = (dx * dx + dy * dy);
+
+        //if (distSq < totalRadiusSq * 10.0f) {
+        //    std::cout << "[Collision Debug]\n"
+        //        << "  Proj Path: (" << start.x << "," << start.y << ") to (" << end.x << "," << end.y << ")\n"
+        //        << "  Target Pos: (" << target.pos.x << "," << target.pos.y << ")\n"
+        //        << "  DistSq: " << distSq << " | Threshold: " << totalRadiusSq << "\n"
+        //        << "  Result: " << (distSq <= totalRadiusSq ? "!!! HIT !!!" : "MISS") << "\n"
+        //        << "-----------------------" << std::endl;
+        //}
+
+        return distSq <= totalRadiusSq;
     }
 }

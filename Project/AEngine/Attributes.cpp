@@ -8,6 +8,6 @@ void Attributes::TakeDamage(int damageValue) {
 		Health(health - damageVal);
 	}
 	else {
-		Shield(--shield);
+		shield = std::clamp(--shield, minValue, maxValue);
 	}
 }

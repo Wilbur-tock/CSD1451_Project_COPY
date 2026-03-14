@@ -64,6 +64,9 @@
 
 Character::Character(AEVec2 _pos, AEVec2 _size, AEGfxTexture* _texture, TileIndex _tileId, CharacterType _type)
 	: GameObject{ _pos, _size, _texture, _tileId, Color{1,1,1,1} }, type{ _type } {
+	// Reserve vector capacity
+	abilityModifiers.reserve(10);
+
 	attribute.MaxHealth(100);
 
 	// Initialize UI Objects
@@ -78,7 +81,7 @@ Character::Character(AEVec2 _pos, AEVec2 _size, AEGfxTexture* _texture, TileInde
 	wsHPBar = UIManager::Bar{ { wsBarX, wsBarY}, { transform.size.x, 10 }, hpBarColor }; // Position just on top of the character
 	wsShieldBar = UIManager::Bar{ {wsBarX,wsShieldBarY} , { transform.size.x, wsShieldBarWidth }, ShieldColor()};
 
-	float panelYOffset = -25.0f;// add Y offset based on the level player/enemy hp bar
+	float panelYOffset = -50.0f;// add Y offset based on the level player/enemy hp bar
 	characterStatsPanel = UIManager::Panel{ {300,100}, Color{0.75f,0.75f,0.75f}, Utils::AnchorMode::TOP_LEFT };
 	characterStatsPanel.AddOffset({ 0, panelYOffset });
 
@@ -163,7 +166,17 @@ void Character::UpdateSprite() {
 
 void Character::Draw() {
 	UpdateSprite(); // Update character sprite texture
-	GraphicsManager::DrawGameObject(*this);
+	GraphicsManager::DrawCharacter(*this);
+
+	// Draw shield
+	if (attribute.IsShieldActive()) {
+		float shieldSize = Config::TILE_SIZE;
+		GraphicsManager::DrawGameObject(
+			AssetsManager::circleTexture,
+			GraphicsManager::CreateTransformMatrix(transform.pos.x, transform.pos.y, 0, shieldSize, shieldSize),
+			Color{ 0.9f,0.9f,0, 0.3f }
+		);
+	}
 }
 
 void Character::DrawUI() {
@@ -172,7 +185,7 @@ void Character::DrawUI() {
 	float shield = static_cast<float>(attribute.Shield());
 	float maxShield = static_cast<float>(attribute.MaxShield());
 
-	bool drawShieldStats = attribute.Shield() > 0;
+	bool drawShieldStats = attribute.IsShieldActive();
 
 	// Draw and update position according to the character pos
 	wsHPBar.UpdatePos({ transform.pos.x - transform.size.x * 0.5f, transform.pos.y + transform.size.y });
@@ -217,8 +230,7 @@ void Character::GetCharacterInfo(std::string& str) {
 void Character::DebugInfo() {
 	if (!Utils::isDebuggerOn) return;
 
-	// Draw Collision line
-	GraphicsManager::DrawLine(transform.pos, collider.size);
+	DrawCollisionLine();
 }
 
 void Character::SetStats(int difficultyLevel) {
@@ -229,8 +241,7 @@ void Character::SetStats(int difficultyLevel) {
 		attribute.Health(maxHP);
 
 		int shield = 10 * multipler;
-		attribute.Shield(shield);
-		attribute.MaxShield(shield);
+		attribute.SetShield(shield);
 
 		float dmgReduc = 0.0f;
 		switch (multipler) {

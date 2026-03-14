@@ -141,6 +141,7 @@ xcopy "$(SolutionDir)Extern\AlphaEngine\lib\fmod.dll" "$(OutDir)" /s /r /y /q</C
     <ClCompile Include="TextObject.cpp" />
     <ClCompile Include="Tile.cpp" />
     <ClCompile Include="BaseTypes.cpp" />
+    <ClCompile Include="TowerShield.cpp" />
     <ClCompile Include="UICursor.cpp" />
     <ClCompile Include="UIManager.cpp" />
     <ClCompile Include="Utils.cpp" />
@@ -188,6 +189,7 @@ xcopy "$(SolutionDir)Extern\AlphaEngine\lib\fmod.dll" "$(OutDir)" /s /r /y /q</C
     <ClInclude Include="TextObject.hpp" />
     <ClInclude Include="Tile.hpp" />
     <ClInclude Include="BaseTypes.hpp" />
+    <ClInclude Include="TowerShield.hpp" />
     <ClInclude Include="UICursor.hpp" />
     <ClInclude Include="UIManager.hpp" />
     <ClInclude Include="Utils.hpp" />
@@ -195,6 +197,7 @@ xcopy "$(SolutionDir)Extern\AlphaEngine\lib\fmod.dll" "$(OutDir)" /s /r /y /q</C
   <ItemGroup>
     <None Include="..\Assets\Abilities\Abilities.json" />
     <None Include="..\Assets\Abilities\AiAbilities.json" />
+    <None Include="PlayerAbilities.json" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

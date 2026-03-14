@@ -9,6 +9,8 @@ struct TileIndex {
 
     bool operator==(TileIndex const& rhs) const;
     void operator=(TileIndex const& rhs);
+    bool operator<=(TileIndex const& rhs) const;
+    bool operator>=(TileIndex const& rhs) const;
 
     bool IsOutOfBounds() const;
 };

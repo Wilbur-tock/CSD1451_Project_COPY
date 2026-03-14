@@ -109,7 +109,7 @@ namespace PhysicsManager {
 
         for (int y = tileY; y <= maxY; ++y) {
             for (int x = minX; x <= maxX; ++x) {
-                if (Utils::IsGridIndexOutOfBounds(x, y)) continue;
+                if (Utils::IsTileIndexOutOfBounds(x, y)) continue;
 
                 Tile& tile = (*MapManager::currentMap)[y][x];
 

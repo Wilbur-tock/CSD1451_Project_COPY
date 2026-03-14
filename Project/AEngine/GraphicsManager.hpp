@@ -28,6 +28,7 @@ namespace GraphicsManager {
 	void DrawGameObject(AEGfxTexture* pTex, AEMtx33 const& transform, Color const& color);
 	// Draw game object on the map using pMeshMiddle rect mode middle
 	void DrawGameObject(GameObject const& gameObject);
+	void DrawCharacter(GameObject const& gameObject);
 
 	// Draw UI texture using pMeshCorner (rect mode corner origin) using WORLD COORDINATES
 	void DrawWorldUI(AEGfxTexture* pTex, AEMtx33 const& transform, Color const& color);
@@ -42,6 +43,7 @@ namespace GraphicsManager {
 	// w, h      – render size in pixels
 	void DrawSpriteFrame(AEGfxTexture* tex, int frame, float screenX, float screenY, float w, float h);
 	void DrawLine(AEVec2 pos, AEVec2 size);
+	void DrawCircle(AEVec2 center, float radius);
 }
 
 #endif // !GRAPHICSMANAGER_HPP

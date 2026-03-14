@@ -93,15 +93,28 @@
     },
 
     {
+        "Name": "Tower Shield",
+        "Type": 3,
+        "Tier": 1,
+        "Texture": "",
+        "Base_Stats": {
+            "Hp": 0,
+            "Attack": 0,
+            "Shield": 3,
+            "Turns": 5
+        }
+    },
+
+    {
         "Name": "STATS",
         "Type": 1,
         "Tier": 1,
         "Texture": "",
         "Base_Stats": {
-            "HP": 0,
-            "ATK": 50,
-            "DEF": 0,
-            "TURNS": 0
+            "Hp": 0,
+            "Attack": 0,
+            "Shield": 0,
+            "Turns": 5
         }
     },
 

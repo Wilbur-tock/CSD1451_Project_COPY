@@ -7,6 +7,7 @@
 #include "GameObject.hpp" // Using GameObject and TileIndex.hpp
 #include "Physics.hpp"
 #include "UIManager.hpp"
+#include "Ability.hpp"
 
 enum class CharacterType {
 	PLAYER,
@@ -51,6 +52,7 @@ private:
 
 private:
 	CharacterType type;
+	std::vector<Ability> abilityModifiers; // list of ability modifiers that is current apply on this character object
 
 	// Player squat animation state
 	bool squatAnimEnabled = false;

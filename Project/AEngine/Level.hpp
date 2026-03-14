@@ -6,6 +6,7 @@
 #include "CannonManager.hpp"
 #include "Tile.hpp"
 #include "Character.hpp"
+#include "TowerShield.hpp"
 
 enum class LevelMode {
 	EASY,
@@ -51,6 +52,11 @@ public:
 	}
 
 	void SetHoveringOverUI(bool isHovering) { isHoveringUI = isHovering; }
+
+	TowerShield& GetTowerShield(bool isPlayer) { return isPlayer ? playerShield : enemyShield; }
+	//bool IsPlayerShieldOn() const { return playerShieldOn; }
+	//bool IsEnemyShieldOn() const { return enemyShieldOn; }
+	//void SetShieldOn(bool isPlayer, int shield, int turnLifespan);
 private:
 	void InitializeUI();
 	void DrawUI();
@@ -63,8 +69,12 @@ private:
 	// Toggle turns between player and enemy once they have shot and a timer has been set and reduced to 0
 	void UpdateTurn();
 	void SetTurn(bool _isPlayerTurn);
+	void NewTurn();
+
 	void UpdateLevelStatus();
 	void DrawResultsUI();
+
+	void SetTerritoryTiles(TileIndex const& newTileId, TileIndex& center, TileIndex& min, TileIndex& max);
 
 	void DebugCommands();
 	void DebugInfo();
@@ -81,6 +91,17 @@ private:
 	CannonManager::Cannon* activeCannon = nullptr; // pointer to the active instance of the cannon object 
 	CannonManager::Cannon playerCannon; // instance of the player cannon
 	CannonManager::Cannon enemyCannon; // instance of the enemy cannon
+
+	// Tile ids
+	int groundY = 0;
+	TileIndex playerCenterId{ 0,0 };
+	TileIndex enemyCenterId{ 0,0 };
+
+	// Territory of tiles
+	std::pair<TileIndex, TileIndex> playerTiles; // min and max tiles that belongs to the player
+	std::pair<TileIndex, TileIndex> enemyTiles; // min and max tiles that belongs to the enemy
+
+	TowerShield playerShield, enemyShield;
 
 	bool isPlayerTurn = true; // is player or enemy turn to shoot
 	bool autoPlayOn = false; // used for debugging let enemy play ONLY

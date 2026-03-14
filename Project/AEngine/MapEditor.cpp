@@ -316,7 +316,7 @@ namespace MapEditor {
 		Utils::GetMouseGridIndex(gridX, gridY);
 
 		// Check for input to draw the map editor
-		if (!Utils::IsGridIndexOutOfBounds(gridX, gridY)) {
+		if (!Utils::IsTileIndexOutOfBounds(gridX, gridY)) {
 			bool leftHold = AEInputCheckCurr(AEVK_LBUTTON);
 			bool rightHold = AEInputCheckCurr(AEVK_RBUTTON);
 			bool ctrlHold = AEInputCheckCurr(AEVK_LCTRL) || AEInputCheckCurr(AEVK_RCTRL);

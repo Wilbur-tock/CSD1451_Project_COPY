@@ -11,7 +11,7 @@
 #include "GameStateManager.hpp"
 #include "ParticlesManager.hpp"
 #include "EffectsManager.hpp"
-
+#include "GraphicsManager.hpp"
 #include "UIManager.hpp"
 
 AEGfxTexture* playerCannonTex = nullptr;
@@ -21,6 +21,7 @@ AEGfxTexture* enemyCannonTex = nullptr;
 TextObject debugText, turnText, turnCountText;
 UIManager::Panel turnStatusPanel;
 UIManager::Bar playerHPBar, enemyHPBar;
+UIManager::Bar playerShieldBar, enemyShieldBar;
 
 bool resultScreenInitialized = false;
 UIManager::Panel resultOverlay, centerPanel;
@@ -48,11 +49,20 @@ void Level::InitializeUI() {
 
 	AbilitiesManager::playerAbilityController.InitializeAllAbilityUI();
 
-	Transform barTrans = { {0,0}, {725,25} };
+	float barGap = turnStatusPanel.Size().x;
+	float barWidth = (Config::SCREEN_WIDTH - barGap) * 0.5f;
+	float barHeight = 25.0f;
+	Transform barTrans = { {0,0}, {barWidth,barHeight} };
 	Utils::SetAnchoredPosition(barTrans, Utils::AnchorMode::TOP_LEFT);
 
 	playerHPBar = UIManager::Bar{ { barTrans.pos.x, barTrans.pos.y }, barTrans.size, PlayerHPColor()};
-	enemyHPBar = UIManager::Bar{ { barTrans.pos.x + 150 + barTrans.size.x, barTrans.pos.y }, barTrans.size, EnemyHPColor(), UIManager::FillType::RIGHT_TO_LEFT};
+
+	float rightX = barTrans.pos.x + barGap + barTrans.size.x;
+	enemyHPBar = UIManager::Bar{ { rightX, barTrans.pos.y}, barTrans.size, EnemyHPColor(), UIManager::FillType::RIGHT_TO_LEFT};
+
+	float shieldBarY = barTrans.pos.y - barHeight;
+	playerShieldBar = UIManager::Bar{ { barTrans.pos.x, shieldBarY}, barTrans.size, ShieldColor() };
+	enemyShieldBar = UIManager::Bar{ { rightX, shieldBarY }, barTrans.size, ShieldColor(), UIManager::FillType::RIGHT_TO_LEFT };
 
 	// Initialize ResultsUI
 	AEGfxTexture* btnTex = AssetsManager::GetTexture("Assets/buttonTexture.png");
@@ -168,6 +178,9 @@ void Level::Initalize() {
 		for (int x = 0; x < Config::GRID_WIDTH; ++x) {
 			Tile& tile = activeLevelMap[y][x];
 
+			// Set ground tile y
+			if (tile.IsGround() && groundY == 0) groundY = tile.tileId.y;
+
 			if (tile.Type() == TileType::TILE_PLAYER_CANNON) {
 				playerCannonStartPos = { tile.transform.pos.x, tile.transform.pos.y + tile.transform.size.y * 0.5f };
 			}
@@ -175,7 +188,8 @@ void Level::Initalize() {
 				enemyCannonStartPos = { tile.transform.pos.x, tile.transform.pos.y + tile.transform.size.y * 0.5f };
 			}
 			else if (tile.Type() == TileType::TILE_PLAYER_CHARACTER || tile.Type() == TileType::TILE_ENEMY_MINION || tile.Type() == TileType::TILE_ENEMY_BOSS) {
-				Character characterObj{ tile.transform.pos, tile.transform.size, AssetsManager::GetCharacterTexture(0)[0], {x,y}, CharacterType::PLAYER};
+				AEVec2 characterSize{ 32.0f, 32.0f };
+				Character characterObj{ tile.transform.pos, characterSize, AssetsManager::GetCharacterTexture(0)[0], {x,y}, CharacterType::PLAYER};
 				int listId = 0;
 
 				switch (tile.Type()) {
@@ -184,22 +198,31 @@ void Level::Initalize() {
 					listId = static_cast<int>(playerCharacters.size() - 1);
 					playerCharacters[listId].id = listId;
 					playerCharacters[listId].SetStats(static_cast<int>(levelDifficulty));
+
+					//Get center tile id of the player
+					SetTerritoryTiles(tile.tileId, playerCenterId, playerTiles.first, playerTiles.second);
+
+					//SetTerritoryTiles(playerTiles, playerCenterId);
 					break;
 
 				case TileType::TILE_ENEMY_MINION:
-					characterObj = { tile.transform.pos, tile.transform.size, AssetsManager::GetCharacterTexture(1)[0], {x,y}, CharacterType::ENEMY_MINION};
+					characterObj = { tile.transform.pos, characterSize, AssetsManager::GetCharacterTexture(1)[0], {x,y}, CharacterType::ENEMY_MINION};
 					enemies.push_back(characterObj);
 					listId = static_cast<int>(enemies.size() - 1);
 					enemies[listId].id = listId;
 					enemies[listId].SetStats(static_cast<int>(levelDifficulty));
+
+					SetTerritoryTiles(tile.tileId, enemyCenterId, enemyTiles.first, enemyTiles.second);
 					break;
 
 				case TileType::TILE_ENEMY_BOSS:
-					characterObj = { tile.transform.pos, tile.transform.size, AssetsManager::GetCharacterTexture(2)[0], {x,y}, CharacterType::ENEMY_BOSS};
+					characterObj = { tile.transform.pos, characterSize, AssetsManager::GetCharacterTexture(2)[0], {x,y}, CharacterType::ENEMY_BOSS};
 					enemies.push_back(characterObj);
 					listId = static_cast<int>(enemies.size() - 1);
 					enemies[listId].id = listId;
 					enemies[listId].SetStats(static_cast<int>(levelDifficulty));
+
+					SetTerritoryTiles(tile.tileId, enemyCenterId, enemyTiles.first, enemyTiles.second);
 
 					bossId = listId;
 					break;
@@ -238,6 +261,13 @@ void Level::Initalize() {
 
 	// Randomise at the start of the level the 3 abilities that the player can choose from in the ability selector UI
 	AbilitiesManager::playerAbilityController.AbilitySelectionRandomisator();
+
+	// Initialize player and enemy shield 
+	playerShield = TowerShield{ MapManager::FindTile(playerCenterId)->transform.pos };
+	enemyShield = TowerShield{ MapManager::FindTile(enemyCenterId)->transform.pos };
+
+	playerShield.SetShieldOn(10, 5);
+	enemyShield.SetShieldOn(10, 5);
 
 	InitializeUI();
 
@@ -318,6 +348,10 @@ void Level::Draw() {
 	enemyCannon.Draw();
 
 	ParticleManager::particleController.Draw();
+
+	// Draw shield 
+	playerShield.Draw();
+	enemyShield.Draw();
 }
 
 void Level::Free() {
@@ -342,6 +376,7 @@ void Level::DrawUI() {
 	turnCountText.TextContent("Turn " + std::to_string(turnCount));
 	turnCountText.Draw();
 
+	// Draw health bar
 	float currentHP = 0, maxHP = 0;
 	GetCurrentHP(currentHP);
 	GetMaxHP(maxHP);
@@ -350,6 +385,15 @@ void Level::DrawUI() {
 	GetCurrentHP(currentHP, false);
 	GetMaxHP(maxHP, false);
 	enemyHPBar.Draw(currentHP, maxHP);
+
+	// Draw shield amount bar
+	if (playerShield.IsShieldOn()) {
+		playerShieldBar.Draw(static_cast<float>(playerShield.attribute.Shield()), static_cast<float>(playerShield.attribute.MaxShield()));
+	}
+
+	if (enemyShield.IsShieldOn()) {
+		enemyShieldBar.Draw(static_cast<float>(enemyShield.attribute.Shield()), static_cast<float>(enemyShield.attribute.MaxShield()));
+	}
 
 	activeCannon->DrawUI();
 	activeCannon->DebugInfo();
@@ -409,7 +453,7 @@ void Level::SetTurn(bool _isPlayerTurn) {
 		// randomise the abilities available to the player for this turn
 		AbilitiesManager::playerAbilityController.AbilitySelectionRandomisator();
 
-		++turnCount; // always increment once after enemy has shot
+		NewTurn();
 	}
 	else {
 		activeCannon = &enemyCannon;
@@ -417,6 +461,13 @@ void Level::SetTurn(bool _isPlayerTurn) {
 	activeCannon->ResetForNewTurn();
 	AudioManager::PlaySFX(AudioManager::SFX::TurnSwitch);
 	std::cout << "[Level] Switch to " << std::string(isPlayerTurn ? "PLAYER" : "ENEMY") << " turn" << '\n';
+}
+
+void Level::NewTurn() {
+	++turnCount; // always increment once after enemy has shot
+
+	playerShield.UpdateLifespan();
+	enemyShield.UpdateLifespan();
 }
 
 void Level::UpdateLevelStatus() {
@@ -472,6 +523,36 @@ void Level::DrawResultsUI() {
 	resultMainMenuButton.Update();
 }
 
+void Level::SetTerritoryTiles(TileIndex const& newTileId, TileIndex& center, TileIndex& min, TileIndex& max) {
+	if (min.x == 0) {
+		min = newTileId;
+	}
+	
+	// Find min/max x axis
+	if (newTileId.x < min.x) {
+		min = newTileId;
+	}
+	else if (newTileId.x > max.x) {
+		max = newTileId;
+	}
+
+	// Find min/max y axis
+	if (newTileId.y < min.y) {
+		min = newTileId;
+	}
+	else if (newTileId.y > max.y) {
+		max = newTileId;
+	}
+
+	// Set center id
+	center = {
+		min.x + ((max.x - min.x) / 2),
+		min.y + ((max.y - min.y) / 2),
+	};
+
+	//std::cout << "Assign: " << newTileId << "\nCenter: " << center << "\nMin: " << min << "\nMax: " << max << '\n';
+}
+
 void Level::DebugCommands() {
 	if (!Utils::isDebuggerOn) return;
 
@@ -509,6 +590,19 @@ void Level::DebugCommands() {
 			if (tile.IsCharacter()) {
 				tile.TakeDamage(10);
 			}
+		}
+	}
+
+	// Input right click on the shield to deal damage to the shield
+	if (CollisionManager::IsPointInGameObject(playerShield)) {
+		if (AEInputCheckTriggered(AEVK_RBUTTON)) {
+			playerShield.attribute.TakeDamage(1);
+		}
+	}
+
+	if (CollisionManager::IsPointInGameObject(enemyShield)) {
+		if (AEInputCheckTriggered(AEVK_RBUTTON)) {
+			enemyShield.attribute.TakeDamage(1);
 		}
 	}
 
@@ -586,6 +680,14 @@ void Level::DebugInfo() {
 				characters.GetCharacterInfo(info);
 			}
 		}
+	}
+
+	if (CollisionManager::IsPointInGameObject(playerShield)) {
+		playerShield.DebugInfo(debug);
+	}
+
+	if (CollisionManager::IsPointInGameObject(enemyShield)) {
+		enemyShield.DebugInfo(debug);
 	}
 
 	debug += info;

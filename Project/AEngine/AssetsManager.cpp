@@ -34,20 +34,20 @@ namespace AssetsManager {
 
         // Load Characters texture
         std::vector<char const*> playerPaths = {
-            "Assets/playerIdle.png",
-            "Assets/playerHalfHp.png",
-            "Assets/playerSquat.png",
+            "Assets/Characters/playerIdle.png",
+            "Assets/Characters/playerHalfHp.png",
+            "Assets/Characters/playerSquat.png",
         };
 
         std::vector<char const*> enemyPaths = {
-            "Assets/enemy100.png",
-            "Assets/enemy75.png",
-            "Assets/enemy50.png",
-            "Assets/enemy25.png",
+            "Assets/Characters/enemy100.png",
+            "Assets/Characters/enemy75.png",
+            "Assets/Characters/enemy50.png",
+            "Assets/Characters/enemy25.png",
         };
 
         std::vector<char const*> bossPaths = {
-            "Assets/enemyBoss.png",
+            "Assets/Characters/enemyBoss.png",
         };
 
         LoadFromPath(playerPaths, playerCharacters);

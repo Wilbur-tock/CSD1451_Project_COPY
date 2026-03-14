@@ -6,6 +6,10 @@ Tile::Tile(AEVec2 _pos, AEGfxTexture* _texture, TileType _type)
 	: GameObject{ _pos, {defaultSize,defaultSize}, _texture }, type{ _type } {
 }
 
+Tile::Tile(AEVec2 _pos, AEVec2 _size, AEGfxTexture* _texture, TileType _type)
+	: GameObject{ _pos, _size, _texture }, type{ _type } {
+}
+
 void Tile::Type(TileType newType) {
 	prevType = type;
 	if (IsEmpty() && IsCharacter()) characterId = -1; // reset characterId

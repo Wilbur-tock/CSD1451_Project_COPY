@@ -53,6 +53,8 @@ namespace CollisionManager {
     return true if the collision is horizontal otherwise false for vertical collision
     *************************************************************************/
     bool IsHorizontalCollision(Transform const& circle, Transform const& square);
+
+    bool CheckContinuousCollision(AEVec2 start, AEVec2 end, Transform const& target);
 }
 
 #endif // !COLLISIONMANAGER_HPP

@@ -8,14 +8,15 @@
 #include "CollisionManager.hpp"
 #include "PhysicsManager.hpp"
 #include "Utils.hpp"
-#include "EffectsManager.hpp"
 #include "AbilitiesManager.hpp"
+#include "AudioManager.hpp"
+#include "EffectsManager.hpp"
 
 Projectile::Projectile(AEGfxTexture* _texture, ProjectileMode _mode, AEVec2 _pos, int _attackCharges)
     : GameObject(_pos, defaultSize, _texture), timer{ 0.0f }, mode(_mode), attackCharges{_attackCharges} {
 }
 
-void Projectile::Render() {
+void Projectile::Draw() {
     AEMtx33 mat = GraphicsManager::CreateTransformMatrix(transform.pos.x, transform.pos.y, 0, transform.size.x, transform.size.y);
     GraphicsManager::DrawGameObject(texture, mat, Color{ 0.5f, 0.5f, 0, 1 });
 }
@@ -35,7 +36,7 @@ void Projectile::AbilityActivation(Ability const* ability) {
             int radius = attribute.DamageRadius();
 
             // Increased radius damage
-            if (!Utils::IsGridIndexOutOfBounds(tileX, tileY)) {
+            if (!Utils::IsTileIndexOutOfBounds(tileX, tileY)) {
                 attribute.DamageRadius(radius * 2);
                 DamageTile(tileX, tileY);
                 Destroy();
@@ -69,7 +70,7 @@ void Projectile::AbilityActivation(Ability const* ability) {
             Utils::GetTileIndex(tileX, tileY, transform.pos);
             tileX -= 2; 
 
-            if (!Utils::IsGridIndexOutOfBounds(tileX, tileY)) {
+            if (!Utils::IsTileIndexOutOfBounds(tileX, tileY)) {
                 for (int i = 0; i <= Config::MAX_GRID_Y; ++i) {
                     Tile& tile = (*MapManager::currentMap)[i][tileX];
                     if (tile.Type() == TileType::TILE_EMPTY) {
@@ -116,6 +117,57 @@ void Projectile::Initialize(Transform cannonTrans, int _activeId, float cannonAn
     velocity.x = cos(cannonAngle) * shotPower;
     velocity.y = sin(cannonAngle) * shotPower;
     timer = Config::PROJECTILE_LIFESPAN;
+}
+
+void Projectile::Update(bool isPlayerShot, float dt) {
+    AEVec2 start = transform.pos;
+    // Set movement first
+    ProjectileMovement(dt);
+    AEVec2 end = transform.pos;
+
+    if (hasHitShield) return; // if projectile has hit a shield it should get destroy instantly no more collision checks
+
+    TowerShield& shield = LevelManager::CurrentLevel()->GetTowerShield(!isPlayerShot);
+    // if its player shot get the AI shield to check shield collision
+    if (shield.IsShieldOn()) {
+        hasHitShield = CollisionManager::CheckContinuousCollision(start, end, shield.transform);
+    }
+
+    if (hasHitShield) {
+        std::cout << "Hit shield" << '\n';
+        shield.attribute.TakeDamage(attribute.Damage());
+        InstantDestroy();
+        return;
+    }
+
+    // Check for collision in a 3x3 area with the projectile
+    int tileX = 0, tileY = 0;
+    Utils::GetTileIndex(tileX, tileY, transform.pos);
+
+    int minX = tileX - 1, minY = tileY - 1, maxX = tileX + 1, maxY = tileY + 1;
+    for (int y = minY; y <= maxY; ++y) {
+        for (int x = minX; x <= maxX; ++x) {
+            if (Utils::IsTileIndexOutOfBounds(x, y)) continue;
+
+            Tile& tile = (*MapManager::currentMap)[y][x];
+
+            if (tile.IsEmpty()) continue; // If it hits a empty tile continue
+
+            bool hasTileCollision = CollisionManager::AreCircleSquareIntersecting(transform, tile.transform);
+
+            // Checking collision of the projectile with the tile blocks that is collidable
+            if (hasTileCollision) {
+                if (!IsCollisionTriggered()) {
+                    AudioManager::PlaySFX(AudioManager::SFX::Impact);
+                    FirstTimeCollision();
+                }
+
+                // Damage tile first, incase of destroying the blocks and bouncing back if damageTile is not called first
+                DamageTile(x, y);
+                OnCollision(tile);
+            }
+        }
+    }
 }
 
 void Projectile::ProjectileMovement(float dt) {
@@ -185,7 +237,7 @@ void Projectile::SetDestroy() {
     }
     else { 
         // Check whatever or not projectile is set to be destroyed
-        // if it grounded or speedSq is very less destroyed the projectile after a timer
+        // if it grounded or speedSq is very small, destroyed the projectile after a timer
         if (isGrounded && speedSq <= 0.1f) {
             timer = Config::PROJECTILE_LIFESPAN;
             toBeDestroyed = true;
@@ -197,11 +249,15 @@ bool Projectile::Destroy() {
     SetDestroy();
     // Destroy projectile
     if (timer <= 0.0f || !IsInMapBounds()) {
-        isActive = isCollisionTriggered = toBeDestroyed = false;
-        timer = 0.0f;
+        InstantDestroy();
         return true; // projectile has been destroy
     }
     return false;
+}
+
+void Projectile::InstantDestroy() {
+    isActive = isCollisionTriggered = toBeDestroyed = false;
+    timer = 0.0f;
 }
 
 void Projectile::DamageTile(int tileX, int tileY) {
@@ -230,7 +286,7 @@ void Projectile::DamageTile(int tileX, int tileY) {
     // Damage how many number of tile based on the radius using a nested for loop
     for (int dY = minDY; dY <= maxDY; ++dY) {
         for (int dX = minDX; dX <= maxDX; ++dX) {
-            if (Utils::IsGridIndexOutOfBounds(dX, dY)) continue;
+            if (Utils::IsTileIndexOutOfBounds(dX, dY)) continue;
 
             Tile& tileToDamage = (*MapManager::currentMap)[dY][dX];
             //std::cout << "[Projectile] Checked tile " << tileToDamage << '\n';

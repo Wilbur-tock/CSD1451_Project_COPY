@@ -13,21 +13,11 @@ namespace AbilitiesManager {
 		//void LoadAllAIAbilities(); //Loads all AI abils from AiAbilities.json file
 		void LoadStartingAbilities();
 
-		std::vector<Ability>& GetOffensiveAbilities() { return offensiveAbilities; }
-		std::vector<Ability>& GetStatsAbilities() { return statsAbilities; }
-		std::vector<Ability>& GetDefensiveAbilities() { return defensiveAbilities; }
+		std::vector<Ability> const& GetOffensiveAbilities() { return offensiveAbilities; }
+		std::vector<Ability> const& GetStatsAbilities() { return statsAbilities; }
+		std::vector<Ability> const& GetDefensiveAbilities() { return defensiveAbilities; }
 
-		std::vector<Ability>& GetProjectilesAbilties() { return allProjectilesAbilties; }
-
-		//std::vector<Ability>& GetAIOffensiveAbilities() { return AIoffensiveAbilities; }
-		//std::vector<Ability>& GetAIStatsAbilities() { return statsAbilities; }
-		//std::vector<Ability>& GetAIDefensiveAbilities() { return defensiveAbilities; }
-
-		//void ChangeProjectile(s32 _projectileID);
-		//bool UseProjectile();
-		//bool AIUseProjectile();
-		//Ability* GetCurrentProjectile() { return ProjectileSelected; }
-		//Ability* GetCurrentAIProjectile() { return AIProjectileSelected; }
+		std::vector<Ability> const& GetProjectilesAbilties() { return allProjectilesAbilties; }
 
 		Ability* CurrentAbility() const { return currentAbility; }
 		int InventoryCount() const{ return inventoryCount; }
@@ -57,6 +47,7 @@ namespace AbilitiesManager {
 		void ResetAbility() {
 			ChangeAbility(0);
 		}
+
 		// True to toggle through all abilities or 
 		// false to toggle through of all the inventory abilities this controller has
 		void ToggleAbility(bool isAllAbilities, int addValue);
@@ -81,22 +72,16 @@ namespace AbilitiesManager {
 		void PrintInventoryCount();
 
 	private:
-		//Ability* ProjectileSelected = nullptr;// Player selected projectile
-		//Ability* AIProjectileSelected = nullptr;// AI selected projectile
-
 		std::vector<Ability> offensiveAbilities; //vector for offensive abils
 		std::vector<Ability> statsAbilities; //vector for stats abils
 		std::vector<Ability> defensiveAbilities; //vector for defensive abils
-		
-		//std::vector<Ability> AIoffensiveAbilities; //vector for AI offensive abils
-		//std::vector<Ability> AIstatsAbilities; //vector for AI stats abils
-		//std::vector<Ability> AIdefensiveAbilities; //vector for AI defensive abils
-
-		std::string controllerName; // use for debugging
-		Ability* currentAbility = nullptr;
 
 		std::vector<Ability> allAbilities; // vector containing all the different type of abilities
 		std::vector<Ability> allProjectilesAbilties; // vector containing all the ability that uses it own projectile mode
+		std::vector<Ability> abilityModifiers;
+
+		std::string controllerName; // use for debugging
+		Ability* currentAbility = nullptr;
 
 		std::vector<Ability*> inventory; // vector containing all the type of abilities this controller has in its inventory
 		std::vector<int> inventoryTypeCount; // To keep track of how many of each ability type there is in the inventory

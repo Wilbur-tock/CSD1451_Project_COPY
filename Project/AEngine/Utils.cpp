@@ -66,7 +66,7 @@ namespace Utils {
 		y = static_cast<int>((Config::WORLD_MAX_Y - worldPos.y) / Config::TILE_SIZE);
 	}
 
-	bool IsGridIndexOutOfBounds(int x, int y) {
+	bool IsTileIndexOutOfBounds(int x, int y) {
 		return x < 0 || x >= Config::GRID_WIDTH || y < 0 || y >= Config::GRID_HEIGHT;
 	}
 

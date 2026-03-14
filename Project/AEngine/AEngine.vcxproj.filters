@@ -225,6 +225,9 @@
     <ClCompile Include="EffectsManager.cpp">
       <Filter>Source Files\Particles</Filter>
     </ClCompile>
+    <ClCompile Include="TowerShield.cpp">
+      <Filter>Source Files\Components</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="UIManager.hpp">
@@ -359,6 +362,9 @@
     <ClInclude Include="Particles.hpp">
       <Filter>Header Files\Particles</Filter>
     </ClInclude>
+    <ClInclude Include="TowerShield.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AudioManager.hpp">
@@ -370,6 +376,9 @@
       <Filter>Resource Files</Filter>
     </None>
     <None Include="..\Assets\Abilities\Abilities.json">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="PlayerAbilities.json">
       <Filter>Resource Files</Filter>
     </None>
   </ItemGroup>

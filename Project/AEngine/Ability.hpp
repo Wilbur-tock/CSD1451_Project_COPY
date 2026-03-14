@@ -18,21 +18,22 @@ enum class Tier {
 };
 
 struct StatsModule {
-	f32 hp, atk, def;
-	f32 turns; // number of turns the ability last
+	int hp = 0, atk = 0, shield = 0;
+	int dmgReduction = 0;
+	int turns = 0; // number of turns the ability last
 };
 
 struct ProjectileModule {
-	s32 projectileId; // to determine which projectile mode the ability is using
-	f32 damageAmp;
-	s32 baseDamage;
-	f32 radius;
-	s32 charges; // projectile attack charges
-	bool unlimitedCharges;
+	int projectileId = 0; // to determine which projectile mode the ability is using
+	int damageAmp = 0;
+	int baseDamage = 0;
+	int radius = 0;
+	int charges = 0; // projectile attack charges
+	bool unlimitedCharges = 0;
 };
 
 struct DefenseModule {
-	s32 shieldHP;
+	int shieldHP = 0;
 };
 
 class Ability {
@@ -64,13 +65,25 @@ public:
 	ProjectileModule	GetProj() const { return proj; }
 	DefenseModule		GetDefense() const { return defense; }
 
-	void SetStats(f32 _hp, f32 _atk, f32 _def, f32 _turns);
-	void SetProjectile(s32 _id, f32 _amp, s32 _basedamage, f32 _radius, s32 _charges, bool _unlimited);
-	void SetDefense(s32 _shieldHP);
+	void SetStats(StatsModule const& newStats) {
+		stats = newStats;
+	}
 
-	int AbilityCharges() const;
-	void AbilityCharges(int toAdd);
-	int PreviousAbilityCharges() const;
+	void SetProjectile(ProjectileModule const& newProj) {
+		proj = newProj;
+	}
+
+	void SetDefense(DefenseModule const& newDef) {
+		defense = newDef;
+	}
+
+	int	 AbilityCharges() const { return abilityCharges; }
+	void AbilityCharges(int toAdd) {
+		previousAbilityCharges = abilityCharges;
+		abilityCharges += toAdd;
+		abilityCharges = std::clamp(abilityCharges, 0, 100);
+	}
+	int PreviousAbilityCharges() const { return previousAbilityCharges; }
 
 private:
 	int id; // To determind what type of ability it is (Bomb projectile, stats ability, etc)

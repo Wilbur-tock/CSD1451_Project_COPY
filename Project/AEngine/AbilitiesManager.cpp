@@ -80,6 +80,7 @@ namespace AbilitiesManager {
 		}
 		else {
 			controllerName = "Player Ability Controller";
+			ReadAbilitiesFromFile(data, "PlayerAbilities.json");
 		}
 
 		totalAbilityCount = data.size();
@@ -104,26 +105,30 @@ namespace AbilitiesManager {
 			std::string statsName = "Base_Stats";
 			if (item.contains(statsName) && !item[statsName].is_null()) {
 				auto& s = item[statsName];
-				newAbility.SetStats(s["HP"], s["ATK"], s["DEF"], s["TURNS"]);
+				newAbility.SetStats(StatsModule{
+					s["Hp"], s["Attack"], s["Shield"], s["Turns"]
+				});
 			}
 
 			std::string projectileName = "Projectile_Stats";
 			if (item.contains(projectileName) && !item[projectileName].is_null()) {
 				auto& p = item[projectileName];
-				newAbility.SetProjectile(
+				newAbility.SetProjectile(ProjectileModule{
 					p["ProjectileID"],
 					p["Damage_Amp"],
 					p["Base_Damage"],
 					p["Radius"],
 					p["Charges"],
 					p["unlimited_charges"]
-				);
+				});
 			}
 
 			std::string defensiveName = "Defensive_Stats";
 			if (item.contains(defensiveName) && !item[defensiveName].is_null()) {
 				auto& d = item[defensiveName];
-				newAbility.SetDefense(d["ShieldHP"]);
+				newAbility.SetDefense(DefenseModule{ 
+					d["ShieldHP"] 
+				});
 			}
 
 			// Add to the type of ability list
@@ -138,55 +143,6 @@ namespace AbilitiesManager {
 				defensiveAbilities.push_back(newAbility);
 				break;
 			}
-
-			//// ROUTE based on Type
-			//if (type == AbilityType::STATISTICS) {
-			//	std::string title = "Base_Stats";
-			//	if (item.contains(title) && !item[title].is_null()) {
-			//		auto& s = item[title];
-			//		newAbil.SetStats(s["HP"], s["ATK"], s["DEF"], s["TURNS"]);
-			//	}
-
-			//	statsAbilities.push_back(newAbil);
-			//}
-			//else if (type == AbilityType::OFFENSIVE) {
-			//	std::string title = "Projectile_Stats";
-			//	if (item.contains(title) && !item[title].is_null()) {
-			//		auto& p = item[title];
-			//		newAbil.SetProjectile(
-			//			p["ProjectileID"],
-			//			p["Damage_Amp"],
-			//			p["Base_Damage"],
-			//			p["Radius"],
-			//			p["Charges"],
-			//			p["unlimited_charges"]
-			//		);
-			//	}
-
-			//	offensiveAbilities.push_back(newAbil);
-			//}
-			//else if (type == AbilityType::DEFENSIVE) {
-			//	std::string title = "Defensive_Stats";
-			//	if (item.contains(title) && !item[title].is_null()) {
-			//		auto& d = item[title];
-			//		newAbil.SetDefense(d["ShieldHP"]);
-			//	}
-
-			//	title = "Projectile_stats";
-			//	if (item.contains(title) && !item[title].is_null()) {
-			//		auto& d = item[title];
-			//		newAbil.SetProjectile(
-			//			d["ProjectileID"],
-			//			d["Damage_Amp"],
-			//			d["Base_Damage"],
-			//			d["Radius"],
-			//			d["Charges"],
-			//			d["unlimited_charges"]
-			//		);
-			//	}
-
-			//	defensiveAbilities.push_back(newAbil);
-			//}
 
 			allAbilities.push_back(newAbility);
 
@@ -265,8 +221,6 @@ namespace AbilitiesManager {
 		if (currentAbility->AbilityCharges() <= 0) return false; // has no ability charges can't use this ability
 
 		currentAbility->AbilityCharges(-1);
-		std::cout << "Before\n";
-		PrintInventory();
 
 		UpdateInventory(*currentAbility, false);
 
@@ -277,9 +231,6 @@ namespace AbilitiesManager {
 		// Reset to default if trying to use an ability without any charges remaining
 		ResetAbility();
 
-		std::cout << "After\n";
-		PrintInventory();
-
 		std::cout << "[AbilitiesManager] Ability used: " + currentAbility->GetName()
 			+ " Charges Remaining: " + std::to_string(currentAbility->AbilityCharges()) << '\n';
 		return true;
@@ -287,7 +238,11 @@ namespace AbilitiesManager {
 
 	// Add ability charges from the based on selection
 	void AbilityController::AddAbility(int abilityId, int chargesToAdd) {
-		if (inventoryCount >= Config::MAX_INVENTORY_COUNT) return; // Don't add any new ability after inventory count has reach the max
+		// Don't add any new ability after inventory count has reach the max
+		if (IsInventoryFull()) {
+			std::cout << "[AbilitesManager] Inventory is full can't add any new ability!" << '\n';
+			return; 
+		}
 		Ability* found = FindAbility(abilityId);
 		if (!found) {
 			std::cerr << "[AbilitiesManager] Can't find to add Ability Id: " + std::to_string(abilityId) << '\n';
@@ -416,14 +371,14 @@ namespace AbilitiesManager {
 		// Check inventory how many offensive and defensive abilities the player has and randomise based on that
 		std::cout << "[AbilitiesManager] Number of abilities in inventory: " << inventory.size() << std::endl;
 
-		if (inventory.size() >= 5) {
+		if (inventory.size() >= Config::MAX_INVENTORY_COUNT) {
 			std::cerr << "[AbilitiesManager] Enough abilities in inventory, randomise stats" << std::endl;
-			
-			// Currently only 3 stat cards so no need randomise, just push all 3 stat cards into the selector
-			for (int i = 0; i < 3; ++i) {
-				//abilitiesCards.push_back(AbilityRandomisator(statsAbilities));
-				abilitiesCards.push_back(statsAbilities[i]);
-			}
+
+			//// Currently only 3 stat cards so no need randomise, just push all 3 stat cards into the selector
+			//for (int i = 0; i < 3; ++i) {
+			//	//abilitiesCards.push_back(AbilityRandomisator(statsAbilities));
+			//	abilitiesCards.push_back(statsAbilities[i]);
+			//}
 		}
 		else {
 			std::cerr << "[AbilitiesManager] Not enough abilities in inventory, randomise offensive and defensive" << std::endl;

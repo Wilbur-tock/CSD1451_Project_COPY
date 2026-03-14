@@ -39,7 +39,7 @@ namespace Utils {
 	void GetMouseGridIndex(int& x, int& y);
 	void GetTileIndex(int& x, int& y, AEVec2 const worldPos);
 	// Return true if it is out of bounds
-	bool IsGridIndexOutOfBounds(int x, int y);
+	bool IsTileIndexOutOfBounds(int x, int y);
 
 	void SetAnchoredPosition(Transform const& parent, Transform& trans, AnchorMode const& anchorMode);
 	// Set anchoredPosition with parent being the screen transform (width and height)

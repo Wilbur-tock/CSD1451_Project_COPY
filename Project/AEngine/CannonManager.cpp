@@ -130,7 +130,7 @@ namespace CannonManager {
         SetCamera(false);
 
         // ALWAYS Reset cannon ability back to default after at the start off a a new turn
-        abilityController->ChangeAbility(0);
+        abilityController->ResetAbility();
 
         // Reselect AI ability
         if (!isPlayerControlled && abilityController) {
@@ -331,44 +331,12 @@ namespace CannonManager {
             float subDt = dt / SUB_STEPS;
 
             for (int step = 0; step < SUB_STEPS; ++step) {
-                // Set movement first
-                projectile.ProjectileMovement(subDt);
-
-                // Check for collision in a 3x3 area with the projectile
-                int tileX = 0, tileY = 0;
-                Utils::GetTileIndex(tileX, tileY, projectile.transform.pos);
-
-                int minX = tileX - 1, minY = tileY - 1, maxX = tileX + 1, maxY = tileY + 1;
-                for (int y = minY; y <= maxY; ++y) {
-                    for (int x = minX; x <= maxX; ++x) {
-                        if (Utils::IsGridIndexOutOfBounds(x, y)) continue;
-
-                        Tile& tile = (*MapManager::currentMap)[y][x];
-
-                        if (tile.IsEmpty()) continue; // If it hits a empty tile continue
-
-                        bool hasCollision = CollisionManager::AreCircleSquareIntersecting(projectile.transform, tile.transform);
-
-                        // Checking collision of the projectile with the tile blocks that is collidable
-                        if(hasCollision) {
-                            // Damage tile first, incase of destroying the blocks and bouncing back if damageTile is not called first
-                            projectile.DamageTile(x, y);
-
-                            if (!projectile.IsCollisionTriggered()) {
-                                AudioManager::PlaySFX(AudioManager::SFX::Impact);
-                                projectile.FirstTimeCollision();
-                            }
-                            else {
-                                projectile.OnCollision(tile);
-                            }
-                        }
-                    }
-                }
+                projectile.Update(isPlayerControlled, subDt);
             }
 
             // Check if projectile need to be destroy and destroy after it lifespan
             projectile.Destroy();
-            projectile.Render();
+            projectile.Draw();
         }
 
         RemoveInactiveProjectiles();
@@ -400,6 +368,15 @@ namespace CannonManager {
 
             // Calculate perfect shot angle and power
             PhysicsManager::PerfectShotCalculation(transform, target->transform, cannonAngle, shotPower);
+        }
+
+        Ability* currentAblity = abilityController->CurrentAbility();
+        std::string abilityName = currentAblity->GetName();
+        Level* level = LevelManager::CurrentLevel();
+
+        // Set defensive ability
+        if (abilityName == "Tower Shield") {
+            level->GetTowerShield(true).SetShieldOn(currentAblity->GetStats().shield, currentAblity->GetStats().turns);
         }
     }
 

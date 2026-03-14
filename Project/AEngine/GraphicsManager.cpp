@@ -270,6 +270,13 @@ namespace GraphicsManager {
 	}
 
 	void DrawGameObject(GameObject const& gameObject) {
+		AEMtx33 mat = CreateTransformMatrix(gameObject.transform.pos.x, gameObject.transform.pos.y, 0, gameObject.transform.size.x * 0.6f, gameObject.transform.size.y * 0.6f);
+		DrawTexture(CoordinateType::WORLD_CENTER, gameObject.texture, mat, gameObject.textureColor, gameObject.pMesh);
+	}
+
+	void DrawCharacter(GameObject const& gameObject) {
+		// Half the width and height to center the texture regardless of the png size
+		// need to half to get the radius
 		AEMtx33 mat = CreateTransformMatrix(gameObject.transform.pos.x, gameObject.transform.pos.y, 0, gameObject.transform.size.x * 0.5f, gameObject.transform.size.y * 0.5f);
 		DrawTexture(CoordinateType::WORLD_CENTER, gameObject.texture, mat, gameObject.textureColor, gameObject.pMesh);
 	}
@@ -312,5 +319,27 @@ namespace GraphicsManager {
 
 		mat = CreateTransformMatrix(left.x, left.y, 0, lineSize, halfH);
 		DrawTexture(CoordinateType::WORLD_CENTER, AssetsManager::squareTexture, mat, lineColor);
+	}
+
+	void DrawCircle(AEVec2 center, float radius) {
+		const int segments = 60; // More segments = smoother circle
+		const float step = 2.0f * 3.14159f / segments;
+
+		for (int i = 0; i < segments; ++i) {
+			float a1 = i * step;
+			float a2 = (i + 1) * step;
+
+			AEVec2 p1 = { center.x + cosf(a1) * radius, center.y + sinf(a1) * radius };
+			AEVec2 p2 = { center.x + cosf(a2) * radius, center.y + sinf(a2) * radius };
+
+			// Draw the segment
+			float dx = p2.x - p1.x;
+			float dy = p2.y - p1.y;
+			float dist = sqrtf(dx * dx + dy * dy);
+			float angle = atan2f(dy, dx);
+
+			AEMtx33 mat = CreateTransformMatrix(p1.x + dx * 0.5f, p1.y + dy * 0.5f, angle, dist, 1.5f);
+			DrawTexture(CoordinateType::WORLD_CENTER, AssetsManager::squareTexture, mat, Color{0,1,0});
+		}
 	}
 }
