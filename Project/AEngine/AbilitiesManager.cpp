@@ -261,23 +261,19 @@ namespace AbilitiesManager {
 			std::cerr << "[AbilitiesManager] Use Ability failed. currentAbility is nullptr\n";
 			return false;
 		}
-		if (currentAbility->GetProj().unlimited_charges) return true;
-		if (currentAbility->AbilityCharges() <= 0) return false;
+		if (currentAbility->GetProj().unlimitedCharges) return true;
+		if (currentAbility->AbilityCharges() <= 0) return false; // has no ability charges can't use this ability
 
 		currentAbility->AbilityCharges(-1);
 		UpdateInventory(*currentAbility, false);
 
 		int id = static_cast<int>(currentAbility->GetType()) - 1;
-		--inventoryTypeCount[id];
+		--inventoryTypeCount[id]; 
+		// Reset to default if trying to use an ability without any charges remaining
+		ResetAbility();
 
-		// cache before ResetAbility
-		std::string abilityName = currentAbility->GetName();
-		int chargesLeft = currentAbility->AbilityCharges();        
-
-		ResetAbility(); // may set currentAbility to nullptr
-
-		std::cout << "[AbilitiesManager] Ability used: " + abilityName
-			+ " Charges Remaining: " + std::to_string(chargesLeft) << '\n';
+		std::cout << "[AbilitiesManager] Ability used: " + currentAbility->GetName()
+			+ " Charges Remaining: " + std::to_string(currentAbility->AbilityCharges()) << '\n';
 		return true;
 	}
 
@@ -330,17 +326,8 @@ namespace AbilitiesManager {
 	// if 0 or equal then randomly return either offensive or defensive, 
 	// if one of them is lesser than the other, return that type
 	AbilityType AbilityController::OffensiveOrDefensive() {
-		int offensiveCount = 0;
-		int defensiveCount = 0;
-
-		for (Ability* ability : inventory) {
-			if (ability->GetType() == AbilityType::OFFENSIVE) {
-				offensiveCount++;
-			}
-			else if (ability->GetType() == AbilityType::DEFENSIVE) {
-				defensiveCount++;
-			}
-		}
+		int offensiveCount = inventoryTypeCount[static_cast<int>(AbilityType::OFFENSIVE) - 1];
+		int defensiveCount = inventoryTypeCount[static_cast<int>(AbilityType::DEFENSIVE) - 1];
 
 		if (offensiveCount == defensiveCount) {
 			return Utils::RandomValue(0, 1) == 0 ? AbilityType::OFFENSIVE : AbilityType::DEFENSIVE;
@@ -600,14 +587,15 @@ namespace AbilitiesManager {
 				iconName = ability->GetName();
 				iconColor = ability->GetType() == AbilityType::OFFENSIVE ? Color(1, 0, 0) : Color(0, 0, 1);
 				// Highlight current ability
-				if (currentAbility == ability) {
+				if (currentAbility == ability && currentInventoryId == i) {
 					iconColor = Color(0, 0, 0);
 				}
-				else { // Can only select ability that is not current selected
-					// Set onclick to select this ability as active
-					btn.SetOnClick([this, ability]() {
+				else { 
+					// Can only select ability that is not current selected
+					btn.SetOnClick([this, ability, i]() {
 						ChangeAbility(ability->Id());
-					});
+						currentInventoryId = i;
+						});
 				}
 			}
 			else {
@@ -617,7 +605,9 @@ namespace AbilitiesManager {
 
 			btn.SetColor(iconColor);
 			btn.GetTextObject().TextContent(iconName);
-			btn.Update();
+			if (!isSelectingAbility) {
+				btn.Update();
+			}
 			btn.Draw();
 		}
 	}

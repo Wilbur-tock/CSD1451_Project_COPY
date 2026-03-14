@@ -21,7 +21,7 @@ void Ability::SetProjectile(s32 _id, f32 _amp, s32 _basedamage, f32 _radius, s32
 	proj.baseDamage = _basedamage;
 	proj.radius = _radius;
 	proj.charges = _charges;
-	proj.unlimited_charges = _unlimited;
+	proj.unlimitedCharges = _unlimited;
 }
 
 void Ability::SetDefense(s32 _shield) {

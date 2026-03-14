@@ -253,7 +253,6 @@ void Level::Update() {
 
 	if (status == LevelStatus::PLAYING) {
 		if (!isPlayerTurn && !enemyCannon.IsTargetAlive()) {
-			std::cout << "[Level]" << '\n';
 			// Find new target if current target is not alive
 			enemyCannon.SetTarget(RandomCharacterObj(true));
 			if (!enemyCannon.IsTargetAlive()) std::cerr << "[Level] Enemy has no target!" << std::endl;
@@ -629,6 +628,5 @@ Character* Level::RandomCharacterObj(bool isPlayerObj) {
 	if (characters.empty()) return nullptr;
 
 	int id = Utils::RandomValue(0, static_cast<int>(characters.size() - 1));
-	std::cout << "Found " << characters[id].TypeName() << '\n';
 	return &characters[id];
 }

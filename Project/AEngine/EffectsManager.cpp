@@ -42,34 +42,64 @@ namespace EffectsManager {
         std::cout << "[EffectsManager] PlayTileBreak at (" << position.x << ", " << position.y << ")\n";
     }
 
-    void EffectsController::PlayProjectiileAbiltiesEffect(Effects effect, AEVec2 pos) {
-        EmitParams particle;
+    void EffectsController::PlayProjectiileAbiltiesEffect(Effects effect, AEVec2 spawnPos) {
+        float originOffset = 0;
+
+        float speedMin{ 50.f };
+        float speedMax{ 150.f };
+        float directionMin{ 0.f };
+        float directionMax{ PI };       
+
+        float rotationSpeedMin{ -PI };
+        float rotationSpeedMax{ PI };
+
+        Color colorStart{ 1.f, 1.f, 1.f, 1.f };
+        Color colorEnd{ 1.f, 1.f, 1.f, 0.f }; 
+
+        float scaleStart{ 10.f };
+        float scaleEnd{ 0.f };
+
+        float lifetimeMin{ 0.5f };
+        float lifetimeMax{ 1.5f };
+
+        int   count{ 10 };
+        ParticleShape shape{ ParticleShape::SQUARE };
+
         switch (effect) {
         case Effects::NUKE:
-            particle = {
-                pos,
-                1,
+            colorStart = { 1.0f, 0, 0, 1.0f };
+            colorStart = { 1.0f, 0, 0, 0.0f };
+            scaleStart = 32.0f * 10;
 
-                10,
-                40,
-                0.f,
-                PI,
-
-                -0.4f,
-                0.4f,
-
-                Color(1.0f, 0.0f, 0.0f),
-                Color(1.0f, 0.0f, 0.0f, 0.f),
-                0,
-                32.0f * 50,
-                0.8f,
-                1.0f, 
-                1,
-				ParticleShape::CIRCLE
-            };
-            std::cout << "[EffectsManager] NUKE at (" << pos.x << ", " << pos.y << ")\n";
+            count = 1000;
+            shape = ParticleShape::CIRCLE;
+            std::cout << "[EffectsManager] Player Nuke Explosion at (" << spawnPos.x << ", " << spawnPos.y << ")\n";
             break;
         }
+
+        EmitParams particle = EmitParams{
+            spawnPos,
+            originOffset,
+
+            speedMin,
+            speedMax,
+            directionMin,
+            directionMax,
+
+            rotationSpeedMin,
+            rotationSpeedMax,
+
+            colorStart,
+            colorEnd,
+            scaleStart,
+            scaleEnd,
+
+            lifetimeMin,
+            lifetimeMax,
+
+            count,
+            shape
+        };
 
         ParticleManager::particleController.Emit(particle);
     }

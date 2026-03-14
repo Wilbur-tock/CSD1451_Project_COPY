@@ -28,7 +28,7 @@ struct ProjectileModule {
 	s32 baseDamage;
 	f32 radius;
 	s32 charges; // projectile attack charges
-	bool unlimited_charges;
+	bool unlimitedCharges;
 };
 
 struct DefenseModule {
