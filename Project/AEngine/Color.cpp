@@ -21,3 +21,11 @@ void Color::EditColorPercentage(float percentage) {
 		b *= percentage
 	);
 }
+
+Color playerHPColor	{ 0.0f,0.9f,0.0f };
+Color enemyHPColor	{ 0.9f,0.0f,0.0f };
+Color shieldColor	{ 1.0f,1.0f,0.0f };
+
+Color const& PlayerHPColor() { return playerHPColor; }
+Color const& EnemyHPColor()	 { return enemyHPColor; }
+Color const& ShieldColor()	 { return shieldColor; }

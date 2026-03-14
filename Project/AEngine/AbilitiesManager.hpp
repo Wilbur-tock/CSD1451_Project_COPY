@@ -29,7 +29,6 @@ namespace AbilitiesManager {
 		//Ability* GetCurrentProjectile() { return ProjectileSelected; }
 		//Ability* GetCurrentAIProjectile() { return AIProjectileSelected; }
 
-		//Ability CurrentAbility() const { return *currentAbility; }
 		Ability* CurrentAbility() const { return currentAbility; }
 		int InventoryCount() const{ return inventoryCount; }
 
@@ -57,7 +56,7 @@ namespace AbilitiesManager {
 		// ensure that an ability with 0 charges cannot be used again
 		void ResetAbility() {
 			if (currentAbility && currentAbility->AbilityCharges() <= 0) {
-				currentAbility = nullptr;
+				ChangeAbility(0);
 			}
 		}
 		// True to toggle through all abilities or 

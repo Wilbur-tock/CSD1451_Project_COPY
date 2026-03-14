@@ -24,6 +24,11 @@ namespace CannonManager {
     TextObject debugText;
 
     void Cannon::Initialize(AbilitiesManager::AbilityController* controller) {
+        if (!controller) {
+            std::cerr << "[CannonManager] abilityController is nullptr!" << '\n';
+            return;
+        }
+
         abilityController = controller;
         controller->ChangeAbility(0); // Set default projectile as the default ability
         ProjectileSettings();
@@ -44,14 +49,13 @@ namespace CannonManager {
     }
     
     void Cannon::ProjectileSettings() {
-        // Reset to default
-        activeProjectiles.clear(); // ensure that there should not be any active ammo when cannon is reset
-        activeProjectiles.reserve(projectileCount * 2);
-        projectiles.clear();
-        projectiles.resize(projectileCount);
-
         std::vector<Ability> const& allProjectileAbilities = abilityController->GetProjectilesAbilties();
         projectileAbilitiesCount = static_cast<int>(allProjectileAbilities.size());
+        // Reset to default
+        activeProjectiles.clear(); // ensure that there should not be any active ammo when cannon is reset
+        activeProjectiles.reserve(projectileAbilitiesCount);
+        projectiles.clear();
+        projectiles.resize(projectileAbilitiesCount);
 
         // Initializing the default and ALL projectiles with abilities
         if (projectiles.empty()) std::cerr << "[CannonManager] Cannon Projectiles vector is EMPTY" << '\n';
@@ -170,10 +174,6 @@ namespace CannonManager {
         if (hasCannonShot || allProjectileDestroyed) return;
         if (!target) {
             std::cerr << "[CannonManager] Can't find any player character targets for the enemy to shoot!" << '\n';
-            return;
-        }
-        if (!abilityController) {
-            std::cerr << "[CannonManager] EnemyAI failed. abilityController is nullptr\n";
             return;
         }
 
@@ -325,9 +325,7 @@ namespace CannonManager {
         for (Projectile& projectile : activeProjectiles) {
             if (!projectile.IsActive()) continue;
 
-            if (abilityController->CurrentAbility()) {
-                projectile.AbilityActivation(abilityController->CurrentAbility());
-            }
+            projectile.AbilityActivation(abilityController->CurrentAbility());
 
             float dt = PhysicsManager::g_dt;
             // Increased the frequency of the collision check by using loops
@@ -512,16 +510,11 @@ namespace CannonManager {
             debugStr += "\nAbility: " + ability->GetName() + " Charges: " + std::to_string(ability->AbilityCharges());
         }
 
-        if (selectedAbility) {
-            debugStr += "\n\nSelected Ability:\nId:" + std::to_string(selectedAbility->Id())
-                + "\nName: " + selectedAbility->GetName()
-                + "\nType: " + selectedAbility->GetTypeName()
-                + "\nAbility Charges Remaining: " + std::to_string(selectedAbility->AbilityCharges())
-                + "\nSelected Projectile Id: " + std::to_string(selectedAbility->GetProj().projectileId);
-        }
-        else {
-            debugStr += "\n\nSelected Ability: None";
-        }
+        debugStr += "\n\nSelected Ability:\nId:" + std::to_string(selectedAbility->Id())
+            + "\nName: " + selectedAbility->GetName()
+            + "\nType: " + selectedAbility->GetTypeName()
+            + "\nAbility Charges Remaining: " + std::to_string(selectedAbility->AbilityCharges())
+            + "\nSelected Projectile Id: " + std::to_string(selectedAbility->GetProj().projectileId);
 
         if (target) {
             debugStr += "\nTarget: " + target->TypeName();

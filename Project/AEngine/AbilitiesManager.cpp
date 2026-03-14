@@ -58,11 +58,18 @@ namespace AbilitiesManager {
 		inventory.clear();
 		currentAbility = nullptr;
 
+		// Clear inventory state before adding starting abilities
+		inventory.clear();
+		inventoryAbilityIds.clear();
+		inventoryCount = 0;
+		std::fill(inventoryTypeCount.begin(), inventoryTypeCount.end(), 0);
+
 		inventory.reserve(Config::MAX_INVENTORY_COUNT);
 		inventoryAbilityIds.reserve(Config::MAX_INVENTORY_COUNT);
 
 		isAIController = isAi;
 
+		// Reading of data from json file
 		nlohmann::json data;
 		ReadAbilitiesFromFile(data, "Abilities.json");
 
@@ -202,14 +209,6 @@ namespace AbilitiesManager {
 
 	// Load the starting abilities for the player and AI
 	void AbilityController::LoadStartingAbilities() {
-
-		// Clear inventory state before adding starting abilities
-		inventory.clear();
-		inventoryAbilityIds.clear();
-		inventoryCount = 0;
-		std::fill(inventoryTypeCount.begin(), inventoryTypeCount.end(), 0);
-		currentAbility = nullptr;
-
 		if (!isAIController) { // Load player starting Abilities
 			AddAbility(AbilityRandomisator(offensiveAbilities).Id());
 			AddAbility(AbilityRandomisator(offensiveAbilities).Id());
@@ -217,10 +216,10 @@ namespace AbilitiesManager {
 			AddAbility(AbilityRandomisator(defensiveAbilities).Id());
 		}
 
-		std::cout << "[AbilitiesManager] List of starting abilities:" << '\n';
-		for (Ability* ability : inventory) {
-			std::cout << ability->GetName() << " Charges: " << ability->AbilityCharges() << '\n';
-		}
+		//std::cout << "[AbilitiesManager] List of starting abilities:" << '\n';
+		//for (Ability* ability : inventory) {
+		//	std::cout << ability->GetName() << " Charges: " << ability->AbilityCharges() << '\n';
+		//}
 	}
 
 	// Randomly select an ability for the AI if it has not already selected one
@@ -586,6 +585,7 @@ namespace AbilitiesManager {
 	void AbilityController::UpdateAbilityUI() {
 		inventoryBackground.Draw();
 
+		// Checking if player is hovering over UI
 		LevelManager::CurrentLevel()->SetHoveringOverUI(CollisionManager::IsPointInRect(
 			inventoryBackground.Pos().x, inventoryBackground.Pos().y, inventoryBackground.Size().x, inventoryBackground.Size().y));
 
@@ -603,15 +603,12 @@ namespace AbilitiesManager {
 				if (currentAbility == ability) {
 					iconColor = Color(0, 0, 0);
 				}
-				// Set onclick to select this ability as active
-				btn.SetOnClick([this, ability]() {
-					if (currentAbility == ability) {
-						currentAbility = nullptr; // deselect
-					}
-					else {
+				else { // Can only select ability that is not current selected
+					// Set onclick to select this ability as active
+					btn.SetOnClick([this, ability]() {
 						ChangeAbility(ability->Id());
-					}
 					});
+				}
 			}
 			else {
 				// Empty slot — clear onclick so it does nothing
