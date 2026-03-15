@@ -17,8 +17,8 @@ namespace CannonManager {
 		Cannon(AEVec2 _pos, AEGfxTexture* _texture, TileIndex _tileId, AEVec2 _size = { 30,10 }, bool _isShootingRight = true, bool _isPlayerControlled = true);
 
 		// return true if projectile has been shoot out of the cannon and be destroyed
-		inline bool AllProjectilesDestroyed() const { return allProjectileDestroyed; }
-
+		bool AllProjectilesDestroyed() const { return allProjectileDestroyed; }
+		AbilitiesManager::AbilityController* const& AbilityController() { return abilityController; }
 		// Member Functions
 
 		void Initialize(AbilitiesManager::AbilityController* controller);

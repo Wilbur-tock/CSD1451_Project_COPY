@@ -24,5 +24,6 @@ private:
 Color const& PlayerHPColor();
 Color const& EnemyHPColor();
 Color const& ShieldColor();
+Color const& StatsBGColor();
 
 #endif // ! COLOR_HPP

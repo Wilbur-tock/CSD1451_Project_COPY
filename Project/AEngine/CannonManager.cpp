@@ -369,15 +369,6 @@ namespace CannonManager {
             PhysicsManager::PerfectShotCalculation(transform, target->transform, cannonAngle, shotPower);
             break;
         }
-
-        Ability* currentAblity = abilityController->CurrentAbility();
-        std::string abilityName = currentAblity->GetName();
-        Level* level = LevelManager::CurrentLevel();
-
-        // Set defensive ability
-        if (abilityName == "Tower Shield") {
-            level->GetTowerShield(true).SetShieldOn(currentAblity->GetStats().shield, currentAblity->GetStats().turns);
-        }
     }
 
     void Cannon::SetCamera(bool isFollowingProjectile) {

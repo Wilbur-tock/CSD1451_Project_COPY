@@ -49,7 +49,7 @@ namespace AbilitiesManager {
 	AbilityController enemyAbilityController;
 
 	// Load all abilities from the JSON file and categorize them into their respective vectors
-	void AbilityController::LoadAllAbilities(bool isAi) {
+	void AbilityController::LoadAllAbilities(bool isPlayer) {
 		offensiveAbilities.clear();
 		statsAbilities.clear();
 		defensiveAbilities.clear();
@@ -67,14 +67,14 @@ namespace AbilitiesManager {
 		inventory.reserve(Config::MAX_INVENTORY_COUNT);
 		inventoryAbilityIds.reserve(Config::MAX_INVENTORY_COUNT);
 
-		isAIController = isAi;
+		isPlayerControlled = isPlayer;
 
 		// Reading of data from json file
 		nlohmann::json data;
 		ReadAbilitiesFromFile(data, "Abilities.json");
 
 		// Read enemies ONLY ability and merge it to the data
-		if (isAi) {
+		if (isPlayer) {
 			controllerName = "Enemy Ability Controller";
 			ReadAbilitiesFromFile(data, "AiAbilities.json");
 		}
@@ -96,10 +96,18 @@ namespace AbilitiesManager {
 			std::string name = item["Name"];
 			AbilityType type = static_cast<AbilityType>(item["Type"].get<int>());
 			Tier tier = static_cast<Tier>(item["Tier"].get<int>());
-			std::string texture = item["Texture"];
+
+			std::string textureName = item["Texture"];
+			std::string textureFilePath = "Assets/Abilities/" + textureName + ".png";
+			AEGfxTexture* texture = AssetsManager::squareTexture;
+			if (textureName != "") {
+				std::cout << textureFilePath << '\n';
+				texture = AssetsManager::GetTexture(textureFilePath.c_str());
+			}
+
 
 			// Increment Id after assigning it
-			Ability newAbility(abilityId, name, type, tier, texture);
+			Ability newAbility{ abilityId, name, type, tier, texture };
 
 			// Load different stats if can find
 			std::string statsName = "Base_Stats";
@@ -151,7 +159,7 @@ namespace AbilitiesManager {
 			bool isProjectilesAbility = abilityId == 0 || newAbility.GetProj().projectileId != 0;
 			if (isProjectilesAbility) {
 				allProjectilesAbilties.push_back(newAbility);
-				std::cout << "[AbiltiesManager] Projectile Ability: " << newAbility.GetName() << '\n';
+				//std::cout << "[AbiltiesManager] Projectile Ability: " << newAbility.GetName() << '\n';
 			}
 
 			// Increment ability id after initalizing everything
@@ -166,7 +174,7 @@ namespace AbilitiesManager {
 
 	// Load the starting abilities for the player and AI
 	void AbilityController::LoadStartingAbilities() {
-		if (!isAIController) { // Load player starting Abilities
+		if (isPlayerControlled) { // Load player starting Abilities
 			AddAbility(AbilityRandomisator(offensiveAbilities).Id());
 			AddAbility(AbilityRandomisator(offensiveAbilities).Id());
 			AddAbility(AbilityRandomisator(defensiveAbilities).Id());
@@ -199,6 +207,63 @@ namespace AbilitiesManager {
 		std::cout << "[AbilitiesManager] Enemy selected ability: " << currentAbility->GetName() << '\n';
 	}
 
+	// Return the type of ability that is lesser in inventory, 
+	// if 0 or equal then randomly return either offensive or defensive, 
+	// if one of them is lesser than the other, return that type
+	AbilityType AbilityController::OffensiveOrDefensive() {
+		int offensiveCount = inventoryTypeCount[static_cast<int>(AbilityType::OFFENSIVE) - 1];
+		int defensiveCount = inventoryTypeCount[static_cast<int>(AbilityType::DEFENSIVE) - 1];
+
+		if (offensiveCount == defensiveCount) {
+			return Utils::RandomValue(0, 1) == 0 ? AbilityType::OFFENSIVE : AbilityType::DEFENSIVE;
+		}
+		else if (offensiveCount < defensiveCount) {
+			return AbilityType::OFFENSIVE;
+		}
+		else {
+			return AbilityType::DEFENSIVE;
+		}
+	}
+
+	void AbilityController::AbilityEffects() {
+		std::string abilityName = currentAbility->GetName();
+		Level* level = LevelManager::CurrentLevel();
+
+		// Activate a ability effect here
+		if (abilityName == "Tower Shield") {
+			level->GetTowerShield(isPlayerControlled).SetShieldOn(currentAbility->GetStats().shield, currentAbility->GetStats().turns);
+			//std::cout << "[AbilitiesManager] Activate Tower Shield ability!" << '\n';
+		}
+
+		if (currentAbility->GetStats().turns > 0) {
+			// Remove the exisiting modifier if it the same as the current ability
+			abilityModifiers.erase(
+				std::remove_if(abilityModifiers.begin(), abilityModifiers.end(),
+					[this](Ability const& ability) {
+						return ability.Id() == currentAbility->Id();
+					}),
+				abilityModifiers.end()
+			);
+
+			// push_back a copy of the currentAbility if the effects last more than 1 turn
+			abilityModifiers.push_back(*currentAbility);
+		}
+
+		PrintAbilityModifiers();
+	}
+
+	void AbilityController::UpdateModifiers() {
+		// Remove modifier from vecot containing all the active ability modifiers
+		abilityModifiers.erase(
+			std::remove_if(abilityModifiers.begin(), abilityModifiers.end(),
+				[](Ability& ability) {
+					ability.UpdateTurnLifespan();
+					return ability.GetStats().turns <= 0;
+				}),
+			abilityModifiers.end()
+		);
+	}
+
 	// Change the current ability based on the ability ID
 	void AbilityController::ChangeAbility(int abilityId) {
 		Ability* found = FindAbility(abilityId);
@@ -219,10 +284,12 @@ namespace AbilitiesManager {
 			return false;
 		}
 		if (currentAbility->GetProj().unlimitedCharges) return true;
+
+		AbilityEffects();
+
 		if (currentAbility->AbilityCharges() <= 0) return false; // has no ability charges can't use this ability
 
 		currentAbility->AbilityCharges(-1);
-
 		UpdateInventory(*currentAbility, false);
 
 		// Update inventory count of ability type
@@ -252,12 +319,11 @@ namespace AbilitiesManager {
 		// Find ability and add the charges
 		Ability& ability = *found;
 		ability.AbilityCharges(chargesToAdd);
+		UpdateInventory(ability, true);
 
 		int id = static_cast<int>(ability.GetType()) - 1;
 		++inventoryTypeCount[id];
 		++inventoryCount;
-
-		UpdateInventory(ability, true);
 	}
 
 	// Helper function to add or remove abilities from the inventory vector based on the ability charges
@@ -293,24 +359,6 @@ namespace AbilitiesManager {
 					return;
 				}
 			}
-		}
-	}
-
-	// Return the type of ability that is lesser in inventory, 
-	// if 0 or equal then randomly return either offensive or defensive, 
-	// if one of them is lesser than the other, return that type
-	AbilityType AbilityController::OffensiveOrDefensive() {
-		int offensiveCount = inventoryTypeCount[static_cast<int>(AbilityType::OFFENSIVE) - 1];
-		int defensiveCount = inventoryTypeCount[static_cast<int>(AbilityType::DEFENSIVE) - 1];
-
-		if (offensiveCount == defensiveCount) {
-			return Utils::RandomValue(0, 1) == 0 ? AbilityType::OFFENSIVE : AbilityType::DEFENSIVE;
-		}
-		else if (offensiveCount < defensiveCount) {
-			return AbilityType::OFFENSIVE;
-		}
-		else {
-			return AbilityType::DEFENSIVE;
 		}
 	}
 
@@ -525,10 +573,10 @@ namespace AbilitiesManager {
 
 		for (int i = 0; i < abilitiesCards.size(); ++i) {
 			Ability const& ability = abilitiesCards[i];
-			AEGfxTexture* imageTexture = ability.GetTexture() == "" ? AssetsManager::squareTexture : AssetsManager::GetTexture(ability.GetTexture().c_str());
 			Card& card = abilitySelectorCards[i];
+
 			// Update onClick and texture every frame
-			card.SetTexture(imageTexture);
+			card.SetTexture(ability.GetTexture());
 
 			Button& button = card.GetButton();
 			button.SetOnClick([this, ability]() {
@@ -627,6 +675,14 @@ namespace AbilitiesManager {
 				break;
 			}
 			std::cout << std::setw(15) << std::left << label << inventoryTypeCount[i] << '\n';
+		}
+	}
+
+	void AbilityController::PrintAbilityModifiers() {
+		std::cout << "==============" + controllerName + " Ability Modifiers" + "=============\n";
+		for (Ability const& ability : abilityModifiers) {
+			std::cout << std::setw(15) << std::left << ability.GetName() 
+				<< "Remaining Turns " + std::to_string(ability.GetStats().turns) << '\n';
 		}
 	}
 }

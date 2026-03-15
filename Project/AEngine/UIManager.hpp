@@ -51,6 +51,7 @@ namespace UIManager {
 		void AddOffset(AEVec2 const& _pos) { transform.pos.x += _pos.x , transform.pos.y += _pos.y; }
 		AEVec2 Size() const { return transform.size; }
 
+		void SetTexture(AEGfxTexture* _texture) { texture = _texture; }
 		void SetColor(Color newColor) { color = newColor; }
 
 		// Assign a parent panel/object to this panel object and it will set its position 

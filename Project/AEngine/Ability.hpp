@@ -38,13 +38,13 @@ struct DefenseModule {
 
 class Ability {
 public:
-	Ability(int _id, std::string _name, AbilityType _type, Tier _tier, std::string _texture);
+	Ability(int _id, std::string _name, AbilityType _type, Tier _tier, AEGfxTexture* _texture);
 
 	int					Id() const { return id; }
 	std::string			GetName() const { return name; }
 	AbilityType			GetType() const { return type; }
 	Tier				GetTier() const { return tier; }
-	std::string			GetTexture() const { return texture; }
+	AEGfxTexture*		GetTexture() const { return texture; }
 	std::string	GetTypeName() {
 		switch (type) {
 		case AbilityType::STATISTICS:
@@ -85,6 +85,10 @@ public:
 	}
 	int PreviousAbilityCharges() const { return previousAbilityCharges; }
 
+	void UpdateTurnLifespan() {
+		--stats.turns;
+	}
+
 private:
 	int id; // To determind what type of ability it is (Bomb projectile, stats ability, etc)
 	int abilityCharges = 0; // count of how many of these ability the player/enemy has
@@ -92,7 +96,7 @@ private:
 	std::string name;
 	AbilityType type;
 	Tier tier;
-	std::string texture;
+	AEGfxTexture* texture;
 
 	StatsModule stats;
 	ProjectileModule proj;

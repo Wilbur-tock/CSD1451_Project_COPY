@@ -77,14 +77,14 @@ Character::Character(AEVec2 _pos, AEVec2 _size, AEGfxTexture* _texture, TileInde
 		hpBarColor = PlayerHPColor();
 	}
 	float wsBarX = transform.pos.x - transform.size.x * 0.5f, wsBarY = transform.pos.y + transform.size.y;
-	float wsShieldBarHeight = 5;
-	float wsShieldBarY = wsBarY + wsShieldBarHeight + barGaps;
+	float barHeight = 10;
+	float wsShieldBarY = wsBarY + barHeight + barGaps;
 
-	wsHPBar = UIManager::Bar{ { wsBarX, wsBarY}, { transform.size.x, 10 }, hpBarColor }; // Position just on top of the character
-	wsShieldBar = UIManager::Bar{ {wsBarX,wsShieldBarY} , { transform.size.x, wsShieldBarHeight }, ShieldColor()};
+	wsHPBar = UIManager::Bar{ { wsBarX, wsBarY}, { transform.size.x, barHeight }, hpBarColor }; // Position just on top of the character
+	wsShieldBar = UIManager::Bar{ {wsBarX,wsShieldBarY} , { transform.size.x, barHeight * 0.5f }, ShieldColor()};
 
-	float panelYOffset = -50.0f;// add Y offset based on the level player/enemy hp bar
-	characterStatsPanel = UIManager::Panel{ {300,100}, Color{0.75f,0.75f,0.75f}, Utils::AnchorMode::TOP_LEFT };
+	float panelYOffset = -60.0f;// add Y offset based on the level player/enemy hp bar
+	characterStatsPanel = UIManager::Panel{ {300,100}, StatsBGColor(), Utils::AnchorMode::TOP_LEFT};
 	characterStatsPanel.AddOffset({ 0, panelYOffset });
 
 	float gap = 2.5f;

@@ -18,11 +18,108 @@ AEGfxTexture* playerCannonTex = nullptr;
 AEGfxTexture* enemyCannonTex = nullptr;
 
 // UI Objects
-TextObject debugText, turnText, turnCountText;
+TextObject debugText;
+TextObject turnText, turnCountText;
 UIManager::Panel turnStatusPanel;
-UIManager::Bar playerHPBar, enemyHPBar;
-UIManager::Bar playerShieldBar, enemyShieldBar;
 
+struct StatsUI {
+	UIManager::Panel barBG;
+	UIManager::Bar hpBar, shieldBar;
+	std::vector<UIManager::Panel> abilityModifierPanel;
+	std::vector<UIManager::Panel> abilityModifierIcon;
+	std::vector<TextObject> abilityModifierText;
+
+	// isLeft = true, is player stats
+	// bgWidth = the width of the hp and shield bar
+	void Initialize(bool isLeft, float bgWidth) {
+		UIManager::FillType fillType = UIManager::FillType::LEFT_TO_RIGHT;
+		Utils::AnchorMode barBGAnchorMode = Utils::AnchorMode::TOP_LEFT;
+		Color hpColor = PlayerHPColor();
+
+		if (!isLeft) {
+			fillType = UIManager::FillType::RIGHT_TO_LEFT;
+			barBGAnchorMode = Utils::AnchorMode::TOP_RIGHT;
+			hpColor = EnemyHPColor();
+		}
+
+		// bar width and height
+		Transform barTransform = { {0,0}, {bgWidth, 25.0f} };
+		Utils::SetAnchoredPosition(barTransform, barBGAnchorMode);
+		// BG panel of the both bar, so get the height of the both bars + 10.0f as a gap
+		AEVec2 barBGSize{ barTransform.size.x, (barTransform.size.y * 2.0f) + 10.0f };
+		Color barBGColor = { 0.9f, 0.9f, 0.9f };
+
+		float shieldBarY = barTransform.pos.y - barTransform.size.y;
+
+		// Initialize the barBG and hp and shield bar
+		barBG = UIManager::Panel{ barBGSize, barBGColor, barBGAnchorMode };
+		hpBar = UIManager::Bar{ { barTransform.pos.x, barTransform.pos.y }, barTransform.size, hpColor, fillType };
+		shieldBar = UIManager::Bar{ { barTransform.pos.x, shieldBarY}, barTransform.size, ShieldColor(), fillType };
+
+		int amCount = Config::MAX_ABILITY_MODIFIER_COUNT;
+		float amPanelGaps = 5.0f;
+		float amPanelWidth = 50.0f, amPanelHeight = 50.0f;
+		float amXOffset = (turnStatusPanel.Size().x * 0.5f) + (amPanelWidth * 0.5f);
+		float amYOffset = -barBGSize.y;
+
+		float gapBetweenBorder = 2.5f;
+
+		abilityModifierPanel.reserve(amCount);
+		abilityModifierIcon.reserve(amCount);
+		abilityModifierText.reserve(amCount);
+
+		for (int i = 0; i < amCount; ++i) {
+			UIManager::Panel panel = UIManager::Panel{
+				{amPanelWidth, amPanelHeight}, StatsBGColor(), Utils::AnchorMode::TOP_CENTER
+			};
+
+			// Calculate each gap between each panel object [PANEL][GAP][PANEL]
+			float totalWidthAndGaps = (amPanelGaps * i) + (amPanelWidth * i);
+			float xOffset = -amXOffset - totalWidthAndGaps;
+			if (!isLeft) {
+				xOffset = amXOffset + totalWidthAndGaps;
+			}
+
+			panel.AddOffset({ xOffset, amYOffset });
+			abilityModifierPanel.push_back(panel);
+
+			UIManager::Panel icon = UIManager::Panel{
+				{amPanelWidth - (gapBetweenBorder * 2.0f), amPanelHeight - (gapBetweenBorder * 2.0f)}, Color{1,1,1}, Utils::AnchorMode::TOP_CENTER
+			};
+
+			icon.AddOffset({ xOffset, amYOffset - gapBetweenBorder });
+			abilityModifierIcon.push_back(icon);
+
+			TextObject text = TextObject{ "5", 0.5f, {1,0,0}, {0,0}, Utils::AnchorMode::BOTTOM_CENTER };
+			text.SetPosition(panel.GetTransform());
+
+			abilityModifierText.push_back(text);
+		}
+	}
+
+	void Draw(float currentHP, float maxHP, bool isShieldOn, float currentShield, float maxShield, std::vector<Ability> const& abilityModifiers) {
+		hpBar.Draw(currentHP, maxHP);
+		if (isShieldOn) {
+			shieldBar.Draw(currentShield, maxShield);
+		}
+
+		for (int i = 0; i < abilityModifiers.size(); ++i) {
+			Ability const& ability = abilityModifiers[i];
+
+			abilityModifierPanel[i].Draw();
+			// Update texture icon then draw
+			abilityModifierIcon[i].SetTexture(ability.GetTexture());
+			abilityModifierIcon[i].Draw();
+			// Update the number of turns remaining
+			abilityModifierText[i].TextContent(std::to_string(ability.GetStats().turns));
+			abilityModifierText[i].Draw();
+		}
+	}
+};
+
+StatsUI playerStatsUI, enemyStatsUI;
+
+// Results UI objects
 bool resultScreenInitialized = false;
 UIManager::Panel resultOverlay, centerPanel;
 Button resultRestartButton, resultMainMenuButton;
@@ -49,20 +146,10 @@ void Level::InitializeUI() {
 
 	AbilitiesManager::playerAbilityController.InitializeAllAbilityUI();
 
-	float barGap = turnStatusPanel.Size().x;
-	float barWidth = (Config::SCREEN_WIDTH - barGap) * 0.5f;
-	float barHeight = 25.0f;
-	Transform barTrans = { {0,0}, {barWidth,barHeight} };
-	Utils::SetAnchoredPosition(barTrans, Utils::AnchorMode::TOP_LEFT);
-
-	playerHPBar = UIManager::Bar{ { barTrans.pos.x, barTrans.pos.y }, barTrans.size, PlayerHPColor()};
-
-	float rightX = barTrans.pos.x + barGap + barTrans.size.x;
-	enemyHPBar = UIManager::Bar{ { rightX, barTrans.pos.y}, barTrans.size, EnemyHPColor(), UIManager::FillType::RIGHT_TO_LEFT};
-
-	float shieldBarY = barTrans.pos.y - barHeight;
-	playerShieldBar = UIManager::Bar{ { barTrans.pos.x, shieldBarY}, barTrans.size, ShieldColor() };
-	enemyShieldBar = UIManager::Bar{ { rightX, shieldBarY }, barTrans.size, ShieldColor(), UIManager::FillType::RIGHT_TO_LEFT };
+	// Initialize the stats of player and enemy UI
+	float bgWidth = (Config::SCREEN_WIDTH - turnStatusPanel.Size().x) * 0.5f;
+	playerStatsUI.Initialize(true, bgWidth);
+	enemyStatsUI.Initialize(false, bgWidth);
 
 	// Initialize ResultsUI
 	AEGfxTexture* btnTex = AssetsManager::GetTexture("Assets/buttonTexture.png");
@@ -131,12 +218,11 @@ void Level::Load() {
 	levelMap.resize(Config::GRID_HEIGHT, std::vector<Tile>(Config::GRID_WIDTH));
 	activeLevelMap.resize(Config::GRID_HEIGHT, std::vector<Tile>(Config::GRID_WIDTH));
 
-	enemies.clear();
-	playerCharacters.clear();
 	int reserveCount = 10;
 	enemies.reserve(reserveCount);
 	playerCharacters.reserve(reserveCount);
 
+	// Load map data
 	MapManager::ReadMapData(levelFileName, levelMap);
 
 	playerCannonTex = AssetsManager::GetTexture("Assets/cannonBarrel.png");
@@ -240,7 +326,7 @@ void Level::Initalize() {
 	playerCannon = CannonManager::Cannon(playerCannonStartPos, playerCannonTex, { 0,0 }, barrelHalfSize, true, true);
 
 	AbilitiesManager::AbilityController& playerController = AbilitiesManager::playerAbilityController;
-	playerController.LoadAllAbilities(false);
+	playerController.LoadAllAbilities(true);
 	playerCannon.Initialize(&playerController);
 	AbilitiesManager::playerAbilityController.IsSelectingAbility(true);
 
@@ -248,7 +334,7 @@ void Level::Initalize() {
 	enemyCannon = CannonManager::Cannon(enemyCannonStartPos, enemyCannonTex, { 0,0 }, barrelHalfSize, false, false);
 
 	AbilitiesManager::AbilityController& enemyController = AbilitiesManager::enemyAbilityController;
-	enemyController.LoadAllAbilities(true);
+	enemyController.LoadAllAbilities(false);
 	enemyCannon.Initialize(&enemyController);
 	enemyCannon.SetEnemyAI(static_cast<int>(levelDifficulty));
 
@@ -370,24 +456,20 @@ void Level::DrawUI() {
 	turnCountText.TextContent("Turn " + std::to_string(turnCount));
 	turnCountText.Draw();
 
+	playerStatsUI.barBG.Draw();
+	enemyStatsUI.barBG.Draw();
+
 	// Draw health bar
 	float currentHP = 0, maxHP = 0;
 	GetCurrentHP(currentHP);
 	GetMaxHP(maxHP);
-	playerHPBar.Draw(currentHP, maxHP);
+	playerStatsUI.Draw(currentHP, maxHP, playerShield.IsShieldOn(), static_cast<float>(playerShield.attribute.Shield()), static_cast<float>(playerShield.attribute.MaxShield()), 
+		playerCannon.AbilityController()->GetAbilityModifiers());
 
 	GetCurrentHP(currentHP, false);
 	GetMaxHP(maxHP, false);
-	enemyHPBar.Draw(currentHP, maxHP);
-
-	// Draw shield amount bar
-	if (playerShield.IsShieldOn()) {
-		playerShieldBar.Draw(static_cast<float>(playerShield.attribute.Shield()), static_cast<float>(playerShield.attribute.MaxShield()));
-	}
-
-	if (enemyShield.IsShieldOn()) {
-		enemyShieldBar.Draw(static_cast<float>(enemyShield.attribute.Shield()), static_cast<float>(enemyShield.attribute.MaxShield()));
-	}
+	enemyStatsUI.Draw(currentHP, maxHP, enemyShield.IsShieldOn(), static_cast<float>(enemyShield.attribute.Shield()), static_cast<float>(enemyShield.attribute.MaxShield()),
+		enemyCannon.AbilityController()->GetAbilityModifiers());
 
 	activeCannon->DrawUI();
 	activeCannon->DebugInfo();
@@ -459,6 +541,9 @@ void Level::SetTurn(bool _isPlayerTurn) {
 
 void Level::NewTurn() {
 	++turnCount; // always increment once after enemy has shot
+
+	playerCannon.AbilityController()->UpdateModifiers();
+	enemyCannon.AbilityController()->UpdateModifiers();
 
 	playerShield.UpdateLifespan();
 	enemyShield.UpdateLifespan();

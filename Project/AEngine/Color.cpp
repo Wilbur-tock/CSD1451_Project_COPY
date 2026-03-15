@@ -25,7 +25,9 @@ void Color::EditColorPercentage(float percentage) {
 Color playerHPColor	{ 0.0f,0.9f,0.0f };
 Color enemyHPColor	{ 0.9f,0.0f,0.0f };
 Color shieldColor	{ 0.9f,0.9f,0.0f };
+Color statsBGColor	{ 0.75f, 0.75f, 0.75f };
 
-Color const& PlayerHPColor() { return playerHPColor; }
-Color const& EnemyHPColor()	 { return enemyHPColor; }
-Color const& ShieldColor()	 { return shieldColor; }
+Color const& PlayerHPColor()	{ return playerHPColor; }
+Color const& EnemyHPColor()		{ return enemyHPColor; }
+Color const& ShieldColor()		{ return shieldColor; }
+Color const& StatsBGColor()		{ return statsBGColor; }

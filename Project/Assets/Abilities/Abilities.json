@@ -78,7 +78,7 @@
         "Name": "Wall",
         "Type": 3,
         "Tier": 1,
-        "Texture": "",
+        "Texture": "Card_Add_Health",
         "Defensive_Stats": {
             "ShieldHP": 1
         },
@@ -96,7 +96,7 @@
         "Name": "Tower Shield",
         "Type": 3,
         "Tier": 1,
-        "Texture": "",
+        "Texture": "Card_Add_Health",
         "Base_Stats": {
             "Hp": 0,
             "Attack": 0,

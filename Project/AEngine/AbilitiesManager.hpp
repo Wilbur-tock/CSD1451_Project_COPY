@@ -9,7 +9,7 @@ namespace AbilitiesManager {
 	class AbilityController {
 	public:
 		// Load all different type of abilites to be called at the start of the game
-		void LoadAllAbilities(bool isAi); //Loads all player abils from Abilities.json file
+		void LoadAllAbilities(bool isPlayer); //Loads all player abils from Abilities.json file
 		//void LoadAllAIAbilities(); //Loads all AI abils from AiAbilities.json file
 		void LoadStartingAbilities();
 
@@ -18,6 +18,7 @@ namespace AbilitiesManager {
 		std::vector<Ability> const& GetDefensiveAbilities() { return defensiveAbilities; }
 
 		std::vector<Ability> const& GetProjectilesAbilties() { return allProjectilesAbilties; }
+		std::vector<Ability> const& GetAbilityModifiers() { return abilityModifiers; }
 
 		Ability* CurrentAbility() const { return currentAbility; }
 		int InventoryCount() const{ return inventoryCount; }
@@ -30,6 +31,9 @@ namespace AbilitiesManager {
 
 		AbilityType OffensiveOrDefensive();
 
+		// Activate ability effects that will be activated once UseAbility() is called
+		void AbilityEffects();
+		void UpdateModifiers();
 		// Change the type of ability this controller is current using
 		void ChangeAbility(int abilityId);
 		// Use the currently select ability if it has unlimited or any charges remaining
@@ -71,6 +75,7 @@ namespace AbilitiesManager {
 		void PrintInventory();
 		void PrintAllAbilities();
 		void PrintInventoryCount();
+		void PrintAbilityModifiers();
 
 	private:
 		std::vector<Ability> offensiveAbilities; //vector for offensive abils
@@ -79,7 +84,7 @@ namespace AbilitiesManager {
 
 		std::vector<Ability> allAbilities; // vector containing all the different type of abilities
 		std::vector<Ability> allProjectilesAbilties; // vector containing all the ability that uses it own projectile mode
-		std::vector<Ability> abilityModifiers;
+		std::vector<Ability> abilityModifiers;// vector containing all the active abilites that last for more than 1 turn (HP boost, attack boost, etc)
 
 		std::string controllerName; // use for debugging
 		Ability* currentAbility = nullptr;
@@ -96,7 +101,7 @@ namespace AbilitiesManager {
 		std::vector<int> inventoryAbilityIds; 
 		bool isSelectingAbility = false;
 
-		bool isAIController = false;
+		bool isPlayerControlled = true;
 		bool hasEnemySelectedAbility = false; // has enemy selected their ability
 
 		std::vector<Ability> abilitiesCards; // vector containing the 3 abilities to be displayed in the ability selector for the player to select from
