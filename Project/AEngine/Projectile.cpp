@@ -82,6 +82,9 @@ void Projectile::AbilityActivation(Ability const* ability) {
             std::cout << "WALL mode triggered\n";
         }
         break;
+    case ProjectileMode::PIERCING:
+        canBypassBlocks = isAbilityTriggered = true;
+        break;
     }
 }
 
@@ -162,13 +165,20 @@ void Projectile::Update(bool isPlayerShot, float dt) {
 
             // Checking collision of the projectile with the tile blocks that is collidable
             if (hasTileCollision) {
-                if (!IsCollisionTriggered()) {
+                if (!canBypassBlocks && isCollisionTriggered) {
                     FirstTimeCollision();
                 }
 
                 // Damage tile first, incase of destroying the blocks and bouncing back if damageTile is not called first
                 DamageTile(x, y);
-                ConstantCollision(tile);
+                if (!canBypassBlocks) {
+                    ConstantCollision(tile);
+                }
+
+                //// After bypassing a block/character immediately disable by pass wall
+                //if (canBypassBlocks) {
+                //    canBypassBlocks = false;
+                //}
             }
         }
     }
@@ -176,7 +186,9 @@ void Projectile::Update(bool isPlayerShot, float dt) {
 
 void Projectile::ProjectileMovement(float dt) {
     // Grounded Check every frame
-    isGrounded = PhysicsManager::IsObjectGrounded(transform);
+    if (!canBypassBlocks) {
+        isGrounded = PhysicsManager::IsObjectGrounded(transform);
+    }
 
     // Movement
     if (isGrounded) {
@@ -324,5 +336,6 @@ std::string Projectile::DebugInfo() {
         + "\nTimer: " + Utils::FormatFloat(timer, 2)
         + "\nAttack Charges: " + std::to_string(AttackCharges())
         + "\nDamage Radius: " + std::to_string(attribute.DamageRadius())
-        + "\nCollisionTriggered: " + static_cast<std::string>(IsCollisionTriggered() ? "true" : "false");
+        + "\nCollisionTriggered: " + static_cast<std::string>(isCollisionTriggered ? "true" : "false")
+        + "\nCanBypassWall: " + static_cast<std::string>(canBypassBlocks ? "true" : "false");
 }

@@ -121,47 +121,16 @@
     },
 
     {
-        "Name": "STATS",
-        "Type": 1,
-        "Tier": 1,
-        "Texture": "",
-        "Base_Stats": {
-            "Hp": 0,
-            "Attack": 0,
-            "Shield": 0,
-            "Turns": 5
-        }
-    },
-
-    {
-        "Name": "OFFENSIVE",
+        "Name": "Piercing",
         "Type": 2,
         "Tier": 1,
         "Texture": "",
         "Projectile_Stats": {
-            "ProjectileID": 0,
+            "ProjectileID": 7,
             "Damage_Amp": 1.0,
-            "Base_Damage": 100,
-            "Radius": 10,
-            "Charges": 1,
-            "unlimited_charges": false
-        }
-    },
-
-    {
-        "Name": "DEFENSIVE",
-        "Type": 3,
-        "Tier": 1,
-        "Texture": "",
-        "Defensive_Stats": {
-            "ShieldHP": 50
-        },
-        "Projectile_Stats": {
-            "ProjectileID": 0,
-            "Damage_Amp": 1.0,
-            "Base_Damage": 100,
-            "Radius": 10,
-            "Charges": 1,
+            "Base_Damage": 10,
+            "Radius": 3,
+            "Charges": 5,
             "unlimited_charges": false
         }
     }

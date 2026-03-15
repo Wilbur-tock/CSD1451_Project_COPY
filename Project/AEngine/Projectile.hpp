@@ -19,6 +19,7 @@ enum class ProjectileMode {
 	AUTO_AIM		= 5,
 	WALL			= 6,
 	SHIELD_BUSTER	= 7,
+	PIERCING		= 8,
 };
 
 class Projectile : public GameObject {
@@ -53,13 +54,12 @@ public:
 		case ProjectileMode::AUTO_AIM:			return "AUTO_AIM"; break;
 		case ProjectileMode::WALL:				return "WALL"; break;
 		case ProjectileMode::SHIELD_BUSTER:		return "SHIELD_BUSTER"; break;
+		case ProjectileMode::PIERCING:			return "PIERCING"; break;
 		default:								return "YOU NEED TO ADD A PROJECTILE MODE NAME";
 		}
 	}
 
 	bool IsActive() const { return isActive; }
-	bool ToBeDestroyed() const { return toBeDestroyed; }
-	bool IsCollisionTriggered() const { return isCollisionTriggered; }
 	bool HasHitSomething() const { return hasHitSomething; }
 
 	// Member functions
@@ -107,8 +107,10 @@ private:
 	bool toBeDestroyed = false;
 	bool isCollisionTriggered = false; // There is a collision triggered between the projectile and block
 	bool isAbilityTriggered = false;
+
 	bool hasHitSomething = false; // has hit any things expect for the ground / undestructible blocks
 	bool hasHitShield = false;
+	bool canBypassBlocks = false;
 };
 
 #endif // !PROJECTILE_HPP

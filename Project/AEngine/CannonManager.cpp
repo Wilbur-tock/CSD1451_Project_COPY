@@ -367,6 +367,7 @@ namespace CannonManager {
 
             // Calculate perfect shot angle and power
             PhysicsManager::PerfectShotCalculation(transform, target->transform, cannonAngle, shotPower);
+            break;
         }
 
         Ability* currentAblity = abilityController->CurrentAbility();
