@@ -75,7 +75,7 @@ namespace CannonManager {
             projectile = Projectile{ AssetsManager::circleTexture };
             projectile.SetProjectileStats(ability.GetName(), ability.GetProj());
 
-            //std::cout << "[CannonManager] Set AbilityId: " << ability.Id() << " Projectile Mode: " << projectile.ModeName() << " " 
+            //std::cout << "[CannonManager] AbilityId: " << ability.Id() << " Projectile Name: " << projectile.ProjectileName() << " Projectile Mode: " << projectile.ModeName() << " "
             // << projectile.ProjectileId() << " into the cannon projectile vector" << '\n';
         }
     }
@@ -313,14 +313,12 @@ namespace CannonManager {
 
     void Cannon::UpdateProjectile() {
         if (hasCannonShot) {
-            allProjectileDestroyed = activeProjectiles.empty();
+            allProjectileDestroyed = activeProjectiles.empty(); // check if all projectiles has been destroyed when cannon has been shot
         }
         if (activeProjectiles.empty()) return;
 
         for (Projectile& projectile : activeProjectiles) {
             if (!projectile.IsActive()) continue;
-
-            projectile.AbilityActivation(abilityController->CurrentAbility());
 
             float dt = PhysicsManager::g_dt;
             // Increased the frequency of the collision check by using loops
@@ -331,6 +329,7 @@ namespace CannonManager {
             float subDt = dt / SUB_STEPS;
 
             for (int step = 0; step < SUB_STEPS; ++step) {
+                projectile.AbilityActivation(abilityController->CurrentAbility());
                 projectile.Update(isPlayerControlled, subDt);
             }
 

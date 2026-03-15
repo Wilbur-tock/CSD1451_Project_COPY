@@ -65,10 +65,10 @@ void Projectile::AbilityActivation(Ability const* ability) {
         if (leftClick) {
             isAbilityTriggered = true;
 
-            // Create a 1 tile width wall 2 tiles X index behind current projectile X index
+            // Create a 1 tile width wall, 1 tiles x index behind current projectile x index
             int tileX = 0, tileY = 0;
             Utils::GetTileIndex(tileX, tileY, transform.pos);
-            tileX -= 2; 
+            tileX -= 1; 
 
             if (!Utils::IsTileIndexOutOfBounds(tileX, tileY)) {
                 for (int i = 0; i <= Config::MAX_GRID_Y; ++i) {
@@ -127,15 +127,20 @@ void Projectile::Update(bool isPlayerShot, float dt) {
 
     if (hasHitShield) return; // if projectile has hit a shield it should get destroy instantly no more collision checks
 
-    TowerShield& shield = LevelManager::CurrentLevel()->GetTowerShield(!isPlayerShot);
     // if its player shot get the AI shield to check shield collision
+    TowerShield& shield = LevelManager::CurrentLevel()->GetTowerShield(!isPlayerShot);
     if (shield.IsShieldOn()) {
         hasHitShield = CollisionManager::CheckContinuousCollision(start, end, shield.transform);
     }
 
     if (hasHitShield) {
-        std::cout << "Hit shield" << '\n';
-        shield.attribute.TakeDamage(attribute.Damage());
+        if (Mode() == ProjectileMode::SHIELD_BUSTER) {
+            shield.TakeDamage(0, true);
+        }
+        else {
+            shield.TakeDamage(attribute.Damage());
+        }
+
         InstantDestroy();
         return;
     }
@@ -151,20 +156,19 @@ void Projectile::Update(bool isPlayerShot, float dt) {
 
             Tile& tile = (*MapManager::currentMap)[y][x];
 
-            if (tile.IsEmpty()) continue; // If it hits a empty tile continue
+            if (tile.IsEmpty()) continue; // If it hits a empty tile continue does not need to check a empty tile
 
             bool hasTileCollision = CollisionManager::AreCircleSquareIntersecting(transform, tile.transform);
 
             // Checking collision of the projectile with the tile blocks that is collidable
             if (hasTileCollision) {
                 if (!IsCollisionTriggered()) {
-                    AudioManager::PlaySFX(AudioManager::SFX::Impact);
                     FirstTimeCollision();
                 }
 
                 // Damage tile first, incase of destroying the blocks and bouncing back if damageTile is not called first
                 DamageTile(x, y);
-                OnCollision(tile);
+                ConstantCollision(tile);
             }
         }
     }
@@ -188,7 +192,7 @@ void Projectile::ProjectileMovement(float dt) {
     transform.pos.y += velocity.y * dt;
 }
 
-void Projectile::OnCollision(Tile const& tile) {
+void Projectile::ConstantCollision(Tile const& tile) {
     if (Mode() == ProjectileMode::PENTA_BURST && !isAbilityTriggered) return;
 
     if(CollisionManager::IsHorizontalCollision(transform, tile.transform)) {
@@ -204,12 +208,16 @@ void Projectile::OnCollision(Tile const& tile) {
 }
 
 void Projectile::FirstTimeCollision() {
+    // Reduce velocity when it hit something the first time
     float percentage = 0.5f;
     velocity.x *= percentage;
     velocity.y *= percentage;
     isCollisionTriggered = true;
 
-    // Set effect
+    // Play audio
+    AudioManager::PlaySFX(AudioManager::SFX::Impact);
+
+    // Set effects
     using EffectsManager::Effects;
     Effects projectileEffect = Effects::DEFAULT;
     switch (Mode()) {

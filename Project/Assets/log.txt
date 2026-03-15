@@ -1,12 +1,12 @@
 =============== Code Tracking ===============
-Draw Mesh Count:                                 3200743
-DrawMap() Count:                                 2883
-Draw Tiles in DrawMap() Count:                   2918680
+Draw Mesh Count:                                 7407237
+DrawMap() Count:                                 6339
+Draw Tiles in DrawMap() Count:                   6643272
 =============== Game Data ===============
-Game Duration:                                   0 mins 54 secs
-Player shots:                                    2
+Game Duration:                                   1 mins 49 secs
+Player shots:                                    4
 Player hits:                                     0
-Player miss:                                     2
-Enemy shots:                                     0
+Player miss:                                     4
+Enemy shots:                                     4
 Enemy hits:                                      0
-Enemy miss:                                      0
+Enemy miss:                                      4

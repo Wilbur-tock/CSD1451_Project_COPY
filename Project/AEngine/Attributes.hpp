@@ -16,6 +16,7 @@ public:
 
 	// Shield take 1 damage per attack regardless of damage value
 	int  Shield() const { return shield;  }
+
 	bool IsShieldActive() const { return shield > 0; }
 
 	int	 MaxShield() const { return maxShield; }
@@ -39,7 +40,14 @@ public:
 	// return true if attribute health is more than 0 otherwise false
 	bool IsActive() const { return isActive; }
 
-	void TakeDamage(int damage);
+	void TakeDamage(int value);
+	// Percentage (0.0f - 1.0f) to damage based on remaining shield health
+	// 0.0f - 10 shield hp > 0 shield hp
+	void DamageShield(float percentage);
+private:
+	// Shield take 1 damage per attack regardless of damage value
+	void Shield(int value) { shield = std::clamp(value, minValue, maxValue); }
+
 private:
 	int minValue = 0, maxValue = 100;
 	bool canBeDamaged = true;

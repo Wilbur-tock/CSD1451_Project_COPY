@@ -91,7 +91,7 @@ namespace AbilitiesManager {
 		statsAbilities.reserve(totalAbilityCount);
 		defensiveAbilities.reserve(totalAbilityCount);
 
-		int id = 0;
+		int abilityId = 0;
 		for (auto& item : data) { // Your JSON is an array at the root
 			std::string name = item["Name"];
 			AbilityType type = static_cast<AbilityType>(item["Type"].get<int>());
@@ -99,7 +99,7 @@ namespace AbilitiesManager {
 			std::string texture = item["Texture"];
 
 			// Increment Id after assigning it
-			Ability newAbility(id++, name, type, tier, texture);
+			Ability newAbility(abilityId, name, type, tier, texture);
 
 			// Load different stats if can find
 			std::string statsName = "Base_Stats";
@@ -146,15 +146,16 @@ namespace AbilitiesManager {
 
 			allAbilities.push_back(newAbility);
 
-			// Only add the default projectile ability as non-projectile abiility would use default projectile id
-			if (newAbility.GetProj().projectileId == 0 && id != 0) {
+			// Only add the default projectile ability as non-projectile abiility would use default projectile id (0)
+			// Do not adding default projectile again after it has been added
+			bool isProjectilesAbility = abilityId == 0 || newAbility.GetProj().projectileId != 0;
+			if (isProjectilesAbility) {
 				allProjectilesAbilties.push_back(newAbility);
+				std::cout << "[AbiltiesManager] Projectile Ability: " << newAbility.GetName() << '\n';
 			}
 
-			// Do not adding default projectile again after it has been added
-			if (newAbility.GetProj().projectileId != 0) { 
-				allProjectilesAbilties.push_back(newAbility);
-			}
+			// Increment ability id after initalizing everything
+			++abilityId;
 		}
 
 		inventoryTypeCount.resize(static_cast<int>(AbilityType::COUNT));

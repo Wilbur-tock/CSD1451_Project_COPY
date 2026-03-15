@@ -32,7 +32,7 @@ namespace AssetsManager {
         titleFont = AEGfxCreateFont("Assets/Font/liberation-mono.ttf", Config::FONT_SIZE * 2);
         circleTexture = AssetsManager::GetTexture("Assets/circle.png");
 
-        // Load Characters texture
+        // Load ALL Characters texture
         std::vector<char const*> playerPaths = {
             "Assets/Characters/playerIdle.png",
             "Assets/Characters/playerHalfHp.png",

@@ -28,6 +28,17 @@ void TowerShield::Draw() {
 	}
 }
 
+void TowerShield::TakeDamage(int damage, bool isShieldBuster, float shieldDmgPercentage) {
+	if (isShieldBuster) {
+		attribute.DamageShield(shieldDmgPercentage);
+	}
+	else {
+		attribute.TakeDamage(attribute.Damage());
+	}
+
+	isShieldOn = attribute.IsShieldActive();
+}
+
 void TowerShield::UpdateLifespan() {
 	if (!isShieldOn) return;
 	std::cout << "Here";

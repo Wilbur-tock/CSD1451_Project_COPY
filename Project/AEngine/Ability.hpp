@@ -19,8 +19,8 @@ enum class Tier {
 
 struct StatsModule {
 	int hp = 0, atk = 0, shield = 0;
-	int dmgReduction = 0;
 	int turns = 0; // number of turns the ability last
+	int dmgReduction = 0;
 };
 
 struct ProjectileModule {

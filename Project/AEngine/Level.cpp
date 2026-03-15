@@ -169,6 +169,8 @@ void Level::Initalize() {
 	// Start of the turn should always be player turn
 	activeCannon = &playerCannon;
 	isPlayerTurn = true;
+	autoPlayOn = false;
+	isSkippingEnemyTurn = false;
 	switchTurnCooldown = 0.0f;
 
 	AEVec2 playerCannonStartPos = { 0,0 }, enemyCannonStartPos = { 0,0 };
@@ -250,12 +252,7 @@ void Level::Initalize() {
 	enemyCannon.Initialize(&enemyController);
 	enemyCannon.SetEnemyAI(static_cast<int>(levelDifficulty));
 
-	// Reset level flow variables
-	isPlayerTurn = true;
-	autoPlayOn = false;
-	isSkippingEnemyTurn = false;
-	switchTurnCooldown = 0.0f;
-
+	// Reset camera
 	CameraManager::camera.SetPosition(playerCannon.transform.pos);
 	CameraManager::camera.SetState(CameraManager::CameraController::INPUT);
 
@@ -265,9 +262,6 @@ void Level::Initalize() {
 	// Initialize player and enemy shield 
 	playerShield = TowerShield{ MapManager::FindTile(playerCenterId)->transform.pos };
 	enemyShield = TowerShield{ MapManager::FindTile(enemyCenterId)->transform.pos };
-
-	playerShield.SetShieldOn(10, 5);
-	enemyShield.SetShieldOn(10, 5);
 
 	InitializeUI();
 

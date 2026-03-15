@@ -11,13 +11,14 @@ struct ProjectileModule;
 class Ability;
 
 enum class ProjectileMode {
-	IDLE		= 0,
-	ATTACK		= 1,
-	BOMB		= 2,
-	NUKE		= 3,
-	PENTA_BURST	= 4,
-	AUTO_AIM	= 5,
-	WALL		= 6,
+	IDLE			= 0,
+	ATTACK			= 1,
+	BOMB			= 2,
+	NUKE			= 3,
+	PENTA_BURST		= 4,
+	AUTO_AIM		= 5,
+	WALL			= 6,
+	SHIELD_BUSTER	= 7,
 };
 
 class Projectile : public GameObject {
@@ -51,6 +52,7 @@ public:
 		case ProjectileMode::PENTA_BURST:		return "PENTA_BURST"; break;
 		case ProjectileMode::AUTO_AIM:			return "AUTO_AIM"; break;
 		case ProjectileMode::WALL:				return "WALL"; break;
+		case ProjectileMode::SHIELD_BUSTER:		return "SHIELD_BUSTER"; break;
 		default:								return "YOU NEED TO ADD A PROJECTILE MODE NAME";
 		}
 	}
@@ -74,7 +76,7 @@ public:
 	void ProjectileMovement(float dt);
 
 	// Simulate the projectile physics of bouncing off the walls, checking if it is grounded
-	void OnCollision(Tile const& tile);
+	void ConstantCollision(Tile const& tile);
 	// If the projectile hit something, REDUCE the velocity by a percentage for the FIRST COLLISION ONLY
 	// So that it does not continue having the same projectile velocity even if it hits and destroy something
 	void FirstTimeCollision();
