@@ -480,7 +480,7 @@ namespace CannonManager {
         AEInputGetCursorPosition(&mouseX, &mouseY);
 
         Projectile const& selectedProjectile = projectiles[selectedProjectileId];
-        Ability* selectedAbility = abilityController->CurrentAbility();
+        Ability const& selectedAbility = abilityController->CurrentAbility();
 
         // Show cannon information
         std::string debugStr = "Cannon " + std::string(isPlayerControlled ? "PLAYER" : "ENEMY")
@@ -497,8 +497,9 @@ namespace CannonManager {
             + "\n\nAbilities Inventory Count: " + std::to_string(abilityController->InventoryCount())
             + "\nCurrent Inventory Id: " + std::to_string(abilityController->CurrentInventoryId());
 
-        for (Ability* const& ability : abilityController->Inventory()) {
-            debugStr += "\nAbility: " + ability->GetName() + " Charges: " + std::to_string(ability->AbilityCharges());
+        for (int abilityId : abilityController->InventoryIds()) {
+            Ability const& ability = *abilityController->GetAbility(abilityId);
+            debugStr += "\nAbility: " + ability.GetName() + " Charges: " + std::to_string(ability.AbilityCharges());
         }
 
         debugStr += "\n\nAbility Modifiers:";
@@ -507,11 +508,11 @@ namespace CannonManager {
             debugStr += "\nAbility: " + ability.GetName() + " Turns: " + std::to_string(ability.GetStats().turns);
         }
 
-        debugStr += "\n\nSelected Ability:\nId:" + std::to_string(selectedAbility->Id())
-            + "\nName: " + selectedAbility->GetName()
-            + "\nType: " + selectedAbility->GetTypeName()
-            + "\nAbility Charges Remaining: " + std::to_string(selectedAbility->AbilityCharges())
-            + "\nSelected Projectile Id: " + std::to_string(selectedAbility->GetProj().projectileId);
+        debugStr += "\n\nSelected Ability:\nId:" + std::to_string(selectedAbility.Id())
+            + "\nName: " + selectedAbility.GetName()
+            + "\nType: " + selectedAbility.GetTypeName()
+            + "\nAbility Charges Remaining: " + std::to_string(selectedAbility.AbilityCharges())
+            + "\nSelected Projectile Id: " + std::to_string(selectedAbility.GetProj().projectileId);
 
         if (target) {
             debugStr += "\nTarget: " + target->TypeName();

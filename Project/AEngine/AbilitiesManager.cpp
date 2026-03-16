@@ -55,17 +55,10 @@ namespace AbilitiesManager {
 		defensiveAbilities.clear();
 
 		allAbilities.clear();
-		inventory.clear();
-		currentAbility = nullptr;
 
 		// Clear inventory state before adding starting abilities
-		inventory.clear();
-		inventoryAbilityIds.clear();
-		inventoryCount = 0;
+		inventoryIds.clear();
 		std::fill(inventoryTypeCount.begin(), inventoryTypeCount.end(), 0);
-
-		inventory.reserve(Config::MAX_INVENTORY_COUNT);
-		inventoryAbilityIds.reserve(Config::MAX_INVENTORY_COUNT);
 
 		isPlayerControlled = isPlayer;
 
@@ -84,12 +77,16 @@ namespace AbilitiesManager {
 		}
 
 		totalAbilityCount = data.size();
+		size_t reserveCount = totalAbilityCount * 2;
+
 		// Reserve space for all vector used in these controller
-		allProjectilesAbilties.reserve(totalAbilityCount);
-		allAbilities.reserve(totalAbilityCount);
-		offensiveAbilities.reserve(totalAbilityCount);
-		statsAbilities.reserve(totalAbilityCount);
-		defensiveAbilities.reserve(totalAbilityCount);
+		allProjectilesAbilties.reserve(reserveCount);
+		allAbilities.reserve(reserveCount);
+		offensiveAbilities.reserve(reserveCount);
+		statsAbilities.reserve(reserveCount);
+		defensiveAbilities.reserve(reserveCount);
+
+		inventoryIds.reserve(Config::MAX_INVENTORY_COUNT);
 
 		int abilityId = 0;
 		for (auto& item : data) { // Your JSON is an array at the root
@@ -168,8 +165,8 @@ namespace AbilitiesManager {
 		inventoryTypeCount.resize(static_cast<int>(AbilityType::COUNT));
 
 		LoadStartingAbilities();
-		PrintAllAbilities();
-		PrintInventory();
+		//PrintAllAbilities();
+		//PrintInventory();
 	}
 
 	// Load the starting abilities for the player and AI
@@ -204,24 +201,22 @@ namespace AbilitiesManager {
 			std::cerr << "[AbilitiesManager] No abilities loaded!" << '\n';
 			return;
 		}
-		// Randomly select abilities for now
+		// Randomly select abilities for now TODO:
 		int size = static_cast<int>(allAbilities.size());;
 		if (size > 1) {
 			selectedId = Utils::RandomValue(0, size - 1);
 		}
-		//selectedId = GetAbility("Skip Turn")->Id();
-		//AddAbility(selectedId, 1);
+
 		ChangeAbility(selectedId);
 		hasEnemySelectedAbility = true;
 
-		std::cout << "[AbilitiesManager] Enemy selected ability: " << currentAbility->GetName() << '\n';
+		std::cout << "[AbilitiesManager] Enemy selected ability: " << CurrentAbility().GetName() << '\n';
 	}
 
 	void AbilityController::Reset() {
-		// Always reset to default ability
+		// Always reset back to default ability
 		ChangeAbility(0);
 		currentInventoryId = 0;
-
 		isAbilityTriggered = false;
 	}
 
@@ -244,12 +239,12 @@ namespace AbilitiesManager {
 	}
 
 	void AbilityController::AbilityEffects() {
-		std::string abilityName = currentAbility->GetName();
+		std::string abilityName = CurrentAbility().GetName();
 		Level* level = LevelManager::CurrentLevel();
 
 		// Activate a ability effect here
 		if (abilityName == "Tower Shield") {
-			level->GetTowerShield(isPlayerControlled).SetShieldOn(currentAbility->GetStats().shield, currentAbility->GetStats().turns);
+			level->GetTowerShield(isPlayerControlled).SetShieldOn(CurrentAbility().GetStats().shield, CurrentAbility().GetStats().turns);
 			//std::cout << "[AbilitiesManager] Activate Tower Shield ability!" << '\n';
 		}
 		else if (abilityName == "Rebuild") {
@@ -262,8 +257,7 @@ namespace AbilitiesManager {
 			level->SetSkipOpponentTurn();
 		}
 
-		AddModifier(*currentAbility);
-
+		AddModifier(CurrentAbility());
 		PrintAbilityModifiers();
 	}
 
@@ -305,12 +299,12 @@ namespace AbilitiesManager {
 
 	// Change the current ability based on the ability ID
 	void AbilityController::ChangeAbility(int abilityId) {
-		Ability* found = GetAbility(abilityId);
+		Ability* found =  GetAbility(abilityId);
 		if (!found) {
-			std::cerr << "[AbilitiesManager] Change Ability failed. abilityId: " << abilityId << '\n';
+			std::cerr << "Can't find ability id: " << std::to_string(abilityId) + ' ' + controllerName + ' ' + std::to_string(allAbilities.size()) << '\n';
 			return;
 		}
-		currentAbility = found;
+		currentAbilityVectorId = found->Id();
 
 		//std::cout << "[AbilitiesManager] Current ability: " + currentAbility->GetName()
 		//	+ " Charges Remaining: " + std::to_string(currentAbility->AbilityCharges()) << '\n';
@@ -318,24 +312,24 @@ namespace AbilitiesManager {
 
 	// Use the currently select ability if it has unlimited or any charges remaining
 	bool AbilityController::UseAbility() {
-		if (!currentAbility) {
-			std::cerr << "[AbilitiesManager] Use Ability failed. currentAbility is nullptr\n";
-			return false;
+		for (int id : inventoryIds) {
+			std::cout << id << ' ' << GetAbility(id)->AbilityCharges() << '\n';
 		}
-		if (currentAbility->GetProj().unlimitedCharges) return true;
+
+		if (CurrentAbility().GetProj().unlimitedCharges) return true;
 
 		AbilityEffects();
 
-		if (currentAbility->AbilityCharges() <= 0) return false; // has no ability charges can't use this ability
+		if (CurrentAbility().AbilityCharges() <= 0) return false; // has no ability charges can't use this ability
 
-		currentAbility->AbilityCharges(-1);
-		UpdateInventory(*currentAbility, false);
+		CurrentAbility().AbilityCharges(-1);
+		UpdateInventory(CurrentAbility(), false);
 
 		// Reset to default if trying to use an ability without any charges remaining
 		Reset();
 
-		std::cout << "[AbilitiesManager] Ability used: " + currentAbility->GetName()
-			+ " Charges Remaining: " + std::to_string(currentAbility->AbilityCharges()) << '\n';
+		std::cout << "[AbilitiesManager] Ability used: " + CurrentAbility().GetName()
+			+ " Charges Remaining: " + std::to_string(CurrentAbility().AbilityCharges()) << '\n';
 		return true;
 	}
 
@@ -351,11 +345,9 @@ namespace AbilitiesManager {
 			std::cerr << "[AbilitiesManager] Can't find to add Ability Id: " + std::to_string(abilityId) << '\n';
 			return;
 		}
-		// Create a copy of the found ability and add the charges 
+		// Store the reference of the found ability and add the charges 
 		Ability& ability = *found;
-		std::cout << ability << '\n';
 		ability.AbilityCharges(chargesToAdd);
-		std::cout << ability << '\n';
 		UpdateInventory(ability, true);
 	}
 
@@ -366,43 +358,18 @@ namespace AbilitiesManager {
 			std::cout << "[AbilitiesManager] Added " << ability << " into inventory" << '\n';
 			// update count
 			++inventoryTypeCount[typeId];
-			++inventoryCount;
 			// Add to inventoryAbilityIds list
-			inventoryAbilityIds.push_back(ability.Id());
-
-			// if previous charges is already more than or equal to 1, means that it is already in the vector no need to add
-			if (ability.PreviousAbilityCharges() >= 1) return;
-
-			// add into the activeAbilities vector
-			inventory.push_back(&ability);
+			inventoryIds.push_back(ability.Id());
 		}
 		else {
 			std::cout << "[AbilitiesManager] Removed " << ability << " from inventory" << '\n';
 			// update count
 			--inventoryTypeCount[typeId];
-			--inventoryCount;
 			// Remove from inventoryAbilityIds vector
-			for (int i = currentInventoryId; i < Config::MAX_INVENTORY_COUNT; ++i) {
-				if (i < Config::MAX_INVENTORY_COUNT - 1) {
-					inventoryAbilityIds[i] = inventoryAbilityIds[i + 1]; // shift every abilityId forward by 1 after currentInventoryId vector index
-				}
-				else {
-					inventoryAbilityIds.pop_back(); // remove the last vector
-				}
-			}
-
-			// Erase from inventoryAbilties Vector
-			if (ability.AbilityCharges() > 0) return; // if there is ability charges remanining no need to erase from inventory vector
-			for (int i = 0; i < inventory.size(); ++i) {
-				if (inventory[i] == &ability) {
-					inventory.erase(inventory.begin() + i);
-					return;
-				}
-			}
+			inventoryIds.erase(inventoryIds.begin() + currentInventoryId);
 		}
 	}
 
-	// Helper function to find and return the ability pointer based on the ability ID
 	Ability* AbilityController::GetAbility(int abilityId) {
 		for (Ability& ab : allAbilities) {
 			if (ab.Id() == abilityId) {
@@ -410,8 +377,8 @@ namespace AbilitiesManager {
 			}
 		}
 
-		std::cerr << "[AbilitiesManager] Can't find " + std::to_string(abilityId) + " in the abilities list\n";
-		return nullptr;
+		std::cerr << "[AbilitiesManager] Can't find id: " + std::to_string(abilityId) + " in the abilities list\n";
+		return 0;
 	}
 
 	Ability* AbilityController::GetAbility(std::string abilityName) {
@@ -436,15 +403,9 @@ namespace AbilitiesManager {
 		return nullptr;
 	}
 
-	// return the projectile Id to change the type of projectile the CANNON is currently using
-	int AbilityController::GetProjectileId() {
-		if (!currentAbility) return 0;
-		return currentAbility->GetProj().projectileId;
-	}
-
 	// True to toggle through all abilities or false to toggle through of all the active abilities this controller has in its inventory
 	void AbilityController::ToggleAbility(bool isAllAbilities, int addValue) {
-		int abilityId = currentAbility->Id();
+		int abilityId = CurrentAbility().Id();
 		abilityId += addValue;
 
 		if (isAllAbilities) {
@@ -452,11 +413,13 @@ namespace AbilitiesManager {
 		}
 		else {
 			bool found = false;
-			for (int i = 0; i < inventory.size(); ++i) {
-				if (inventory[i] == currentAbility) {
+			for (int i = 0; i < InventoryCount(); ++i) {
+				int newAbilityId = inventoryIds[i];
+				// If toggle until current ability wrap around until the last ability index in the inventory
+				if (inventoryIds[i] == CurrentAbility().Id()) {
 					int selectedListId = i + addValue;
-					Utils::Wrap(selectedListId, 0, static_cast<int>(inventory.size() - 1));
-					abilityId = inventory[selectedListId]->Id();
+					Utils::Wrap(selectedListId, 0, static_cast<int>(InventoryCount() - 1));
+					abilityId = newAbilityId;
 					found = true;
 					break;
 				}
@@ -483,9 +446,9 @@ namespace AbilitiesManager {
 
 		// Randomise Abilties
 		// Check inventory how many offensive and defensive abilities the player has and randomise based on that
-		std::cout << "[AbilitiesManager] Number of abilities in inventory: " << inventory.size() << std::endl;
+		std::cout << "[AbilitiesManager] Number of abilities in inventory: " << InventoryCount() << std::endl;
 
-		if (inventory.size() >= Config::MAX_INVENTORY_COUNT) {
+		if (InventoryCount() >= Config::MAX_INVENTORY_COUNT) {
 			std::cerr << "[AbilitiesManager] Enough abilities in inventory, randomise stats" << std::endl;
 
 			//// Currently only 3 stat cards so no need randomise, just push all 3 stat cards into the selector
@@ -668,12 +631,12 @@ namespace AbilitiesManager {
 			std::string iconName = "Empty";
 			Color iconColor{ 0.5f, 0.5f, 0.5f };
 
-			if (i < inventoryCount) {
-				Ability* ability = GetAbility(inventoryAbilityIds[i]);
+			if (i < InventoryCount()) {
+				Ability* ability = GetAbility(inventoryIds[i]);
 				iconName = ability->GetName();
 				iconColor = ability->GetType() == AbilityType::OFFENSIVE ? Color(1, 0, 0) : Color(0, 0, 1);
 				// Highlight current ability
-				if (currentAbility == ability && currentInventoryId == i) {
+				if (CurrentAbility().Id() == ability->Id() && currentInventoryId == i) {
 					iconColor = Color(0, 0, 0);
 				}
 				else { 
@@ -722,8 +685,8 @@ namespace AbilitiesManager {
 	}
 
 	void AbilityController::PrintInventory() {
-		std::cout << "==============" + controllerName + " Inventory Count:" + std::to_string(inventoryCount) + "=============\n";
-		for (int id : inventoryAbilityIds) {
+		std::cout << "==============" + controllerName + " Inventory Count:" + std::to_string(InventoryCount()) + "=============\n";
+		for (int id : inventoryIds) {
 			Ability const& ability = *GetAbility(id);
 			std::cout << std::setw(5) << std::left << "Id: " + std::to_string(id) << " Name: " + ability.GetName()
 				+ " Charges: " + std::to_string(ability.AbilityCharges()) << '\n';

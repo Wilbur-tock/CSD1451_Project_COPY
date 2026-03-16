@@ -45,7 +45,7 @@ public:
 	AbilityType			GetType() const { return type; }
 	Tier				GetTier() const { return tier; }
 	AEGfxTexture*		GetTexture() const { return texture; }
-	std::string	GetTypeName() {
+	std::string	GetTypeName() const {
 		switch (type) {
 		case AbilityType::STATISTICS:
 			return "STATISTICS";

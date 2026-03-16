@@ -23,7 +23,7 @@ void Projectile::Draw() {
     GraphicsManager::DrawGameObject(texture, mat, Color{ 0.5f, 0.5f, 0, 1 });
 }
 
-void Projectile::AbilityActivation(Ability const* ability) {
+void Projectile::AbilityActivation(Ability const& ability) {
     if (Mode() == ProjectileMode::IDLE || Mode() == ProjectileMode::ATTACK || isAbilityTriggered) return;
 
     bool leftClick = AEInputCheckTriggered(AEVK_LBUTTON);
@@ -78,7 +78,7 @@ void Projectile::AbilityActivation(Ability const* ability) {
                     Tile& tile = (*MapManager::currentMap)[i][tileX];
                     if (tile.Type() == TileType::TILE_EMPTY) {
                         tile.Type(TileType::TILE_BLOCK_1);
-                        tile.attribute.Health(ability->GetDefense().shieldHP);
+                        tile.attribute.Health(ability.GetDefense().shieldHP);
                     }
                 }
             }

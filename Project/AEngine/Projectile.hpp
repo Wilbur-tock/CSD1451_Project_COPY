@@ -76,7 +76,7 @@ public:
 
 	// Ability effects checker for ability to take effect after projectile has been shot 
 	// Check for inputs to activated PROJECTILE Abilities
-	void AbilityActivation(Ability const* ability);
+	void AbilityActivation(Ability const& ability);
 	void ProjectileMovement(float dt);
 
 	// Simulate the projectile physics of bouncing off the walls, checking if it is grounded

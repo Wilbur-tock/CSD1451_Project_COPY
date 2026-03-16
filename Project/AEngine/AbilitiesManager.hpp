@@ -17,9 +17,12 @@ namespace AbilitiesManager {
 		std::vector<Ability> const& GetProjectilesAbilties() { return allProjectilesAbilties; }
 		std::vector<Ability> const& GetAbilityModifiers() { return abilityModifiers; }
 
-		Ability* CurrentAbility() const { return currentAbility; }
-		int InventoryCount() const { return inventoryCount; }
+		Ability& CurrentAbility() { return allAbilities[currentAbilityVectorId]; }
+
+		int InventoryCount() const { return static_cast<int>(inventoryIds.size()); }
 		int CurrentInventoryId() const { return currentInventoryId; }
+		std::vector<int> const& InventoryIds() const { return inventoryIds; }
+		bool IsInventoryFull() const { return InventoryCount() >= Config::MAX_INVENTORY_COUNT; }
 
 		bool IsSelectingAbility() const { return isSelectingAbility; }
 		void IsSelectingAbility(bool _isSelectingAbility) { isSelectingAbility = _isSelectingAbility; }
@@ -27,8 +30,9 @@ namespace AbilitiesManager {
 		bool IsAbilityTriggered() const { return isAbilityTriggered; }
 		void IsAbilityTriggered(bool isTriggered) { isAbilityTriggered = isTriggered; }
 
-		std::vector<Ability*> const& Inventory() const { return inventory; }
-		bool IsInventoryFull() const { return inventoryCount >= Config::MAX_INVENTORY_COUNT; }
+		// return the projectile Id to change the type of projectile the CANNON is currently using
+		// if the ability type is an offensive which affects the projectile
+		int GetProjectileId() { return CurrentAbility().GetProj().projectileId; }
 
 		// Member functions
 
@@ -61,9 +65,6 @@ namespace AbilitiesManager {
 		Ability* GetAbility(int abilityId);
 		Ability* GetAbility(std::string abilityName);
 		Ability* GetAbilityModifiers(std::string abilityName);
-		// return the projectile Id to change the type of projectile the CANNON is currently using
-		// if the ability type is an offensive which affects the projectile
-		int GetProjectileId();
 
 		// True to toggle through all abilities or 
 		// false to toggle through of all the inventory abilities this controller has
@@ -91,6 +92,8 @@ namespace AbilitiesManager {
 		void PrintAbilityModifiers();
 
 	private:
+		std::string controllerName; // use for debugging
+
 		std::vector<Ability> offensiveAbilities; //vector for offensive abils
 		std::vector<Ability> statsAbilities; //vector for stats abils
 		std::vector<Ability> defensiveAbilities; //vector for defensive abils
@@ -99,19 +102,15 @@ namespace AbilitiesManager {
 		std::vector<Ability> allProjectilesAbilties; // vector containing all the ability that uses it own projectile mode
 		std::vector<Ability> abilityModifiers;// vector containing all the active abilites that last for more than 1 turn (HP boost, attack boost, etc)
 
-		std::string controllerName; // use for debugging
-		Ability* currentAbility = nullptr;
-
-		std::vector<Ability*> inventory; // vector containing all the type of abilities this controller has in its inventory
+		int currentAbilityVectorId = 0; // id of the current ability stored in the allAbilities vector
 		std::vector<int> inventoryTypeCount; // To keep track of how many of each ability type there is in the inventory
-
 		size_t totalAbilityCount = 0;
-		int inventoryCount = 0; // total number of abilites the has stored in the inventory
 		int currentInventoryId = 0;
-		// ids of all the ability that store in the inventory 
-		// for example inventory has 5 max space [0][0][1][2][3] < numbers representing the index of the ability 
-		// has 2 charges of abilityId in inventory while the rest 1 charges only
-		std::vector<int> inventoryAbilityIds; 
+		// ids of all the abilityId that is stored in the inventory 
+		// for example inventory has 5 max space [0][0][1][2][3] < numbers representing the abilityId
+		// has 2 charges of abilityId 2 in inventory while the rest 1 charges only
+		std::vector<int> inventoryIds; 
+
 		bool isSelectingAbility = false;
 		bool isAbilityTriggered = false;
 		bool isPlayerControlled = true;
