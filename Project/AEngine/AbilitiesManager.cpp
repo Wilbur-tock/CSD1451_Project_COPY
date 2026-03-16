@@ -175,9 +175,12 @@ namespace AbilitiesManager {
 	void AbilityController::LoadStartingAbilities() {
 		if (isPlayerControlled) { // Load player starting Abilities
 			AddAbility(0);
-			AddAbility(AbilityRandomisator(offensiveAbilities).Id());
-			AddAbility(AbilityRandomisator(defensiveAbilities).Id());
-			AddAbility(AbilityRandomisator(defensiveAbilities).Id());
+			// Just randomise the max inventory count - 1 (because of the default ability)
+			int randomCount = Config::MAX_INVENTORY_COUNT - 1;
+			for (int i = 0; i < randomCount; ++i) {
+				OffensiveOrDefensive() == AbilityType::OFFENSIVE ? AddAbility(AbilityRandomisator(offensiveAbilities).Id()) 
+					: AddAbility(AbilityRandomisator(defensiveAbilities).Id());
+			}
 		}
 
 		//std::cout << "[AbilitiesManager] List of starting abilities:" << '\n';
@@ -547,7 +550,7 @@ namespace AbilitiesManager {
 	Card abilitySelectorCards[selectorCount];
 
 	void AbilityController::InitializeAllAbilityUI() {
-		inventoryBackground = UIManager::Panel{ {600.0f, 100.0f}, Color(0.647f, 0.165f, 0.165f, 1.0f), Utils::AnchorMode::BOTTOM_CENTER };
+		inventoryBackground = UIManager::Panel{ {750.0f, 100.0f}, Color(0.647f, 0.165f, 0.165f, 1.0f), Utils::AnchorMode::BOTTOM_CENTER };
 
 		Transform inventoryBGTrans = inventoryBackground.GetTransform();
 		float totalWidth = inventoryBGTrans.size.x;
