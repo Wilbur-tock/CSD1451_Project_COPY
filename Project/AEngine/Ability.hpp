@@ -89,6 +89,10 @@ public:
 		--stats.turns;
 	}
 
+	void SetShield(int newValue) {
+		stats.shield = newValue;
+	}
+
 private:
 	int id; // To determind what type of ability it is (Bomb projectile, stats ability, etc)
 	int abilityCharges = 0; // count of how many of these ability the player/enemy has

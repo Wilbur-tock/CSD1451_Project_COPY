@@ -3,13 +3,14 @@
 
 #include "Attributes.hpp"
 #include "GameObject.hpp"
+#include "AbilitiesManager.hpp"
 
 class TowerShield : public GameObject {
 public:
 	Attributes attribute;
 
 	TowerShield() = default;
-	TowerShield(AEVec2 _pos);
+	TowerShield(AEVec2 _pos, AbilitiesManager::AbilityController* controller);
 
 	Transform const& GetTransform() const { return transform; }
 	bool IsShieldOn() const { return isShieldOn; }
@@ -23,6 +24,7 @@ public:
 private:
 	bool isShieldOn = false;
 	int lifespan = 0; // number of turns the shield stays alive before disappearing
+	AbilitiesManager::AbilityController* abilityController = nullptr;
 };
 
 #endif // !TOWERSHIELD_HPP

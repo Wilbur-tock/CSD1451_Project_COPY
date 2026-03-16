@@ -133,5 +133,20 @@
             "Charges": 5,
             "unlimited_charges": false
         }
+    },
+
+    {
+        "Name": "Cluster Shot",
+        "Type": 2,
+        "Tier": 1,
+        "Texture": "",
+        "Projectile_Stats": {
+            "ProjectileID": 8,
+            "Damage_Amp": 1.0,
+            "Base_Damage": 10,
+            "Radius": 3,
+            "Charges": 1,
+            "unlimited_charges": false
+        }
     }
 ]

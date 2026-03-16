@@ -12,8 +12,10 @@
 #include "AudioManager.hpp"
 #include "EffectsManager.hpp"
 
+AEVec2 defaultSize{ 10.0f , 10.0f };
+
 Projectile::Projectile(AEGfxTexture* _texture, ProjectileMode _mode, AEVec2 _pos, int _attackCharges)
-    : GameObject(_pos, defaultSize, _texture), timer{ 0.0f }, mode(_mode), attackCharges{_attackCharges} {
+    : GameObject(_pos, defaultSize, _texture), mode(_mode), attackCharges{_attackCharges} {
 }
 
 void Projectile::Draw() {
@@ -39,11 +41,12 @@ void Projectile::AbilityActivation(Ability const* ability) {
             if (!Utils::IsTileIndexOutOfBounds(tileX, tileY)) {
                 attribute.DamageRadius(radius * 2);
                 DamageTile(tileX, tileY);
-                Destroy();
+                InstantDestroy();
             }
 
             // Reset stats back to default
             attribute.DamageRadius(radius);
+            PlayModeEffect();
             std::cout << "BOMB mode triggered\n";
         }
         break;
@@ -85,6 +88,14 @@ void Projectile::AbilityActivation(Ability const* ability) {
     case ProjectileMode::PIERCING:
         canBypassBlocks = isAbilityTriggered = true;
         break;
+    case ProjectileMode::CLUSTER_SHOT:
+        // Has not hit anything yet can use ability
+        if (!isCollisionTriggered && leftClick) {
+            isAbilityTriggered = true;
+
+
+        }
+        break;
     }
 }
 
@@ -107,18 +118,34 @@ void Projectile::SetProjectileStats(std::string _projectileName, ProjectileModul
     AttackCharges(data.charges);
 }
 
-void Projectile::Initialize(Transform cannonTrans, int _activeId, float cannonAngle, float shotPower) {
+void Projectile::Initialize(Transform const& cannonTransform, int _activeId, float cannonAngle, float shotPower) {
+    // Set projectile spawn pos at the front of the cannon muzzle
+    // using cos and sin to calculate the direction of where the cannon is pointing at
+    Transform const& trans = {
+        cannonTransform.pos.x + (cos(cannonAngle) * cannonTransform.size.x),
+        cannonTransform.pos.y + (sin(cannonAngle) * cannonTransform.size.y),
+    };
+
+    // Convert power and angle to 2d vector velocity
+    AEVec2 const& _velocity = {
+        cos(cannonAngle) * shotPower,
+        sin(cannonAngle) * shotPower,
+    };
+
+    Initialize(trans, _activeId, _velocity);
+}
+
+void Projectile::Initialize(Transform const& _transform, int _activeId, AEVec2 const& _velocity) {
     isActive = true;
     id = _activeId;
 
-    // Set projectile spawn pos at the front of the cannon muzzle
-    // using cos and sin to calculate the direction of where the cannon is pointing at
-    transform.pos.x = cannonTrans.pos.x + (cos(cannonAngle) * cannonTrans.size.x);
-    transform.pos.y = cannonTrans.pos.y + (sin(cannonAngle) * cannonTrans.size.y);
+    // Set spawn position
+    transform.pos.x = _transform.pos.x;
+    transform.pos.y = _transform.pos.y;
 
-    // Convert power and angle to 2d vector
-    velocity.x = cos(cannonAngle) * shotPower;
-    velocity.y = sin(cannonAngle) * shotPower;
+    // Set velocity
+    velocity.x = _velocity.x;
+    velocity.y = _velocity.y;
     timer = Config::PROJECTILE_LIFESPAN;
 }
 
@@ -139,6 +166,7 @@ void Projectile::Update(bool isPlayerShot, float dt) {
     if (hasHitShield) {
         if (Mode() == ProjectileMode::SHIELD_BUSTER) {
             shield.TakeDamage(0, true);
+            PlayModeEffect();
         }
         else {
             shield.TakeDamage(attribute.Damage());
@@ -165,7 +193,7 @@ void Projectile::Update(bool isPlayerShot, float dt) {
 
             // Checking collision of the projectile with the tile blocks that is collidable
             if (hasTileCollision) {
-                if (!canBypassBlocks && isCollisionTriggered) {
+                if (!canBypassBlocks && !isCollisionTriggered) {
                     FirstTimeCollision();
                 }
 
@@ -214,8 +242,8 @@ void Projectile::ConstantCollision(Tile const& tile) {
         PhysicsManager::ResolveVerticalCollision(transform, velocity, isGrounded, tile.transform);
     }
 
-    if (!hasHitSomething && tile.IsDestructible()) {
-        hasHitSomething = true;
+    if (!isHitSomething && tile.IsDestructible()) {
+        isHitSomething = true;
     }
 }
 
@@ -230,15 +258,7 @@ void Projectile::FirstTimeCollision() {
     AudioManager::PlaySFX(AudioManager::SFX::Impact);
 
     // Set effects
-    using EffectsManager::Effects;
-    Effects projectileEffect = Effects::DEFAULT;
-    switch (Mode()) {
-    case ProjectileMode::NUKE:
-        projectileEffect = Effects::NUKE;
-        break;
-    }
-
-    EffectsManager::effectsController.PlayProjectiileAbiltiesEffect(projectileEffect, transform.pos);
+    PlayModeEffect();
 }
 
 void Projectile::ConsumeAttackCharge() {
@@ -278,6 +298,10 @@ bool Projectile::Destroy() {
 void Projectile::InstantDestroy() {
     isActive = isCollisionTriggered = toBeDestroyed = false;
     timer = 0.0f;
+}
+
+void Projectile::PlayModeEffect() {
+    EffectsManager::effectsController.PlayProjectiileAbiltiesEffect(static_cast<int>(Mode()), transform.pos);
 }
 
 void Projectile::DamageTile(int tileX, int tileY) {

@@ -26,6 +26,9 @@ namespace AbilitiesManager {
 		bool IsSelectingAbility() const { return isSelectingAbility; }
 		void IsSelectingAbility(bool _isSelectingAbility) { isSelectingAbility = _isSelectingAbility; }
 
+		bool IsAbilityTriggered() const { return isAbilityTriggered; }
+		void IsAbilityTriggered(bool isTriggered) { isAbilityTriggered = isTriggered; }
+
 		std::vector<Ability*> const& Inventory() const { return inventory; }
 		bool IsInventoryFull() const { return inventoryCount >= Config::MAX_INVENTORY_COUNT; }
 
@@ -33,7 +36,10 @@ namespace AbilitiesManager {
 
 		// Activate ability effects that will be activated once UseAbility() is called
 		void AbilityEffects();
+		void AddModifier(Ability const& ability);
+		// Remove 1 turn attribute from each ability modifier
 		void UpdateModifiers();
+		void CheckModifiers();
 		// Change the type of ability this controller is current using
 		void ChangeAbility(int abilityId);
 		// Use the currently select ability if it has unlimited or any charges remaining
@@ -42,15 +48,19 @@ namespace AbilitiesManager {
 		// Add ability charges from the based on selection
 		void AddAbility(int abilityId, int chargesToAdd = 1);
 		void UpdateInventory(Ability& ability, bool toAddToVector);
-		Ability* FindAbility(int abilityId);
+		// Find ability in the AllAbilties vector
+		Ability* GetAbility(int abilityId);
+		Ability* GetAbility(std::string abilityName);
+		Ability* GetAbilityModifiers(std::string abilityName);
 		// return the projectile Id to change the type of projectile the CANNON is currently using
 		// if the ability type is an offensive which affects the projectile
 		int GetProjectileId();
 
 		// Reset to default ability if current ability if an offensive and charges remaining is 0 to 
 		// ensure that an ability with 0 charges cannot be used again
-		void ResetAbility() {
+		void ResetForNewTurn() {
 			ChangeAbility(0);
+			isAbilityTriggered = false;
 		}
 
 		// True to toggle through all abilities or 
@@ -100,7 +110,7 @@ namespace AbilitiesManager {
 		// has 2 charges of abilityId in inventory while the rest 1 charges only
 		std::vector<int> inventoryAbilityIds; 
 		bool isSelectingAbility = false;
-
+		bool isAbilityTriggered = false;
 		bool isPlayerControlled = true;
 		bool hasEnemySelectedAbility = false; // has enemy selected their ability
 

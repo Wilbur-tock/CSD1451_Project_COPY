@@ -346,8 +346,11 @@ void Level::Initalize() {
 	AbilitiesManager::playerAbilityController.AbilitySelectionRandomisator();
 
 	// Initialize player and enemy shield 
-	playerShield = TowerShield{ MapManager::FindTile(playerCenterId)->transform.pos };
-	enemyShield = TowerShield{ MapManager::FindTile(enemyCenterId)->transform.pos };
+	playerShield = TowerShield{ MapManager::FindTile(playerCenterId)->transform.pos, &playerController };
+	enemyShield = TowerShield{ MapManager::FindTile(enemyCenterId)->transform.pos, &enemyController };
+
+	enemyShield.SetShieldOn(5, 5);
+	enemyController.AddModifier(*(enemyController.GetAbility("Tower Shield")));
 
 	InitializeUI();
 
@@ -542,11 +545,15 @@ void Level::SetTurn(bool _isPlayerTurn) {
 void Level::NewTurn() {
 	++turnCount; // always increment once after enemy has shot
 
-	playerCannon.AbilityController()->UpdateModifiers();
-	enemyCannon.AbilityController()->UpdateModifiers();
+	AbilitiesManager::AbilityController *playerController = playerCannon.AbilityController();
+	AbilitiesManager::AbilityController *enemyController = enemyCannon.AbilityController();
 
 	playerShield.UpdateLifespan();
 	enemyShield.UpdateLifespan();
+
+	// Update turn life span of all modifiers and check its turn lifespan and hp is not zero
+	playerController->UpdateModifiers();
+	enemyController->UpdateModifiers();
 }
 
 void Level::UpdateLevelStatus() {

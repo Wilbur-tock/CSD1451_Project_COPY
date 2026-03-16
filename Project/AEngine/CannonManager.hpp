@@ -18,7 +18,7 @@ namespace CannonManager {
 
 		// return true if projectile has been shoot out of the cannon and be destroyed
 		bool AllProjectilesDestroyed() const { return allProjectileDestroyed; }
-		AbilitiesManager::AbilityController* const& AbilityController() { return abilityController; }
+		AbilitiesManager::AbilityController* AbilityController() { return abilityController; }
 		// Member Functions
 
 		void Initialize(AbilitiesManager::AbilityController* controller);
@@ -64,7 +64,8 @@ namespace CannonManager {
 		// Remove inactive projectiles from active projectiles vector
 		void RemoveInactiveProjectiles();
 		// Ability effects checker for ability to take effect before projectile has been shot 
-		// Check for inputs to activated PROJECTILE Abilities
+		// Check for inputs to activated PROJECTILE Abilities after projectile has been shot
+		// Ability effects that triggered on cannon
 		void AbilityActivation(Projectile& projectile);
 
 		void SetCamera(bool isFollowingProjectile);

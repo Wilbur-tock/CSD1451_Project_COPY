@@ -42,72 +42,72 @@ namespace EffectsManager {
         std::cout << "[EffectsManager] PlayTileBreak at (" << position.x << ", " << position.y << ")\n";
     }
 
-    void EffectsController::PlayProjectiileAbiltiesEffect(Effects effect, AEVec2 spawnPos) {
+    void EffectsController::PlayProjectiileAbiltiesEffect(int projectileMode, AEVec2 spawnPos) {
         // Default variables for an EXPLOSION effect
         float originOffset = 0;
 
-        float speedMin{ 80.0f };
-        float speedMax{ 250.f };
+        AEVec2 speed{ 80.0f , 250.0f };
+        AEVec2 directional{ 0.0f, PI };
+        AEVec2 rotation{ -PI, PI };
 
-        float directionMin{ 0.f };
-        float directionMax{ PI };       
+        std::pair<Color, Color> color = { { 1.f, 0.5f, 0.f, 1.f }, { 0.8f, 0.1f, 0.f, 0.f } };
+        AEVec2 scale{ 20.0f, 0.0f };
+        AEVec2 lifespan{ 0.5f, 1.5f };
 
-        float rotationSpeedMin{ -PI };
-        float rotationSpeedMax{ PI };
-
-        Color colorStart{ 1.f, 0.5f, 0.f, 1.f };
-        Color colorEnd{ 0.8f, 0.1f, 0.f, 0.f };
-
-        float scaleStart{ 20.0f };
-        float scaleEnd{ 0.0f };
-
-        float lifetimeMin{ 0.5f };
-        float lifetimeMax{ 1.5f };
-
-        int   count{ 10 };
+        int count{ 10 };
         ParticleShape shape{ ParticleShape::SQUARE };
 
-        switch (effect) {
-        case Effects::DEFAULT:
+        switch (projectileMode) {
+        case 1: // default
             originOffset = 10.0f;
-            std::cout << "[EffectsManager] Play Explosion at (" << spawnPos.x << ", " << spawnPos.y << ")\n";
             break;
-        case Effects::NUKE:
-            colorStart = { 1.0f, 0, 0, 1.0f };
-
-            speedMin = 0.0f;
-            speedMax = 0.0f;
-
-            scaleStart = 32.0f;
-            scaleEnd = 32.0f * 15.0f;
-
-            lifetimeMin = 3.0f;
-            lifetimeMax = 5.0f;
+        case 2: // bomb
+            speed = { 200.0f, 500.0f };
+            directional = { 0.0f, 2.0f * PI };
+            rotation = { -2.0f * PI, 2.0f * PI };
+            color.first = { 1.0f, 0.65f, 0.0f, 1.0f };
+            color.second = { 0.4f, 0.5f, 0.0f, 0.0f };
+            scale = { 16.0f, 24.0f };
+            count = 40;
+            shape = ParticleShape::CIRCLE;
+            break;
+        case 3: // nuke
+            speed = { 500.0f, 1000.0f };
+            color.first = { 1.0f, 0, 0, 1.0f };
+            speed = { 0,0 };
+            scale = { 32.0f, 32.0f * 15.0f };
+            lifespan = { 3.0f, 5.0f };
             count = 1;
             shape = ParticleShape::CIRCLE;
-            std::cout << "[EffectsManager] Play Nuke Explosion at (" << spawnPos.x << ", " << spawnPos.y << ")\n";
             break;
+        case 7: // Shield_buster
+            originOffset = 20.0f;
+            speed = { 400.0f, 800.0f };
+            directional = { 0.0f, 2.0f * PI };
+            rotation = { -4.0f * PI, 4.0f * PI };
+            lifespan = { 0.15f, 0.4f };
+            count = 50;
         }
 
         EmitParams particle = EmitParams{
             spawnPos,
             originOffset,
 
-            speedMin,
-            speedMax,
-            directionMin,
-            directionMax,
+            speed.x,
+            speed.y,
+            directional.x,
+            directional.y,
 
-            rotationSpeedMin,
-            rotationSpeedMax,
+            rotation.x,
+            rotation.y,
 
-            colorStart,
-            colorEnd,
-            scaleStart,
-            scaleEnd,
-
-            lifetimeMin,
-            lifetimeMax,
+            color.first,
+            color.second,
+            scale.x,
+            scale.y,
+            
+            lifespan.x,
+            lifespan.y,
 
             count,
             shape

@@ -101,7 +101,6 @@ namespace AbilitiesManager {
 			std::string textureFilePath = "Assets/Abilities/" + textureName + ".png";
 			AEGfxTexture* texture = AssetsManager::squareTexture;
 			if (textureName != "") {
-				std::cout << textureFilePath << '\n';
 				texture = AssetsManager::GetTexture(textureFilePath.c_str());
 			}
 
@@ -175,7 +174,7 @@ namespace AbilitiesManager {
 	// Load the starting abilities for the player and AI
 	void AbilityController::LoadStartingAbilities() {
 		if (isPlayerControlled) { // Load player starting Abilities
-			AddAbility(AbilityRandomisator(offensiveAbilities).Id());
+			AddAbility(0);
 			AddAbility(AbilityRandomisator(offensiveAbilities).Id());
 			AddAbility(AbilityRandomisator(defensiveAbilities).Id());
 			AddAbility(AbilityRandomisator(defensiveAbilities).Id());
@@ -235,30 +234,42 @@ namespace AbilitiesManager {
 			//std::cout << "[AbilitiesManager] Activate Tower Shield ability!" << '\n';
 		}
 
-		if (currentAbility->GetStats().turns > 0) {
+		AddModifier(*currentAbility);
+
+		PrintAbilityModifiers();
+	}
+
+	void AbilityController::AddModifier(Ability const& ability) {
+		if (ability.GetStats().turns > 0) {
 			// Remove the exisiting modifier if it the same as the current ability
 			abilityModifiers.erase(
 				std::remove_if(abilityModifiers.begin(), abilityModifiers.end(),
 					[this](Ability const& ability) {
-						return ability.Id() == currentAbility->Id();
+						return ability.Id() == ability.Id();
 					}),
 				abilityModifiers.end()
 			);
 
 			// push_back a copy of the currentAbility if the effects last more than 1 turn
-			abilityModifiers.push_back(*currentAbility);
-		}
+			abilityModifiers.push_back(ability);
 
-		PrintAbilityModifiers();
+			std::cout << "Added modifier: " << ability.GetName() << '\n';
+		}
 	}
 
 	void AbilityController::UpdateModifiers() {
-		// Remove modifier from vecot containing all the active ability modifiers
+		for (Ability& ability : abilityModifiers) {
+			ability.UpdateTurnLifespan();
+		}
+		CheckModifiers();
+	}
+
+	void AbilityController::CheckModifiers() {
+		// Remove modifier from vector containing all the active ability modifiers if either turns attribute or shield attribute reaches 0
 		abilityModifiers.erase(
 			std::remove_if(abilityModifiers.begin(), abilityModifiers.end(),
 				[](Ability& ability) {
-					ability.UpdateTurnLifespan();
-					return ability.GetStats().turns <= 0;
+					return ability.GetStats().turns <= 0 || ability.GetStats().shield <= 0;
 				}),
 			abilityModifiers.end()
 		);
@@ -266,7 +277,7 @@ namespace AbilitiesManager {
 
 	// Change the current ability based on the ability ID
 	void AbilityController::ChangeAbility(int abilityId) {
-		Ability* found = FindAbility(abilityId);
+		Ability* found = GetAbility(abilityId);
 		if (!found) {
 			std::cerr << "[AbilitiesManager] Change Ability failed. abilityId: " << abilityId << '\n';
 			return;
@@ -297,7 +308,7 @@ namespace AbilitiesManager {
 		--inventoryTypeCount[id]; 
 		--inventoryCount;
 		// Reset to default if trying to use an ability without any charges remaining
-		ResetAbility();
+		ResetForNewTurn();
 
 		std::cout << "[AbilitiesManager] Ability used: " + currentAbility->GetName()
 			+ " Charges Remaining: " + std::to_string(currentAbility->AbilityCharges()) << '\n';
@@ -311,7 +322,7 @@ namespace AbilitiesManager {
 			std::cout << "[AbilitesManager] Inventory is full can't add any new ability!" << '\n';
 			return; 
 		}
-		Ability* found = FindAbility(abilityId);
+		Ability* found = GetAbility(abilityId);
 		if (!found) {
 			std::cerr << "[AbilitiesManager] Can't find to add Ability Id: " + std::to_string(abilityId) << '\n';
 			return;
@@ -363,7 +374,7 @@ namespace AbilitiesManager {
 	}
 
 	// Helper function to find and return the ability pointer based on the ability ID
-	Ability* AbilityController::FindAbility(int abilityId) {
+	Ability* AbilityController::GetAbility(int abilityId) {
 		for (Ability& ab : allAbilities) {
 			if (ab.Id() == abilityId) {
 				return &ab;
@@ -371,6 +382,28 @@ namespace AbilitiesManager {
 		}
 
 		std::cerr << "[AbilitiesManager] Can't find " + std::to_string(abilityId) + " in the abilities list\n";
+		return nullptr;
+	}
+
+	Ability* AbilityController::GetAbility(std::string abilityName) {
+		for (Ability& ab : allAbilities) {
+			if (ab.GetName() == abilityName) {
+				return &ab;
+			}
+		}
+
+		std::cerr << "[AbilitiesManager] Can't find " + abilityName + " in the ability modifier vector\n";
+		return nullptr;
+	}
+
+	Ability* AbilityController::GetAbilityModifiers(std::string abilityName) {
+		for (Ability& ab : abilityModifiers) {
+			if (ab.GetName() == abilityName) {
+				return &ab;
+			}
+		}
+
+		std::cerr << "[AbilitiesManager] Can't find " + abilityName + " in the ability modifier vector\n";
 		return nullptr;
 	}
 
@@ -406,7 +439,10 @@ namespace AbilitiesManager {
 	}
 
 	const Ability AbilityController::AbilityRandomisator(std::vector<Ability> const& abilities) {
-		return abilities[Utils::RandomValue(0, static_cast<int>(abilities.size() - 1))];
+		int minId = 0;
+		if (abilities[0].Id() == 0) minId = 1; // checking if the first ability in abilities vector contains the default ability remove it
+		int randomId = Utils::RandomValue(minId, static_cast<int>(abilities.size() - 1));
+		return abilities[randomId];
 	}
 
 	// Randomly select abilities for the ability selector UI
@@ -604,7 +640,7 @@ namespace AbilitiesManager {
 			Color iconColor{ 0.5f, 0.5f, 0.5f };
 
 			if (i < inventoryCount) {
-				Ability* ability = FindAbility(inventoryAbilityIds[i]);
+				Ability* ability = GetAbility(inventoryAbilityIds[i]);
 				iconName = ability->GetName();
 				iconColor = ability->GetType() == AbilityType::OFFENSIVE ? Color(1, 0, 0) : Color(0, 0, 1);
 				// Highlight current ability
@@ -655,7 +691,7 @@ namespace AbilitiesManager {
 	void AbilityController::PrintInventory() {
 		std::cout << "==============" + controllerName + " Inventory Count:" + std::to_string(inventoryCount) + "=============\n";
 		for (int id : inventoryAbilityIds) {
-			std::cout << std::setw(15) << std::left << "Id: " << id << " Name: " << FindAbility(id)->GetName() << '\n';
+			std::cout << std::setw(15) << std::left << "Id: " << id << " Name: " << GetAbility(id)->GetName() << '\n';
 		}
 	}
 

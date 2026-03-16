@@ -20,11 +20,11 @@ enum class ProjectileMode {
 	WALL			= 6,
 	SHIELD_BUSTER	= 7,
 	PIERCING		= 8,
+	CLUSTER_SHOT	= 9,
 };
 
 class Projectile : public GameObject {
 public:
-	bool isGrounded = false;
 	Attributes attribute;
 
 	// Ctor
@@ -40,33 +40,37 @@ public:
 	ProjectileMode Mode() const { return mode; }
 	void Mode(ProjectileMode newMode) { mode = newMode; }
 
-	int ProjectileId() const { return projectileId; }
-
-	std::string ProjectileName() const { return projectileName; }
-
-	inline std::string ModeName() const {
+	std::string ModeName() const {
 		switch (mode) {
-		case ProjectileMode::IDLE:				return "IDLE"; break;
-		case ProjectileMode::ATTACK:			return "DAMAGE"; break;
-		case ProjectileMode::BOMB:				return "BOMB"; break;
-		case ProjectileMode::NUKE:				return "NUKE"; break;
-		case ProjectileMode::PENTA_BURST:		return "PENTA_BURST"; break;
-		case ProjectileMode::AUTO_AIM:			return "AUTO_AIM"; break;
-		case ProjectileMode::WALL:				return "WALL"; break;
-		case ProjectileMode::SHIELD_BUSTER:		return "SHIELD_BUSTER"; break;
-		case ProjectileMode::PIERCING:			return "PIERCING"; break;
+		case ProjectileMode::IDLE:				return "IDLE";
+		case ProjectileMode::ATTACK:			return "DAMAGE";
+		case ProjectileMode::BOMB:				return "BOMB";
+		case ProjectileMode::NUKE:				return "NUKE";
+		case ProjectileMode::PENTA_BURST:		return "PENTA_BURST";
+		case ProjectileMode::AUTO_AIM:			return "AUTO_AIM";;
+		case ProjectileMode::WALL:				return "WALL";
+		case ProjectileMode::SHIELD_BUSTER:		return "SHIELD_BUSTER";
+		case ProjectileMode::PIERCING:			return "PIERCING";
+		case ProjectileMode::CLUSTER_SHOT:		return "CLUSTER_SHOT";
 		default:								return "YOU NEED TO ADD A PROJECTILE MODE NAME";
 		}
 	}
 
+	int ProjectileId() const { return projectileId; }
+
+	std::string ProjectileName() const { return projectileName; }
+
 	bool IsActive() const { return isActive; }
-	bool HasHitSomething() const { return hasHitSomething; }
+	bool IsHittingSomething() const { return isHitSomething; }
+	bool IsCollisionTriggered() const { return isCollisionTriggered; }
 
 	// Member functions
 
 	void SetProjectileStats(std::string _projectileName, ProjectileModule const& data);
 
-	void Initialize(Transform cannonTrans, int _activeId, float cannonAngle, float shotPower);
+	// Calculate the spawn position and starting velocity using angle and power
+	void Initialize(Transform const& cannonTransform, int _activeId, float cannonAngle, float shotPower);
+	void Initialize(Transform const& _transform, int _activeId, AEVec2 const& _velocity);
 	void Update(bool isPlayerShot, float dt);
 	void Draw();
 
@@ -95,20 +99,22 @@ private:
 	// Instantly destroy the projectile after the timer runs out or
 	// it has hit a shield or some blocks that instant destroy projectiles
 	void InstantDestroy();
+	void PlayModeEffect();
 
 private:
-	static constexpr AEVec2 defaultSize{ 10,10 };
+	bool isGrounded = false;
 	int projectileId = 0, attackCharges = 1;
 	std::string projectileName;
 	ProjectileMode mode = ProjectileMode::ATTACK;
+	std::string modeName;
 
 	float timer = 0.0f; // lifespan timer
 	bool isActive = false; // is projectile still alive or dead
 	bool toBeDestroyed = false;
-	bool isCollisionTriggered = false; // There is a collision triggered between the projectile and block
+	bool isCollisionTriggered = false; // There is a collision triggered between the projectile and block for the first time
 	bool isAbilityTriggered = false;
 
-	bool hasHitSomething = false; // has hit any things expect for the ground / undestructible blocks
+	bool isHitSomething = false; // has hit any things expect for the ground / undestructible blocks
 	bool hasHitShield = false;
 	bool canBypassBlocks = false;
 };
