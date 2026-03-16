@@ -130,7 +130,7 @@ namespace CannonManager {
         SetCamera(false);
 
         // ALWAYS Reset cannon ability back to default after at the start off a a new turn
-        abilityController->ResetAbility();
+        abilityController->ResetForNewTurn();
 
         // Reselect AI ability
         if (!isPlayerControlled && abilityController) {
@@ -329,8 +329,9 @@ namespace CannonManager {
             float subDt = dt / SUB_STEPS;
 
             for (int step = 0; step < SUB_STEPS; ++step) {
-                projectile.AbilityActivation(abilityController->CurrentAbility());
                 projectile.Update(isPlayerControlled, subDt);
+                projectile.AbilityActivation(abilityController->CurrentAbility());
+                AbilityActivation(projectile);
             }
 
             // Check if projectile need to be destroy and destroy after it lifespan
@@ -346,7 +347,7 @@ namespace CannonManager {
         if (activeProjectiles.empty()) return;
         for (int i = static_cast<int>(activeProjectiles.size() - 1); i >= 0; --i) {
             if (!activeProjectiles[i].IsActive()) {
-                activeProjectiles[i].HasHitSomething() ?
+                activeProjectiles[i].IsHittingSomething() ?
                     isPlayerControlled ? ++GameTrackingManager::data.playerShotsHit : ++GameTrackingManager::data.enemyShotsHit :
                     isPlayerControlled ? ++GameTrackingManager::data.playerShotsMiss : ++GameTrackingManager::data.enemyShotsMiss;
 
@@ -358,7 +359,14 @@ namespace CannonManager {
     }
 
     void Cannon::AbilityActivation(Projectile& projectile) {
+        if (abilityController->IsAbilityTriggered()) return;
+
+        bool leftClick = AEInputCheckTriggered(AEVK_LBUTTON);
+
         switch (projectile.Mode()) {
+        case ProjectileMode::ATTACK:
+            // Assign stats boost here
+            break;
         case ProjectileMode::AUTO_AIM:
             // Find new target if target is not alive
             if (!IsTargetAlive()) {
@@ -367,6 +375,26 @@ namespace CannonManager {
 
             // Calculate perfect shot angle and power
             PhysicsManager::PerfectShotCalculation(transform, target->transform, cannonAngle, shotPower);
+            abilityController->IsAbilityTriggered(true);
+            break;
+        case ProjectileMode::CLUSTER_SHOT:
+            if (!projectile.IsCollisionTriggered() && leftClick) {
+                int count = 2;
+                for (int i = 0; i < count; ++i) {
+                    // Initialize and spawn a new projectile from current position
+                    Projectile newProjectile = projectiles[selectedProjectileId];
+                    float reducePercentage = i == 0 ? 0.90f : 1.10f;
+
+                    newProjectile.Initialize(activeProjectiles.back().transform, static_cast<int>(activeProjectiles.size()),
+                        { projectile.velocity.x * reducePercentage, projectile.velocity.y * reducePercentage });
+
+                    // Add the these projectile to the active projectile list
+                    activeProjectiles.push_back(newProjectile);
+                    activeProjectiles.back().id = static_cast<int>(activeProjectiles.size() - 1);
+                }
+
+                abilityController->IsAbilityTriggered(true);
+            }
             break;
         }
     }
@@ -470,6 +498,12 @@ namespace CannonManager {
 
         for (Ability* const& ability : abilityController->Inventory()) {
             debugStr += "\nAbility: " + ability->GetName() + " Charges: " + std::to_string(ability->AbilityCharges());
+        }
+
+        debugStr += "\n\nAbility Modifiers:";
+
+        for (Ability const& ability : abilityController->GetAbilityModifiers()) {
+            debugStr += "\nAbility: " + ability.GetName() + " Turns: " + std::to_string(ability.GetStats().turns);
         }
 
         debugStr += "\n\nSelected Ability:\nId:" + std::to_string(selectedAbility->Id())
