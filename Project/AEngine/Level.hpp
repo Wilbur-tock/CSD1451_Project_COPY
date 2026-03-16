@@ -8,17 +8,21 @@
 #include "Character.hpp"
 #include "TowerShield.hpp"
 
-enum class LevelMode {
-	EASY,
-	MEDIUM,
-	HARD
-};
+enum class LevelDifficulty { EASY, MEDIUM, HARD };
 
 enum class LevelStatus {
 	PLAYING,
 	PAUSED,
 	PLAYER_WON,
 	ENEMY_WON,
+};
+
+struct TerritoryTiles {
+	TileIndex centerId{ 0,0 }; // center tile index of where the player/enemy character object is located at
+	TileIndex minId{ 0,0 }; // min tile index of where the player/enemy character object is located at
+	TileIndex maxId{ 0,0 }; // max tile index of where the player/enemy character object is located at
+	std::vector<Tile> originalTiles; // list of tiles objects that contains destructible blocks that belongs to the player/enemy
+	int territoryTileRadius = 15;
 };
 
 // Class that contains all the level information 
@@ -52,11 +56,14 @@ public:
 	}
 
 	void SetHoveringOverUI(bool isHovering) { isHoveringUI = isHovering; }
+	void SetExtraTurn() { hasExtraShot = true; }
+	void SetSkipOpponentTurn() { skipOpponentTurn = true; }
 
 	TowerShield& GetTowerShield(bool isPlayer) { return isPlayer ? playerShield : enemyShield; }
-	//bool IsPlayerShieldOn() const { return playerShieldOn; }
-	//bool IsEnemyShieldOn() const { return enemyShieldOn; }
-	//void SetShieldOn(bool isPlayer, int shield, int turnLifespan);
+
+	// build or destroy all the original tiles belongs to the territory
+	void ToggleTerritoryTiles(bool isPlayer, bool isBuilding);
+
 private:
 	void InitializeUI();
 	void DrawUI();
@@ -68,13 +75,14 @@ private:
 
 	// Toggle turns between player and enemy once they have shot and a timer has been set and reduced to 0
 	void UpdateTurn();
-	void SetTurn(bool _isPlayerTurn);
-	void NewTurn();
+	void SetNewTurn(bool _isPlayerTurn);
+	void UpdateNewRound();
 
 	void UpdateLevelStatus();
 	void DrawResultsUI();
 
-	void SetTerritoryTiles(TileIndex const& newTileId, TileIndex& center, TileIndex& min, TileIndex& max);
+	void SetTerritoryIndex(TileIndex const& newTileId, TileIndex& center, TileIndex& min, TileIndex& max);
+	void SetOriginalTerritoryTiles(TerritoryTiles& territoryTiles);
 
 	void DebugCommands();
 	void DebugInfo();
@@ -83,29 +91,21 @@ private:
 	int levelId = 0;
 	std::string levelName; // Name of the level in the format (Level [INDEX])
 	std::string levelFileName; // file name to load in the levelMap in the format (level[INDEX])
-	LevelMode levelDifficulty = LevelMode::EASY;
+	LevelDifficulty levelDifficulty = LevelDifficulty::EASY;
 
 	LevelStatus status = LevelStatus::PLAYING;
-	int turnCount = 1; // Number of turn after both player has shot
+	int roundCount = 1; // Number of turn after both player has shot
 
 	CannonManager::Cannon* activeCannon = nullptr; // pointer to the active instance of the cannon object 
 	CannonManager::Cannon playerCannon; // instance of the player cannon
 	CannonManager::Cannon enemyCannon; // instance of the enemy cannon
 
-	// Tile ids
-	int groundY = 0;
-	TileIndex playerCenterId{ 0,0 };
-	TileIndex enemyCenterId{ 0,0 };
-
-	// Territory of tiles
-	std::pair<TileIndex, TileIndex> playerTiles; // min and max tiles that belongs to the player
-	std::pair<TileIndex, TileIndex> enemyTiles; // min and max tiles that belongs to the enemy
-
-	TowerShield playerShield, enemyShield;
-
+	bool isPlayerStarting = true; // is player the first one to shoot
 	bool isPlayerTurn = true; // is player or enemy turn to shoot
 	bool autoPlayOn = false; // used for debugging let enemy play ONLY
-	bool isSkippingEnemyTurn = false;
+	bool hasExtraShot = false; // does the current shooter have an extra shot
+	bool skipOpponentTurn = false;
+	bool noEnemyTurn = false; // used for debugging to keep skipping enemy turns
 	bool isHoveringUI = false;
 	float switchTurnCooldown = 0.0f; // Cooldown timer to add a delay between the destruction of the player projectile and starting of enemy turn
 
@@ -115,6 +115,13 @@ private:
 	std::vector<Character> enemies; // contains all instance of the Enemy Character Object in the level
 	int bossId = 0; // enemies vector id which the boss is stored in
 	std::vector<Character> playerCharacters; // contains all instance of the Player Character Object in the level
+
+	// Tile ids
+	int groundY = 0;
+
+	TerritoryTiles playerTerritory, enemyTerritory;
+
+	TowerShield playerShield, enemyShield;
 };
 
 #endif // !LEVEL_HPP

@@ -309,7 +309,7 @@ namespace GameStateManager {
         // Toggle debugger
         if (AEInputCheckTriggered(AEVK_TAB)) {
             Utils::isDebuggerOn = !Utils::isDebuggerOn;
-            std::cout << static_cast<std::string>(Utils::isDebuggerOn ? "DEBUGGER ON\n" : "DEBUGGER OFF\n");
+            std::cout << std::string(Utils::isDebuggerOn ? "DEBUGGER ON\n" : "DEBUGGER OFF\n");
         }
 
         // Return to main menu

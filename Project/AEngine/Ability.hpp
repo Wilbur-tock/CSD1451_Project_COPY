@@ -97,7 +97,7 @@ private:
 	int id; // To determind what type of ability it is (Bomb projectile, stats ability, etc)
 	int abilityCharges = 0; // count of how many of these ability the player/enemy has
 	int previousAbilityCharges = 0;
-	std::string name;
+	std::string name = "";
 	AbilityType type;
 	Tier tier;
 	AEGfxTexture* texture;

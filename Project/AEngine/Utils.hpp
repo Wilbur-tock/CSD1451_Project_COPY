@@ -40,6 +40,8 @@ namespace Utils {
 	void GetTileIndex(int& x, int& y, AEVec2 const worldPos);
 	// Return true if it is out of bounds
 	bool IsTileIndexOutOfBounds(int x, int y);
+	// Check if tile index is out of bounds. if out of bounds, set it to be within bounds
+	void SetTileIndexWithinBounds(int& x, int& y);
 
 	void SetAnchoredPosition(Transform const& parent, Transform& trans, AnchorMode const& anchorMode);
 	// Set anchoredPosition with parent being the screen transform (width and height)

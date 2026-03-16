@@ -75,37 +75,6 @@
     },
 
     {
-        "Name": "Wall",
-        "Type": 3,
-        "Tier": 1,
-        "Texture": "Card_Add_Health",
-        "Defensive_Stats": {
-            "ShieldHP": 1
-        },
-        "Projectile_Stats": {
-            "ProjectileID": 5,
-            "Damage_Amp": 1.0,
-            "Base_Damage": 10,
-            "Radius": 2,
-            "Charges": 1,
-            "unlimited_charges": false
-        }
-    },
-
-    {
-        "Name": "Tower Shield",
-        "Type": 3,
-        "Tier": 1,
-        "Texture": "Card_Shield",
-        "Base_Stats": {
-            "Hp": 0,
-            "Attack": 0,
-            "Shield": 3,
-            "Turns": 5
-        }
-    },
-
-    {
         "Name": "Shield Buster",
         "Type": 2,
         "Tier": 1,
@@ -148,5 +117,57 @@
             "Charges": 1,
             "unlimited_charges": false
         }
+    },
+
+    {
+        "Name": "Wall",
+        "Type": 3,
+        "Tier": 1,
+        "Texture": "Card_Add_Health",
+        "Defensive_Stats": {
+            "ShieldHP": 1
+        },
+        "Projectile_Stats": {
+            "ProjectileID": 5,
+            "Damage_Amp": 1.0,
+            "Base_Damage": 10,
+            "Radius": 2,
+            "Charges": 1,
+            "unlimited_charges": false
+        }
+    },
+
+    {
+        "Name": "Tower Shield",
+        "Type": 3,
+        "Tier": 1,
+        "Texture": "Card_Shield",
+        "Base_Stats": {
+            "Hp": 0,
+            "Attack": 0,
+            "Shield": 3,
+            "Turns": 5
+        }
+    },
+
+    {
+        "Name": "Rebuild",
+        "Type": 3,
+        "Tier": 1,
+        "Texture": ""
+    },
+
+    {
+        "Name": "Extra Shot",
+        "Type": 2,
+        "Tier": 1,
+        "Texture": ""
+    },
+
+    {
+        "Name": "Skip Turn",
+        "Type": 3,
+        "Tier": 1,
+        "Texture": ""
     }
 ]

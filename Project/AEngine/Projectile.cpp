@@ -355,11 +355,11 @@ std::string Projectile::DebugInfo() {
         + Utils::FormatFloat(transform.size.x, 2) + " y: " + Utils::FormatFloat(transform.size.y, 2)
         + "\nPos x: " + Utils::FormatFloat(transform.pos.x, 2) + " y " + Utils::FormatFloat(transform.pos.y, 2)
         + "\nVelocity x: " + Utils::FormatFloat(velocity.x, 2) + " y: " + Utils::FormatFloat(velocity.y, 2)
-        + "\nGrounded: " + static_cast<std::string>(isGrounded ? "true" : "false")
-        + "\nTo Be Destroyed: " + static_cast<std::string>(toBeDestroyed ? "true" : "false")
+        + "\nGrounded: " + std::string(isGrounded ? "true" : "false")
+        + "\nTo Be Destroyed: " + std::string(toBeDestroyed ? "true" : "false")
         + "\nTimer: " + Utils::FormatFloat(timer, 2)
         + "\nAttack Charges: " + std::to_string(AttackCharges())
         + "\nDamage Radius: " + std::to_string(attribute.DamageRadius())
-        + "\nCollisionTriggered: " + static_cast<std::string>(isCollisionTriggered ? "true" : "false")
-        + "\nCanBypassWall: " + static_cast<std::string>(canBypassBlocks ? "true" : "false");
+        + "\nCollisionTriggered: " + std::string(isCollisionTriggered ? "true" : "false")
+        + "\nCanBypassWall: " + std::string(canBypassBlocks ? "true" : "false");
 }

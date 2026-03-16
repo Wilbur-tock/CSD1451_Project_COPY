@@ -8,10 +8,7 @@
 namespace AbilitiesManager {
 	class AbilityController {
 	public:
-		// Load all different type of abilites to be called at the start of the game
-		void LoadAllAbilities(bool isPlayer); //Loads all player abils from Abilities.json file
-		//void LoadAllAIAbilities(); //Loads all AI abils from AiAbilities.json file
-		void LoadStartingAbilities();
+		// Getters and Setters
 
 		std::vector<Ability> const& GetOffensiveAbilities() { return offensiveAbilities; }
 		std::vector<Ability> const& GetStatsAbilities() { return statsAbilities; }
@@ -21,7 +18,8 @@ namespace AbilitiesManager {
 		std::vector<Ability> const& GetAbilityModifiers() { return abilityModifiers; }
 
 		Ability* CurrentAbility() const { return currentAbility; }
-		int InventoryCount() const{ return inventoryCount; }
+		int InventoryCount() const { return inventoryCount; }
+		int CurrentInventoryId() const { return currentInventoryId; }
 
 		bool IsSelectingAbility() const { return isSelectingAbility; }
 		void IsSelectingAbility(bool _isSelectingAbility) { isSelectingAbility = _isSelectingAbility; }
@@ -31,6 +29,17 @@ namespace AbilitiesManager {
 
 		std::vector<Ability*> const& Inventory() const { return inventory; }
 		bool IsInventoryFull() const { return inventoryCount >= Config::MAX_INVENTORY_COUNT; }
+
+		// Member functions
+
+		// Load all different type of abilites to be called at the start of the game
+		void LoadAllAbilities(bool isPlayer); //Loads all player abils from Abilities.json file
+		//void LoadAllAIAbilities(); //Loads all AI abils from AiAbilities.json file
+		void LoadStartingAbilities();
+
+		// Reset to default ability if current ability if an offensive and charges remaining is 0 to 
+		// ensure that an ability with 0 charges cannot be used again
+		void Reset();
 
 		AbilityType OffensiveOrDefensive();
 
@@ -56,13 +65,6 @@ namespace AbilitiesManager {
 		// if the ability type is an offensive which affects the projectile
 		int GetProjectileId();
 
-		// Reset to default ability if current ability if an offensive and charges remaining is 0 to 
-		// ensure that an ability with 0 charges cannot be used again
-		void ResetForNewTurn() {
-			ChangeAbility(0);
-			isAbilityTriggered = false;
-		}
-
 		// True to toggle through all abilities or 
 		// false to toggle through of all the inventory abilities this controller has
 		void ToggleAbility(bool isAllAbilities, int addValue);
@@ -83,6 +85,7 @@ namespace AbilitiesManager {
 
 	private:
 		void PrintInventory();
+		// Print all abilities that was loaded from the json into the console
 		void PrintAllAbilities();
 		void PrintInventoryCount();
 		void PrintAbilityModifiers();
@@ -106,7 +109,7 @@ namespace AbilitiesManager {
 		int inventoryCount = 0; // total number of abilites the has stored in the inventory
 		int currentInventoryId = 0;
 		// ids of all the ability that store in the inventory 
-		// for example inventory has 5 max space [0][0][1][2][3] < numbers represents the abilityId 
+		// for example inventory has 5 max space [0][0][1][2][3] < numbers representing the index of the ability 
 		// has 2 charges of abilityId in inventory while the rest 1 charges only
 		std::vector<int> inventoryAbilityIds; 
 		bool isSelectingAbility = false;

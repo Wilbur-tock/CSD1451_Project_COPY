@@ -19,7 +19,7 @@ AEGfxTexture* enemyCannonTex = nullptr;
 
 // UI Objects
 TextObject debugText;
-TextObject turnText, turnCountText;
+TextObject turnText, roundCountText;
 UIManager::Panel turnStatusPanel;
 
 struct StatsUI {
@@ -140,9 +140,9 @@ void Level::InitializeUI() {
 	turnText = TextObject{ "", 0.8f,{0,0.75f,0}, {0,0}, Utils::AnchorMode::CENTER};
 	turnText.SetPosition(turnStatusPanel.GetTransform());
 
-	turnCountText = TextObject{ "", 0.6f,{0,0,0}, {0,0}, Utils::AnchorMode::CENTER };
-	turnCountText.SetPosition(turnStatusPanel.GetTransform());
-	turnCountText.SetOffsetPosition(0, -20.0f);
+	roundCountText = TextObject{ "", 0.6f,{0,0,0}, {0,0}, Utils::AnchorMode::CENTER };
+	roundCountText.SetPosition(turnStatusPanel.GetTransform());
+	roundCountText.SetOffsetPosition(0, -20.0f);
 
 	AbilitiesManager::playerAbilityController.InitializeAllAbilityUI();
 
@@ -254,11 +254,12 @@ void Level::Initalize() {
 	playerCharacters.clear();
 	enemies.clear();
 
-	// Start of the turn should always be player turn
-	activeCannon = &playerCannon;
-	isPlayerTurn = true;
+	// Initialize variables
+	activeCannon = isPlayerStarting ? &playerCannon : &enemyCannon;
+	isPlayerTurn = isPlayerStarting;
+	// Reset debugging back to false
 	autoPlayOn = false;
-	isSkippingEnemyTurn = false;
+	noEnemyTurn = false;
 	switchTurnCooldown = 0.0f;
 
 	AEVec2 playerCannonStartPos = { 0,0 }, enemyCannonStartPos = { 0,0 };
@@ -290,7 +291,7 @@ void Level::Initalize() {
 					playerCharacters[listId].SetStats(static_cast<int>(levelDifficulty));
 
 					//Get center tile id of the player
-					SetTerritoryTiles(tile.tileId, playerCenterId, playerTiles.first, playerTiles.second);
+					SetTerritoryIndex(tile.tileId, playerTerritory.centerId, playerTerritory.minId, playerTerritory.maxId);
 
 					//SetTerritoryTiles(playerTiles, playerCenterId);
 					break;
@@ -302,7 +303,7 @@ void Level::Initalize() {
 					enemies[listId].id = listId;
 					enemies[listId].SetStats(static_cast<int>(levelDifficulty));
 
-					SetTerritoryTiles(tile.tileId, enemyCenterId, enemyTiles.first, enemyTiles.second);
+					SetTerritoryIndex(tile.tileId, enemyTerritory.centerId, enemyTerritory.minId, enemyTerritory.maxId);
 					break;
 
 				case TileType::TILE_ENEMY_BOSS:
@@ -312,7 +313,7 @@ void Level::Initalize() {
 					enemies[listId].id = listId;
 					enemies[listId].SetStats(static_cast<int>(levelDifficulty));
 
-					SetTerritoryTiles(tile.tileId, enemyCenterId, enemyTiles.first, enemyTiles.second);
+					SetTerritoryIndex(tile.tileId, enemyTerritory.centerId, enemyTerritory.minId, enemyTerritory.maxId);
 
 					bossId = listId;
 					break;
@@ -348,11 +349,14 @@ void Level::Initalize() {
 	AbilitiesManager::playerAbilityController.AbilitySelectionRandomisator();
 
 	// Initialize player and enemy shield 
-	playerShield = TowerShield{ MapManager::FindTile(playerCenterId)->transform.pos, &playerController };
-	enemyShield = TowerShield{ MapManager::FindTile(enemyCenterId)->transform.pos, &enemyController };
+	playerShield = TowerShield{ MapManager::FindTile(playerTerritory.centerId)->transform.pos, &playerController };
+	enemyShield = TowerShield{ MapManager::FindTile(enemyTerritory.centerId)->transform.pos, &enemyController };
 
 	//enemyShield.SetShieldOn(5, 5);
 	//enemyController.AddModifier(*(enemyController.GetAbility("Tower Shield")));
+
+	// Initialize Territory tiles
+	SetOriginalTerritoryTiles(playerTerritory);
 
 	InitializeUI();
 
@@ -442,6 +446,41 @@ void Level::Draw() {
 void Level::Free() {
 }
 
+Character* Level::FindCharacterObj(Tile const& tile) {
+	if (!tile.IsCharacter()) {
+		std::cerr << "[Level] Tile does not contain any characters!" << '\n';
+		return nullptr;
+	}
+
+	Character* character = nullptr;
+	if (tile.IsEnemy()) {
+		character = FindEnemyCharacterObj(tile.CharacterId());
+	}
+	else {
+		character = FindPlayerCharacterObj(tile.CharacterId());
+	}
+	return character;
+}
+
+Character* Level::FindEnemyCharacterObj(int characterId) {
+	if (characterId < 0) return nullptr;
+	return &enemies[characterId];
+}
+
+Character* Level::FindPlayerCharacterObj(int characterId) {
+	if (characterId < 0) return nullptr;
+	return &playerCharacters[characterId];
+}
+
+Character* Level::RandomCharacterObj(bool isPlayerObj) {
+	std::vector<Character>& characters = isPlayerObj ? playerCharacters : enemies;
+
+	if (characters.empty()) return nullptr;
+
+	int id = Utils::RandomValue(0, static_cast<int>(characters.size() - 1));
+	return &characters[id];
+}
+
 void Level::DrawUI() {
 	// Update UI before drawing it
 	if (isPlayerTurn) {
@@ -455,16 +494,16 @@ void Level::DrawUI() {
 
 	// UI to display whose turn it is
 	turnStatusPanel.Draw();
-
 	turnText.Draw();
 
-	turnCountText.TextContent("Turn " + std::to_string(turnCount));
-	turnCountText.Draw();
+	// Display how many numbers of round 
+	roundCountText.TextContent("Round " + std::to_string(roundCount));
+	roundCountText.Draw();
 
+	// Draw stats of player and enemy
 	playerStatsUI.barBG.Draw();
 	enemyStatsUI.barBG.Draw();
 
-	// Draw health bar
 	float currentHP = 0, maxHP = 0;
 	GetCurrentHP(currentHP);
 	GetMaxHP(maxHP);
@@ -476,6 +515,7 @@ void Level::DrawUI() {
 	enemyStatsUI.Draw(currentHP, maxHP, enemyShield.IsShieldOn(), static_cast<float>(enemyShield.attribute.Shield()), static_cast<float>(enemyShield.attribute.MaxShield()),
 		enemyCannon.AbilityController()->GetAbilityModifiers());
 
+	// Draw active cannon UI
 	activeCannon->DrawUI();
 	activeCannon->DebugInfo();
 }
@@ -521,39 +561,63 @@ void Level::UpdateTurn() {
 
 		if (switchTurnCooldown <= 0.0f) {
 			// Switch active cannon
-			SetTurn(!isPlayerTurn);
+			SetNewTurn(!isPlayerTurn);
 		}
 	}
 }
 
-void Level::SetTurn(bool _isPlayerTurn) {
-	isPlayerTurn = _isPlayerTurn;
+void Level::SetNewTurn(bool _isPlayerTurn) {
+	bool canSetNewRound = true; // always can set new round expect if the current active shooter has an extra shot to shoot
+	bool isNewRound = isPlayerStarting == _isPlayerTurn;
+	if (hasExtraShot) {
+		canSetNewRound = false;
+		hasExtraShot = false;
+	}
+	else {
+		isPlayerTurn = _isPlayerTurn; // set isPlayerTurn if there is no extra shot
+
+		// Skip oponennt turn
+		if (skipOpponentTurn) {
+			isPlayerTurn = !isPlayerTurn; // flip state again 
+			skipOpponentTurn = false;
+			isNewRound = true;
+		}
+	}
+
+	// Switching active cannon
 	if (isPlayerTurn) {
 		activeCannon = &playerCannon;
 		AbilitiesManager::playerAbilityController.IsSelectingAbility(true);
 		// randomise the abilities available to the player for this turn
 		AbilitiesManager::playerAbilityController.AbilitySelectionRandomisator();
-
-		NewTurn();
 	}
 	else {
+		// Enemy Turn
 		activeCannon = &enemyCannon;
 	}
-	activeCannon->ResetForNewTurn();
+
+	// can set new turn and whoever starting the round and current turn is the same
+	if (canSetNewRound && isNewRound) {
+		UpdateNewRound();
+	}
+
+	activeCannon->ResetCannon();
 	AudioManager::PlaySFX(AudioManager::SFX::TurnSwitch);
 	std::cout << "[Level] Switch to " << std::string(isPlayerTurn ? "PLAYER" : "ENEMY") << " turn" << '\n';
 }
 
-void Level::NewTurn() {
-	++turnCount; // always increment once after enemy has shot
+void Level::UpdateNewRound() {
+	++roundCount;
 
 	AbilitiesManager::AbilityController *playerController = playerCannon.AbilityController();
 	AbilitiesManager::AbilityController *enemyController = enemyCannon.AbilityController();
 
+	// Update turn lifespan of active tower shields
 	playerShield.UpdateLifespan();
 	enemyShield.UpdateLifespan();
 
-	// Update turn life span of all modifiers and check its turn lifespan and hp is not zero
+	// Update turn lifespan of all ability modifiers that each controller has
+	// and check if its turn lifespan or hp is not zero remove the ability effects
 	playerController->UpdateModifiers();
 	enemyController->UpdateModifiers();
 }
@@ -611,7 +675,7 @@ void Level::DrawResultsUI() {
 	resultMainMenuButton.Update();
 }
 
-void Level::SetTerritoryTiles(TileIndex const& newTileId, TileIndex& center, TileIndex& min, TileIndex& max) {
+void Level::SetTerritoryIndex(TileIndex const& newTileId, TileIndex& center, TileIndex& min, TileIndex& max) {
 	if (min.x == 0) {
 		min = newTileId;
 	}
@@ -637,8 +701,47 @@ void Level::SetTerritoryTiles(TileIndex const& newTileId, TileIndex& center, Til
 		min.x + ((max.x - min.x) / 2),
 		min.y + ((max.y - min.y) / 2),
 	};
+}
 
-	//std::cout << "Assign: " << newTileId << "\nCenter: " << center << "\nMin: " << min << "\nMax: " << max << '\n';
+void Level::SetOriginalTerritoryTiles(TerritoryTiles& territoryTiles) {
+	territoryTiles.originalTiles.reserve(32);
+	// Set new min and max tileIndex
+	// a box : min = bottom left corner, max = top right corner
+	int radius = territoryTiles.territoryTileRadius;
+	int minX = territoryTiles.centerId.x - radius;
+	int minY = territoryTiles.centerId.y + radius;
+	int maxX = territoryTiles.centerId.x + radius;
+	int maxY = territoryTiles.centerId.y - radius;
+
+	// Ensure index is not out of bounds
+	Utils::SetTileIndexWithinBounds(minX, minY);
+	Utils::SetTileIndexWithinBounds(maxX, maxY);
+
+	// Store the starting tiles of the min and max territory to the vector
+	for (int y = maxY; y < minY; ++y) {
+		for (int x = minX; x < maxX; ++x) {
+			if (Utils::IsTileIndexOutOfBounds(x, y)) continue; // additional check index not out of bounds
+			Tile const& tile = levelMap[y][x];
+
+			if (!tile.IsBlocks()) continue; // not a block continue
+			territoryTiles.originalTiles.push_back(tile);
+		}
+	}
+}
+
+void Level::ToggleTerritoryTiles(bool isPlayer, bool isBuilding) {
+	TerritoryTiles const& territoryTiles = isPlayer ? playerTerritory : enemyTerritory;
+	for (Tile const& originalTile : territoryTiles.originalTiles) {
+		Tile& currentTile = activeLevelMap[originalTile.tileId.y][originalTile.tileId.x];
+		if (currentTile.IsCharacter()) continue; // Don't rebuild/destroy a tile that contains a character already
+
+		if (isBuilding) { // rebuild
+			currentTile.Type(originalTile.Type());
+		}
+		else { // destroy
+			currentTile.Type(TileType::TILE_EMPTY);
+		}
+	}
 }
 
 void Level::DebugCommands() {
@@ -646,7 +749,7 @@ void Level::DebugCommands() {
 
 	// Input R to change whose turn it is
 	if (AEInputCheckTriggered(AEVK_R)) {
-		SetTurn(!isPlayerTurn);
+		SetNewTurn(!isPlayerTurn);
 	}
 	// Input CTRL + R to turn autoPlayOn on/off
 	if (AEInputCheckCurr(AEVK_LCTRL) || AEInputCheckCurr(AEVK_RCTRL)) {
@@ -657,7 +760,15 @@ void Level::DebugCommands() {
 
 	// Input E to skip enemy turn
 	if (AEInputCheckTriggered(AEVK_E)) {
-		isSkippingEnemyTurn = !isSkippingEnemyTurn;
+		noEnemyTurn = !noEnemyTurn;
+	}
+
+	if (AEInputCheckTriggered(AEVK_G)) {
+		ToggleTerritoryTiles(true, true);
+	}
+
+	if (AEInputCheckTriggered(AEVK_H)) {
+		ToggleTerritoryTiles(true, false);
 	}
 
 	int gridX = 0, gridY = 0;
@@ -694,9 +805,9 @@ void Level::DebugCommands() {
 		}
 	}
 
-	if (isSkippingEnemyTurn) { // Skipping enemy turn
+	if (noEnemyTurn) { // Skipping enemy turn
 		if (!isPlayerTurn) {
-			SetTurn(true);
+			SetNewTurn(true);
 		}
 
 		if (autoPlayOn) autoPlayOn = false;
@@ -705,10 +816,10 @@ void Level::DebugCommands() {
 	if (autoPlayOn) {
 		AbilitiesManager::playerAbilityController.IsSelectingAbility(false);;
 		if (isPlayerTurn) {
-			SetTurn(false);
+			SetNewTurn(false);
 		}
 
-		isSkippingEnemyTurn = false;
+		noEnemyTurn = false;
 	}
 }
 
@@ -730,8 +841,8 @@ void Level::DebugInfo() {
 	float mX = 0, mY = 0;
 	Utils::GetWorldMousePos(mX, mY);
 
-	std::string debug = "Shortcuts:\n[CTRL + R] Auto play " + static_cast<std::string>(autoPlayOn ? "ON" : "OFF")
-		+ "\n[E] Skipping enemy turn " + static_cast<std::string>(isSkippingEnemyTurn ? "ON" : "OFF")
+	std::string debug = "Shortcuts:\n[CTRL + R] Auto play " + std::string(autoPlayOn ? "ON" : "OFF")
+		+ "\n[E] Skipping enemy turn " + std::string(noEnemyTurn ? "ON" : "OFF")
 		+ "\n[R] Skip to enemy turn\n\nLevel:\nLevel Status: " + std::to_string(static_cast<int>(status))
 		+ "\n\nTile Map\nIndex X: " + std::to_string(gridX) + " Y: " + std::to_string(gridY)
 		+ "\nTile: " + GetTileName(tile.Type());
@@ -784,39 +895,4 @@ void Level::DebugInfo() {
 
 	debugText.TextContent(debug);
 	debugText.Draw();
-}
-
-Character* Level::FindCharacterObj(Tile const& tile) {
-	if (!tile.IsCharacter()) {
-		std::cerr << "[Level] Tile does not contain any characters!" << '\n';
-		return nullptr;
-	}
-
-	Character* character = nullptr;
-	if (tile.IsEnemy()) {
-		character = FindEnemyCharacterObj(tile.CharacterId());
-	}
-	else {
-		character = FindPlayerCharacterObj(tile.CharacterId());
-	}
-	return character;
-}
-
-Character* Level::FindEnemyCharacterObj(int characterId) {
-	if (characterId < 0) return nullptr;
-	return &enemies[characterId];
-}
-
-Character* Level::FindPlayerCharacterObj(int characterId) {
-	if (characterId < 0) return nullptr;
-	return &playerCharacters[characterId];
-}
-
-Character* Level::RandomCharacterObj(bool isPlayerObj) {
-	std::vector<Character>& characters = isPlayerObj ? playerCharacters : enemies;
-
-	if (characters.empty()) return nullptr;
-
-	int id = Utils::RandomValue(0, static_cast<int>(characters.size() - 1));
-	return &characters[id];
 }

@@ -70,6 +70,13 @@ namespace Utils {
 		return x < 0 || x >= Config::GRID_WIDTH || y < 0 || y >= Config::GRID_HEIGHT;
 	}
 
+	void SetTileIndexWithinBounds(int& x, int& y) {
+		x = x < Config::MIN_GRID_X ? Config::MIN_GRID_X : x;
+		x = x > Config::MAX_GRID_X ? Config::MAX_GRID_X : x;
+		y = y < Config::MIN_GRID_Y ? Config::MIN_GRID_Y : y;
+		y = y > Config::MAX_GRID_Y ? Config::MAX_GRID_Y : y;
+	}
+
 	void SetAnchoredPosition(Transform const& parent, Transform& trans, AnchorMode const& anchorMode) {
 		// Set position based on screen width and height with its origin mode in the CENTER
 		float newX = parent.pos.x, newY = parent.pos.y;

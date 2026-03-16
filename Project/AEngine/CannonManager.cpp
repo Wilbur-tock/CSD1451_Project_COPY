@@ -124,13 +124,13 @@ namespace CannonManager {
         }
     }
 
-    void Cannon::ResetForNewTurn() {
+    void Cannon::ResetCannon() {
         allProjectileDestroyed = false;
         hasCannonShot = false;
         SetCamera(false);
 
         // ALWAYS Reset cannon ability back to default after at the start off a a new turn
-        abilityController->ResetForNewTurn();
+        abilityController->Reset();
 
         // Reselect AI ability
         if (!isPlayerControlled && abilityController) {
@@ -483,9 +483,9 @@ namespace CannonManager {
         Ability* selectedAbility = abilityController->CurrentAbility();
 
         // Show cannon information
-        std::string debugStr = "Cannon " + static_cast<std::string>(isPlayerControlled ? "PLAYER" : "ENEMY")
+        std::string debugStr = "Cannon " + std::string(isPlayerControlled ? "PLAYER" : "ENEMY")
             + "\nIs Active : " + std::string(hasCannonShot ? "true" : "false")
-            + "\nAll Projectile destroyed : " + static_cast<std::string>(allProjectileDestroyed ? "true" : "false")
+            + "\nAll Projectile destroyed : " + std::string(allProjectileDestroyed ? "true" : "false")
             + "\nActive Projectiles Count: " + std::to_string(activeProjectiles.size())
             + "\nPos x: " + Utils::FormatFloat(transform.pos.x, 2) + " y: " + Utils::FormatFloat(transform.pos.y, 2)
             + "\nAngle: " + Utils::FormatFloat(cannonAngle * (180.0f / 3.14159265359), 2) + " " + Utils::FormatFloat(cannonAngle, 2)
@@ -494,7 +494,8 @@ namespace CannonManager {
             + "\nMode: " + selectedProjectile.ModeName()
             + "\nDamage: " + std::to_string(selectedProjectile.attribute.Damage())
             + "\nRadius: " + std::to_string(selectedProjectile.attribute.DamageRadius())
-            + "\n\nAbilities Inventory Count: " + std::to_string(abilityController->InventoryCount());
+            + "\n\nAbilities Inventory Count: " + std::to_string(abilityController->InventoryCount())
+            + "\nCurrent Inventory Id: " + std::to_string(abilityController->CurrentInventoryId());
 
         for (Ability* const& ability : abilityController->Inventory()) {
             debugStr += "\nAbility: " + ability->GetName() + " Charges: " + std::to_string(ability->AbilityCharges());

@@ -72,10 +72,18 @@ void Button::SetPosition(Transform const& parent, Utils::AnchorMode mode) {
 
 void Button::SetIconGaps(BorderGaps gaps) {
     borderGaps = gaps;
+
+    float size = transform.size.x; // its a square so same x and y size
+    // Find the largest gap
+    float largestGapX = gaps.xLeft > gaps.xRight ? gaps.xLeft : gaps.xRight;
+    float largestGapY = gaps.yTop > gaps.yBottom ? gaps.yTop : gaps.yBottom;
+    float largestGap = largestGapX > largestGapY ? largestGapX : largestGapY;
+    // minus off the largest to ensure that the icon remain a square
+    size -= largestGap * 2;
+
+    iconTransform.size.x = size;
+    iconTransform.size.y = size;
     // Change top-left corner anchor position
-    iconTransform.pos.x = transform.pos.x + borderGaps.xLeft;
+    iconTransform.pos.x = transform.pos.x + largestGap;
     iconTransform.pos.y = transform.pos.y - borderGaps.yTop; // - because y-axis is 0 to max from top to bottom
-    // Change width and height based on gaps between left, right, top and bottom
-    iconTransform.size.x = transform.size.x - (borderGaps.xLeft + borderGaps.xRight);
-    iconTransform.size.y = transform.size.y - (borderGaps.yTop + borderGaps.yBottom);
 }

@@ -28,13 +28,13 @@ namespace CannonManager {
 		void Update();
 		void Draw();
 		void DrawUI();
-		void ResetForNewTurn();
+		void ResetCannon();
 
 		// Return true if this cannon has a lock in target or the target has been destroyed
 		bool IsTargetAlive();
 		void SetTarget(Character* _target) {
 			target = _target;
-			//std::cout << "[CannonManager] " + static_cast<std::string>(isPlayerControlled ? "PLAYER" : "ENEMY") 
+			//std::cout << "[CannonManager] " + std::string(isPlayerControlled ? "PLAYER" : "ENEMY") 
 			//    + " New Target Set: " + _target->TypeName() << '\n';
 		}
 
