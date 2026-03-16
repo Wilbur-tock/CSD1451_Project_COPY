@@ -8,4 +8,12 @@ struct Transform {
 	AEVec2 pos, size;
 };
 
+// Gaps between x left and right, y top and bottom
+struct BorderGaps {
+	float xLeft;
+	float xRight;
+	float yTop;
+	float yBottom;
+};
+
 #endif // !BASETYPES_HPP

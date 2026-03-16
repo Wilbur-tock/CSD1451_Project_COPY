@@ -198,6 +198,7 @@ namespace Guide {
             { 220.0f, 70.0f },
             Color(0.8f, 0.2f, 0.2f, 1.0f),
             buttonTexture,
+            nullptr,
             OnBackClicked
         );
 
@@ -208,6 +209,7 @@ namespace Guide {
             { 260.0f, 70.0f },
             Color(0.2f, 0.6f, 0.9f, 1.0f),
             buttonTexture,
+            nullptr,
             OnGameGuideClicked
         );
 
@@ -218,6 +220,7 @@ namespace Guide {
             { 260.0f, 70.0f },
             Color(0.55f, 0.4f, 0.9f, 1.0f),
             buttonTexture,
+            nullptr,
             OnAbilitiesGuideClicked
         );
 

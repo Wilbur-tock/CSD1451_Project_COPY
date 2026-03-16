@@ -48,6 +48,7 @@ namespace PauseMenu {
             { btnW, btnH },
             Color(0.2f, 0.7f, 0.3f, 1.0f),   // green
             btnTexture,
+            nullptr,
             OnResumeClicked
         );
 
@@ -60,6 +61,7 @@ namespace PauseMenu {
             { btnW, btnH },
             Color(0.6f, 0.6f, 0.2f, 1.0f),   // yellow
             btnTexture,
+            nullptr,
             OnSettingsClicked
         );
 
@@ -72,6 +74,7 @@ namespace PauseMenu {
             { btnW, btnH },
             Color(0.8f, 0.2f, 0.2f, 1.0f),   // red
             btnTexture,
+            nullptr,
             OnBackToMenuClicked
         );
 

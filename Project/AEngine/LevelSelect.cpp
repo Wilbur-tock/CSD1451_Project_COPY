@@ -46,6 +46,7 @@ namespace LevelSelect {
             { btnWidth, btnHeight },
             Color(0.25f, 0.7f, 0.35f, 1.0f),
             buttonTexture,
+            nullptr,
             OnLevel1Clicked
         );
 
@@ -56,6 +57,7 @@ namespace LevelSelect {
             { btnWidth, btnHeight },
             Color(0.25f, 0.45f, 0.9f, 1.0f),
             buttonTexture,
+            nullptr,
             OnLevel2Clicked
         );
 
@@ -66,6 +68,7 @@ namespace LevelSelect {
             { btnWidth, btnHeight },
             Color(0.85f, 0.25f, 0.25f, 1.0f),
             buttonTexture,
+            nullptr,
             OnBackClicked
         );
 

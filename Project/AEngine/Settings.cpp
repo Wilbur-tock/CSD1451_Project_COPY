@@ -176,6 +176,7 @@ namespace Settings {
             { btnW, btnH },
             Color(0.8f, 0.2f, 0.2f, 1.0f),
             btnTexture,
+            nullptr,
             OnBackClicked
         );
 
@@ -190,6 +191,7 @@ namespace Settings {
             { smallBtnW, smallBtnH },
             Color(0.7f, 0.3f, 0.3f, 1.0f),
             btnTexture,
+            nullptr,
             OnMasterVolumeDownClicked
         );
 
@@ -200,6 +202,7 @@ namespace Settings {
             { smallBtnW, smallBtnH },
             Color(0.3f, 0.7f, 0.3f, 1.0f),
             btnTexture,
+            nullptr,
             OnMasterVolumeUpClicked
         );
 
@@ -210,6 +213,7 @@ namespace Settings {
             { smallBtnW, smallBtnH },
             Color(0.7f, 0.3f, 0.3f, 1.0f),
             btnTexture,
+            nullptr,
             OnBGMVolumeDownClicked
         );
 
@@ -220,6 +224,7 @@ namespace Settings {
             { smallBtnW, smallBtnH },
             Color(0.3f, 0.7f, 0.3f, 1.0f),
             btnTexture,
+            nullptr,
             OnBGMVolumeUpClicked
         );
 
@@ -230,6 +235,7 @@ namespace Settings {
             { smallBtnW, smallBtnH },
             Color(0.7f, 0.3f, 0.3f, 1.0f),
             btnTexture,
+            nullptr,
             OnSFXVolumeDownClicked
         );
 
@@ -240,6 +246,7 @@ namespace Settings {
             { smallBtnW, smallBtnH },
             Color(0.3f, 0.7f, 0.3f, 1.0f),
             btnTexture,
+            nullptr,
             OnSFXVolumeUpClicked
         );
 

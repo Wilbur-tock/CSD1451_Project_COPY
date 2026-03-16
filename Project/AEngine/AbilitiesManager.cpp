@@ -572,7 +572,7 @@ namespace AbilitiesManager {
 		float startX = inventoryBGTrans.pos.x + borderPaddingX;
 		float startY = inventoryBGTrans.pos.y - borderPaddingY;
 
-		// Initialize Ability Icons at bottom showcasing the list of ability player has in its inventory
+		// Initialize Ability Icons at bottom showcasing the list of ability they have in its inventory
 		for (int i = 0; i < inventoryMaxCount; ++i) {
 			Button& btn = inventoryAbilityButton[i];
 
@@ -584,8 +584,8 @@ namespace AbilitiesManager {
 				Utils::AnchorMode::BOTTOM_CENTER, AEVec2{ x, y },
 				AEVec2{ btnSizeX, btnSizeY }, Color{1,1,1}, AssetsManager::squareTexture
 			};
-
-			btn.SetTextOffset(0, 5);
+			btn.SetIconGaps({ 15,15,5,15 });
+			//btn.SetTextOffset(0, 5);
 		}
 
 		// Initialize Ability Selector
@@ -657,12 +657,15 @@ namespace AbilitiesManager {
 						currentInventoryId = i;
 						});
 				}
+
+				btn.SetIcon(ability->GetTexture());
 			}
 			else {
 				// Empty slot — clear onclick so it does nothing
 				btn.SetOnClick(nullptr);
 			}
 
+			// Update textContent and color
 			btn.SetColor(iconColor);
 			btn.GetTextObject().TextContent(iconName);
 			if (!isSelectingAbility) {

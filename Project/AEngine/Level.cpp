@@ -175,6 +175,7 @@ void Level::InitializeUI() {
 		{ btnW, btnH },
 		Color(0.2f, 0.6f, 0.9f, 1.0f),
 		btnTex,
+		nullptr,
 		OnResultRestart
 	);
 
@@ -189,6 +190,7 @@ void Level::InitializeUI() {
 		{ btnW, btnH },
 		Color(0.8f, 0.2f, 0.2f, 1.0f),
 		btnTex,
+		nullptr,
 		OnResultMainMenu
 	);
 
@@ -349,8 +351,8 @@ void Level::Initalize() {
 	playerShield = TowerShield{ MapManager::FindTile(playerCenterId)->transform.pos, &playerController };
 	enemyShield = TowerShield{ MapManager::FindTile(enemyCenterId)->transform.pos, &enemyController };
 
-	enemyShield.SetShieldOn(5, 5);
-	enemyController.AddModifier(*(enemyController.GetAbility("Tower Shield")));
+	//enemyShield.SetShieldOn(5, 5);
+	//enemyController.AddModifier(*(enemyController.GetAbility("Tower Shield")));
 
 	InitializeUI();
 

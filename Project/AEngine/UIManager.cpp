@@ -81,7 +81,7 @@ namespace UIManager {
 
     PopupPanel::PopupPanel(std::string textContent, AEVec2 _size, Color _color, Utils::AnchorMode panelAnchorMode, AEGfxTexture* panelTexture, AEGfxTexture* btnTexture, Utils::FuncPtr onClick) 
         : panel{ _size, _color, panelAnchorMode, panelTexture }, 
-        button{ {0,0}, {50,50}, Color{1,1,1}, btnTexture, onClick },
+        button{ {0,0}, {50,50}, Color{1,1,1}, btnTexture, nullptr, onClick },
         textObj{ textContent, 0.5f, Color{1,0,0}, {0,0}, Utils::AnchorMode::CENTER } {
         // Set button position to be top right corner to close panel
         button.SetPosition({panel.Pos(), panel.Size()}, Utils::AnchorMode::TOP_RIGHT);

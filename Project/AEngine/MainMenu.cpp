@@ -54,6 +54,7 @@ namespace MainMenu {
             { btnWidth, btnHeight },
             Color(0.2f, 0.6f, 0.9f, 1.0f),  // Blue color
             buttonTexture,
+            nullptr,
             OnPlayClicked
         );
 
@@ -67,6 +68,7 @@ namespace MainMenu {
             { btnWidth, btnHeight },
             Color(0.3f, 0.7f, 0.3f, 1.0f),  // Green color
             buttonTexture,
+            nullptr,
             OnMapEditorClicked
         );
 
@@ -80,6 +82,7 @@ namespace MainMenu {
             { btnWidth, btnHeight },
             Color(0.6f, 0.6f, 0.2f, 1.0f),  // Yellow color
             buttonTexture,
+            nullptr,
             OnSettingsClicked
         );
 
@@ -93,6 +96,7 @@ namespace MainMenu {
             { btnWidth, btnHeight },
             Color(0.9f, 0.55f, 0.2f, 1.0f),
             buttonTexture,
+            nullptr,
             OnGuideClicked
         );
 
@@ -106,6 +110,7 @@ namespace MainMenu {
             { btnWidth, btnHeight },
             Color(0.7f, 0.5f, 0.9f, 1.0f),  // Purple color
             buttonTexture,
+            nullptr,
             OnCreditsClicked
         );
 
@@ -119,6 +124,7 @@ namespace MainMenu {
             { btnWidth, btnHeight },
             Color(0.8f, 0.2f, 0.2f, 1.0f),  // Red color
             buttonTexture,
+            nullptr,
             OnQuitClicked
         );
 
