@@ -96,7 +96,7 @@
         "Name": "Tower Shield",
         "Type": 3,
         "Tier": 1,
-        "Texture": "Card_Add_Health",
+        "Texture": "Card_Shield",
         "Base_Stats": {
             "Hp": 0,
             "Attack": 0,
