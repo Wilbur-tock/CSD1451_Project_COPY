@@ -104,7 +104,7 @@ void Projectile::SetProjectileStats(std::string _projectileName, ProjectileModul
 
     // 1. Set Identity
     projectileId = data.projectileId;
-    mode = static_cast<ProjectileMode>(data.projectileId + 1);
+    mode = static_cast<ProjectileMode>(data.projectileId);
 
     // 2. Set Stats directly from JSON data
     // Total Damage = Base * Multiplier

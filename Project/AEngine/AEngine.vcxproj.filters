@@ -372,13 +372,13 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\Assets\Abilities\AiAbilities.json">
+    <None Include="..\Assets\DataAbilities\Abilities.json">
       <Filter>Resource Files</Filter>
     </None>
-    <None Include="..\Assets\Abilities\Abilities.json">
+    <None Include="..\Assets\DataAbilities\AiAbilities.json">
       <Filter>Resource Files</Filter>
     </None>
-    <None Include="PlayerAbilities.json">
+    <None Include="..\Assets\DataAbilities\PlayerAbilities.json">
       <Filter>Resource Files</Filter>
     </None>
   </ItemGroup>

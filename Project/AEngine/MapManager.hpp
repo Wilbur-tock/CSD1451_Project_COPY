@@ -8,7 +8,7 @@
 // Contain enum TileType, class Tile
 namespace MapManager {
 	extern std::vector<std::vector<Tile>> *currentMap; // Current map layout that is being displayed onto the map
-	static std::string const mapFilePath = "Assets/MapData/";
+	static std::string const mapFilePath = "Assets/DataMap/";
 
 	inline std::string MapFilePath() { return mapFilePath; }
 

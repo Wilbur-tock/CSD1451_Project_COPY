@@ -60,23 +60,15 @@ namespace CannonManager {
         // Initializing the default and ALL projectiles with abilities
         if (projectiles.empty()) std::cerr << "[CannonManager] Cannon Projectiles vector is EMPTY" << '\n';
 
-        for (int i = 0; i < projectiles.size(); ++i) {
-            // Assign default projectile ability if the the projectils size is larger than the allProjectileAbilities size
-            int abilityId = 0;
-            if (i < allProjectileAbilities.size()) {
-                abilityId = i;
-            }
-
-            // Assign ability stats to the projectiles
-            Ability const& ability = allProjectileAbilities[abilityId];
-            Projectile& projectile = projectiles[i];
+        for (Ability const& ability : allProjectileAbilities) {
+            Projectile& projectile = projectiles[ability.GetProj().projectileId];
 
             // Initialize projectile with its texture
             projectile = Projectile{ AssetsManager::circleTexture };
             projectile.SetProjectileStats(ability.GetName(), ability.GetProj());
 
             //std::cout << "[CannonManager] AbilityId: " << ability.Id() << " Projectile Name: " << projectile.ProjectileName() << " Projectile Mode: " << projectile.ModeName() << " "
-            // << projectile.ProjectileId() << " into the cannon projectile vector" << '\n';
+            //    << projectile.ProjectileId() << " into the cannon projectile vector" << '\n';
         }
     }
     
@@ -330,7 +322,7 @@ namespace CannonManager {
 
             for (int step = 0; step < SUB_STEPS; ++step) {
                 projectile.Update(isPlayerControlled, subDt);
-                projectile.AbilityActivation(abilityController->CurrentAbility());
+                projectile.AbilityActivation(abilityController->GetCurrentAbility());
                 AbilityActivation(projectile);
             }
 
@@ -400,17 +392,18 @@ namespace CannonManager {
     }
 
     void Cannon::SetCamera(bool isFollowingProjectile) {
+        CameraManager::CameraController& cam = CameraManager::camera;
         if (isFollowingProjectile) {
             // Set camera to follow the newly fired projectile
-            CameraManager::camera.SetFollowTarget(&activeProjectiles.back().transform.pos);
-            CameraManager::camera.SetState(CameraManager::CameraController::CameraState::FOLLOW);
+            cam.SetFollowTarget(&activeProjectiles.back().transform.pos);
+            cam.SetState(CameraManager::CameraController::CameraState::FOLLOW);
         }
         else {
             // Return camera to input control
-            CameraManager::camera.SetFollowTarget(nullptr);
-            CameraManager::camera.SetState(CameraManager::CameraController::CameraState::INPUT);
-            CameraManager::camera.SetPosition(transform.pos);
-            // TODO: RESET ZOOM back to default
+            cam.SetFollowTarget(nullptr);
+            cam.SetState(CameraManager::CameraController::CameraState::INPUT);
+            cam.SetPosition(transform.pos);
+            //cam.SetZoom(1.0f); // reset zoom level back to default
         }
     }
 
@@ -480,7 +473,7 @@ namespace CannonManager {
         AEInputGetCursorPosition(&mouseX, &mouseY);
 
         Projectile const& selectedProjectile = projectiles[selectedProjectileId];
-        Ability const& selectedAbility = abilityController->CurrentAbility();
+        Ability const& selectedAbility = abilityController->GetCurrentAbility();
 
         // Show cannon information
         std::string debugStr = "Cannon " + std::string(isPlayerControlled ? "PLAYER" : "ENEMY")

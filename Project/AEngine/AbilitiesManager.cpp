@@ -12,7 +12,7 @@
 #include "LevelManager.hpp"
 
 namespace {
-	std::string filePath = "Assets/Abilities/";
+	std::string filePath = "Assets/DataAbilities/";
 	// Helper function to read from JSON file and input the data into a JSON Object
 	static void ReadAbilitiesFromFile(nlohmann::json& jsonData, std::string const& fileName) {
 		std::string filePathAndName = filePath + fileName;
@@ -55,10 +55,7 @@ namespace AbilitiesManager {
 		defensiveAbilities.clear();
 
 		allAbilities.clear();
-
-		// Clear inventory state before adding starting abilities
 		inventoryIds.clear();
-		std::fill(inventoryTypeCount.begin(), inventoryTypeCount.end(), 0);
 
 		isPlayerControlled = isPlayer;
 
@@ -69,31 +66,32 @@ namespace AbilitiesManager {
 		// Read enemies ONLY ability and merge it to the data
 		if (isPlayer) {
 			controllerName = "Player Ability Controller";
-			ReadAbilitiesFromFile(data, "AiAbilities.json");
+			ReadAbilitiesFromFile(data, "PlayerAbilities.json");
 		}
 		else {
 			controllerName = "Enemy Ability Controller";
-			ReadAbilitiesFromFile(data, "PlayerAbilities.json");
+			ReadAbilitiesFromFile(data, "AiAbilities.json");
 		}
 
 		totalAbilityCount = data.size();
-		size_t reserveCount = totalAbilityCount * 2;
+		size_t reserveCount = totalAbilityCount;
 
 		// Reserve space for all vector used in these controller
-		allProjectilesAbilties.reserve(reserveCount);
+		projectileAbilities.reserve(reserveCount);
 		allAbilities.reserve(reserveCount);
 		offensiveAbilities.reserve(reserveCount);
 		statsAbilities.reserve(reserveCount);
 		defensiveAbilities.reserve(reserveCount);
 
 		inventoryIds.reserve(Config::MAX_INVENTORY_COUNT);
+		inventoryTypeCount.resize(static_cast<int>(AbilityType::COUNT));
 
 		int abilityId = 0;
 		for (auto& item : data) { // Your JSON is an array at the root
 			std::string name = item["Name"];
 			AbilityType type = static_cast<AbilityType>(item["Type"].get<int>());
 			Tier tier = static_cast<Tier>(item["Tier"].get<int>());
-
+			// Load texture if no texturename is given use a default texture
 			std::string textureName = item["Texture"];
 			std::string textureFilePath = "Assets/Abilities/" + textureName + ".png";
 			AEGfxTexture* texture = AssetsManager::squareTexture;
@@ -101,11 +99,9 @@ namespace AbilitiesManager {
 				texture = AssetsManager::GetTexture(textureFilePath.c_str());
 			}
 
-
-			// Increment Id after assigning it
 			Ability newAbility{ abilityId, name, type, tier, texture };
 
-			// Load different stats if can find
+			// Load different stats modules if can find
 			std::string statsName = "Base_Stats";
 			if (item.contains(statsName) && !item[statsName].is_null()) {
 				auto& s = item[statsName];
@@ -150,19 +146,26 @@ namespace AbilitiesManager {
 
 			allAbilities.push_back(newAbility);
 
-			// Only add the default projectile ability as non-projectile abiility would use default projectile id (0)
-			// Do not adding default projectile again after it has been added
-			bool isProjectilesAbility = abilityId == 0 || newAbility.GetProj().projectileId != 0;
-			if (isProjectilesAbility) {
-				allProjectilesAbilties.push_back(newAbility);
+			// checking if the this ability projectileId is new id that has not been added to the allProjectilesAbilities vector
+			bool addToProjectilesAbilities = true;
+			for (Ability const& ability : projectileAbilities) {
+				int projectileId = ability.GetProj().projectileId; 
+				if (projectileId == newAbility.GetProj().projectileId) { // already in the vector don't add
+					addToProjectilesAbilities = false;
+					break;
+				}
+			}
+
+			// Only add each projectileId once for example if there is like 5 abilites that uses projectileId (0) 
+			// only add into the vector once only
+			if (addToProjectilesAbilities) {
+				projectileAbilities.push_back(newAbility);
 				//std::cout << "[AbiltiesManager] Projectile Ability: " << newAbility.GetName() << '\n';
 			}
 
 			// Increment ability id after initalizing everything
 			++abilityId;
 		}
-
-		inventoryTypeCount.resize(static_cast<int>(AbilityType::COUNT));
 
 		LoadStartingAbilities();
 		//PrintAllAbilities();
@@ -210,7 +213,7 @@ namespace AbilitiesManager {
 		ChangeAbility(selectedId);
 		hasEnemySelectedAbility = true;
 
-		std::cout << "[AbilitiesManager] Enemy selected ability: " << CurrentAbility().GetName() << '\n';
+		std::cout << "[AbilitiesManager] Enemy selected ability: " << GetCurrentAbility().GetName() << '\n';
 	}
 
 	void AbilityController::Reset() {
@@ -239,12 +242,12 @@ namespace AbilitiesManager {
 	}
 
 	void AbilityController::AbilityEffects() {
-		std::string abilityName = CurrentAbility().GetName();
+		std::string abilityName = GetCurrentAbility().GetName();
 		Level* level = LevelManager::CurrentLevel();
 
 		// Activate a ability effect here
 		if (abilityName == "Tower Shield") {
-			level->GetTowerShield(isPlayerControlled).SetShieldOn(CurrentAbility().GetStats().shield, CurrentAbility().GetStats().turns);
+			level->GetTowerShield(isPlayerControlled).SetShieldOn(GetCurrentAbility().GetStats().shield, GetCurrentAbility().GetStats().turns);
 			//std::cout << "[AbilitiesManager] Activate Tower Shield ability!" << '\n';
 		}
 		else if (abilityName == "Rebuild") {
@@ -257,26 +260,26 @@ namespace AbilitiesManager {
 			level->SetSkipOpponentTurn();
 		}
 
-		AddModifier(CurrentAbility());
+		AddModifier(GetCurrentAbility());
 		PrintAbilityModifiers();
 	}
 
 	void AbilityController::AddModifier(Ability const& ability) {
-		if (ability.GetStats().turns > 0) {
-			// Remove the exisiting modifier if it the same as the current ability
-			abilityModifiers.erase(
-				std::remove_if(abilityModifiers.begin(), abilityModifiers.end(),
-					[this](Ability const& ability) {
-						return ability.Id() == ability.Id();
-					}),
-				abilityModifiers.end()
-			);
+		if (!(ability.GetStats().turns > 0)) return; // is not an ability modifier
 
-			// push_back a copy of the currentAbility if the effects last more than 1 turn
-			abilityModifiers.push_back(ability);
+		// Remove the exisiting modifier if it the same as the current ability
+		abilityModifiers.erase(
+			std::remove_if(abilityModifiers.begin(), abilityModifiers.end(),
+				[this](Ability const& ability) {
+					return ability.Id() == ability.Id();
+				}),
+			abilityModifiers.end()
+		);
 
-			std::cout << "Added modifier: " << ability.GetName() << '\n';
-		}
+		// push_back a copy of the currentAbility if the effects last more than 1 turn
+		abilityModifiers.push_back(ability);
+
+		//std::cout << "Added modifier: " << ability.GetName() << '\n';
 	}
 
 	void AbilityController::UpdateModifiers() {
@@ -299,12 +302,18 @@ namespace AbilitiesManager {
 
 	// Change the current ability based on the ability ID
 	void AbilityController::ChangeAbility(int abilityId) {
-		Ability* found =  GetAbility(abilityId);
-		if (!found) {
-			std::cerr << "Can't find ability id: " << std::to_string(abilityId) + ' ' + controllerName + ' ' + std::to_string(allAbilities.size()) << '\n';
-			return;
+		for (int i = 0; i < allAbilities.size(); ++i) {
+			// Found the same ability id in allAbilitiesVector return if found
+			if (allAbilities[i].Id() == abilityId) {
+				currentAbilityId = abilityId;
+				currentAbilityVectorId = i;
+				return;
+			}
 		}
-		currentAbilityVectorId = found->Id();
+
+		currentAbilityId = 0;
+		currentAbilityVectorId = 0;
+		std::cerr << "Can't find ability id: " << std::to_string(abilityId) + ' ' + controllerName + ' ' + std::to_string(allAbilities.size()) << '\n';
 
 		//std::cout << "[AbilitiesManager] Current ability: " + currentAbility->GetName()
 		//	+ " Charges Remaining: " + std::to_string(currentAbility->AbilityCharges()) << '\n';
@@ -312,24 +321,20 @@ namespace AbilitiesManager {
 
 	// Use the currently select ability if it has unlimited or any charges remaining
 	bool AbilityController::UseAbility() {
-		for (int id : inventoryIds) {
-			std::cout << id << ' ' << GetAbility(id)->AbilityCharges() << '\n';
-		}
-
-		if (CurrentAbility().GetProj().unlimitedCharges) return true;
+		if (GetCurrentAbility().GetProj().unlimitedCharges) return true;
 
 		AbilityEffects();
 
-		if (CurrentAbility().AbilityCharges() <= 0) return false; // has no ability charges can't use this ability
+		if (GetCurrentAbility().AbilityCharges() <= 0) return false; // has no ability charges can't use this ability
 
-		CurrentAbility().AbilityCharges(-1);
-		UpdateInventory(CurrentAbility(), false);
+		SetCurrentAbility().AbilityCharges(-1);
+		UpdateInventory(SetCurrentAbility(), false);
 
 		// Reset to default if trying to use an ability without any charges remaining
 		Reset();
 
-		std::cout << "[AbilitiesManager] Ability used: " + CurrentAbility().GetName()
-			+ " Charges Remaining: " + std::to_string(CurrentAbility().AbilityCharges()) << '\n';
+		std::cout << "[AbilitiesManager] Ability used: " + GetCurrentAbility().GetName()
+			+ " Charges Remaining: " + std::to_string(GetCurrentAbility().AbilityCharges()) << '\n';
 		return true;
 	}
 
@@ -405,7 +410,7 @@ namespace AbilitiesManager {
 
 	// True to toggle through all abilities or false to toggle through of all the active abilities this controller has in its inventory
 	void AbilityController::ToggleAbility(bool isAllAbilities, int addValue) {
-		int abilityId = CurrentAbility().Id();
+		int abilityId = GetCurrentAbility().Id();
 		abilityId += addValue;
 
 		if (isAllAbilities) {
@@ -416,7 +421,7 @@ namespace AbilitiesManager {
 			for (int i = 0; i < InventoryCount(); ++i) {
 				int newAbilityId = inventoryIds[i];
 				// If toggle until current ability wrap around until the last ability index in the inventory
-				if (inventoryIds[i] == CurrentAbility().Id()) {
+				if (inventoryIds[i] == GetCurrentAbility().Id()) {
 					int selectedListId = i + addValue;
 					Utils::Wrap(selectedListId, 0, static_cast<int>(InventoryCount() - 1));
 					abilityId = newAbilityId;
@@ -430,7 +435,7 @@ namespace AbilitiesManager {
 		ChangeAbility(abilityId);
 	}
 
-	const Ability AbilityController::AbilityRandomisator(std::vector<Ability> const& abilities) {
+	Ability const& AbilityController::AbilityRandomisator(std::vector<Ability> const& abilities) {
 		int minId = 0;
 		if (abilities[0].Id() == 0) minId = 1; // checking if the first ability in abilities vector contains the default ability remove it
 		int randomId = Utils::RandomValue(minId, static_cast<int>(abilities.size() - 1));
@@ -636,7 +641,7 @@ namespace AbilitiesManager {
 				iconName = ability->GetName();
 				iconColor = ability->GetType() == AbilityType::OFFENSIVE ? Color(1, 0, 0) : Color(0, 0, 1);
 				// Highlight current ability
-				if (CurrentAbility().Id() == ability->Id() && currentInventoryId == i) {
+				if (GetCurrentAbility().Id() == ability->Id() && currentInventoryId == i) {
 					iconColor = Color(0, 0, 0);
 				}
 				else { 

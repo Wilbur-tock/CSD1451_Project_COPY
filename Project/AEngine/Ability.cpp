@@ -9,7 +9,7 @@ Ability::Ability(int _id, std::string _name, AbilityType _type, Tier _tier, AEGf
 }
 
 std::ostream& operator<<(std::ostream& os, Ability ability) {
-	os << "Ability Name: " << ability.GetName() << " Ability ID: " << ability.GetProj().projectileId 
+	os << "Ability Name: " << ability.GetName() << " ID: " << ability.GetProj().projectileId 
 		<< " Remaining Charges: " << ability.GetProj().charges;
 	return os;
 }

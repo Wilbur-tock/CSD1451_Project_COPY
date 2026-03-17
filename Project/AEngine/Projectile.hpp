@@ -11,16 +11,16 @@ struct ProjectileModule;
 class Ability;
 
 enum class ProjectileMode {
-	IDLE			= 0,
-	ATTACK			= 1,
-	BOMB			= 2,
-	NUKE			= 3,
-	PENTA_BURST		= 4,
-	AUTO_AIM		= 5,
-	WALL			= 6,
-	SHIELD_BUSTER	= 7,
-	PIERCING		= 8,
-	CLUSTER_SHOT	= 9,
+	ATTACK			= 0, 
+	BOMB			= 1,
+	NUKE			= 2,
+	PENTA_BURST		= 3,
+	AUTO_AIM		= 4,
+	WALL			= 5,
+	SHIELD_BUSTER	= 6,
+	PIERCING		= 7,
+	CLUSTER_SHOT	= 8,
+	IDLE, // Always the last if its in idle mode, projectile can't deal damage again as it attack charges has run out
 };
 
 class Projectile : public GameObject {

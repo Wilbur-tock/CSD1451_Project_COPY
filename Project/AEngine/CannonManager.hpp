@@ -80,16 +80,16 @@ namespace CannonManager {
 		bool allProjectileDestroyed = false; // projectile has been shot out and destroyed
 		bool resetCamWhenShooting = false; // When player press left mouse click, reset camera to position the cannon and unable to move the camera or not
 
-		// Cannon attributes
 		AEVec2 defaultSize{ 30,10 };
 		int projectileCount = 10;
 		int projectileAbilitiesCount = 0;
-		float cannonAngle = 0.0f; // Angle of the cannon for the projectile to shoot from
 
 		int selectedProjectileId = 0; // index of the selected projectile from the vector list of all the different type of projectiles
 		std::vector<Projectile> projectiles; // vector containing all the different type of projectiles (Default, bomb , etc)
 		std::vector<Projectile> activeProjectiles; // vector of all the active projectiles (Projectiles that have been shot out of the cannon)
 
+		// Cannon attributes
+		float cannonAngle = 0.0f; // Angle of the cannon for the projectile to shoot from
 		// Shot power charging system (how far the cannon shoots the projectile)
 		float chargingRate = Config::CANNON_MAX_POWER * 1.5f;
 		float chargingPower = 0;
