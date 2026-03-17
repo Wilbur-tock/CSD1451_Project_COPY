@@ -106,7 +106,7 @@ namespace AbilitiesManager {
 			if (item.contains(statsName) && !item[statsName].is_null()) {
 				auto& s = item[statsName];
 				newAbility.SetStats(StatsModule{
-					s["Hp"], s["Attack"], s["Shield"], s["Turns"]
+					s["Hp"], s["Attack"], s["Shield"], s["Rounds"], s["Is_Buff"], s["Target_Self"]
 				});
 			}
 
@@ -210,6 +210,8 @@ namespace AbilitiesManager {
 			selectedId = Utils::RandomValue(0, size - 1);
 		}
 
+		selectedId = GetAbility("Gravity")->Id();
+		AddAbility(selectedId);
 		ChangeAbility(selectedId);
 		hasEnemySelectedAbility = true;
 
@@ -242,12 +244,13 @@ namespace AbilitiesManager {
 	}
 
 	void AbilityController::AbilityEffects() {
+		Ability const& ability = GetCurrentAbility();
 		std::string abilityName = GetCurrentAbility().GetName();
 		Level* level = LevelManager::CurrentLevel();
 
 		// Activate a ability effect here
 		if (abilityName == "Tower Shield") {
-			level->GetTowerShield(isPlayerControlled).SetShieldOn(GetCurrentAbility().GetStats().shield, GetCurrentAbility().GetStats().turns);
+			level->GetTowerShield(isPlayerControlled).SetShieldOn(GetCurrentAbility().GetStats().shield, GetCurrentAbility().GetStats().rounds);
 			//std::cout << "[AbilitiesManager] Activate Tower Shield ability!" << '\n';
 		}
 		else if (abilityName == "Rebuild") {
@@ -260,33 +263,51 @@ namespace AbilitiesManager {
 			level->SetSkipOpponentTurn();
 		}
 
-		AddModifier(GetCurrentAbility());
+		// Add modifier after shooter has shot out the projectile
+		if (ability.GetStats().targetSelf) {
+			// Add modifier to self
+			AddModifier(ability);
+		}
+		else {
+			// Add modifier to the opponent
+			isPlayerControlled ? enemyAbilityController.AddModifier(ability) : playerAbilityController.AddModifier(ability);
+		}
+
 		PrintAbilityModifiers();
 	}
 
 	void AbilityController::AddModifier(Ability const& ability) {
-		if (!(ability.GetStats().turns > 0)) return; // is not an ability modifier
+		if (!ability.IsAbilityModifier()) return;
 
 		// Remove the exisiting modifier if it the same as the current ability
 		abilityModifiers.erase(
 			std::remove_if(abilityModifiers.begin(), abilityModifiers.end(),
-				[this](Ability const& ability) {
-					return ability.Id() == ability.Id();
+				[ability](Ability const& ab) {
+					return ab.Id() == ability.Id();
 				}),
 			abilityModifiers.end()
 		);
 
-		// push_back a copy of the currentAbility if the effects last more than 1 turn
+		// push_back a copy of the currentAbility if the effects last more than 1 round
 		abilityModifiers.push_back(ability);
+
+		// if the controller does not start the round, and added a modifier the number of rounds remaining 
+		// it should not decrease immediately after its turn end but after the next round end
+		if (LevelManager::CurrentLevel()->IsStarting(isPlayerControlled)) {
+			abilityModifiers.back().JustAddModifier(true);
+		}
 
 		//std::cout << "Added modifier: " << ability.GetName() << '\n';
 	}
 
 	void AbilityController::UpdateModifiers() {
+		PrintAbilityModifiers();
 		for (Ability& ability : abilityModifiers) {
-			ability.UpdateTurnLifespan();
+			// Update lifespan
+			ability.UpdateRoundLifespan();
 		}
 		CheckModifiers();
+		PrintAbilityModifiers();
 	}
 
 	void AbilityController::CheckModifiers() {
@@ -294,7 +315,7 @@ namespace AbilitiesManager {
 		abilityModifiers.erase(
 			std::remove_if(abilityModifiers.begin(), abilityModifiers.end(),
 				[](Ability& ability) {
-					return ability.GetStats().turns <= 0 || ability.GetStats().shield <= 0;
+					return ability.GetStats().rounds <= 0 || (ability.GetName() == "Tower Shield" == ability.GetStats().shield <= 0);
 				}),
 			abilityModifiers.end()
 		);
@@ -721,7 +742,8 @@ namespace AbilitiesManager {
 		std::cout << "==============" + controllerName + " Ability Modifiers" + "=============\n";
 		for (Ability const& ability : abilityModifiers) {
 			std::cout << std::setw(15) << std::left << ability.GetName() 
-				<< "Remaining Turns " + std::to_string(ability.GetStats().turns) << '\n';
+				<< "Remaining Turns " + std::to_string(ability.GetStats().rounds) << ' '
+				<< std::boolalpha << ability.JustAddModifier() << '\n';
 		}
 	}
 }

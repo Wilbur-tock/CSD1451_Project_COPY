@@ -18,9 +18,12 @@ enum class Tier {
 };
 
 struct StatsModule {
-	int hp = 0, atk = 0, shield = 0;
-	int turns = 0; // number of turns the ability last
-	int dmgReduction = 0;
+	int hp = 0;
+	int atk = 0;
+	int shield = 0;
+	int rounds = 0; // number of rounds this ability would last
+	bool isBuff = true;// is a stats buff or debuff
+	bool targetSelf = true;  // stats buff/debuff on self or opponent
 };
 
 struct ProjectileModule {
@@ -85,14 +88,21 @@ public:
 	}
 	int PreviousAbilityCharges() const { return previousAbilityCharges; }
 
-	void UpdateTurnLifespan() {
-		--stats.turns;
+	void UpdateRoundLifespan() { 
+		if (justAddedModifier) {
+			justAddedModifier = false;
+			return;
+		}
+		--stats.rounds;
 	}
 
-	void SetShield(int newValue) {
-		stats.shield = newValue;
-	}
+	void SetShield(int newValue) { stats.shield = newValue; }
 
+	// return true if is an ability modifier meaning the ability effects is applied for more than 1 round
+	bool IsAbilityModifier() const { return stats.rounds > 0; }
+
+	void JustAddModifier(bool justAdd) { justAddedModifier = justAdd; }
+	bool JustAddModifier() const { return justAddedModifier; }
 private:
 	int id; // To determind what type of ability it is (Bomb projectile, stats ability, etc)
 	int abilityCharges = 0; // count of how many of these ability the player/enemy has
@@ -101,6 +111,8 @@ private:
 	AbilityType type;
 	Tier tier;
 	AEGfxTexture* texture;
+
+	bool justAddedModifier = false;
 
 	StatsModule stats;
 	ProjectileModule proj;

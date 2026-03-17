@@ -146,7 +146,9 @@
             "Hp": 0,
             "Attack": 0,
             "Shield": 3,
-            "Turns": 5
+            "Rounds": 5,
+            "Is_Buff": true,
+            "Target_Self": true
         }
     },
 
@@ -169,5 +171,20 @@
         "Type": 3,
         "Tier": 1,
         "Texture": ""
+    },
+
+    {
+        "Name": "Gravity",
+        "Type": 3,
+        "Tier": 1,
+        "Texture": "",
+        "Base_Stats": {
+            "Hp": 0,
+            "Attack": 0,
+            "Shield": 0,
+            "Rounds": 1,
+            "Is_Buff": false,
+            "Target_Self": false
+        }
     }
 ]

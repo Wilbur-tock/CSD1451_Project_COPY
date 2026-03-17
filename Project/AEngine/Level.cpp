@@ -62,8 +62,9 @@ struct StatsUI {
 		float amXOffset = (turnStatusPanel.Size().x * 0.5f) + (amPanelWidth * 0.5f);
 		float amYOffset = -barBGSize.y;
 
-		float gapBetweenBorder = 2.5f;
+		float gapBetweenBorder = 7.5f;
 
+		// Initialize ability modifier UI objects
 		abilityModifierPanel.reserve(amCount);
 		abilityModifierIcon.reserve(amCount);
 		abilityModifierText.reserve(amCount);
@@ -83,14 +84,16 @@ struct StatsUI {
 			panel.AddOffset({ xOffset, amYOffset });
 			abilityModifierPanel.push_back(panel);
 
+			AEVec2 iconSize{ amPanelWidth - (gapBetweenBorder * 2.0f), amPanelHeight - (gapBetweenBorder * 2.0f) };
+
 			UIManager::Panel icon = UIManager::Panel{
-				{amPanelWidth - (gapBetweenBorder * 2.0f), amPanelHeight - (gapBetweenBorder * 2.0f)}, Color{1,1,1}, Utils::AnchorMode::TOP_CENTER
+				{iconSize}, Color{1,1,1}, Utils::AnchorMode::TOP_CENTER
 			};
 
 			icon.AddOffset({ xOffset, amYOffset - gapBetweenBorder });
 			abilityModifierIcon.push_back(icon);
 
-			TextObject text = TextObject{ "5", 0.5f, {1,0,0}, {0,0}, Utils::AnchorMode::BOTTOM_CENTER };
+			TextObject text = TextObject{ "5", 0.55f, {0,0,0}, {0,0}, Utils::AnchorMode::BOTTOM_RIGHT };
 			text.SetPosition(panel.GetTransform());
 
 			abilityModifierText.push_back(text);
@@ -106,12 +109,17 @@ struct StatsUI {
 		for (int i = 0; i < abilityModifiers.size(); ++i) {
 			Ability const& ability = abilityModifiers[i];
 
+			Color amPanelColor{ 0, 0.9f, 0 };
+			if (!ability.GetStats().isBuff) {
+				amPanelColor.SetColor(0.9f, 0, 0);
+			}
+			abilityModifierPanel[i].SetColor(amPanelColor);
 			abilityModifierPanel[i].Draw();
 			// Update texture icon then draw
 			abilityModifierIcon[i].SetTexture(ability.GetTexture());
 			abilityModifierIcon[i].Draw();
 			// Update the number of turns remaining
-			abilityModifierText[i].TextContent(std::to_string(ability.GetStats().turns));
+			abilityModifierText[i].TextContent(std::to_string(ability.GetStats().rounds));
 			abilityModifierText[i].Draw();
 		}
 	}

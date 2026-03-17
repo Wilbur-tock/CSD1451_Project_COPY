@@ -283,6 +283,7 @@ namespace CannonManager {
         Projectile projectile = projectiles[selectedProjectileId];
 
         AbilityActivation(projectile);
+        ApplyModifierEffects(projectile);
 
         projectile.Initialize(transform, static_cast<int>(activeProjectiles.size()), cannonAngle, shotPower);
 
@@ -322,6 +323,8 @@ namespace CannonManager {
 
             for (int step = 0; step < SUB_STEPS; ++step) {
                 projectile.Update(isPlayerControlled, subDt);
+
+                // Activate ability after projectile has been updated
                 projectile.AbilityActivation(abilityController->GetCurrentAbility());
                 AbilityActivation(projectile);
             }
@@ -339,7 +342,7 @@ namespace CannonManager {
         if (activeProjectiles.empty()) return;
         for (int i = static_cast<int>(activeProjectiles.size() - 1); i >= 0; --i) {
             if (!activeProjectiles[i].IsActive()) {
-                activeProjectiles[i].IsHittingSomething() ?
+                activeProjectiles[i].HasHit() ?
                     isPlayerControlled ? ++GameTrackingManager::data.playerShotsHit : ++GameTrackingManager::data.enemyShotsHit :
                     isPlayerControlled ? ++GameTrackingManager::data.playerShotsMiss : ++GameTrackingManager::data.enemyShotsMiss;
 
@@ -370,7 +373,7 @@ namespace CannonManager {
             abilityController->IsAbilityTriggered(true);
             break;
         case ProjectileMode::CLUSTER_SHOT:
-            if (!projectile.IsCollisionTriggered() && leftClick) {
+            if (!projectile.HasCollided() && leftClick) {
                 int count = 2;
                 for (int i = 0; i < count; ++i) {
                     // Initialize and spawn a new projectile from current position
@@ -388,6 +391,16 @@ namespace CannonManager {
                 abilityController->IsAbilityTriggered(true);
             }
             break;
+        }
+    }
+
+    void Cannon::ApplyModifierEffects(Projectile& projectile) {
+        // apply the modifier effects this controller has in the abilityModifier vector
+        // if the modifier effects needs to be constanly reapply after the shooter has shoot
+        for (Ability const& ability : abilityController->GetAbilityModifiers()) {
+            if (ability.GetName() == "Gravity") { 
+                projectile.GravityScale(2.5f); // value is preset here
+            }
         }
     }
 
@@ -498,7 +511,7 @@ namespace CannonManager {
         debugStr += "\n\nAbility Modifiers:";
 
         for (Ability const& ability : abilityController->GetAbilityModifiers()) {
-            debugStr += "\nAbility: " + ability.GetName() + " Turns: " + std::to_string(ability.GetStats().turns);
+            debugStr += "\nAbility: " + ability.GetName() + " Turns: " + std::to_string(ability.GetStats().rounds);
         }
 
         debugStr += "\n\nSelected Ability:\nId:" + std::to_string(selectedAbility.Id())

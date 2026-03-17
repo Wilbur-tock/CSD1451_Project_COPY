@@ -11,14 +11,18 @@
 
 namespace CannonManager {
 	class Cannon : public GameObject {
-	public:
-		// Constructors
+	public: // Constructors
 		Cannon() = default;
 		Cannon(AEVec2 _pos, AEGfxTexture* _texture, TileIndex _tileId, AEVec2 _size = { 30,10 }, bool _isShootingRight = true, bool _isPlayerControlled = true);
 
-		// return true if projectile has been shoot out of the cannon and be destroyed
+		// Getters and Setters
+
+		// return true if the projectile has been shoot out of the cannon and all projectiles has been destroyed
 		bool AllProjectilesDestroyed() const { return allProjectileDestroyed; }
 		AbilitiesManager::AbilityController* AbilityController() { return abilityController; }
+
+		void SetTarget(Character* _target) { target = _target; }
+
 		// Member Functions
 
 		void Initialize(AbilitiesManager::AbilityController* controller);
@@ -32,16 +36,9 @@ namespace CannonManager {
 
 		// Return true if this cannon has a lock in target or the target has been destroyed
 		bool IsTargetAlive();
-		void SetTarget(Character* _target) {
-			target = _target;
-			//std::cout << "[CannonManager] " + std::string(isPlayerControlled ? "PLAYER" : "ENEMY") 
-			//    + " New Target Set: " + _target->TypeName() << '\n';
-		}
-
 		void SetEnemyAI(int difficultyLevel);
 
 		void DebugInfo();
-		Character* Target() const { return target; }
 	private:
 		// Initialize all the different type of projectile abilities to the CANNON CLASS
 		// Switch between the projectileId to choose the different type of projectile abilities
@@ -67,6 +64,7 @@ namespace CannonManager {
 		// Check for inputs to activated PROJECTILE Abilities after projectile has been shot
 		// Ability effects that triggered on cannon
 		void AbilityActivation(Projectile& projectile);
+		void ApplyModifierEffects(Projectile& projectile);
 
 		void SetCamera(bool isFollowingProjectile);
 		void DrawTrajectory();

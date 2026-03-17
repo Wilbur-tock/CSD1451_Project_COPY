@@ -34,6 +34,13 @@ public:
 	// Default ctor
 	Level(int _leveId);
 
+	// Getters and Setters
+
+	TowerShield& GetTowerShield(bool isPlayer) { return isPlayer ? playerShield : enemyShield; }
+	CannonManager::Cannon& GetCannon(bool isPlayer) { return isPlayer ? playerCannon : enemyCannon; }
+	// Checking who is starting the level
+	bool IsStarting(bool isPlayer) const { return isPlayer == isPlayerStarting; }
+
 	// Member functions
 
 	// Read level map data and load level resources
@@ -58,8 +65,6 @@ public:
 	void SetHoveringOverUI(bool isHovering) { isHoveringUI = isHovering; }
 	void SetExtraTurn() { hasExtraShot = true; }
 	void SetSkipOpponentTurn() { skipOpponentTurn = true; }
-
-	TowerShield& GetTowerShield(bool isPlayer) { return isPlayer ? playerShield : enemyShield; }
 
 	// build or destroy all the original tiles belongs to the territory
 	void ToggleTerritoryTiles(bool isPlayer, bool isBuilding);

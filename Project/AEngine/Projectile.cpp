@@ -58,7 +58,7 @@ void Projectile::AbilityActivation(Ability const& ability) {
         }
         break;
     case ProjectileMode::PENTA_BURST:
-        if (isCollisionTriggered) { // Give a velocity boost once only to continue hitting more stuff
+        if (hasCollided) { // Give a velocity boost once only to continue hitting more stuff
             isAbilityTriggered = true;
             velocity.x *= 2;
             velocity.y *= 2;
@@ -88,25 +88,14 @@ void Projectile::AbilityActivation(Ability const& ability) {
     case ProjectileMode::PIERCING:
         canBypassBlocks = isAbilityTriggered = true;
         break;
-    case ProjectileMode::CLUSTER_SHOT:
-        // Has not hit anything yet can use ability
-        if (!isCollisionTriggered && leftClick) {
-            isAbilityTriggered = true;
-
-
-        }
-        break;
     }
 }
 
 void Projectile::SetProjectileStats(std::string _projectileName, ProjectileModule const& data) {
     projectileName = _projectileName;
-
-    // 1. Set Identity
     projectileId = data.projectileId;
     mode = static_cast<ProjectileMode>(data.projectileId);
 
-    // 2. Set Stats directly from JSON data
     // Total Damage = Base * Multiplier
     float totalDamage = static_cast<float>(data.baseDamage) * data.damageAmp;
     attribute.Damage(static_cast<int>(totalDamage));
@@ -193,7 +182,7 @@ void Projectile::Update(bool isPlayerShot, float dt) {
 
             // Checking collision of the projectile with the tile blocks that is collidable
             if (hasTileCollision) {
-                if (!canBypassBlocks && !isCollisionTriggered) {
+                if (!canBypassBlocks && !hasCollided) {
                     FirstTimeCollision();
                 }
 
@@ -224,8 +213,9 @@ void Projectile::ProjectileMovement(float dt) {
         velocity.y = 0; // ensure that the projectile stay on the ground
         if (std::abs(velocity.x) < PhysicsManager::MINIMUM_VELOCITY) velocity.x = 0;
     }
-    else {
-        velocity.y -= PhysicsManager::GRAVITY * dt;
+    else { 
+        // Gravity pull
+        velocity.y -= (PhysicsManager::GRAVITY * gravityScale) * dt;
     }
 
     transform.pos.x += velocity.x * dt;
@@ -242,8 +232,8 @@ void Projectile::ConstantCollision(Tile const& tile) {
         PhysicsManager::ResolveVerticalCollision(transform, velocity, isGrounded, tile.transform);
     }
 
-    if (!isHitSomething && tile.IsDestructible()) {
-        isHitSomething = true;
+    if (!hasHit && tile.IsDestructible()) {
+        hasHit = true;
     }
 }
 
@@ -252,7 +242,7 @@ void Projectile::FirstTimeCollision() {
     float percentage = 0.5f;
     velocity.x *= percentage;
     velocity.y *= percentage;
-    isCollisionTriggered = true;
+    hasCollided = true;
 
     // Play audio
     AudioManager::PlaySFX(AudioManager::SFX::Impact);
@@ -296,7 +286,7 @@ bool Projectile::Destroy() {
 }
 
 void Projectile::InstantDestroy() {
-    isActive = isCollisionTriggered = toBeDestroyed = false;
+    isActive = hasCollided = toBeDestroyed = false;
     timer = 0.0f;
 }
 
@@ -360,6 +350,6 @@ std::string Projectile::DebugInfo() {
         + "\nTimer: " + Utils::FormatFloat(timer, 2)
         + "\nAttack Charges: " + std::to_string(AttackCharges())
         + "\nDamage Radius: " + std::to_string(attribute.DamageRadius())
-        + "\nCollisionTriggered: " + std::string(isCollisionTriggered ? "true" : "false")
+        + "\nCollisionTriggered: " + std::string(hasCollided ? "true" : "false")
         + "\nCanBypassWall: " + std::string(canBypassBlocks ? "true" : "false");
 }

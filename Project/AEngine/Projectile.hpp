@@ -57,12 +57,13 @@ public:
 	}
 
 	int ProjectileId() const { return projectileId; }
-
 	std::string ProjectileName() const { return projectileName; }
 
 	bool IsActive() const { return isActive; }
-	bool IsHittingSomething() const { return isHitSomething; }
-	bool IsCollisionTriggered() const { return isCollisionTriggered; }
+	bool HasHit() const { return hasHit; }
+	bool HasCollided() const { return hasCollided; }
+
+	void GravityScale(float newGravityScale) { gravityScale = newGravityScale; }
 
 	// Member functions
 
@@ -108,13 +109,16 @@ private:
 	ProjectileMode mode = ProjectileMode::ATTACK;
 	std::string modeName;
 
+	float gravityScale = 1.0f;
+
 	float timer = 0.0f; // lifespan timer
 	bool isActive = false; // is projectile still alive or dead
 	bool toBeDestroyed = false;
-	bool isCollisionTriggered = false; // There is a collision triggered between the projectile and block for the first time
+	bool hasCollided = false; // has hit any tile blocks that is not empty
+	bool hasHit = false; // has hit any destructible tiles 
+
 	bool isAbilityTriggered = false;
 
-	bool isHitSomething = false; // has hit any things expect for the ground / undestructible blocks
 	bool hasHitShield = false;
 	bool canBypassBlocks = false;
 };
