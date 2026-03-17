@@ -14,6 +14,10 @@ void Color::SetColor(float _r, float _g, float _b, float _a) {
 	a = _a < min ? min : _a > max ? max : _a;
 }
 
+void Color::SetColor(Color const& _color) {
+	SetColor(_color.Red(), _color.Green(), _color.Blue());
+}
+
 void Color::EditColorPercentage(float percentage) {
 	SetColor(
 		r *= percentage,

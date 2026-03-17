@@ -399,7 +399,7 @@ namespace CannonManager {
         // if the modifier effects needs to be constanly reapply after the shooter has shoot
         for (Ability const& ability : abilityController->GetAbilityModifiers()) {
             if (ability.GetName() == "Gravity") { 
-                projectile.GravityScale(2.5f); // value is preset here
+                projectile.GravityScale(ability.GetStatus().gravityScale); // value is preset here
             }
         }
     }
@@ -469,6 +469,7 @@ namespace CannonManager {
             }
         }
 
+        // Increase or decreased difficulty
         if (AEInputCheckTriggered(AEVK_Y)) {
             Utils::Wrap(++aiDifficulty, 0.0f, 1.0f);
             std::cout << "[CannonManager] AI Difficulty: " + std::to_string(aiDifficulty) << '\n';
@@ -511,7 +512,7 @@ namespace CannonManager {
         debugStr += "\n\nAbility Modifiers:";
 
         for (Ability const& ability : abilityController->GetAbilityModifiers()) {
-            debugStr += "\nAbility: " + ability.GetName() + " Turns: " + std::to_string(ability.GetStats().rounds);
+            debugStr += "\nAbility: " + ability.GetName() + " Turns: " + std::to_string(ability.GetStatus().rounds);
         }
 
         debugStr += "\n\nSelected Ability:\nId:" + std::to_string(selectedAbility.Id())

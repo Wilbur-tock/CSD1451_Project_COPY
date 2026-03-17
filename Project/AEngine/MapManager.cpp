@@ -250,7 +250,7 @@ namespace MapManager {
 					tile.transform.size.x / 2.0f, tile.transform.size.y / 2.0f
 				);
 
-				GraphicsManager::DrawGameObject(baseTex, tileMat, Color{ 1,1,1,1 });
+				GraphicsManager::DrawGameObject(baseTex, tileMat, tile.textureColor);
 				++GameTrackingManager::data.drawTilesCount;
 
 				// Draw cracks on blocks based on tile hp

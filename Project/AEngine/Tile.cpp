@@ -3,11 +3,11 @@
 #include "LevelManager.hpp"
 
 Tile::Tile(AEVec2 _pos, AEGfxTexture* _texture, TileType _type)
-	: GameObject{ _pos, {defaultSize,defaultSize}, _texture }, type{ _type } {
+	: GameObject{ _pos, {defaultSize,defaultSize}, _texture, TileIndex{0,0}, Color{1,1,1} }, type{ _type } {
 }
 
 Tile::Tile(AEVec2 _pos, AEVec2 _size, AEGfxTexture* _texture, TileType _type)
-	: GameObject{ _pos, _size, _texture }, type{ _type } {
+	: GameObject{ _pos, _size, _texture, TileIndex{0,0}, Color{1,1,1} }, type{ _type } {
 }
 
 void Tile::Type(TileType newType) {
@@ -43,6 +43,29 @@ void Tile::TakeDamage(int damage) {
 	if (!attribute.IsActive()) {
 		Type(TileType::TILE_EMPTY);
 	}
+}
+
+void Tile::SetDecay(int _decayDamage, int _numOfRounds) {
+	isDecaying = true;
+	decayDamage = _decayDamage;
+	remainingDecayRounds = _numOfRounds;
+	textureColor.SetColor(0, 0.8f, 0);
+}
+
+void Tile::UpdateDecay() {
+	if (!isDecaying) return;
+
+	TakeDamage(decayDamage);
+	--remainingDecayRounds;
+
+	if (remainingDecayRounds <= 0) {
+		textureColor.SetColor(defaultColor); // reset color back to default
+		isDecaying = false;
+	}
+}
+
+std::string Tile::DecayInfo() {
+	return "\nDecay Rounds Remaining: " + std::to_string(remainingDecayRounds);
 }
 
 std::string GetTileName(TileType type) {

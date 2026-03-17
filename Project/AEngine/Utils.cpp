@@ -2,7 +2,6 @@
 
 #include "GraphicsManager.hpp"
 #include "CameraManager.hpp"
-#include "BaseTypes.hpp"
 
 namespace Utils {
 	bool isDebuggerOn = true;
@@ -75,6 +74,17 @@ namespace Utils {
 		x = x > Config::MAX_GRID_X ? Config::MAX_GRID_X : x;
 		y = y < Config::MIN_GRID_Y ? Config::MIN_GRID_Y : y;
 		y = y > Config::MAX_GRID_Y ? Config::MAX_GRID_Y : y;
+	}
+
+	void CalculateTileBounds(TileIndex const& center, TileIndex& min, TileIndex& max, int radius) {
+		min.x = center.x - radius;
+		min.y = center.y + radius;
+		max.x = center.x + radius;
+		max.y = center.y - radius;
+
+		// Ensure index is not out of bounds
+		SetTileIndexWithinBounds(min.x, min.y);
+		SetTileIndexWithinBounds(max.x, max.y);
 	}
 
 	void SetAnchoredPosition(Transform const& parent, Transform& trans, AnchorMode const& anchorMode) {

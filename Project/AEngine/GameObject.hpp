@@ -17,7 +17,8 @@ public:
 
 	AEGfxVertexList* pMesh = nullptr;
 	AEGfxTexture* texture = nullptr; // Image texture to drawn
-	Color textureColor{ 0,0,0 };
+	Color textureColor{ 1,1,1 };
+	Color defaultColor{ 1,1,1 };
 
 	Collider collider{ CollisionType::COLLIDER_BOX, {0,0} };
 

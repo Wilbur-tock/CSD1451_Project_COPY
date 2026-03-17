@@ -21,9 +21,6 @@ struct StatsModule {
 	int hp = 0;
 	int atk = 0;
 	int shield = 0;
-	int rounds = 0; // number of rounds this ability would last
-	bool isBuff = true;// is a stats buff or debuff
-	bool targetSelf = true;  // stats buff/debuff on self or opponent
 };
 
 struct ProjectileModule {
@@ -37,6 +34,16 @@ struct ProjectileModule {
 
 struct DefenseModule {
 	int shieldHP = 0;
+};
+
+struct StatusModule {
+	bool isModifier = false; // is this ability a atk/hp stats boost or just a
+	int rounds = 0; // number of rounds this ability would last
+	bool isPositive = true;// is this ability a postive or negative effect (buff or debuff)
+	bool targetSelf = true;  // stats buff/debuff on self or opponent
+	float gravityScale = 0.0f;
+	int damageEachRound = 0; // damage dealt over each round
+	int effectRadius = 0;
 };
 
 class Ability {
@@ -67,18 +74,12 @@ public:
 	StatsModule			GetStats() const { return stats; }
 	ProjectileModule	GetProj() const { return proj; }
 	DefenseModule		GetDefense() const { return defense; }
+	StatusModule        GetStatus() const { return status; }
 
-	void SetStats(StatsModule const& newStats) {
-		stats = newStats;
-	}
-
-	void SetProjectile(ProjectileModule const& newProj) {
-		proj = newProj;
-	}
-
-	void SetDefense(DefenseModule const& newDef) {
-		defense = newDef;
-	}
+	void SetStats(StatsModule const& newStats) { stats = newStats; }
+	void SetProjectile(ProjectileModule const& newProj) { proj = newProj; }
+	void SetDefense(DefenseModule const& newDef) { defense = newDef; }
+	void SetStatus(StatusModule const& newStatus) { status = newStatus; }
 
 	int	 AbilityCharges() const { return abilityCharges; }
 	void AbilityCharges(int toAdd) {
@@ -93,13 +94,13 @@ public:
 			justAddedModifier = false;
 			return;
 		}
-		--stats.rounds;
+		--status.rounds;
 	}
 
 	void SetShield(int newValue) { stats.shield = newValue; }
 
 	// return true if is an ability modifier meaning the ability effects is applied for more than 1 round
-	bool IsAbilityModifier() const { return stats.rounds > 0; }
+	bool IsAbilityModifier() const { return status.isModifier && status.rounds > 0; }
 
 	void JustAddModifier(bool justAdd) { justAddedModifier = justAdd; }
 	bool JustAddModifier() const { return justAddedModifier; }
@@ -117,6 +118,7 @@ private:
 	StatsModule stats;
 	ProjectileModule proj;
 	DefenseModule defense;
+	StatusModule status;
 };
 
 std::ostream& operator<<(std::ostream& os, Ability ability);

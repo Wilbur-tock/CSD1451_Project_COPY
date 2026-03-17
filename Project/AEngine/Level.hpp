@@ -69,6 +69,8 @@ public:
 	// build or destroy all the original tiles belongs to the territory
 	void ToggleTerritoryTiles(bool isPlayer, bool isBuilding);
 
+	void AddDecayTiles(TileIndex const& vectorTileId) { decayingTiles.push_back(vectorTileId); }
+
 private:
 	void InitializeUI();
 	void DrawUI();
@@ -127,6 +129,8 @@ private:
 	TerritoryTiles playerTerritory, enemyTerritory;
 
 	TowerShield playerShield, enemyShield;
+
+	std::vector<TileIndex> decayingTiles; // vector ids of activeLevelMap of which tiles having the decaying effect
 };
 
 #endif // !LEVEL_HPP

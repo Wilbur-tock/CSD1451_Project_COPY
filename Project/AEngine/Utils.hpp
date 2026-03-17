@@ -3,8 +3,8 @@
 
 #include "pch.hpp"
 #include "Color.hpp"
-
-struct Transform;
+#include "BaseTypes.hpp"
+#include "TileIndex.hpp"
 
 namespace Utils {
 	extern bool isDebuggerOn;
@@ -42,6 +42,8 @@ namespace Utils {
 	bool IsTileIndexOutOfBounds(int x, int y);
 	// Check if tile index is out of bounds. if out of bounds, set it to be within bounds
 	void SetTileIndexWithinBounds(int& x, int& y);
+
+	void CalculateTileBounds(TileIndex const& center, TileIndex& min, TileIndex& max, int radius);
 
 	void SetAnchoredPosition(Transform const& parent, Transform& trans, AnchorMode const& anchorMode);
 	// Set anchoredPosition with parent being the screen transform (width and height)

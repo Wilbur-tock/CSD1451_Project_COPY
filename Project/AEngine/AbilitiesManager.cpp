@@ -106,7 +106,7 @@ namespace AbilitiesManager {
 			if (item.contains(statsName) && !item[statsName].is_null()) {
 				auto& s = item[statsName];
 				newAbility.SetStats(StatsModule{
-					s["Hp"], s["Attack"], s["Shield"], s["Rounds"], s["Is_Buff"], s["Target_Self"]
+					s["Hp"], s["Attack"], s["Shield"]
 				});
 			}
 
@@ -128,6 +128,20 @@ namespace AbilitiesManager {
 				auto& d = item[defensiveName];
 				newAbility.SetDefense(DefenseModule{ 
 					d["ShieldHP"] 
+				});
+			}
+
+			std::string statusName = "Status_Stats";
+			if (item.contains(statusName) && !item[statusName].is_null()) {
+				auto& status = item[statusName];
+				newAbility.SetStatus(StatusModule{
+					status["Is_Modifier"],
+					status["Rounds"],
+					status["Is_Postive"],
+					status["Target_Self"],
+					status["Gravity_Scale"],
+					status["Damage_Each_Round"],
+					status["Effect_Radius"],
 				});
 			}
 
@@ -250,7 +264,7 @@ namespace AbilitiesManager {
 
 		// Activate a ability effect here
 		if (abilityName == "Tower Shield") {
-			level->GetTowerShield(isPlayerControlled).SetShieldOn(GetCurrentAbility().GetStats().shield, GetCurrentAbility().GetStats().rounds);
+			level->GetTowerShield(isPlayerControlled).SetShieldOn(GetCurrentAbility().GetStats().shield, GetCurrentAbility().GetStatus().rounds);
 			//std::cout << "[AbilitiesManager] Activate Tower Shield ability!" << '\n';
 		}
 		else if (abilityName == "Rebuild") {
@@ -264,7 +278,7 @@ namespace AbilitiesManager {
 		}
 
 		// Add modifier after shooter has shot out the projectile
-		if (ability.GetStats().targetSelf) {
+		if (ability.GetStatus().targetSelf) {
 			// Add modifier to self
 			AddModifier(ability);
 		}
@@ -315,7 +329,7 @@ namespace AbilitiesManager {
 		abilityModifiers.erase(
 			std::remove_if(abilityModifiers.begin(), abilityModifiers.end(),
 				[](Ability& ability) {
-					return ability.GetStats().rounds <= 0 || (ability.GetName() == "Tower Shield" == ability.GetStats().shield <= 0);
+					return ability.GetStatus().rounds <= 0 || (ability.GetName() == "Tower Shield" == ability.GetStats().shield <= 0);
 				}),
 			abilityModifiers.end()
 		);
@@ -344,15 +358,15 @@ namespace AbilitiesManager {
 	bool AbilityController::UseAbility() {
 		if (GetCurrentAbility().GetProj().unlimitedCharges) return true;
 
-		AbilityEffects();
+		// if debugger is on even without having any charges can use ability but don't update the inventory
+		if (Utils::isDebuggerOn || GetCurrentAbility().AbilityCharges() > 0) {
+			AbilityEffects();
+		}
 
-		if (GetCurrentAbility().AbilityCharges() <= 0) return false; // has no ability charges can't use this ability
+		if (GetCurrentAbility().AbilityCharges() <= 0) return false; // has no ability charges can't use this ability return false without updating the inventory
 
 		SetCurrentAbility().AbilityCharges(-1);
 		UpdateInventory(SetCurrentAbility(), false);
-
-		// Reset to default if trying to use an ability without any charges remaining
-		Reset();
 
 		std::cout << "[AbilitiesManager] Ability used: " + GetCurrentAbility().GetName()
 			+ " Charges Remaining: " + std::to_string(GetCurrentAbility().AbilityCharges()) << '\n';
@@ -742,7 +756,7 @@ namespace AbilitiesManager {
 		std::cout << "==============" + controllerName + " Ability Modifiers" + "=============\n";
 		for (Ability const& ability : abilityModifiers) {
 			std::cout << std::setw(15) << std::left << ability.GetName() 
-				<< "Remaining Turns " + std::to_string(ability.GetStats().rounds) << ' '
+				<< "Remaining Turns " + std::to_string(ability.GetStatus().rounds) << ' '
 				<< std::boolalpha << ability.JustAddModifier() << '\n';
 		}
 	}

@@ -42,9 +42,13 @@ class Tile : public GameObject {
 public:
 	Attributes attribute;
 
+	// Constructors
+
 	Tile() = default;
 	Tile(AEVec2 _pos, AEGfxTexture* _texture, TileType _type);
 	Tile(AEVec2 _pos, AEVec2 _size, AEGfxTexture* _texture, TileType _type);
+
+	// Getters and Setters
 
 	TileType Type() const { return type; }
 
@@ -67,11 +71,21 @@ public:
 
 	// Damage tile and character inside the tile
 	void TakeDamage(int damage);
+
+	void SetDecay(int _decayDamage, int _numOfRounds);
+	void UpdateDecay();
+	bool IsDecaying() const { return isDecaying; }
+	std::string DecayInfo();
+
 private:
 	float defaultSize = Config::TILE_SIZE;
 	TileType prevType = TileType::TILE_EMPTY; // previous tile type
 	TileType type = TileType::TILE_EMPTY; // current tile type
 	int characterId = -1; // index of the character object stored in the vector list
+
+	bool isDecaying = false;
+	int decayDamage = 0;
+	int remainingDecayRounds = 0;
 };
 
 std::string GetTileName(TileType type);

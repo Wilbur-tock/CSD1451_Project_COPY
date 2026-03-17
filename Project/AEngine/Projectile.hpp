@@ -20,7 +20,7 @@ enum class ProjectileMode {
 	SHIELD_BUSTER	= 6,
 	PIERCING		= 7,
 	CLUSTER_SHOT	= 8,
-	IDLE, // Always the last if its in idle mode, projectile can't deal damage again as it attack charges has run out
+	DECAY_SHOT		= 9,
 };
 
 class Projectile : public GameObject {
@@ -42,7 +42,6 @@ public:
 
 	std::string ModeName() const {
 		switch (mode) {
-		case ProjectileMode::IDLE:				return "IDLE";
 		case ProjectileMode::ATTACK:			return "DAMAGE";
 		case ProjectileMode::BOMB:				return "BOMB";
 		case ProjectileMode::NUKE:				return "NUKE";
@@ -52,6 +51,7 @@ public:
 		case ProjectileMode::SHIELD_BUSTER:		return "SHIELD_BUSTER";
 		case ProjectileMode::PIERCING:			return "PIERCING";
 		case ProjectileMode::CLUSTER_SHOT:		return "CLUSTER_SHOT";
+		case ProjectileMode::DECAY_SHOT:		return "DECAY_SHOT";
 		default:								return "YOU NEED TO ADD A PROJECTILE MODE NAME";
 		}
 	}

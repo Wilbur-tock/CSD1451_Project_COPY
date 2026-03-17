@@ -110,7 +110,7 @@ struct StatsUI {
 			Ability const& ability = abilityModifiers[i];
 
 			Color amPanelColor{ 0, 0.9f, 0 };
-			if (!ability.GetStats().isBuff) {
+			if (!ability.GetStatus().isPositive) {
 				amPanelColor.SetColor(0.9f, 0, 0);
 			}
 			abilityModifierPanel[i].SetColor(amPanelColor);
@@ -119,7 +119,7 @@ struct StatsUI {
 			abilityModifierIcon[i].SetTexture(ability.GetTexture());
 			abilityModifierIcon[i].Draw();
 			// Update the number of turns remaining
-			abilityModifierText[i].TextContent(std::to_string(ability.GetStats().rounds));
+			abilityModifierText[i].TextContent(std::to_string(ability.GetStatus().rounds));
 			abilityModifierText[i].Draw();
 		}
 	}
@@ -228,10 +228,6 @@ void Level::Load() {
 	levelMap.resize(Config::GRID_HEIGHT, std::vector<Tile>(Config::GRID_WIDTH));
 	activeLevelMap.resize(Config::GRID_HEIGHT, std::vector<Tile>(Config::GRID_WIDTH));
 
-	int reserveCount = 10;
-	enemies.reserve(reserveCount);
-	playerCharacters.reserve(reserveCount);
-
 	// Load map data
 	MapManager::ReadMapData(levelFileName, levelMap);
 
@@ -261,6 +257,12 @@ void Level::Initalize() {
 	// Reset
 	playerCharacters.clear();
 	enemies.clear();
+	decayingTiles.clear();
+
+	int reserveCount = 10;
+	enemies.reserve(reserveCount);
+	playerCharacters.reserve(reserveCount);
+	decayingTiles.reserve(64);
 
 	// Initialize variables
 	activeCannon = isPlayerStarting ? &playerCannon : &enemyCannon;
@@ -379,8 +381,8 @@ void Level::Update() {
 	DebugCommands();
 
 	if (status == LevelStatus::PLAYING) {
+		// Find new target if current target is not alive
 		if (!isPlayerTurn && !enemyCannon.IsTargetAlive()) {
-			// Find new target if current target is not alive
 			enemyCannon.SetTarget(RandomCharacterObj(true));
 			if (!enemyCannon.IsTargetAlive()) std::cerr << "[Level] Enemy has no target!" << std::endl;
 		}
@@ -617,6 +619,22 @@ void Level::SetNewTurn(bool _isPlayerTurn) {
 void Level::UpdateNewRound() {
 	++roundCount;
 
+	// Decaying tiles effect
+	if (decayingTiles.size() > 0) {
+		for (TileIndex id : decayingTiles) {
+			activeLevelMap[id.y][id.x].UpdateDecay();
+		}
+
+		// Erase any decaying tiles
+		decayingTiles.erase(
+			std::remove_if(decayingTiles.begin(), decayingTiles.end(),
+				[&](TileIndex id) {
+					return activeLevelMap[id.y][id.x].IsDecaying();
+				}),
+			decayingTiles.end()
+		);
+	}
+
 	AbilitiesManager::AbilityController *playerController = playerCannon.AbilityController();
 	AbilitiesManager::AbilityController *enemyController = enemyCannon.AbilityController();
 
@@ -716,18 +734,12 @@ void Level::SetOriginalTerritoryTiles(TerritoryTiles& territoryTiles) {
 	// Set new min and max tileIndex
 	// a box : min = bottom left corner, max = top right corner
 	int radius = territoryTiles.territoryTileRadius;
-	int minX = territoryTiles.centerId.x - radius;
-	int minY = territoryTiles.centerId.y + radius;
-	int maxX = territoryTiles.centerId.x + radius;
-	int maxY = territoryTiles.centerId.y - radius;
-
-	// Ensure index is not out of bounds
-	Utils::SetTileIndexWithinBounds(minX, minY);
-	Utils::SetTileIndexWithinBounds(maxX, maxY);
+	TileIndex min {0,0}, max{0,0};
+	Utils::CalculateTileBounds(territoryTiles.centerId, min, max, radius);
 
 	// Store the starting tiles of the min and max territory to the vector
-	for (int y = maxY; y < minY; ++y) {
-		for (int x = minX; x < maxX; ++x) {
+	for (int y = max.y; y < min.y; ++y) {
+		for (int x = min.x; x < max.x; ++x) {
 			if (Utils::IsTileIndexOutOfBounds(x, y)) continue; // additional check index not out of bounds
 			Tile const& tile = levelMap[y][x];
 
@@ -858,13 +870,18 @@ void Level::DebugInfo() {
 	if (tile.IsCharacter()) {
 		std::stringstream ss;
 		ss << FindCharacterObj(tile);
-		debug += " " + ss.str();
+		debug += " " + ss.str(); // display address of the character object
 	}
 
 	debug += "\nPos X: " + Utils::FormatFloat(tile.transform.pos.x, 2) + " Y: " + Utils::FormatFloat(tile.transform.pos.y, 2)
 		+ "\nHP: " + Utils::FormatFloat(tile.attribute.Health(), 2)
-		+ "\nDamage Multiplier: " + std::to_string(tile.attribute.DamageMultiplier())
-		+ "\n\nCamera " + std::to_string(CameraManager::camera.GetState())
+		+ "\nDamage Multiplier: " + std::to_string(tile.attribute.DamageMultiplier());
+
+	if (tile.IsDecaying()) {
+		debug += tile.DecayInfo();
+	}
+
+	debug += "\n\nCamera " + std::to_string(CameraManager::camera.GetState())
 		+ "\nPos X : " + Utils::FormatFloat(x, 2) + " Y : " + Utils::FormatFloat(y, 2)
 		+ "\nCamera State: " + CameraManager::camera.PrintState() // Camera INFO
 		+ "\nZoom: " + Utils::FormatFloat(CameraManager::camera.GetZoom(), 2)

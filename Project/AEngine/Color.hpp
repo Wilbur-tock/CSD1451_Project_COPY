@@ -15,6 +15,7 @@ public:
 
 	void EditColorPercentage(float percentage);
 	void SetColor(float _r, float _g, float _b, float _a = 1.0f);
+	void SetColor(Color const& _color);
 
 private:
 	float r, g, b, a;

@@ -24,7 +24,7 @@ void Projectile::Draw() {
 }
 
 void Projectile::AbilityActivation(Ability const& ability) {
-    if (Mode() == ProjectileMode::IDLE || Mode() == ProjectileMode::ATTACK || isAbilityTriggered) return;
+    if (Mode() == ProjectileMode::ATTACK || isAbilityTriggered) return;
 
     bool leftClick = AEInputCheckTriggered(AEVK_LBUTTON);
 
@@ -87,6 +87,27 @@ void Projectile::AbilityActivation(Ability const& ability) {
         break;
     case ProjectileMode::PIERCING:
         canBypassBlocks = isAbilityTriggered = true;
+        break;
+    case ProjectileMode::DECAY_SHOT:
+        if (hasCollided) {
+            isAbilityTriggered = true;
+            int radius = ability.GetStatus().effectRadius;
+
+            TileIndex center{0,0}, min{0,0}, max{0,0};
+            Utils::GetTileIndex(center.x, center.y, transform.pos); // set current projectile tile index as center
+            Utils::CalculateTileBounds(center, min, max, radius); // calculate the bounds to set the blocks inside the bounds to be decaying
+
+            // add blocks to be decay
+            for (int y = max.y; y < min.y; ++y) {
+                for (int x = min.x; x < max.x; ++x) {
+                    Tile& tile = (*MapManager::currentMap)[y][x];
+                    if (tile.IsBlocks()) {
+                        tile.SetDecay(ability.GetStatus().damageEachRound, ability.GetStatus().rounds); // set decay 
+                        LevelManager::CurrentLevel()->AddDecayTiles(tile.tileId); // add to the vector containing all the decaying tiles
+                    }
+                }
+            }
+        }
         break;
     }
 }
@@ -254,7 +275,6 @@ void Projectile::FirstTimeCollision() {
 void Projectile::ConsumeAttackCharge() {
     if (--attackCharges <= 0) {
         attackCharges = 0;
-        mode = ProjectileMode::IDLE;
     }
 }
 
@@ -296,7 +316,7 @@ void Projectile::PlayModeEffect() {
 
 void Projectile::DamageTile(int tileX, int tileY) {
     Tile& centerTile = (*MapManager::currentMap)[tileY][tileX];
-    if (Mode() == ProjectileMode::IDLE || !centerTile.IsDestructible()) return;
+    if (attackCharges <= 0 || !centerTile.IsDestructible()) return;
 
     int blastRadius = attribute.DamageRadius();
 
