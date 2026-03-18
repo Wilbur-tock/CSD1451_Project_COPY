@@ -3,28 +3,24 @@
 #include "Utils.hpp"
 #include "Color.hpp"
 #include "GameStateManager.hpp"
-#include "LevelManager.hpp"
 
 namespace UIInstructionsOverlay {
 
     static std::string GetStateName(GameStateManager::GameState s) {
         using GameStateManager::GameState;
         switch (s) {
-        case GameState::INITIALIZE: return "INITIALIZE";
-        case GameState::MAIN_MENU:  return "MAIN MENU";
+        case GameState::INITIALIZE:   return "INITIALIZE";
+        case GameState::MAIN_MENU:    return "MAIN MENU";
         case GameState::LEVEL_SELECT: return "LEVEL SELECT";
-        case GameState::MAP_EDITOR: return "MAP EDITOR";
-        case GameState::LEVEL:
-            if (LevelManager::CurrentLevel()) {
-                return LevelManager::CurrentLevel()->Name();
-            }
-            return "LEVEL";
-        case GameState::CREDITS:    return "CREDITS";
-        case GameState::SETTINGS:   return "SETTINGS";
-        case GameState::GUIDE:      return "GUIDE";
-        case GameState::RESTART:    return "RESTART";
-        case GameState::EXIT:       return "EXIT";
-        case GameState::QUIT:       return "QUIT";
+        case GameState::MAP_EDITOR:   return "MAP EDITOR";
+        case GameState::LEVEL_1:      return "LEVEL 1";
+        case GameState::LEVEL_2:      return "LEVEL 2";
+        case GameState::CREDITS:      return "CREDITS";
+        case GameState::SETTINGS:     return "SETTINGS";
+        case GameState::GUIDE:        return "GUIDE";
+        case GameState::RESTART:      return "RESTART";
+        case GameState::EXIT:         return "EXIT";
+        case GameState::QUIT:         return "QUIT";
         }
         return "GAME";
     }
@@ -54,7 +50,7 @@ namespace UIInstructionsOverlay {
 
     void Draw() {
         GameStateManager::GameState current = GameStateManager::current;
-        
+
         dimPanel.Draw();
         mainPanel.Draw();
 
@@ -66,12 +62,12 @@ namespace UIInstructionsOverlay {
             "[I] Close this popup\n\n"
             "WHEN THIS POPUP IS CLOSED\n"
             "[TAB] Toggle Debugger\n";
-       
+
         using GameStateManager::GameState;
 
-        if (current == GameState::LEVEL) {
+        if (current == GameState::LEVEL_1 || current == GameState::LEVEL_2) {
             msg +=
-                "LEVEL\n"
+                "\nLEVEL\n"
                 "Mouse: Aim cannon\n"
                 "Hold [LMB]: Charge shot\n"
                 "Release [LMB]: Fire\n"
@@ -81,7 +77,7 @@ namespace UIInstructionsOverlay {
         }
         else if (current == GameState::MAP_EDITOR) {
             msg +=
-                "MAP EDITOR\n"
+                "\nMAP EDITOR\n"
                 "[LMB]: Place selected tile\n"
                 "[RMB]: Erase tile\n"
                 "[CTRL] + Click: Fill ROW\n"
@@ -96,7 +92,7 @@ namespace UIInstructionsOverlay {
         }
         else if (current == GameState::MAIN_MENU) {
             msg +=
-                "MAIN MENU\n"
+                "\nMAIN MENU\n"
                 "[1] Play\n"
                 "[2] Map Editor\n"
                 "[3] Settings\n"
@@ -105,41 +101,32 @@ namespace UIInstructionsOverlay {
                 "[Q] Quit\n";
         }
         else if (current == GameState::LEVEL_SELECT) {
-            msg += "LEVEL SELECT\n";
-
-            int levelCount = LevelManager::LevelCount();
-            int quickSelectCount = (levelCount < 9) ? levelCount : 9;
-
-            for (int i = 0; i < quickSelectCount; ++i) {
-                msg += "[" + std::to_string(i + 1) + "] Start " + LevelManager::GetLevelName(i) + "\n";
-            }
-
-            if (levelCount > 9) {
-                msg += "Mouse: Start any level button\n";
-            }
-
-            if (levelCount <= 0) {
-                msg += "No playable levels found.\n";
-            }
-
-            msg += "[ESC] / [BACK]: Return to Main Menu\n";
+            msg +=
+                "\nLEVEL SELECT\n"
+                "[1] Start Level 1\n"
+                "[2] Start Level 2\n"
+                "[ESC] / [BACK]: Return to Main Menu\n";
         }
         else if (current == GameState::GUIDE) {
             msg +=
-                "GUIDE\n"
-                "[1] Game Guide page\n"
-                "[2] Abilities Guide page\n"
-                "[ESC] / [BACK]: Return to Main Menu\n";
+                "\nGUIDE\n"
+                "[1] Open Game Guide\n"
+                "[2] Open Abilities Guide\n"
+                "Inside Abilities Guide:\n"
+                "[1] Offensive tab\n"
+                "[2] Defensive tab\n"
+                "[W]/[S] or [UP]/[DOWN]: Scroll ability list\n"
+                "[ESC] / [BACK]: Return to Guide Menu or Main Menu\n";
         }
         else if (current == GameState::CREDITS) {
             msg +=
-                "CREDITS\n"
+                "\nCREDITS\n"
                 "[SPACE]: Speed up scroll\n"
                 "[ESC] / [BACK]: Return to Main Menu\n";
         }
         else if (current == GameState::SETTINGS) {
             msg +=
-                "SETTINGS\n"
+                "\nSETTINGS\n"
                 "Use the sliders or +/- buttons to adjust Master, BGM, and SFX volume.\n"
                 "[ESC] / [BACK]: Return\n";
         }

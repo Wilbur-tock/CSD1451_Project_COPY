@@ -5,16 +5,11 @@
 #include "Level.hpp"
 
 namespace LevelManager {
-	void LoadAllLevels();
+	void LoadAllLevels(); // Load all the levels data (Map layout, all instance of player and enemy character object)
 
-	void LoadLevel(int levelIndex);
-	void SelectLevel(int levelIndex);
+	void LoadLevel(int levelId);
+	void SelectLevel(int levelId);
 	Level* CurrentLevel();
-
-	int LevelCount();
-	bool IsValidLevelIndex(int levelIndex);
-	Level const* GetLevel(int levelIndex);
-	std::string GetLevelName(int levelIndex);
 
 	void InitializeLevel();
 	void UpdateLevel();
