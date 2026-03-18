@@ -11,10 +11,6 @@ namespace LevelSelect {
     void Draw();
     void Free();
     void Unload();
-
-    void OnLevel1Clicked();
-    void OnLevel2Clicked();
-    void OnBackClicked();
 }
 
 #endif // LEVEL_SELECT_HPP

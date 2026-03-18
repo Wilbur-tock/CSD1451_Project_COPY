@@ -1,47 +1,129 @@
 #include "LevelManager.hpp"
 
+#include <filesystem>
+#include <cctype>
+
 namespace LevelManager {
+	namespace fs = std::filesystem;
+
 	namespace {
-		constexpr int LEVEL_COUNT = 2;
+		constexpr char LEVEL_FOLDER[] = "Assets/DataMap";
+		int selectedLevelIndex = -1;
+
+		bool TryExtractLevelId(fs::path const& path, int& outLevelId) {
+			if (!fs::is_regular_file(path) || path.extension() != ".txt") {
+				return false;
+			}
+
+			std::string stem = path.stem().string(); // e.g. "level3"
+			const std::string prefix = "level";
+
+			if (stem.rfind(prefix, 0) != 0) {
+				return false;
+			}
+
+			std::string suffix = stem.substr(prefix.size());
+			if (suffix.empty()) {
+				return false; // skips "level.txt"
+			}
+
+			bool allDigits = std::all_of(
+				suffix.begin(),
+				suffix.end(),
+				[](unsigned char c) { return std::isdigit(c) != 0; }
+			);
+
+			if (!allDigits) {
+				return false;
+			}
+
+			outLevelId = std::stoi(suffix);
+			return outLevelId > 0;
+		}
 	}
 
-	Level* selectedLevel = nullptr;      // current selected level
-	std::vector<Level> levelDatas;       // vector containing all the level data in the game
+	Level* selectedLevel = nullptr;
+	std::vector<Level> levelDatas;
 
-	bool IsValidLevelId(int levelId) {
-		return levelId >= 0 && levelId < static_cast<int>(levelDatas.size());
+	int LevelCount() {
+		return static_cast<int>(levelDatas.size());
+	}
+
+	bool IsValidLevelIndex(int levelIndex) {
+		return levelIndex >= 0 && levelIndex < static_cast<int>(levelDatas.size());
+	}
+
+	Level const* GetLevel(int levelIndex) {
+		if (!IsValidLevelIndex(levelIndex)) {
+			return nullptr;
+		}
+
+		return &levelDatas[levelIndex];
+	}
+
+	std::string GetLevelName(int levelIndex) {
+		Level const* level = GetLevel(levelIndex);
+		return level ? level->Name() : "";
 	}
 
 	void LoadAllLevels() {
 		selectedLevel = nullptr;
+		selectedLevelIndex = -1;
 		levelDatas.clear();
-		levelDatas.reserve(LEVEL_COUNT);
 
-		// Create and load all levels that can be selected from Level Select
-		for (int i = 0; i < LEVEL_COUNT; ++i) {
-			int id = i + 1; // level1.txt, level2.txt
-			levelDatas.emplace_back(id);
+		std::vector<int> discoveredLevelIds;
+
+		try {
+			for (auto const& entry : fs::directory_iterator(LEVEL_FOLDER)) {
+				int levelId = 0;
+				if (TryExtractLevelId(entry.path(), levelId)) {
+					discoveredLevelIds.push_back(levelId);
+				}
+			}
+		}
+		catch (fs::filesystem_error const& e) {
+			std::cerr << "[LevelManager] Failed to scan " << LEVEL_FOLDER
+				<< ": " << e.what() << '\n';
+			return;
+		}
+
+		std::sort(discoveredLevelIds.begin(), discoveredLevelIds.end());
+		discoveredLevelIds.erase(
+			std::unique(discoveredLevelIds.begin(), discoveredLevelIds.end()),
+			discoveredLevelIds.end()
+		);
+
+		levelDatas.reserve(discoveredLevelIds.size());
+
+		for (int levelId : discoveredLevelIds) {
+			levelDatas.emplace_back(levelId);
 			levelDatas.back().Load();
 		}
+
+		std::cout << "[LevelManager] Loaded " << levelDatas.size() << " level(s).\n";
 	}
 
-	void LoadLevel(int levelId) {
-		if (!IsValidLevelId(levelId)) {
-			std::cerr << "[LevelManager] Invalid level index in LoadLevel(): " << levelId << '\n';
+	void LoadLevel(int levelIndex) {
+		if (!IsValidLevelIndex(levelIndex)) {
+			std::cerr << "[LevelManager] Invalid level index in LoadLevel(): "
+				<< levelIndex << '\n';
 			return;
 		}
 
-		levelDatas[levelId].Load();
+		levelDatas[levelIndex].Load();
 	}
 
-	void SelectLevel(int levelId) {
-		if (!IsValidLevelId(levelId)) {
-			std::cerr << "[LevelManager] Invalid level index in SelectLevel(): " << levelId << '\n';
+	void SelectLevel(int levelIndex) {
+		if (!IsValidLevelIndex(levelIndex)) {
+			std::cerr << "[LevelManager] Invalid level index in SelectLevel(): "
+				<< levelIndex << '\n';
 			selectedLevel = nullptr;
+			selectedLevelIndex = -1;
 			return;
 		}
 
-		selectedLevel = &levelDatas[levelId];
+		selectedLevelIndex = levelIndex;
+		selectedLevel = &levelDatas[levelIndex];
 	}
 
 	Level* CurrentLevel() {
@@ -50,7 +132,7 @@ namespace LevelManager {
 
 	void InitializeLevel() {
 		if (!selectedLevel) {
-			std::cerr << "[LevelManager] Cannot initialize level: no level selected.\n";
+			std::cerr << "[LevelManager] Cannot initialize level: no selected level.\n";
 			return;
 		}
 
@@ -59,7 +141,6 @@ namespace LevelManager {
 
 	void UpdateLevel() {
 		if (!selectedLevel) {
-			std::cerr << "[LevelManager] Cannot update level: no level selected.\n";
 			return;
 		}
 
@@ -75,7 +156,8 @@ namespace LevelManager {
 	}
 
 	void UnloadLevel() {
-		selectedLevel = nullptr;
 		levelDatas.clear();
+		selectedLevel = nullptr;
+		selectedLevelIndex = -1;
 	}
 }

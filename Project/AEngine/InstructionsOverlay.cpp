@@ -3,6 +3,7 @@
 #include "Utils.hpp"
 #include "Color.hpp"
 #include "GameStateManager.hpp"
+#include "LevelManager.hpp"
 
 namespace UIInstructionsOverlay {
 
@@ -13,8 +14,11 @@ namespace UIInstructionsOverlay {
         case GameState::MAIN_MENU:  return "MAIN MENU";
         case GameState::LEVEL_SELECT: return "LEVEL SELECT";
         case GameState::MAP_EDITOR: return "MAP EDITOR";
-        case GameState::LEVEL_1:    return "LEVEL 1";
-        case GameState::LEVEL_2:    return "LEVEL 2";
+        case GameState::LEVEL:
+            if (LevelManager::CurrentLevel()) {
+                return LevelManager::CurrentLevel()->Name();
+            }
+            return "LEVEL";
         case GameState::CREDITS:    return "CREDITS";
         case GameState::SETTINGS:   return "SETTINGS";
         case GameState::GUIDE:      return "GUIDE";
@@ -65,7 +69,7 @@ namespace UIInstructionsOverlay {
        
         using GameStateManager::GameState;
 
-        if (current == GameState::LEVEL_1 || current == GameState::LEVEL_2) {
+        if (current == GameState::LEVEL) {
             msg +=
                 "LEVEL\n"
                 "Mouse: Aim cannon\n"
@@ -101,11 +105,24 @@ namespace UIInstructionsOverlay {
                 "[Q] Quit\n";
         }
         else if (current == GameState::LEVEL_SELECT) {
-            msg +=
-                "LEVEL SELECT\n"
-                "[1] Start Level 1\n"
-                "[2] Start Level 2\n"
-                "[ESC] / [BACK]: Return to Main Menu\n";
+            msg += "LEVEL SELECT\n";
+
+            int levelCount = LevelManager::LevelCount();
+            int quickSelectCount = (levelCount < 9) ? levelCount : 9;
+
+            for (int i = 0; i < quickSelectCount; ++i) {
+                msg += "[" + std::to_string(i + 1) + "] Start " + LevelManager::GetLevelName(i) + "\n";
+            }
+
+            if (levelCount > 9) {
+                msg += "Mouse: Start any level button\n";
+            }
+
+            if (levelCount <= 0) {
+                msg += "No playable levels found.\n";
+            }
+
+            msg += "[ESC] / [BACK]: Return to Main Menu\n";
         }
         else if (current == GameState::GUIDE) {
             msg +=

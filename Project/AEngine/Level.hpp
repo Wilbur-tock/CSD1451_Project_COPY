@@ -34,6 +34,9 @@ public:
 	// Default ctor
 	Level(int _leveId);
 
+	// Checks for level
+	int Id() const { return levelId; }
+	std::string const& Name() const { return levelName; }
 	// Getters and Setters
 
 	TowerShield& GetTowerShield(bool isPlayer) { return isPlayer ? playerShield : enemyShield; }

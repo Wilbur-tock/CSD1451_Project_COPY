@@ -33,8 +33,7 @@ namespace GameStateManager {
 
     // IsGameplayState (private helper), returns true if state supports pausing
     static bool IsGameplayState() {
-        return current == GameState::LEVEL_1
-            || current == GameState::LEVEL_2
+        return current == GameState::LEVEL
             || current == GameState::MAP_EDITOR;
     }
 
@@ -155,9 +154,17 @@ namespace GameStateManager {
                     gsFree = MapEditor::Exit;
                     break;
 
-                case GameState::LEVEL_1:
-                case GameState::LEVEL_2:
-                    LevelManager::SelectLevel(static_cast<int>(current) - static_cast<int>(GameState::LEVEL_1));
+                case GameState::LEVEL:
+                    if (LevelManager::CurrentLevel() == nullptr) {
+                        std::cerr << "[GameStateManager] No level selected. Returning to level select.\n";
+                        current = GameState::LEVEL_SELECT;
+                        gsIntialize = LevelSelect::Initialize;
+                        gsUpdate = LevelSelect::Update;
+                        gsDraw = LevelSelect::Draw;
+                        gsFree = LevelSelect::Free;
+                        break;
+                    }
+
                     gsIntialize = LevelManager::InitializeLevel;
                     gsUpdate = LevelManager::UpdateLevel;
                     gsDraw = nullptr;
@@ -351,8 +358,7 @@ namespace GameStateManager {
             AudioManager::PlayBGM(AudioManager::Track::MapEditor);
             break;
 
-        case GameState::LEVEL_1:
-        case GameState::LEVEL_2:
+        case GameState::LEVEL:
             AudioManager::PlayBGM(AudioManager::Track::Level);
             break;
 
