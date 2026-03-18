@@ -18,3 +18,26 @@ void Attributes::DamageShield(float percentage) {
 	percentage = std::clamp(percentage, 0.0f, 1.0f);
 	Shield(static_cast<int>(shield * percentage));
 }
+
+void Attributes::SetTickDamage(int tickDmg, int ticks) {
+	isTickDamageActive = true;
+	tickDamage = tickDmg;
+	remainingTicks = ticks;
+}
+
+void Attributes::UpdateTicks() {
+	if (!isTickDamageActive) return;
+
+	TakeDamage(tickDamage);
+	--remainingTicks;
+
+	if (remainingTicks <= 0) {
+		isTickDamageActive = false;
+	}
+}
+
+std::string Attributes::TickDamageInfo() {
+	if (!isTickDamageActive) return "";
+	return "\n\nTicks Remaining: " + std::to_string(remainingTicks)
+		+ "\nTicks Damage: " + std::to_string(tickDamage);
+}

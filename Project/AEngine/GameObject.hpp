@@ -30,6 +30,8 @@ public:
 	~GameObject();
 
 	void DrawCollisionLine();
+	// 0 - defaultColor, 1 - poison/decay damage
+	void UpdateTextureColor(int type);
 
 	bool IsInMapBounds() const {
 		return transform.pos.x >= Config::WORLD_MIN_X && transform.pos.x <= Config::WORLD_MAX_X

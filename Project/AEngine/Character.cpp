@@ -226,7 +226,8 @@ void Character::GetCharacterInfo(std::string& str) {
 		+ "\nIsGrounded: " + std::string(physics.IsGrounded() ? "true" : "false")
 		+ "\n\nStats:\nHP: " + std::to_string(attribute.Health()) + "/" + std::to_string(attribute.MaxHealth())
 		+ "\nDamage Multiplier: " + std::to_string(attribute.DamageMultiplier())
-		+ "\nShield: " + std::to_string(attribute.Shield()) + "/" + std::to_string(attribute.MaxShield());
+		+ "\nShield: " + std::to_string(attribute.Shield()) + "/" + std::to_string(attribute.MaxShield())
+		+ attribute.TickDamageInfo();
 }
 
 void Character::DebugInfo() {

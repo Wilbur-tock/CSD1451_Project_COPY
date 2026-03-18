@@ -78,7 +78,7 @@ void Projectile::AbilityActivation(Ability const& ability) {
                     Tile& tile = (*MapManager::currentMap)[i][tileX];
                     if (tile.Type() == TileType::TILE_EMPTY) {
                         tile.Type(TileType::TILE_BLOCK_1);
-                        tile.attribute.Health(ability.GetDefense().shieldHP);
+                        tile.attribute.Health(ability.GetStats().hp);
                     }
                 }
             }
@@ -91,22 +91,30 @@ void Projectile::AbilityActivation(Ability const& ability) {
     case ProjectileMode::DECAY_SHOT:
         if (hasCollided) {
             isAbilityTriggered = true;
-            int radius = ability.GetStatus().effectRadius;
+            SetAreaEffects(ability, true);
+            //int radius = ability.GetStatus().effectRadius;
 
-            TileIndex center{0,0}, min{0,0}, max{0,0};
-            Utils::GetTileIndex(center.x, center.y, transform.pos); // set current projectile tile index as center
-            Utils::CalculateTileBounds(center, min, max, radius); // calculate the bounds to set the blocks inside the bounds to be decaying
+            //TileIndex center{0,0}, min{0,0}, max{0,0};
+            //Utils::GetTileIndex(center.x, center.y, transform.pos); // set current projectile tile index as center
+            //Utils::CalculateTileBounds(center, min, max, radius); // calculate the bounds to set the blocks inside the bounds to be decaying
 
-            // add blocks to be decay
-            for (int y = max.y; y < min.y; ++y) {
-                for (int x = min.x; x < max.x; ++x) {
-                    Tile& tile = (*MapManager::currentMap)[y][x];
-                    if (tile.IsBlocks()) {
-                        tile.SetDecay(ability.GetStatus().damageEachRound, ability.GetStatus().rounds); // set decay 
-                        LevelManager::CurrentLevel()->AddDecayTiles(tile.tileId); // add to the vector containing all the decaying tiles
-                    }
-                }
-            }
+            //// add blocks to be decay
+            //for (int y = max.y; y < min.y; ++y) {
+            //    for (int x = min.x; x < max.x; ++x) {
+            //        Tile& tile = (*MapManager::currentMap)[y][x];
+            //        if (tile.IsBlocks()) {
+            //            tile.attribute.SetTickDamage(ability.GetStatus().damageEachRound, ability.GetStatus().rounds); // set decay or to poison
+            //            tile.UpdateTextureColor(1); // update texture color of the tiles after it has been set to decay
+            //            currentLevel->AddDecayTiles(tile.tileId); // add to the vector containing all the decaying tiles
+            //        }
+            //    }
+            //}
+        }
+        break;
+    case ProjectileMode::POISON:
+        if (hasCollided) {
+            isAbilityTriggered = true;
+            SetAreaEffects(ability, false);
         }
         break;
     }
@@ -357,6 +365,38 @@ void Projectile::DamageTile(int tileX, int tileY) {
     // Consume 1 attack charge if projectile has damaged a tile 
     if (hasDamageAnyTile) {
         ConsumeAttackCharge();
+    }
+}
+
+void Projectile::SetAreaEffects(Ability const& ability, bool isDecaying) {
+    Level* currentLevel = LevelManager::CurrentLevel();
+    int radius = ability.GetStatus().effectRadius;
+
+    TileIndex center{ 0,0 }, min{ 0,0 }, max{ 0,0 };
+    Utils::GetTileIndex(center.x, center.y, transform.pos); // set current projectile tile index as center
+    Utils::CalculateTileBounds(center, min, max, radius); // calculate the bounds to set the blocks inside the bounds to be decaying
+
+    // Check tiles within a given radius
+    for (int y = max.y; y < min.y; ++y) {
+        for (int x = min.x; x < max.x; ++x) {
+            Tile& tile = (*MapManager::currentMap)[y][x];
+
+            if (isDecaying) { // decay blocks within a tile radius
+                if (!tile.IsBlocks()) continue;
+
+                tile.attribute.SetTickDamage(ability.GetStatus().damageEachRound, ability.GetStatus().rounds); // set decay or to poison
+                tile.UpdateTextureColor(1); // update texture color of the tiles after it has been set to decay
+                currentLevel->AddDecayTiles(tile.tileId); // add to the vector containing all the decaying tiles
+            }
+            else { // poison character within a tile radius
+                if (!tile.IsCharacter()) continue;
+                // Find character to poison
+                Character* characterToPoison = currentLevel->FindCharacterObj(tile);
+                characterToPoison->attribute.SetTickDamage(ability.GetStatus().damageEachRound, ability.GetStatus().rounds);
+                characterToPoison->UpdateTextureColor(1);
+                currentLevel->AddPoisonCharacters(characterToPoison->IsPlayer(), characterToPoison->id);
+            }
+        }
     }
 }
 

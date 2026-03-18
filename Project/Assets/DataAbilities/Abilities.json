@@ -127,8 +127,32 @@
         "Projectile_Stats": {
             "ProjectileID": 9,
             "Damage_Amp": 1.0,
-            "Base_Damage": 10,
-            "Radius": 3,
+            "Base_Damage": 5,
+            "Radius": 1,
+            "Charges": 1,
+            "unlimited_charges": false
+        },
+        "Status_Stats": {
+            "Is_Modifier": false,
+            "Rounds": 5,
+            "Is_Postive": true,
+            "Target_Self": true,
+            "Gravity_Scale": 1.0,
+            "Damage_Each_Round": 5,
+            "Effect_Radius": 5
+        }
+    },
+
+    {
+        "Name": "Poison",
+        "Type": 2,
+        "Tier": 1,
+        "Texture": "",
+        "Projectile_Stats": {
+            "ProjectileID": 10,
+            "Damage_Amp": 1.0,
+            "Base_Damage": 5,
+            "Radius": 1,
             "Charges": 1,
             "unlimited_charges": false
         },
@@ -148,8 +172,10 @@
         "Type": 3,
         "Tier": 1,
         "Texture": "Card_Add_Health",
-        "Defensive_Stats": {
-            "ShieldHP": 1
+        "Base_Stats": {
+            "Hp": 1,
+            "Attack": 0,
+            "Shield": 0
         },
         "Projectile_Stats": {
             "ProjectileID": 5,

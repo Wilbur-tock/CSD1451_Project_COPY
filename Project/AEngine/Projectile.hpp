@@ -21,6 +21,7 @@ enum class ProjectileMode {
 	PIERCING		= 7,
 	CLUSTER_SHOT	= 8,
 	DECAY_SHOT		= 9,
+	POISON			= 10,
 };
 
 class Projectile : public GameObject {
@@ -52,6 +53,7 @@ public:
 		case ProjectileMode::PIERCING:			return "PIERCING";
 		case ProjectileMode::CLUSTER_SHOT:		return "CLUSTER_SHOT";
 		case ProjectileMode::DECAY_SHOT:		return "DECAY_SHOT";
+		case ProjectileMode::POISON:			return "POISON";
 		default:								return "YOU NEED TO ADD A PROJECTILE MODE NAME";
 		}
 	}
@@ -88,6 +90,8 @@ public:
 
 	// Damage tiles based on projectile damage (Blocks & Enemy included)
 	void DamageTile(int x, int y);
+	void SetAreaEffects(Ability const& ability, bool isDecaying);
+
 	void ConsumeAttackCharge();
 	// Check if projectile is set to be destroyed
 	void SetDestroy();

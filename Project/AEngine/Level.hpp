@@ -70,6 +70,7 @@ public:
 	void ToggleTerritoryTiles(bool isPlayer, bool isBuilding);
 
 	void AddDecayTiles(TileIndex const& vectorTileId) { decayingTiles.push_back(vectorTileId); }
+	void AddPoisonCharacters(bool isPlayerCharacter, int vectorCharacterId) {  poisonCharacters.push_back({ isPlayerCharacter, vectorCharacterId }); }
 
 private:
 	void InitializeUI();
@@ -116,21 +117,23 @@ private:
 	bool isHoveringUI = false;
 	float switchTurnCooldown = 0.0f; // Cooldown timer to add a delay between the destruction of the player projectile and starting of enemy turn
 
+	// Map level data
 	std::vector<std::vector<Tile>> levelMap; // Default Level tile map loaded at the start
 	std::vector<std::vector<Tile>> activeLevelMap; // runtime level map
 
-	std::vector<Character> enemies; // contains all instance of the Enemy Character Object in the level
+	// Level characters object
 	int bossId = 0; // enemies vector id which the boss is stored in
+	std::vector<Character> enemies; // contains all instance of the Enemy Character Object in the level
 	std::vector<Character> playerCharacters; // contains all instance of the Player Character Object in the level
 
-	// Tile ids
+	// Territory tiles
 	int groundY = 0;
-
 	TerritoryTiles playerTerritory, enemyTerritory;
 
 	TowerShield playerShield, enemyShield;
 
 	std::vector<TileIndex> decayingTiles; // vector ids of activeLevelMap of which tiles having the decaying effect
+	std::vector<std::pair<bool,int>> poisonCharacters; // vector ids of all the characters that are poison, bool isPlayerCharacter, int vectorId
 };
 
 #endif // !LEVEL_HPP

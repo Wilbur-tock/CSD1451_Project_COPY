@@ -23,6 +23,7 @@ public:
 	Character(AEVec2 _pos, AEVec2 _size, AEGfxTexture* _texture, TileIndex _tileId, CharacterType _type);
 
 	CharacterType Type() const { return type; }
+	bool IsPlayer() const { return type == CharacterType::PLAYER; }
 
 	void Update();
 	void Draw();

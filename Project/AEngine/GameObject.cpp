@@ -65,3 +65,11 @@ void GameObject::DrawCollisionLine() {
         GraphicsManager::DrawCircle(transform.pos, collider.size.x * 0.5f);
     }
 }
+
+void GameObject::UpdateTextureColor(int type) {
+    Color color = defaultColor;
+
+    if (type == 1) color.SetColor(0, 0.8f, 0); // poison/decay texture color
+
+    textureColor.SetColor(color);
+}

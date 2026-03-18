@@ -45,29 +45,6 @@ void Tile::TakeDamage(int damage) {
 	}
 }
 
-void Tile::SetDecay(int _decayDamage, int _numOfRounds) {
-	isDecaying = true;
-	decayDamage = _decayDamage;
-	remainingDecayRounds = _numOfRounds;
-	textureColor.SetColor(0, 0.8f, 0);
-}
-
-void Tile::UpdateDecay() {
-	if (!isDecaying) return;
-
-	TakeDamage(decayDamage);
-	--remainingDecayRounds;
-
-	if (remainingDecayRounds <= 0) {
-		textureColor.SetColor(defaultColor); // reset color back to default
-		isDecaying = false;
-	}
-}
-
-std::string Tile::DecayInfo() {
-	return "\nDecay Rounds Remaining: " + std::to_string(remainingDecayRounds);
-}
-
 std::string GetTileName(TileType type) {
 	int id = static_cast<int>(type);
 	if (id < 0 || id >= static_cast<int>(tileNames.size())) return "INVALID";

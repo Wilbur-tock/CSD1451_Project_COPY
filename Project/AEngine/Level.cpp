@@ -622,16 +622,54 @@ void Level::UpdateNewRound() {
 	// Decaying tiles effect
 	if (decayingTiles.size() > 0) {
 		for (TileIndex id : decayingTiles) {
-			activeLevelMap[id.y][id.x].UpdateDecay();
+			Tile& tile = activeLevelMap[id.y][id.x];
+			tile.attribute.UpdateTicks();
+			tile.UpdateTextureColor(1);
 		}
 
 		// Erase any decaying tiles
 		decayingTiles.erase(
 			std::remove_if(decayingTiles.begin(), decayingTiles.end(),
 				[&](TileIndex id) {
-					return activeLevelMap[id.y][id.x].IsDecaying();
+					Tile& tile = activeLevelMap[id.y][id.x];
+
+					if (!tile.attribute.IsTickDamageActive()) {
+						tile.UpdateTextureColor(0); // reset texture color back to default
+						return true;
+					}
+					return false;
 				}),
 			decayingTiles.end()
+		);
+	}
+
+	// Check for poison characters
+	if (poisonCharacters.size() > 0) {
+		for (std::pair<bool, int>& value : poisonCharacters) {
+			bool isPlayerCharacter = value.first;
+			int characterId = value.second;
+			Character* character = isPlayerCharacter ? FindPlayerCharacterObj(characterId) : FindEnemyCharacterObj(characterId);
+			character->attribute.UpdateTicks();
+			character->UpdateTextureColor(1);
+
+			std::cout << "New HP: " << character->attribute.Health() << '\n';
+		}
+
+		// Erase any poison characters from the vector if poison is not active anymore
+		poisonCharacters.erase(
+			std::remove_if(poisonCharacters.begin(), poisonCharacters.end(),
+				[&](std::pair<bool, int>const& poisonChar) {
+					bool isPlayerCharacter = poisonChar.first;
+					int characterId = poisonChar.second;
+					Character* character = isPlayerCharacter ? FindPlayerCharacterObj(characterId) : FindEnemyCharacterObj(characterId);
+
+					if (!character->attribute.IsTickDamageActive()) {
+						character->UpdateTextureColor(0); // reset texture color back to default
+						return true;
+					}
+					return false;
+				}),
+			poisonCharacters.end()
 		);
 	}
 
@@ -877,8 +915,8 @@ void Level::DebugInfo() {
 		+ "\nHP: " + Utils::FormatFloat(tile.attribute.Health(), 2)
 		+ "\nDamage Multiplier: " + std::to_string(tile.attribute.DamageMultiplier());
 
-	if (tile.IsDecaying()) {
-		debug += tile.DecayInfo();
+	if (tile.attribute.IsTickDamageActive()) {
+		debug += tile.attribute.TickDamageInfo();
 	}
 
 	debug += "\n\nCamera " + std::to_string(CameraManager::camera.GetState())

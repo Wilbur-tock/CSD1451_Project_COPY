@@ -71,12 +71,6 @@ public:
 
 	// Damage tile and character inside the tile
 	void TakeDamage(int damage);
-
-	void SetDecay(int _decayDamage, int _numOfRounds);
-	void UpdateDecay();
-	bool IsDecaying() const { return isDecaying; }
-	std::string DecayInfo();
-
 private:
 	float defaultSize = Config::TILE_SIZE;
 	TileType prevType = TileType::TILE_EMPTY; // previous tile type

@@ -123,14 +123,6 @@ namespace AbilitiesManager {
 				});
 			}
 
-			std::string defensiveName = "Defensive_Stats";
-			if (item.contains(defensiveName) && !item[defensiveName].is_null()) {
-				auto& d = item[defensiveName];
-				newAbility.SetDefense(DefenseModule{ 
-					d["ShieldHP"] 
-				});
-			}
-
 			std::string statusName = "Status_Stats";
 			if (item.contains(statusName) && !item[statusName].is_null()) {
 				auto& status = item[statusName];

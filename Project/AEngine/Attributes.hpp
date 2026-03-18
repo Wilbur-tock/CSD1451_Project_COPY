@@ -44,6 +44,12 @@ public:
 	// Percentage (0.0f - 1.0f) to damage based on remaining shield health
 	// 0.0f - 10 shield hp > 0 shield hp
 	void DamageShield(float percentage);
+
+	void SetTickDamage(int tickDmg, int ticks);
+	void UpdateTicks();
+	bool IsTickDamageActive() const { return isTickDamageActive; }
+	std::string TickDamageInfo();
+
 private:
 	// Shield take 1 damage per attack regardless of damage value
 	void Shield(int value) { shield = std::clamp(value, minValue, maxValue); }
@@ -65,6 +71,10 @@ private:
 	int damageMultiplier = 1; // multiply how much damage it can take, 1 - normal damage, 5 - times 5 of damage
 	// Percentages = 0.00 - 1.00
 	float damageReduction = 0, critReduction = 0;
+
+	bool isTickDamageActive = false; // isActive if the object is poison or decaying
+	int tickDamage = 0;
+	int remainingTicks = 0;
 };
 
 #endif // !ATTRIBUTES_HPP

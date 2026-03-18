@@ -32,10 +32,6 @@ struct ProjectileModule {
 	bool unlimitedCharges = 0;
 };
 
-struct DefenseModule {
-	int shieldHP = 0;
-};
-
 struct StatusModule {
 	bool isModifier = false; // is this ability a atk/hp stats boost or just a
 	int rounds = 0; // number of rounds this ability would last
@@ -73,12 +69,10 @@ public:
 						
 	StatsModule			GetStats() const { return stats; }
 	ProjectileModule	GetProj() const { return proj; }
-	DefenseModule		GetDefense() const { return defense; }
 	StatusModule        GetStatus() const { return status; }
 
 	void SetStats(StatsModule const& newStats) { stats = newStats; }
 	void SetProjectile(ProjectileModule const& newProj) { proj = newProj; }
-	void SetDefense(DefenseModule const& newDef) { defense = newDef; }
 	void SetStatus(StatusModule const& newStatus) { status = newStatus; }
 
 	int	 AbilityCharges() const { return abilityCharges; }
@@ -117,7 +111,6 @@ private:
 
 	StatsModule stats;
 	ProjectileModule proj;
-	DefenseModule defense;
 	StatusModule status;
 };
 
