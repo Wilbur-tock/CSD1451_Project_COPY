@@ -58,7 +58,7 @@ public:
 	Character* RandomCharacterObj(bool isPlayerObj);
 
 	Character* EnemyBoss() { 
-		if (bossId < 0 || bossId > enemies.size()) return nullptr;
+		if (bossId < 0 || bossId >= static_cast<int>(enemies.size())) return nullptr;
 		return &enemies[bossId];
 	}
 

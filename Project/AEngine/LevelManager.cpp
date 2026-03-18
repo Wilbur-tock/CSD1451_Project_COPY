@@ -1,29 +1,47 @@
 #include "LevelManager.hpp"
 
 namespace LevelManager {
-	Level* selectedLevel = nullptr; // current selected level
-	std::vector<Level> levelDatas; // vector containing all the level data in the game
+	namespace {
+		constexpr int LEVEL_COUNT = 2;
+	}
+
+	Level* selectedLevel = nullptr;      // current selected level
+	std::vector<Level> levelDatas;       // vector containing all the level data in the game
+
+	bool IsValidLevelId(int levelId) {
+		return levelId >= 0 && levelId < static_cast<int>(levelDatas.size());
+	}
 
 	void LoadAllLevels() {
-		int levelCount = 1;
+		selectedLevel = nullptr;
 		levelDatas.clear();
-		levelDatas.reserve(levelCount);
+		levelDatas.reserve(LEVEL_COUNT);
 
-		// Add all instance of level into the vector
-		for (int i = 0; i < levelCount; ++i) {
-			int id = i + 1;
-			Level data{ id };
-			levelDatas.push_back(data);
-			levelDatas[i].Load();
+		// Create and load all levels that can be selected from Level Select
+		for (int i = 0; i < LEVEL_COUNT; ++i) {
+			int id = i + 1; // level1.txt, level2.txt
+			levelDatas.emplace_back(id);
+			levelDatas.back().Load();
 		}
 	}
 
 	void LoadLevel(int levelId) {
+		if (!IsValidLevelId(levelId)) {
+			std::cerr << "[LevelManager] Invalid level index in LoadLevel(): " << levelId << '\n';
+			return;
+		}
+
 		levelDatas[levelId].Load();
 	}
 
 	void SelectLevel(int levelId) {
-		selectedLevel = &(levelDatas[levelId]);
+		if (!IsValidLevelId(levelId)) {
+			std::cerr << "[LevelManager] Invalid level index in SelectLevel(): " << levelId << '\n';
+			selectedLevel = nullptr;
+			return;
+		}
+
+		selectedLevel = &levelDatas[levelId];
 	}
 
 	Level* CurrentLevel() {
@@ -31,19 +49,33 @@ namespace LevelManager {
 	}
 
 	void InitializeLevel() {
+		if (!selectedLevel) {
+			std::cerr << "[LevelManager] Cannot initialize level: no level selected.\n";
+			return;
+		}
+
 		selectedLevel->Initalize();
 	}
 
 	void UpdateLevel() {
+		if (!selectedLevel) {
+			std::cerr << "[LevelManager] Cannot update level: no level selected.\n";
+			return;
+		}
+
 		selectedLevel->Update();
 	}
 
 	void FreeLevel() {
+		if (!selectedLevel) {
+			return;
+		}
+
 		selectedLevel->Free();
 	}
 
 	void UnloadLevel() {
-		levelDatas.clear();
 		selectedLevel = nullptr;
+		levelDatas.clear();
 	}
 }

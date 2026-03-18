@@ -220,7 +220,9 @@ void Level::InitializeUI() {
 }
 
 Level::Level(int _leveId)
-	: levelId{ _leveId }, levelName{ "Level " + std::to_string(levelId + 1) }, levelFileName{ "level" + std::to_string(levelId) } {
+	: levelId{ _leveId },
+	levelName{ "Level " + std::to_string(levelId) },
+	levelFileName{ "level" + std::to_string(levelId) } {
 }
 
 void Level::Load() {

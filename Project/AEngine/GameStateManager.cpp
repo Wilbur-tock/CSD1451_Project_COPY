@@ -292,6 +292,8 @@ namespace GameStateManager {
     // Releases all globally owned resources in reverse dependency order
     void Exit() {
         GameTrackingManager::GameEnd();
+
+        LevelManager::UnloadLevel();
         AssetsManager::Unload();
 
         MainMenu::Unload();
