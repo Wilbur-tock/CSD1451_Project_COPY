@@ -131,11 +131,29 @@ StatsUI playerStatsUI, enemyStatsUI;
 // Results UI objects
 bool resultScreenInitialized = false;
 UIManager::Panel resultOverlay, centerPanel;
-Button resultRestartButton, resultMainMenuButton;
+Button resultRestartButton, resultNextLevelButton, resultMainMenuButton;
 TextObject resultTitle, subtitle;
+
+static GameStateManager::GameState LevelIndexToState(int levelIndex) {
+	return static_cast<GameStateManager::GameState>(
+		static_cast<int>(GameStateManager::GameState::LEVEL_1) + levelIndex
+		);
+}
 
 static void OnResultRestart() {
 	GameStateManager::next = GameStateManager::GameState::RESTART;
+}
+
+static void OnResultNextLevel() {
+	Level* currentLevel = LevelManager::CurrentLevel();
+	if (!currentLevel) return;
+
+	const int nextLevelIndex = currentLevel->Id() + 1;
+
+	if (nextLevelIndex < 0 || nextLevelIndex >= LevelManager::LevelCount()) return;
+	if (!LevelManager::IsLevelUnlocked(nextLevelIndex)) return;
+
+	GameStateManager::next = LevelIndexToState(nextLevelIndex);
 }
 
 static void OnResultMainMenu() {
@@ -146,7 +164,7 @@ void Level::InitializeUI() {
 	// Initialize UI objects in level
 	turnStatusPanel = { {150,75}, {1,1,1}, Utils::AnchorMode::TOP_CENTER };
 
-	turnText = TextObject{ "", 0.8f,{0,0.75f,0}, { {0,0}, {0,0} }, Utils::AnchorMode::CENTER};
+	turnText = TextObject{ "", 0.8f,{0,0.75f,0}, { {0,0}, {0,0} }, Utils::AnchorMode::CENTER };
 	turnText.SetPosition(turnStatusPanel.GetTransform());
 
 	roundCountText = TextObject{ "", 0.6f,{0,0,0}, { {0,0}, {0,0} }, Utils::AnchorMode::CENTER };
@@ -161,26 +179,27 @@ void Level::InitializeUI() {
 	enemyStatsUI.Initialize(false, bgWidth);
 
 	// Initialize ResultsUI
+		// Initialize ResultsUI
 	AEGfxTexture* btnTex = AssetsManager::GetTexture("Assets/buttonTexture.png");
 	if (!btnTex) btnTex = AssetsManager::squareTexture;
 
-	float btnW = 250.0f;
+	float btnW = 220.0f;
 	float btnH = 70.0f;
-	float gap = 30.0f;
+	float gap = 25.0f;
 
-	// Coordinates use world-origin where (0,0) = screen center
-	// pMeshCorner draws from top-left corner downward
-	// Total button area width: btnW + gap + btnW = 530
-	float totalW = btnW + gap + btnW;
+	// 3-button layout: [RESTART] [NEXT LEVEL] [MAIN MENU]
+	float totalW = btnW * 3.0f + gap * 2.0f;
+	float startX = -totalW * 0.5f;
+	float buttonY = -35.0f;
 
-	// Restart button: left side of center
-	float restartX = -totalW * 0.5f;
-	float restartY = -20.0f;
+	float restartX = startX;
+	float nextX = restartX + btnW + gap;
+	float menuX = nextX + btnW + gap;
 
 	resultRestartButton = Button(
 		TextObject{ "RESTART" },
 		Utils::AnchorMode::CENTER,
-		{ restartX, restartY },
+		{ restartX, buttonY },
 		{ btnW, btnH },
 		Color(0.2f, 0.6f, 0.9f, 1.0f),
 		btnTex,
@@ -188,14 +207,21 @@ void Level::InitializeUI() {
 		OnResultRestart
 	);
 
-	// Main menu button: right side of center
-	float menuX = restartX + btnW + gap;
-	float menuY = restartY;
+	resultNextLevelButton = Button(
+		TextObject{ "NEXT LEVEL" },
+		Utils::AnchorMode::CENTER,
+		{ nextX, buttonY },
+		{ btnW, btnH },
+		Color(0.2f, 0.75f, 0.3f, 1.0f),
+		btnTex,
+		nullptr,
+		OnResultNextLevel
+	);
 
 	resultMainMenuButton = Button(
 		TextObject{ "MAIN MENU" },
 		Utils::AnchorMode::CENTER,
-		{ menuX, menuY },
+		{ menuX, buttonY },
 		{ btnW, btnH },
 		Color(0.8f, 0.2f, 0.2f, 1.0f),
 		btnTex,
@@ -203,21 +229,31 @@ void Level::InitializeUI() {
 		OnResultMainMenu
 	);
 
-	// -- Draw dark semi-transparent full-screen overlay --
-	// Screen top-left in world-origin coords is (-SCREEN_WIDTH/2, SCREEN_HEIGHT/2)
-	resultOverlay = UIManager::Panel{ {(float)Config::SCREEN_WIDTH, (float)Config::SCREEN_HEIGHT},
-		Color(0.0f, 0.0f, 0.0f, 0.6f), Utils::AnchorMode::TOP_LEFT };
+	// Dark overlay
+	resultOverlay = UIManager::Panel{
+		{ (float)Config::SCREEN_WIDTH, (float)Config::SCREEN_HEIGHT },
+		Color(0.0f, 0.0f, 0.0f, 0.6f),
+		Utils::AnchorMode::TOP_LEFT
+	};
 
-	centerPanel = UIManager::Panel{ {600.0f, 300.0f}, Color{1,1,1}, Utils::AnchorMode::CENTER};
+	// Slightly wider panel now because of 3 buttons
+	centerPanel = UIManager::Panel{
+		{ 820.0f, 320.0f },
+		Color{ 1,1,1 },
+		Utils::AnchorMode::CENTER
+	};
 
-	resultTitle = TextObject{ "", 2.0f, Color{1,1,1}, { {0,0}, {0,0} }, Utils::AnchorMode::CENTER};
+	resultTitle = TextObject{
+		"", 2.0f, Color{ 1,1,1 }, { {0,0}, {0,0} }, Utils::AnchorMode::CENTER
+	};
 	resultTitle.SetPosition(centerPanel.GetTransform());
-	// Shift title text upward inside the panel
-	resultTitle.SetOffsetPosition(0, 50.0f);
+	resultTitle.SetOffsetPosition(0, 70.0f);
 
-	subtitle = TextObject{ "", 0.7f, Color{1,1,1, 0.9f}, { {0,0}, {0,0} }, Utils::AnchorMode::CENTER};
+	subtitle = TextObject{
+		"", 0.7f, Color{ 1,1,1, 0.9f }, { {0,0}, {0,0} }, Utils::AnchorMode::CENTER
+	};
 	subtitle.SetPosition(centerPanel.GetTransform());
-	subtitle.SetOffsetPosition(0, 0.2f);
+	subtitle.SetOffsetPosition(0, 10.0f);
 }
 
 Level::Level(int _leveId)
@@ -721,12 +757,28 @@ void Level::UpdateLevelStatus() {
 void Level::DrawResultsUI() {
 	resultOverlay.Draw();
 
+	const bool showNextLevelButton =
+		(status == LevelStatus::PLAYER_WON) &&
+		(levelId + 1 < LevelManager::LevelCount()) &&
+		LevelManager::IsLevelUnlocked(levelId + 1);
+
 	Color panelColor = (status == LevelStatus::PLAYER_WON)
 		? Color(0.1f, 0.3f, 0.1f, 0.9f)
 		: Color(0.3f, 0.1f, 0.1f, 0.9f);
 
 	centerPanel.SetColor(panelColor);
 	centerPanel.Draw();
+
+	// Keyboard shortcuts on result screen
+	if (AEInputCheckTriggered(AEVK_R)) {
+		AudioManager::PlaySFX(AudioManager::SFX::UIButton);
+		OnResultRestart();
+	}
+
+	if (showNextLevelButton && AEInputCheckTriggered(AEVK_N)) {
+		AudioManager::PlaySFX(AudioManager::SFX::UIButton);
+		OnResultNextLevel();
+	}
 
 	// -- Draw result title text --
 	std::string resultStr = (status == LevelStatus::PLAYER_WON) ? "VICTORY!" : "DEFEAT!";
@@ -739,15 +791,29 @@ void Level::DrawResultsUI() {
 	resultTitle.Draw();
 
 	// -- Draw subtitle text --
-	std::string subStr = (status == LevelStatus::PLAYER_WON)
-		? "All enemies have been defeated!"
-		: "All your units have fallen!";
+	std::string subStr;
+	if (status == LevelStatus::PLAYER_WON) {
+		if (showNextLevelButton) {
+			subStr = "Level cleared! Press NEXT LEVEL to continue.  [N]";
+		}
+		else {
+			subStr = "You cleared the final level!";
+		}
+	}
+	else {
+		subStr = "All your units have fallen!  [R]";
+	}
 
 	subtitle.TextContent(subStr);
 	subtitle.Draw();
 
 	// -- Draw buttons --
 	resultRestartButton.Update();
+
+	if (showNextLevelButton) {
+		resultNextLevelButton.Update();
+	}
+
 	resultMainMenuButton.Update();
 }
 
