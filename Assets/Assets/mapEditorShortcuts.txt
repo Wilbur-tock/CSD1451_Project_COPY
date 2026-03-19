@@ -1,7 +1,0 @@
-Saving Files:
-E - to save file name as level.txt
-CTRL+{NUMBER} - to save file name as level{NUMBER}.txt
-
-Drawing:
-CTRL+LCLICK - Draw the entire grid row to be the block type
-SHIFT+RIGHT - Draw the entire grid coloumn to be the block type

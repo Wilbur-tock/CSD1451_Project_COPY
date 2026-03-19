@@ -93,10 +93,11 @@ struct StatsUI {
 			icon.AddOffset({ xOffset, amYOffset - gapBetweenBorder });
 			abilityModifierIcon.push_back(icon);
 
-			TextObject text = TextObject{ "5", 0.55f, {0,0,0}, {0,0}, Utils::AnchorMode::BOTTOM_RIGHT };
-			text.SetPosition(panel.GetTransform());
+			// Display number of rounds this modifier would last
+			TextObject iconText = TextObject{ "5", 0.55f, Color{0.15f, 0.15f, 0.15f}, { {0,0}, {0,0} }, Utils::AnchorMode::BOTTOM_RIGHT };
+			iconText.SetPosition(panel.GetTransform());
 
-			abilityModifierText.push_back(text);
+			abilityModifierText.push_back(iconText);
 		}
 	}
 
@@ -145,10 +146,10 @@ void Level::InitializeUI() {
 	// Initialize UI objects in level
 	turnStatusPanel = { {150,75}, {1,1,1}, Utils::AnchorMode::TOP_CENTER };
 
-	turnText = TextObject{ "", 0.8f,{0,0.75f,0}, {0,0}, Utils::AnchorMode::CENTER};
+	turnText = TextObject{ "", 0.8f,{0,0.75f,0}, { {0,0}, {0,0} }, Utils::AnchorMode::CENTER};
 	turnText.SetPosition(turnStatusPanel.GetTransform());
 
-	roundCountText = TextObject{ "", 0.6f,{0,0,0}, {0,0}, Utils::AnchorMode::CENTER };
+	roundCountText = TextObject{ "", 0.6f,{0,0,0}, { {0,0}, {0,0} }, Utils::AnchorMode::CENTER };
 	roundCountText.SetPosition(turnStatusPanel.GetTransform());
 	roundCountText.SetOffsetPosition(0, -20.0f);
 
@@ -209,12 +210,12 @@ void Level::InitializeUI() {
 
 	centerPanel = UIManager::Panel{ {600.0f, 300.0f}, Color{1,1,1}, Utils::AnchorMode::CENTER};
 
-	resultTitle = TextObject{ "", 2.0f, Color{1,1,1}, {0.0f, 0.0f}, Utils::AnchorMode::CENTER};
+	resultTitle = TextObject{ "", 2.0f, Color{1,1,1}, { {0,0}, {0,0} }, Utils::AnchorMode::CENTER};
 	resultTitle.SetPosition(centerPanel.GetTransform());
 	// Shift title text upward inside the panel
 	resultTitle.SetOffsetPosition(0, 50.0f);
 
-	subtitle = TextObject{ "", 0.7f, Color{1,1,1, 0.9f}, {0.0f, 0.0f}, Utils::AnchorMode::CENTER};
+	subtitle = TextObject{ "", 0.7f, Color{1,1,1, 0.9f}, { {0,0}, {0,0} }, Utils::AnchorMode::CENTER};
 	subtitle.SetPosition(centerPanel.GetTransform());
 	subtitle.SetOffsetPosition(0, 0.2f);
 }

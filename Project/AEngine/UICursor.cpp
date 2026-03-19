@@ -71,7 +71,7 @@ namespace UICursor {
         float originX = x - (gSize.x * 0.25f);
         float originY = y + (gSize.y * 0.25f);
 
-        AEMtx33 mat = GraphicsManager::CreateTransformMatrix(originX, originY, 0.0f, gSize.x, gSize.y);
+        AEMtx33 mat = GraphicsManager::CreateTransformMatrix(originX, originY, gSize.x, gSize.y);
         GraphicsManager::DrawScreenOverlay(gCursorTex, mat, Color{ 1.0f, 1.0f, 1.0f, 1.0f });
     }
 }

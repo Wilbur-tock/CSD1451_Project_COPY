@@ -98,7 +98,7 @@ namespace CannonManager {
 
     void Cannon::Draw() {
         // Render cannon
-        AEMtx33 mat = GraphicsManager::CreateTransformMatrix(transform.pos.x, transform.pos.y, cannonAngle, transform.size.x, transform.size.y);
+        AEMtx33 mat = GraphicsManager::CreateTransformMatrix(transform.pos.x, transform.pos.y, transform.size.x, transform.size.y, cannonAngle);
         GraphicsManager::DrawGameObject(texture, mat, textureColor);
     }
 
@@ -423,6 +423,7 @@ namespace CannonManager {
     void Cannon::DrawTrajectory() {
         if (hasCannonShot) return; 
         int numDots = 30;
+        float size = 10;
         // Starting position (at the barrel tip, matching ShootProjectile)
         float startX = transform.pos.x + cos(cannonAngle) * transform.size.x;
         float startY = transform.pos.y + sin(cannonAngle) * transform.size.x;
@@ -442,7 +443,7 @@ namespace CannonManager {
             float drawY = startY + (vy * t) - (0.5f * PhysicsManager::GRAVITY * t * t);
 
             float alpha = 1.0f - static_cast<float>(i / numDots);
-            GraphicsManager::DrawGameObject(AssetsManager::circleTexture, GraphicsManager::CreateTransformMatrix(drawX, drawY, 0, 10, 10), { 1,1,1, alpha });
+            GraphicsManager::DrawGameObject(AssetsManager::circleTexture, GraphicsManager::CreateTransformMatrix(drawX, drawY, size, size, 0), { 1,1,1, alpha });
         }
     }
 

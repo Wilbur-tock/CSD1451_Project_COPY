@@ -17,8 +17,8 @@ and the bottom of the card will display the name of the ability and the descript
 
 #define CARD_WIDTH 350.0f
 #define CARD_HEIGHT 550.0f
-#define IMAGE_WIDTH 300.0f
-#define IMAGE_HEIGHT 220.0f
+#define IMAGE_WIDTH 200.0f
+#define IMAGE_HEIGHT 200.0f
 
 class Card {
 public:
@@ -34,14 +34,16 @@ public:
 
 
 	Button& GetButton() { return button; }
+	TextObject& GetTitle() { return title; }
+
 	void Update();
 	void Draw();
-
 	void SetTexture(AEGfxTexture* texture);
 
 private:
 	std::string name;
 	AEVec2 pos{ 0,0 };
+	TextObject title;
 	Button button; 
 	AEGfxTexture* imageTexture = nullptr;
 };

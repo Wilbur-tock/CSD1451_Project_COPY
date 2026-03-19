@@ -25,10 +25,10 @@ namespace UIManager {
 
         // Lighter background bar
         if (isScreenOverlay) {
-            GraphicsManager::DrawScreenOverlay(tex, GraphicsManager::CreateTransformMatrix(x, y, 0, w, h), bgColor);
+            GraphicsManager::DrawScreenOverlay(tex, GraphicsManager::CreateTransformMatrix(x, y, w, h), bgColor);
         }
         else {
-            GraphicsManager::DrawWorldUI(tex, GraphicsManager::CreateTransformMatrix(x, y, 0, w, h), bgColor);
+            GraphicsManager::DrawWorldUI(tex, GraphicsManager::CreateTransformMatrix(x, y, w, h), bgColor);
         }
 
         float percentage = (currValue / maxValue);
@@ -53,10 +53,10 @@ namespace UIManager {
 
         // Bar
         if (isScreenOverlay) {
-            GraphicsManager::DrawScreenOverlay(tex, GraphicsManager::CreateTransformMatrix(x, y, 0, newW, newH), fillColor);
+            GraphicsManager::DrawScreenOverlay(tex, GraphicsManager::CreateTransformMatrix(x, y, newW, newH), fillColor);
         }
         else {
-            GraphicsManager::DrawWorldUI(tex, GraphicsManager::CreateTransformMatrix(x, y, 0, newW, newH), fillColor);
+            GraphicsManager::DrawWorldUI(tex, GraphicsManager::CreateTransformMatrix(x, y, newW, newH), fillColor);
         }
 	}
 
@@ -71,7 +71,7 @@ namespace UIManager {
     }
 
     void Panel::Draw() {
-        AEMtx33 mat = GraphicsManager::CreateTransformMatrix(transform.pos.x, transform.pos.y, 0, transform.size.x, transform.size.y);
+        AEMtx33 mat = GraphicsManager::CreateTransformMatrix(transform.pos.x, transform.pos.y, transform.size.x, transform.size.y);
         AEGfxTexture* _texture = AssetsManager::squareTexture;
         if (texture) {
             _texture = texture;
@@ -82,7 +82,7 @@ namespace UIManager {
     PopupPanel::PopupPanel(std::string textContent, AEVec2 _size, Color _color, Utils::AnchorMode panelAnchorMode, AEGfxTexture* panelTexture, AEGfxTexture* btnTexture, Utils::FuncPtr onClick) 
         : panel{ _size, _color, panelAnchorMode, panelTexture }, 
         button{ {0,0}, {50,50}, Color{1,1,1}, btnTexture, nullptr, onClick },
-        textObj{ textContent, 0.5f, Color{1,0,0}, {0,0}, Utils::AnchorMode::CENTER } {
+        textObj{ textContent, 0.5f, Color{1,0,0}, { {0,0}, {0,0} }, Utils::AnchorMode::CENTER } {
         // Set button position to be top right corner to close panel
         button.SetPosition({panel.Pos(), panel.Size()}, Utils::AnchorMode::TOP_RIGHT);
 

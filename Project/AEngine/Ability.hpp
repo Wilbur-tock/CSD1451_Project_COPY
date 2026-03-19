@@ -44,10 +44,11 @@ struct StatusModule {
 
 class Ability {
 public:
-	Ability(int _id, std::string _name, AbilityType _type, Tier _tier, AEGfxTexture* _texture);
+	Ability(int _id, std::string _name, std::string _description, AbilityType _type, Tier _tier, AEGfxTexture* _texture);
 
 	int					Id() const { return id; }
 	std::string			GetName() const { return name; }
+	std::string			GetDescription() const { return description; }
 	AbilityType			GetType() const { return type; }
 	Tier				GetTier() const { return tier; }
 	AEGfxTexture*		GetTexture() const { return texture; }
@@ -103,6 +104,7 @@ private:
 	int abilityCharges = 0; // count of how many of these ability the player/enemy has
 	int previousAbilityCharges = 0;
 	std::string name = "";
+	std::string description = "";
 	AbilityType type;
 	Tier tier;
 	AEGfxTexture* texture;

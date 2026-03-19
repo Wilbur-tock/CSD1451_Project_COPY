@@ -93,7 +93,7 @@ namespace Settings {
         GraphicsManager::DrawWorldUI(
             nullptr,
             GraphicsManager::CreateTransformMatrix(
-                SLIDER_LEFT_X, sliderY, 0,
+                SLIDER_LEFT_X, sliderY,
                 SLIDER_W, SLIDER_H),
             Color(0.2f, 0.2f, 0.2f, 0.5f)
         );
@@ -104,7 +104,7 @@ namespace Settings {
             GraphicsManager::DrawWorldUI(
                 nullptr,
                 GraphicsManager::CreateTransformMatrix(
-                    SLIDER_LEFT_X, sliderY, 0,
+                    SLIDER_LEFT_X, sliderY,
                     fillW, SLIDER_H),
                 Color(0.2f, 0.6f, 0.9f, 0.75f)
             );
@@ -116,7 +116,7 @@ namespace Settings {
         GraphicsManager::DrawWorldUI(
             nullptr,
             GraphicsManager::CreateTransformMatrix(
-                knobX - knobSz / 2.0f, sliderY - 7.0f, 0,
+                knobX - knobSz / 2.0f, sliderY - 7.0f,
                 knobSz, knobSz),
             Color(1.0f, 1.0f, 1.0f, 1.0f)
         );
@@ -125,7 +125,7 @@ namespace Settings {
         GraphicsManager::DrawWorldUI(
             nullptr,
             GraphicsManager::CreateTransformMatrix(
-                knobX - innerSz / 2.0f, sliderY, 0,
+                knobX - innerSz / 2.0f, sliderY,
                 innerSz, innerSz),
             Color(0.2f, 0.6f, 0.9f, 1.0f)
         );
@@ -270,7 +270,7 @@ namespace Settings {
             GraphicsManager::DrawWorldUI(
                 bgTexture,
                 GraphicsManager::CreateTransformMatrix(
-                    -Config::SCREEN_WIDTH / 2.0f, Config::SCREEN_HEIGHT / 2.0f, 0,
+                    -Config::SCREEN_WIDTH / 2.0f, Config::SCREEN_HEIGHT / 2.0f,
                     Config::SCREEN_WIDTH, Config::SCREEN_HEIGHT),
                 Color(1.0f, 1.0f, 1.0f, 1.0f)
             );

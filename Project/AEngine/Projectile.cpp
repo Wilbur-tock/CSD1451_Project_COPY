@@ -19,7 +19,7 @@ Projectile::Projectile(AEGfxTexture* _texture, ProjectileMode _mode, AEVec2 _pos
 }
 
 void Projectile::Draw() {
-    AEMtx33 mat = GraphicsManager::CreateTransformMatrix(transform.pos.x, transform.pos.y, 0, transform.size.x, transform.size.y);
+    AEMtx33 mat = GraphicsManager::CreateTransformMatrix(transform.pos.x, transform.pos.y, transform.size.x, transform.size.y);
     GraphicsManager::DrawGameObject(texture, mat, Color{ 0.5f, 0.5f, 0, 1 });
 }
 
@@ -394,7 +394,7 @@ void Projectile::SetAreaEffects(Ability const& ability, bool isDecaying) {
                 Character* characterToPoison = currentLevel->FindCharacterObj(tile);
                 characterToPoison->attribute.SetTickDamage(ability.GetStatus().damageEachRound, ability.GetStatus().rounds);
                 characterToPoison->UpdateTextureColor(1);
-                currentLevel->AddPoisonCharacters(characterToPoison->IsPlayer(), characterToPoison->id);
+                currentLevel->AddPoisonCharacters(characterToPoison->IsPlayer(), characterToPoison->id); // add to the vector containing all the poison tiles
             }
         }
     }

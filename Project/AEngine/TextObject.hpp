@@ -22,7 +22,7 @@ public:
 	\param[in] pos
 	- use NORMALIZED COORDINATES range from -1.0f to 1.0f
 	*************************************************************************/
-	TextObject(std::string _text, float _scale = 1.0f, Color _color = Color{ 1,1,1 }, AEVec2 _pos = { 0,0 }, Utils::AnchorMode _anchorMode = Utils::AnchorMode::TOP_LEFT);
+	TextObject(std::string _text, float _scale = 1.0f, Color _color = Color{ 1,1,1 }, Transform _transform = { {0,0}, {0,0} }, Utils::AnchorMode _anchorMode = Utils::AnchorMode::TOP_LEFT);
 
 	// Set a new anchorMode and set a new parent transform to update the position of this textObject (Called in Init)
 	void SetPosition(Utils::AnchorMode newMode, Transform const& parentTransform);
@@ -31,8 +31,7 @@ public:
 	// Set the offset position to be used to offset from the anchor point that was set (Called in Init)
 	void SetOffsetPosition(float x, float y);
 
-	AEVec2 Pos() const { return pos; }
-	void Pos(AEVec2 _pos) { pos = _pos; }
+	Transform& GetTransform() { return transform; }
 
 	void TextScale(float newScale) { textScale = newScale; }
 	void SetColor(Color const& newColor) { color = newColor; }
@@ -40,11 +39,7 @@ public:
 	void SetFont(s8 newFont) { font = newFont; }
 
 	std::string TextContent() { return textContent; }
-	void TextContent(std::string newText) {
-		prevTextContent = textContent;
-		textContent = newText;
-		hasUpdatePos = false;
-	}
+	void TextContent(std::string newText);
 
 	void Draw();
 private:
@@ -57,7 +52,7 @@ private:
 	std::string prevTextContent = "";
 
 	float textScale = 1.0f;
-	AEVec2 pos{ 0,0 };
+	Transform transform;
 	Color color{ 1,1,1 };
 	s8 font;
 

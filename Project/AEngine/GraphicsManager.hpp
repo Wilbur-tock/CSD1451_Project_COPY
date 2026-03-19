@@ -22,7 +22,7 @@ namespace GraphicsManager {
 	// x,y - WORLD COORDINATES position of WHERE the texture is going to be render at
 	// rot - rotation, 
 	// scaleX, scaleY, size of the texture
-	AEMtx33 CreateTransformMatrix(float x, float y, float rot = 0.f, float scaleX = 100.f, float scaleY = 100.f);
+	AEMtx33 CreateTransformMatrix(float x, float y, float scaleX = 100.f, float scaleY = 100.f, float rotation = 0.f);
 
 	// Draw game object on the map using pMeshMiddle rect mode middle
 	void DrawGameObject(AEGfxTexture* pTex, AEMtx33 const& transform, Color const& color);

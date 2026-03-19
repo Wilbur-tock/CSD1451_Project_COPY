@@ -175,7 +175,7 @@ void Character::Draw() {
 		float shieldSize = Config::TILE_SIZE;
 		GraphicsManager::DrawGameObject(
 			AssetsManager::circleTexture,
-			GraphicsManager::CreateTransformMatrix(transform.pos.x, transform.pos.y, 0, shieldSize, shieldSize),
+			GraphicsManager::CreateTransformMatrix(transform.pos.x, transform.pos.y, shieldSize, shieldSize, 0),
 			Color{ 0.9f,0.9f,0, 0.3f }
 		);
 	}

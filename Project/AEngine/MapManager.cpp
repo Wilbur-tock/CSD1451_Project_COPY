@@ -246,7 +246,7 @@ namespace MapManager {
 				if (!baseTex) continue;
 
 				AEMtx33 tileMat = GraphicsManager::CreateTransformMatrix(
-					tile.transform.pos.x, tile.transform.pos.y, 0.0f,
+					tile.transform.pos.x, tile.transform.pos.y,
 					tile.transform.size.x / 2.0f, tile.transform.size.y / 2.0f
 				);
 

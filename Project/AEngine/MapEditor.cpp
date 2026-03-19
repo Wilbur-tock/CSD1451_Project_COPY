@@ -387,7 +387,7 @@ namespace MapEditor {
 
 		mapLabelPanel = UIManager::Panel{ { 250, 50 }, { 1,1,1 }, Utils::AnchorMode::TOP_CENTER };
 		// mapLabelText is a child object of the mapLabelPanel
-		mapLabelText = TextObject{ currentMapLabel, 0.75f, {0,0,0}, {0,0}, Utils::AnchorMode::CENTER};
+		mapLabelText = TextObject{ currentMapLabel, 0.75f, {0,0,0}, { {0,0}, {0,0} }, Utils::AnchorMode::CENTER};
 		mapLabelText.SetPosition(mapLabelPanel.GetTransform());
 
 		CameraManager::camera.SetPosition({ 0, 0 });

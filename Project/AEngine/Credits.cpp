@@ -113,7 +113,7 @@ namespace Credits {
             GraphicsManager::DrawWorldUI(
                 bgTexture,
                 GraphicsManager::CreateTransformMatrix(
-                    0, 0, 0,
+                    0, 0,
                     Config::SCREEN_WIDTH,
                     Config::SCREEN_HEIGHT
                 ),
@@ -126,7 +126,7 @@ namespace Credits {
         }
 
         // Draw credits text with scroll offset
-        creditsText.Pos({ -0.3f, scrollOffset });
+        creditsText.GetTransform().pos = {-0.3f, scrollOffset};
         creditsText.Draw();
 
         // Draw hint at 

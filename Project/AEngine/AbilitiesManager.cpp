@@ -89,6 +89,7 @@ namespace AbilitiesManager {
 		int abilityId = 0;
 		for (auto& item : data) { // Your JSON is an array at the root
 			std::string name = item["Name"];
+			std::string description = item["Description"];
 			AbilityType type = static_cast<AbilityType>(item["Type"].get<int>());
 			Tier tier = static_cast<Tier>(item["Tier"].get<int>());
 			// Load texture if no texturename is given use a default texture
@@ -99,7 +100,7 @@ namespace AbilitiesManager {
 				texture = AssetsManager::GetTexture(textureFilePath.c_str());
 			}
 
-			Ability newAbility{ abilityId, name, type, tier, texture };
+			Ability newAbility{ abilityId, name, description, type, tier, texture };
 
 			// Load different stats modules if can find
 			std::string statsName = "Base_Stats";
@@ -443,7 +444,7 @@ namespace AbilitiesManager {
 		if (isAllAbilities) {
 			Utils::Wrap(abilityId, 0, static_cast<int>(allAbilities.size()-1));
 		}
-		else {
+		else { // Toggle through inventory abilities
 			bool found = false;
 			for (int i = 0; i < InventoryCount(); ++i) {
 				int newAbilityId = inventoryIds[i];
@@ -471,16 +472,10 @@ namespace AbilitiesManager {
 
 	// Randomly select abilities for the ability selector UI
 	void AbilityController::AbilitySelectionRandomisator() {
-
-		std::cout << "[AbilitiesManager] Randomising abilities for the selector..." << std::endl;
-
 		abilitiesCards.clear();
 
 		// Randomise Abilties
-		// Check inventory how many offensive and defensive abilities the player has and randomise based on that
-		std::cout << "[AbilitiesManager] Number of abilities in inventory: " << InventoryCount() << std::endl;
-
-		if (InventoryCount() >= Config::MAX_INVENTORY_COUNT) {
+		if (InventoryCount() >= Config::MAX_INVENTORY_COUNT) { 
 			std::cerr << "[AbilitiesManager] Enough abilities in inventory, randomise stats" << std::endl;
 
 			//// Currently only 3 stat cards so no need randomise, just push all 3 stat cards into the selector
@@ -493,13 +488,15 @@ namespace AbilitiesManager {
 			std::cerr << "[AbilitiesManager] Not enough abilities in inventory, randomise offensive and defensive" << std::endl;
 			if (OffensiveOrDefensive() == AbilityType::OFFENSIVE) {
 				// 2 offensive and 1 defensive
-				abilitiesCards.push_back(AbilityRandomisator(offensiveAbilities));
+				abilitiesCards.push_back(offensiveAbilities[1]);
+				//abilitiesCards.push_back(AbilityRandomisator(offensiveAbilities));
 				abilitiesCards.push_back(AbilityRandomisator(offensiveAbilities));
 				abilitiesCards.push_back(AbilityRandomisator(defensiveAbilities));
 			}
 			else {
 				// 2 defensive and 1 offensive
-				abilitiesCards.push_back(AbilityRandomisator(defensiveAbilities));
+				abilitiesCards.push_back(offensiveAbilities[1]);
+				//abilitiesCards.push_back(AbilityRandomisator(defensiveAbilities));
 				abilitiesCards.push_back(AbilityRandomisator(defensiveAbilities));
 				abilitiesCards.push_back(AbilityRandomisator(offensiveAbilities));
 			}
@@ -619,12 +616,7 @@ namespace AbilitiesManager {
 		for (int i = 0; i < selectorCount; ++i) {
 			Card& card = abilitySelectorCards[i];
 			card = Card{ "", cardPos, Color(1,0,0), AssetsManager::squareTexture, nullptr, nullptr };
-			cardPos.x += cardSize.x + gap;
-
-			// Set button text object anchor position
-			TextObject& textObj = card.GetButton().GetTextObject();
-			textObj.SetPosition(Utils::AnchorMode::CENTER, card.GetButton().GetTransform());
-			textObj.SetOffsetPosition(0, -25.0f);
+			cardPos.x += cardSize.x + gap; // update pos for the next card in the for loop
 		}
 	}
 
@@ -642,7 +634,8 @@ namespace AbilitiesManager {
 			button.SetOnClick([this, ability]() {
 				OnClickAbilityCard(ability);
 				});
-			button.GetTextObject().TextContent(ability.GetName()); // update text content
+			card.GetTitle().TextContent(ability.GetName()); // update title
+			button.GetTextObject().TextContent(ability.GetDescription()); // update description
 
 			// Update and draw
 			card.Update();

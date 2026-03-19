@@ -48,7 +48,7 @@ void Button::Draw() {
     }
 
     // Draw button background
-    GraphicsManager::DrawScreenOverlay(bgTexture, GraphicsManager::CreateTransformMatrix(transform.pos.x, transform.pos.y, 0, transform.size.x, transform.size.y), btnColor);
+    GraphicsManager::DrawScreenOverlay(bgTexture, GraphicsManager::CreateTransformMatrix(transform.pos.x, transform.pos.y, transform.size.x, transform.size.y, 0), btnColor);
 
     // Draw text if the string is not a empty string
     if (!textObj.TextContent().empty()) {
@@ -57,7 +57,7 @@ void Button::Draw() {
 
     // Draw icon if there is onee
     if (iconTexture) {
-        GraphicsManager::DrawScreenOverlay(iconTexture, GraphicsManager::CreateTransformMatrix(iconTransform.pos.x, iconTransform.pos.y, 0, iconTransform.size.x, iconTransform.size.y), iconColor);
+        GraphicsManager::DrawScreenOverlay(iconTexture, GraphicsManager::CreateTransformMatrix(iconTransform.pos.x, iconTransform.pos.y, iconTransform.size.x, iconTransform.size.y, 0), iconColor);
     }
 }
 

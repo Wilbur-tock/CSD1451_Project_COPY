@@ -645,7 +645,6 @@ namespace Guide {
                 GraphicsManager::CreateTransformMatrix(
                     -Config::SCREEN_WIDTH / 2.0f,
                     Config::SCREEN_HEIGHT / 2.0f,
-                    0,
                     Config::SCREEN_WIDTH,
                     Config::SCREEN_HEIGHT
                 ),

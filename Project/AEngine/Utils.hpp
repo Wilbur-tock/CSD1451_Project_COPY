@@ -51,6 +51,8 @@ namespace Utils {
 
 	std::string FormatFloat(double value, int precision);
 
+	void WrapText(std::string& text, s8 font, float scale, float maxWidth);
+
 	template <typename T>
 	T RandomValue(T min, T max) {
 		return static_cast<T>(min + (AERandFloat() * (max - min)));

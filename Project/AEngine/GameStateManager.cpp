@@ -285,7 +285,7 @@ namespace GameStateManager {
         UIManager::Panel debugPanel{ {200, 75}, {1.0f,1.0f,1.0f, 0.75f}, Utils::AnchorMode::BOTTOM_LEFT };
         debugPanel.Draw();
 
-        TextObject debugText{ "", Utils::debuggerInfo.first * 0.75f, Utils::debuggerInfo.second, AEVec2{-1.f, -0.81f} };
+        TextObject debugText{ "", Utils::debuggerInfo.first * 0.75f, Utils::debuggerInfo.second, Transform{ {-1.f, -0.81f} , {0,0} } };
         debugText.TextContent("\n[TAB] Debugger ON\nFPS: " + Utils::FormatFloat(AEFrameRateControllerGetFrameRate(), 2)
             + "\nDeltaTime: " + Utils::FormatFloat(PhysicsManager::g_dt, 2)
             + "\n[M] Main Menu");

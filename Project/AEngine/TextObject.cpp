@@ -3,12 +3,23 @@
 #include "AssetsManager.hpp"
 
 TextObject::TextObject()
-	: textContent{ "" }, textScale{ 1.0f }, pos{ 0,0 }, color{ 1,1,1 }, font{ AssetsManager::textFont }, 
+	: textContent{ "" }, textScale{ 1.0f }, transform{ { 0,0 }, {0,0} }, color{ 1,1,1 }, font{ AssetsManager::textFont },
 	anchorMode{ Utils::AnchorMode::TOP_LEFT } {}
 
-TextObject::TextObject(std::string _textContent, float _scale, Color _color, AEVec2 _pos, Utils::AnchorMode _anchorMode)
-	: textContent{ _textContent }, textScale{ _scale }, pos{ _pos }, color{ _color }, font{ AssetsManager::textFont }, 
+TextObject::TextObject(std::string _textContent, float _scale, Color _color, Transform _transform, Utils::AnchorMode _anchorMode)
+	: textContent{ _textContent }, textScale{ _scale }, transform{ _transform.pos, _transform.size }, color{ _color }, font{ AssetsManager::textFont },
 	anchorMode{ _anchorMode } {}
+
+void TextObject::TextContent(std::string newText) {
+	prevTextContent = textContent;
+	textContent = newText;
+	// Wrap text if there is a width stated
+	if (transform.size.x > 0) {
+		Utils::WrapText(textContent, font, textScale, transform.size.x);
+		//std::cout << textContent << '\n';
+	}
+	hasUpdatePos = false;
+}
 
 void TextObject::Draw() {
 	if (textContent.empty()) return;
@@ -21,7 +32,7 @@ void TextObject::Draw() {
 	}
 
 	// Update position if there is a offset need to constantly updated if textContent is updated
-	float x = pos.x, y = pos.y;
+	float x = transform.pos.x, y = transform.pos.y;
 	if (offsetPos.x != 0 || offsetPos.y != 0) {
 		x += offsetPos.x;
 		y += offsetPos.y;
@@ -83,7 +94,7 @@ void TextObject::SetOffsetPosition(float x, float y) {
 	offsetPos = { x,y };
 }
 
-void TextObject::SetAnchorPosition(Transform const& transform) {
+void TextObject::SetAnchorPosition(Transform const& parentTransform) {
 	SetTextAnchorPosition();
 	f32 lineW, lineH;
 	AEGfxGetPrintSize(AssetsManager::textFont, textContent.c_str(), textScale, &lineW, &lineH);
@@ -93,12 +104,12 @@ void TextObject::SetAnchorPosition(Transform const& transform) {
 	float halfLineH = static_cast<float>(lineH * 0.5f);
 
 	// Need to normalize parent pos and size
-	float x = transform.pos.x;
-	float y = transform.pos.y;
+	float x = parentTransform.pos.x;
+	float y = parentTransform.pos.y;
 	Utils::NormalizeCoordinates(x, y);
 
-	float halfPanelW = transform.size.x * 0.5f;
-	float halfPanelH = transform.size.y * 0.5f;
+	float halfPanelW = parentTransform.size.x * 0.5f;
+	float halfPanelH = parentTransform.size.y * 0.5f;
 	Utils::NormalizeCoordinates(halfPanelW, halfPanelH);
 
 	// Set position x
@@ -106,32 +117,32 @@ void TextObject::SetAnchorPosition(Transform const& transform) {
 	case Utils::AnchorMode::TOP_LEFT:
 		break;
 	case Utils::AnchorMode::TOP_CENTER:
-		pos.x = x + halfPanelW - halfLineW;
+		transform.pos.x = x + halfPanelW - halfLineW;
 		break;
 	case Utils::AnchorMode::TOP_RIGHT:
-		pos.x = x + (halfPanelW * 2.0f) - lineW;
+		transform.pos.x = x + (halfPanelW * 2.0f) - lineW;
 		break;
 	case Utils::AnchorMode::CENTER_LEFT:
-		pos.y = y - halfPanelH + halfLineH;
+		transform.pos.y = y - halfPanelH + halfLineH;
 		break;
 	case Utils::AnchorMode::CENTER:
-		pos.y = y - halfPanelH + halfLineH;
-		pos.x = x + halfPanelW - halfLineW;
+		transform.pos.y = y - halfPanelH + halfLineH;
+		transform.pos.x = x + halfPanelW - halfLineW;
 		break;
 	case Utils::AnchorMode::CENTER_RIGHT:
-		pos.y = y - halfPanelH + halfLineH;
-		pos.x = x + (halfPanelW * 2.0f) - lineW;
+		transform.pos.y = y - halfPanelH + halfLineH;
+		transform.pos.x = x + (halfPanelW * 2.0f) - lineW;
 		break;
 	case Utils::AnchorMode::BOTTOM_LEFT:
-		pos.y = y - (halfPanelH * 2.0f) + lineH;
+		transform.pos.y = y - (halfPanelH * 2.0f) + lineH;
 		break;
 	case Utils::AnchorMode::BOTTOM_CENTER:
-		pos.y = y - (halfPanelH * 2.0f) + lineH;
-		pos.x = x + halfPanelW - halfLineW;
+		transform.pos.y = y - (halfPanelH * 2.0f) + lineH;
+		transform.pos.x = x + halfPanelW - halfLineW;
 		break;
 	case Utils::AnchorMode::BOTTOM_RIGHT:
-		pos.y = y - (halfPanelH * 2.0f) + lineH;
-		pos.x = x + (halfPanelW * 2.0f) - lineW;
+		transform.pos.y = y - (halfPanelH * 2.0f) + lineH;
+		transform.pos.x = x + (halfPanelW * 2.0f) - lineW;
 		break;
 	}
 }
@@ -148,29 +159,29 @@ void TextObject::SetTextAnchorPosition() {
 	switch (anchorMode) {
 	case Utils::AnchorMode::TOP_LEFT: {
 		Utils::NormalizeCoordinates(x, y);
-		pos.x = x + borderGap;
-		pos.y = y - borderGap;
+		transform.pos.x = x + borderGap;
+		transform.pos.y = y - borderGap;
 		break;
 	}
 	case Utils::AnchorMode::TOP_CENTER: {
 		x += halfW;
 		Utils::NormalizeCoordinates(x, y);
-		pos.x = x - (textW / 2.0f);
-		pos.y = y;
+		transform.pos.x = x - (textW / 2.0f);
+		transform.pos.y = y;
 		break;
 	}
 	case Utils::AnchorMode::TOP_RIGHT: {
 		x += halfW;
 		Utils::NormalizeCoordinates(x, y);
-		pos.x = x - (textW) - borderGap;
-		pos.y = y - borderGap;
+		transform.pos.x = x - (textW) - borderGap;
+		transform.pos.y = y - borderGap;
 		break;
 	}
 	case Utils::AnchorMode::CENTER_LEFT: {
 		y -= halfH;
 		Utils::NormalizeCoordinates(x, y);
-		pos.x = x + borderGap;
-		pos.y = y + (textH / 2.0f);
+		transform.pos.x = x + borderGap;
+		transform.pos.y = y + (textH / 2.0f);
 		break;
 	}
 	case Utils::AnchorMode::CENTER: {
@@ -180,39 +191,39 @@ void TextObject::SetTextAnchorPosition() {
 		x += halfW;
 		y -= halfH;
 		Utils::NormalizeCoordinates(x, y);
-		pos.x = x - (textW / 2.0f);
-		pos.y = y + (textH / 2.0f);
+		transform.pos.x = x - (textW / 2.0f);
+		transform.pos.y = y + (textH / 2.0f);
 		break;
 	}
 	case Utils::AnchorMode::CENTER_RIGHT: {
 		x += x;
 		y -= halfH;
 		Utils::NormalizeCoordinates(x, y);
-		pos.x = x - (textW)-borderGap;
-		pos.y = y + (textH / 2.0f);
+		transform.pos.x = x - (textW)-borderGap;
+		transform.pos.y = y + (textH / 2.0f);
 		break;
 	}
 	case Utils::AnchorMode::BOTTOM_LEFT: {
 		y -= y;
 		Utils::NormalizeCoordinates(x, y);
-		pos.x = x + borderGap;
-		pos.y = y + textH + borderGap;
+		transform.pos.x = x + borderGap;
+		transform.pos.y = y + textH + borderGap;
 		break;
 	}
 	case Utils::AnchorMode::BOTTOM_CENTER: {
 		x += halfW;
 		y -= y;
 		Utils::NormalizeCoordinates(x, y);
-		pos.x = x - (textW / 2.0f);
-		pos.y = y + textH + borderGap;
+		transform.pos.x = x - (textW / 2.0f);
+		transform.pos.y = y + textH + borderGap;
 		break;
 	}
 	case Utils::AnchorMode::BOTTOM_RIGHT: {
 		x += x;
 		y -= y;
 		Utils::NormalizeCoordinates(x, y);
-		pos.x = x - textW - borderGap;
-		pos.y = y + textH + borderGap;
+		transform.pos.x = x - textW - borderGap;
+		transform.pos.y = y + textH + borderGap;
 		break;
 	}
 	}

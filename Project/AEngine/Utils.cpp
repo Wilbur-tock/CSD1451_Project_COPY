@@ -148,4 +148,32 @@ namespace Utils {
 		std::snprintf(buf, sizeof(buf), "%.*f", precision, value);
 		return std::string(buf);
 	}
+
+	void WrapText(std::string& text, s8 font, float scale, float maxWidth) {
+		std::stringstream ss(text);
+		std::string word;
+		std::string currentLine;
+		text = "";
+
+		float maxHeight = 0;
+		Utils::NormalizeCoordinates(maxWidth, maxHeight); // Must normalize the size
+
+		while (ss >> word) {
+			std::string testLine = currentLine.empty() ? word : currentLine + " " + word;
+
+			f32 testWidth, testHeight;
+			// Check if the current line + the new word exceeds maxWidth
+			AEGfxGetPrintSize(font, testLine.c_str(), scale, &testWidth, &testHeight);
+
+			if (testWidth > maxWidth && !currentLine.empty()) {
+				// If it exceeds, push the current line to result and start a new line with the word
+				text += currentLine + "\n";
+				currentLine = word;
+			}
+			else {
+				currentLine = testLine;
+			}
+		}
+		text += currentLine; // Add the final line
+	}
 }

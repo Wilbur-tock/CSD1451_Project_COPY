@@ -190,7 +190,7 @@ namespace GraphicsManager {
 		float uvOffsetX = frame * (1.0f / Loading::SPRITE_FRAME_COUNT);
 
 		// Build the transform matrix for this sprite.
-		AEMtx33 mat = CreateTransformMatrix(screenX, screenY, 0.0f, w * 0.5f, h * 0.5f);
+		AEMtx33 mat = CreateTransformMatrix(screenX, screenY, w * 0.5f, h * 0.5f, 0.0f);
 
 		// Apply the same camera offset correction used by DrawScreenOverlay.
 		// This keeps the sprite locked to screen space even when the world camera moves.
@@ -250,12 +250,12 @@ namespace GraphicsManager {
 		}
 	}
 
-	AEMtx33 CreateTransformMatrix(float x, float y, float rot, float scaleX, float scaleY) {
+	AEMtx33 CreateTransformMatrix(float x, float y, float scaleX, float scaleY, float rotation) {
 		AEMtx33 matScale, matRot, matTrans, matResult;
 
 		// Create individual components
 		AEMtx33Scale(&matScale, scaleX, scaleY);
-		AEMtx33Rot(&matRot, rot);
+		AEMtx33Rot(&matRot, rotation);
 		AEMtx33Trans(&matTrans, x, y);
 
 		// Concatenate: Translation * Rotation * Scale
@@ -270,14 +270,14 @@ namespace GraphicsManager {
 	}
 
 	void DrawGameObject(GameObject const& gameObject) {
-		AEMtx33 mat = CreateTransformMatrix(gameObject.transform.pos.x, gameObject.transform.pos.y, 0, gameObject.transform.size.x * 0.6f, gameObject.transform.size.y * 0.6f);
+		AEMtx33 mat = CreateTransformMatrix(gameObject.transform.pos.x, gameObject.transform.pos.y, gameObject.transform.size.x * 0.6f, gameObject.transform.size.y * 0.6f, 0);
 		DrawTexture(CoordinateType::WORLD_CENTER, gameObject.texture, mat, gameObject.textureColor, gameObject.pMesh);
 	}
 
 	void DrawCharacter(GameObject const& gameObject) {
 		// Half the width and height to center the texture regardless of the png size
 		// need to half to get the radius
-		AEMtx33 mat = CreateTransformMatrix(gameObject.transform.pos.x, gameObject.transform.pos.y, 0, gameObject.transform.size.x * 0.5f, gameObject.transform.size.y * 0.5f);
+		AEMtx33 mat = CreateTransformMatrix(gameObject.transform.pos.x, gameObject.transform.pos.y, gameObject.transform.size.x * 0.5f, gameObject.transform.size.y * 0.5f, 0);
 		DrawTexture(CoordinateType::WORLD_CENTER, gameObject.texture, mat, gameObject.textureColor, gameObject.pMesh);
 	}
 
@@ -308,16 +308,16 @@ namespace GraphicsManager {
 		AEVec2 right	= { pos.x + halfW, pos.y };
 		AEVec2 left		= { pos.x - halfW, pos.y };
 
-		AEMtx33 mat = CreateTransformMatrix(top.x, top.y, 0, halfW, lineSize);
+		AEMtx33 mat = CreateTransformMatrix(top.x, top.y, halfW, lineSize);
 		DrawTexture(CoordinateType::WORLD_CENTER, AssetsManager::squareTexture, mat, lineColor);
 
-		mat = CreateTransformMatrix(btm.x, btm.y, 0, halfW, lineSize);
+		mat = CreateTransformMatrix(btm.x, btm.y, halfW, lineSize);
 		DrawTexture(CoordinateType::WORLD_CENTER, AssetsManager::squareTexture, mat, lineColor);
 
-		mat = CreateTransformMatrix(right.x, right.y, 0, lineSize, halfH);
+		mat = CreateTransformMatrix(right.x, right.y, lineSize, halfH);
 		DrawTexture(CoordinateType::WORLD_CENTER, AssetsManager::squareTexture, mat, lineColor);
 
-		mat = CreateTransformMatrix(left.x, left.y, 0, lineSize, halfH);
+		mat = CreateTransformMatrix(left.x, left.y, lineSize, halfH);
 		DrawTexture(CoordinateType::WORLD_CENTER, AssetsManager::squareTexture, mat, lineColor);
 	}
 
@@ -338,7 +338,7 @@ namespace GraphicsManager {
 			float dist = sqrtf(dx * dx + dy * dy);
 			float angle = atan2f(dy, dx);
 
-			AEMtx33 mat = CreateTransformMatrix(p1.x + dx * 0.5f, p1.y + dy * 0.5f, angle, dist, 1.5f);
+			AEMtx33 mat = CreateTransformMatrix(p1.x + dx * 0.5f, p1.y + dy * 0.5f, dist, 1.5f, angle);
 			DrawTexture(CoordinateType::WORLD_CENTER, AssetsManager::squareTexture, mat, Color{0,1,0});
 		}
 	}
