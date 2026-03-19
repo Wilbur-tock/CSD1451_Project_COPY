@@ -33,6 +33,9 @@ namespace GameStateManager {
     static bool IsGameplayState() {
         return current == GameState::LEVEL_1
             || current == GameState::LEVEL_2
+            || current == GameState::LEVEL_3
+            || current == GameState::LEVEL_4
+            || current == GameState::LEVEL_5
             || current == GameState::MAP_EDITOR;
     }
 
@@ -133,6 +136,9 @@ namespace GameStateManager {
 
                 case GameState::LEVEL_1:
                 case GameState::LEVEL_2:
+                case GameState::LEVEL_3:
+                case GameState::LEVEL_4:
+                case GameState::LEVEL_5:
                     LevelManager::SelectLevel(static_cast<int>(current) - static_cast<int>(GameState::LEVEL_1));
                     gsIntialize = LevelManager::InitializeLevel;
                     gsUpdate = LevelManager::UpdateLevel;
@@ -308,6 +314,9 @@ namespace GameStateManager {
 
         case GameState::LEVEL_1:
         case GameState::LEVEL_2:
+        case GameState::LEVEL_3:
+        case GameState::LEVEL_4:
+        case GameState::LEVEL_5:
             AudioManager::PlayBGM(AudioManager::Track::Level);
             break;
 

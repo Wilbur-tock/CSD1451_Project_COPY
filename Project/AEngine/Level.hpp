@@ -137,6 +137,8 @@ private:
 
 	std::vector<TileIndex> decayingTiles; // vector ids of activeLevelMap of which tiles having the decaying effect
 	std::vector<std::pair<bool,int>> poisonCharacters; // vector ids of all the characters that are poison, bool isPlayerCharacter, int vectorId
+	
+	bool hasProcessedVictory = false;
 };
 
 #endif // !LEVEL_HPP

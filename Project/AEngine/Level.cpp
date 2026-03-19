@@ -221,7 +221,7 @@ void Level::InitializeUI() {
 }
 
 Level::Level(int _leveId)
-	: levelId{ _leveId }, levelName{ "Level " + std::to_string(levelId + 1) }, levelFileName{ "level" + std::to_string(levelId) } {
+	: levelId{ _leveId }, levelName{ "Level " + std::to_string(levelId + 1) }, levelFileName{ "level" + std::to_string(levelId + 1) } {
 }
 
 void Level::Load() {
@@ -247,6 +247,7 @@ void Level::Load() {
 
 void Level::Initalize() {
 	status = LevelStatus::PLAYING;
+	hasProcessedVictory = false;
 	// Initialize map 
 	for (int i = 0; i < Config::GRID_HEIGHT; ++i) {
 		for (int j = 0; j < Config::GRID_WIDTH; ++j) {
@@ -696,15 +697,25 @@ void Level::UpdateLevelStatus() {
 	GetCurrentHP(currentPlayerHP, true);
 	GetCurrentHP(currentEnemyHP, false);
 
-	// All the enemies and boss are dead or only the boss are dead player will won
+	// All the enemies and boss are dead or only the boss are dead player will win
 	if (EnemyBoss()) {
 		if (EnemyBoss()->attribute.Health() <= 0 || currentEnemyHP <= 0) status = LevelStatus::PLAYER_WON;
 	}
 	else {
 		if (currentEnemyHP <= 0) status = LevelStatus::PLAYER_WON;
 	}
-	
+
 	if (currentPlayerHP <= 0) status = LevelStatus::ENEMY_WON;
+
+	// Unlock the next level once, only when victory happens
+	if (status == LevelStatus::PLAYER_WON && !hasProcessedVictory) {
+		LevelManager::UnlockNextLevel(levelId);
+		hasProcessedVictory = true;
+	}
+
+	if (status != LevelStatus::PLAYER_WON) {
+		hasProcessedVictory = false;
+	}
 }
 
 void Level::DrawResultsUI() {

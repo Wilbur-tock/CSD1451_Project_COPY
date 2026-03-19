@@ -5,11 +5,22 @@
 #include "Level.hpp"
 
 namespace LevelManager {
-	void LoadAllLevels(); // Load all the levels data (Map layout, all instance of player and enemy character object)
+	constexpr int TOTAL_LEVEL_COUNT = 5;
+	constexpr int FIRST_LEVEL_INDEX = 0;
+
+	void LoadAllLevels(); // Load all levels data
 
 	void LoadLevel(int levelId);
 	void SelectLevel(int levelId);
 	Level* CurrentLevel();
+
+	int LevelCount();
+	bool IsValidLevelIndex(int levelIndex);
+	bool IsLevelUnlocked(int levelIndex);
+	int HighestUnlockedLevel();
+	void UnlockLevel(int levelIndex);
+	void UnlockNextLevel(int completedLevelIndex);
+	void ResetProgress();
 
 	void InitializeLevel();
 	void UpdateLevel();

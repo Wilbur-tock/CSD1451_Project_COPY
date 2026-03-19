@@ -1,5 +1,8 @@
 #include "LevelSelect.hpp"
 
+#include <array>
+#include <string>
+
 #include "GraphicsManager.hpp"
 #include "GameStateManager.hpp"
 #include "AssetsManager.hpp"
@@ -10,19 +13,61 @@
 #include "Utils.hpp"
 #include "Config.hpp"
 #include "UICursor.hpp"
+#include "LevelManager.hpp"
 
 namespace LevelSelect {
 
-    static Button level1Button;
-    static Button level2Button;
-    static Button backButton;
+    namespace {
+        constexpr int kTotalButtons = 5;
 
-    static TextObject titleText;
-    static TextObject subtitleText;
-    static TextObject hintText;
+        std::array<Button, kTotalButtons> levelButtons;
+        Button backButton;
 
-    static AEGfxTexture* bgTexture = nullptr;
-    static AEGfxTexture* buttonTexture = nullptr;
+        TextObject titleText;
+        TextObject subtitleText;
+        TextObject hintText;
+
+        AEGfxTexture* bgTexture = nullptr;
+        AEGfxTexture* buttonTexture = nullptr;
+
+        GameStateManager::GameState LevelIndexToState(int levelIndex) {
+            return static_cast<GameStateManager::GameState>(
+                static_cast<int>(GameStateManager::GameState::LEVEL_1) + levelIndex
+                );
+        }
+
+        void OpenLevel(int levelIndex) {
+            if (!LevelManager::IsLevelUnlocked(levelIndex)) {
+                return;
+            }
+
+            GameStateManager::next = LevelIndexToState(levelIndex);
+        }
+
+        void ConfigureLevelButton(Button& button, int levelIndex, float x, float y, float width, float height) {
+            const bool unlocked = LevelManager::IsLevelUnlocked(levelIndex);
+            std::string label = "LEVEL " + std::to_string(levelIndex + 1);
+
+            Color buttonColor = Color(0.30f, 0.30f, 0.30f, 0.95f);
+            if (unlocked) {
+                buttonColor = Color(0.25f, 0.55f + (0.06f * levelIndex), 0.40f, 1.0f);
+            }
+            else {
+                label += "  [LOCKED]";
+            }
+
+            button = Button(
+                TextObject{ label },
+                Utils::AnchorMode::CENTER,
+                { x, y },
+                { width, height },
+                buttonColor,
+                buttonTexture,
+                nullptr,
+                nullptr
+            );
+        }
+    }
 
     void Load() {
         bgTexture = AssetsManager::GetTexture("Assets/game_bg.png");
@@ -33,38 +78,31 @@ namespace LevelSelect {
         CameraManager::camera.SetPosition({ 0.0f, 0.0f });
         CameraManager::camera.SetState(CameraManager::CameraController::STATIC);
 
-        const float btnWidth = 320.0f;
-        const float btnHeight = 90.0f;
-        const float centerX = 0.0f;
-        const float startY = 80.0f;
-        const float spacing = 120.0f;
+        const float btnWidth = 340.0f;
+        const float btnHeight = 75.0f;
+        const float centerX = -btnWidth / 2.0f;
+        const float startY = 220.0f;
+        const float spacing = 95.0f;
 
-        level1Button = Button(
-            TextObject{ "LEVEL 1" },
-            Utils::AnchorMode::CENTER,
-            { centerX - btnWidth / 2.0f, startY },
-            { btnWidth, btnHeight },
-            Color(0.25f, 0.7f, 0.35f, 1.0f),
-            buttonTexture,
-            nullptr,
-            OnLevel1Clicked
-        );
+        ConfigureLevelButton(levelButtons[0], 0, centerX, startY, btnWidth, btnHeight);
+        levelButtons[0].SetOnClick(OnLevel1Clicked);
 
-        level2Button = Button(
-            TextObject{ "LEVEL 2" },
-            Utils::AnchorMode::CENTER,
-            { centerX - btnWidth / 2.0f, startY - spacing },
-            { btnWidth, btnHeight },
-            Color(0.25f, 0.45f, 0.9f, 1.0f),
-            buttonTexture,
-            nullptr,
-            OnLevel2Clicked
-        );
+        ConfigureLevelButton(levelButtons[1], 1, centerX, startY - spacing, btnWidth, btnHeight);
+        levelButtons[1].SetOnClick(LevelManager::IsLevelUnlocked(1) ? OnLevel2Clicked : nullptr);
+
+        ConfigureLevelButton(levelButtons[2], 2, centerX, startY - spacing * 2.0f, btnWidth, btnHeight);
+        levelButtons[2].SetOnClick(LevelManager::IsLevelUnlocked(2) ? OnLevel3Clicked : nullptr);
+
+        ConfigureLevelButton(levelButtons[3], 3, centerX, startY - spacing * 3.0f, btnWidth, btnHeight);
+        levelButtons[3].SetOnClick(LevelManager::IsLevelUnlocked(3) ? OnLevel4Clicked : nullptr);
+
+        ConfigureLevelButton(levelButtons[4], 4, centerX, startY - spacing * 4.0f, btnWidth, btnHeight);
+        levelButtons[4].SetOnClick(LevelManager::IsLevelUnlocked(4) ? OnLevel5Clicked : nullptr);
 
         backButton = Button(
             TextObject{ "< BACK" },
             Utils::AnchorMode::CENTER,
-            { centerX - btnWidth / 2.0f, startY - spacing * 2.0f },
+            { centerX, startY - spacing * 5.35f },
             { btnWidth, btnHeight },
             Color(0.85f, 0.25f, 0.25f, 1.0f),
             buttonTexture,
@@ -76,21 +114,21 @@ namespace LevelSelect {
             "SELECT LEVEL",
             2.5f,
             Color(0.0f, 0.0f, 0.0f, 1.0f),
-            { -0.22f, 0.72f }
+            { -0.22f, 0.82f }
         };
 
         subtitleText = {
-            "Choose which battlefield you want to play",
+            "Beat a level to unlock the next one",
             0.9f,
             Color(0.0f, 0.0f, 0.0f, 0.9f),
-            { -0.34f, 0.57f }
+            { -0.25f, 0.68f }
         };
 
         hintText = {
-            "1 - Level 1   |   2 - Level 2   |   ESC / BACK - Main Menu",
+            "1-5 = Select unlocked level   |   ESC / BACK = Main Menu",
             0.7f,
             Color(0.0f, 0.0f, 0.0f, 0.95f),
-            { -0.78f, -0.92f }
+            { -0.80f, -0.94f }
         };
     }
 
@@ -112,6 +150,15 @@ namespace LevelSelect {
 
         titleText.Draw();
         subtitleText.Draw();
+
+        TextObject progressText{
+            "Highest unlocked: LEVEL " + std::to_string(LevelManager::HighestUnlockedLevel() + 1),
+            0.8f,
+            Color(0.0f, 0.0f, 0.0f, 0.95f),
+            { -0.18f, 0.60f }
+        };
+        progressText.Draw();
+
         hintText.Draw();
     }
 
@@ -122,22 +169,47 @@ namespace LevelSelect {
             return;
         }
 
-        if (AEInputCheckTriggered(AEVK_1)) {
+        if (AEInputCheckTriggered(AEVK_1) && LevelManager::IsLevelUnlocked(0)) {
             AudioManager::PlaySFX(AudioManager::SFX::UIButton);
             OnLevel1Clicked();
             return;
         }
 
-        if (AEInputCheckTriggered(AEVK_2)) {
+        if (AEInputCheckTriggered(AEVK_2) && LevelManager::IsLevelUnlocked(1)) {
             AudioManager::PlaySFX(AudioManager::SFX::UIButton);
             OnLevel2Clicked();
             return;
         }
 
+        if (AEInputCheckTriggered(AEVK_3) && LevelManager::IsLevelUnlocked(2)) {
+            AudioManager::PlaySFX(AudioManager::SFX::UIButton);
+            OnLevel3Clicked();
+            return;
+        }
+
+        if (AEInputCheckTriggered(AEVK_4) && LevelManager::IsLevelUnlocked(3)) {
+            AudioManager::PlaySFX(AudioManager::SFX::UIButton);
+            OnLevel4Clicked();
+            return;
+        }
+
+        if (AEInputCheckTriggered(AEVK_5) && LevelManager::IsLevelUnlocked(4)) {
+            AudioManager::PlaySFX(AudioManager::SFX::UIButton);
+            OnLevel5Clicked();
+            return;
+        }
+
         Draw();
 
-        level1Button.Update();
-        level2Button.Update();
+        for (int i = 0; i < kTotalButtons; ++i) {
+            if (LevelManager::IsLevelUnlocked(i)) {
+                levelButtons[i].Update();
+            }
+            else {
+                levelButtons[i].Draw();
+            }
+        }
+
         backButton.Update();
 
         UICursor::Draw();
@@ -147,13 +219,11 @@ namespace LevelSelect {
 
     void Unload() {}
 
-    void OnLevel1Clicked() {
-        GameStateManager::next = GameStateManager::GameState::LEVEL_1;
-    }
-
-    void OnLevel2Clicked() {
-        GameStateManager::next = GameStateManager::GameState::LEVEL_2;
-    }
+    void OnLevel1Clicked() { OpenLevel(0); }
+    void OnLevel2Clicked() { OpenLevel(1); }
+    void OnLevel3Clicked() { OpenLevel(2); }
+    void OnLevel4Clicked() { OpenLevel(3); }
+    void OnLevel5Clicked() { OpenLevel(4); }
 
     void OnBackClicked() {
         GameStateManager::next = GameStateManager::GameState::MAIN_MENU;

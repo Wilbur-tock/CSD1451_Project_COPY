@@ -2,7 +2,7 @@
 #define GAMESTATEMANAGER_HPP
 
 #include "pch.hpp"
-#include "Utils.hpp" // Using FuncPtr
+#include "Utils.hpp"
 
 namespace GameStateManager {
 	enum class GameState {
@@ -12,6 +12,9 @@ namespace GameStateManager {
 		MAP_EDITOR,
 		LEVEL_1,
 		LEVEL_2,
+		LEVEL_3,
+		LEVEL_4,
+		LEVEL_5,
 		CREDITS,
 		SETTINGS,
 		GUIDE,
@@ -24,9 +27,7 @@ namespace GameStateManager {
 	extern GameState current, previous, next;
 
 	void Load();
-
 	void Update();
-
 	void Exit();
 }
 

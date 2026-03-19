@@ -14,6 +14,9 @@ namespace LevelSelect {
 
     void OnLevel1Clicked();
     void OnLevel2Clicked();
+    void OnLevel3Clicked();
+    void OnLevel4Clicked();
+    void OnLevel5Clicked();
     void OnBackClicked();
 }
 
