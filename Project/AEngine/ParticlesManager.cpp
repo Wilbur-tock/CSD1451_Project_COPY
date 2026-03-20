@@ -53,6 +53,12 @@ namespace ParticleManager {
 
             // Integrate rotation
             p.rotation += p.rotationSpeed * dt;
+
+            if (p.acceleration != 0.f) {
+                float factor = 1.f + p.acceleration * dt;
+                p.velocity.x *= factor;
+                p.velocity.y *= factor;
+            }
         }
     }
 
@@ -138,6 +144,7 @@ namespace ParticleManager {
             float speed = RandRange(params.speedMin, params.speedMax);
             p.velocity.x = cosf(dir) * speed;
             p.velocity.y = sinf(dir) * speed;
+            p.acceleration = RandRange(params.accelerationMin, params.accelerationMax);
 
             // ---- Rotation --------------------------------------------------
             p.rotation = RandRange(0.f, PI);

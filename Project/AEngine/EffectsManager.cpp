@@ -28,6 +28,22 @@ namespace EffectsManager {
 
     void EffectsController::PlayTileBreak(AEVec2 position) {
         Emit({
+            position,   8.f,                                // spawn pos, radius
+            60.f,       180.f,                              // speed min, max
+            0.f,        2.f * PI,                           // direction min, max
+            -1.5f,      1.5f,                               // rotation speed min, max
+            Color(0.55f, 0.40f, 0.28f, 1.f),               // color start
+            Color(0.40f, 0.30f, 0.20f, 0.f),               // color end
+            12.f,       4.f,                                // scale start, end (smaller)
+            0.6f,       1.2f,                               // lifetime min, max
+            18,                                             // count
+            ParticleShape::SQUARE
+            });
+        std::cout << "[EffectsManager] PlayTileBreak at (" << position.x << ", " << position.y << ")\n";
+    }
+
+    void EffectsController::PlaySmoke(AEVec2 position) {
+        Emit({
             position,   20.f,                               // spawn pos, radius
             10.f,       45.f,                               // speed min, max
             0.f,        PI,                                 // direction min, max
@@ -39,7 +55,24 @@ namespace EffectsManager {
             25,                                             // count
             ParticleShape::CIRCLE
             });
-        std::cout << "[EffectsManager] PlayTileBreak at (" << position.x << ", " << position.y << ")\n";
+        std::cout << "[EffectsManager] PlaySmoke at (" << position.x << ", " << position.y << ")\n";
+    }
+
+    void EffectsController::PlaySmokeCloud(AEVec2 position) {
+        Emit({
+            position,   15.f,                               // spawn pos, radius
+            120.f,      280.f,                              // speed min, max (burst out fast)
+            0.f,        2.f * PI,                           // direction min, max (full 360)
+            -0.3f,      0.3f,                               // rotation speed min, max (slow lazy spin)
+            Color(0.55f, 0.55f, 0.55f, 0.7f),              // color start (mid grey, semi-transparent)
+            Color(0.75f, 0.75f, 0.75f, 0.f),               // color end (light grey, fade out)
+            30.f,       60.f,                               // scale start, end (grow as they slow)
+            1.5f,       2.5f,                               // lifetime min, max (linger)
+            65,                                             // count
+            ParticleShape::CIRCLE,                           // circles = puffy smoke
+            - 4.f,       -2.f                               // AccelerationMin, AccelerationMax
+            });
+        std::cout << "[EffectsManager] PlaySmokeCloud at (" << position.x << ", " << position.y << ")\n";
     }
 
     void EffectsController::PlayProjectiileAbiltiesEffect(int projectileMode, AEVec2 spawnPos) {
@@ -56,6 +89,8 @@ namespace EffectsManager {
 
         int count{ 10 };
         ParticleShape shape{ ParticleShape::SQUARE };
+
+        AEVec2 acceleration{ 0.f, 0.f };
 
         switch (projectileMode) {
         case 1: // default
@@ -79,6 +114,7 @@ namespace EffectsManager {
             lifespan = { 3.0f, 5.0f };
             count = 1;
             shape = ParticleShape::CIRCLE;
+			acceleration = { 20.0f, 50.0f };
             break;
         case 7: // Shield_buster
             originOffset = 20.0f;
@@ -110,7 +146,10 @@ namespace EffectsManager {
             lifespan.y,
 
             count,
-            shape
+            shape,
+
+			acceleration.x,
+			acceleration.y
         };
 
         ParticleManager::particleController.Emit(particle);

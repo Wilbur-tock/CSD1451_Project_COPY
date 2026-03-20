@@ -28,6 +28,9 @@ public:
     float   rotationSpeedMin{ -PI };
     float   rotationSpeedMax{ PI };
 
+	float   accelerationMin{ 0.f };
+    float   accelerationMax{ 0.f };
+
     // ---- Appearance -----------------------------------------------------
     Color   colorStart{ 1.f, 1.f, 1.f, 1.f };
     Color   colorEnd{ 1.f, 1.f, 1.f, 0.f }; // Fade out alpha by default
@@ -54,6 +57,8 @@ public:
         directionMax{ PI },
         rotationSpeedMin{ -PI },
         rotationSpeedMax{ PI },
+		accelerationMin{ 0.f },
+		accelerationMax{ 0.f },
         colorStart{ 1.f, 1.f, 1.f, 1.f },
         colorEnd{ 1.f, 1.f, 1.f, 0.f },
         scaleStart{ 10.f },
@@ -62,6 +67,7 @@ public:
         lifetimeMax{ 1.5f },
         count{ 10 },
         shape{ ParticleShape::SQUARE }
+
     {}
 
     EmitParams(
@@ -73,12 +79,15 @@ public:
         float scaleStart, float scaleEnd,
         float lifetimeMin, float lifetimeMax,
         int count,
-        ParticleShape shape = ParticleShape::SQUARE  // defaulted
+        ParticleShape shape = ParticleShape::SQUARE,  // defaulted
+        float accelerationMin = 0.f,                    // defaulted
+        float accelerationMax = 0.f                     // defaulted
     ) :
         spawnPosition{ spawnPosition }, spawnRadius{ spawnRadius },
         speedMin{ speedMin }, speedMax{ speedMax },
         directionMin{ directionMin }, directionMax{ directionMax },
         rotationSpeedMin{ rotationSpeedMin }, rotationSpeedMax{ rotationSpeedMax },
+        accelerationMin{ accelerationMin }, accelerationMax{ accelerationMax },
         colorStart{ colorStart }, colorEnd{ colorEnd },
         scaleStart{ scaleStart }, scaleEnd{ scaleEnd },
         lifetimeMin{ lifetimeMin }, lifetimeMax{ lifetimeMax },
@@ -108,6 +117,8 @@ public:
     float   rotationSpeed{ 0.f }; // Radians per second (can be negative)
     float   scaleStart{ 1.f }; // Uniform scale at birth
     float   scaleEnd{ 0.f }; // Uniform scale at death (lerped over lifetime)
+
+    float   acceleration{ 0.f };
 
     // ---- Appearance ---------------------------------------------------------
     Color   colorStart{ 1.f, 1.f, 1.f, 1.f }; // RGBA at birth
