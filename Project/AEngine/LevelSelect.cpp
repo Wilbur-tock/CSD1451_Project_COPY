@@ -175,7 +175,7 @@ namespace LevelSelect {
         for (int i = 0; i < LevelManager::TOTAL_LEVEL_COUNT; ++i) {
             if (AEInputCheckTriggered(static_cast<u8>(AEVK_1 + i)) && LevelManager::IsLevelUnlocked(i)) {
                 AudioManager::PlaySFX(AudioManager::SFX::UIButton);
-                OpenLevel(0);
+                OpenLevel(i);
                 return;
             }
         }
