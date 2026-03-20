@@ -44,6 +44,8 @@ public:
 	// Checking who is starting the level
 	bool IsStarting(bool isPlayer) const { return isPlayer == isPlayerStarting; }
 
+	std::vector<Character>& GetCharacters(bool isPlayer) { return (isPlayer ? playerCharacters : enemies); }
+
 	// Member functions
 
 	// Read level map data and load level resources

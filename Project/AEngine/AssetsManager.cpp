@@ -9,6 +9,7 @@ namespace AssetsManager {
     AEGfxTexture* squareTexture, *circleTexture;
     s8 textFont, titleFont;
 
+    // List of all the characters texture
     std::vector<AEGfxTexture*> playerCharacters;
     std::vector<AEGfxTexture*> enemyCharacters;
     std::vector<AEGfxTexture*> bossCharacters;

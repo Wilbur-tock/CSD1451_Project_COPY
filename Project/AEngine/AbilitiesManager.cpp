@@ -269,8 +269,18 @@ namespace AbilitiesManager {
 		else if (abilityName == "Skip Turn") {
 			level->SetSkipOpponentTurn();
 		}
+		else if (abilityName == "Invisibility") {
+			for (Character& character : LevelManager::CurrentLevel()->GetCharacters(isPlayerControlled)) {
+				character.attribute.SetInvisibility(ability.GetStatus().rounds);
+			}
+		}
+		else if (abilityName == "Cleanse") {
+			for (Character& character : LevelManager::CurrentLevel()->GetCharacters(isPlayerControlled)) {
+				character.attribute.CleanseNegativeEffects();
+			}
+		}
 
-		// Add modifier after shooter has shot out the projectile
+		// Add modifier after shooter has shot out the projectile if it a modifier
 		if (ability.GetStatus().targetSelf) {
 			// Add modifier to self
 			AddModifier(ability);

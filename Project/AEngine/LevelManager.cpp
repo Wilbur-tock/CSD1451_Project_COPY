@@ -3,13 +3,14 @@
 namespace LevelManager {
 	Level* selectedLevel = nullptr;
 	std::vector<Level> levelDatas;
-	int highestUnlockedLevel = FIRST_LEVEL_INDEX; // 0-based. Level 1 is unlocked by default.
+	int highestUnlockedLevel = FIRST_LEVEL_INDEX;
 
 	void LoadAllLevels() {
 		selectedLevel = nullptr;
 		levelDatas.clear();
 		levelDatas.reserve(TOTAL_LEVEL_COUNT);
 
+		// Load all the data levels and add into the vector
 		for (int i = 0; i < TOTAL_LEVEL_COUNT; ++i) {
 			Level data{ i };
 			levelDatas.push_back(data);
@@ -46,6 +47,7 @@ namespace LevelManager {
 	}
 
 	bool IsLevelUnlocked(int levelIndex) {
+		if (Utils::isDebuggerOn) return true; // unlock all levels if debugger is on
 		return IsValidLevelIndex(levelIndex) && levelIndex <= highestUnlockedLevel;
 	}
 
@@ -90,6 +92,5 @@ namespace LevelManager {
 	void UnloadLevel() {
 		levelDatas.clear();
 		selectedLevel = nullptr;
-		highestUnlockedLevel = FIRST_LEVEL_INDEX;
 	}
 }

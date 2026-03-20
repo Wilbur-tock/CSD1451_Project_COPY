@@ -325,7 +325,7 @@ namespace CannonManager {
                 projectile.Update(isPlayerControlled, subDt);
 
                 // Activate ability after projectile has been updated
-                projectile.AbilityActivation(abilityController->GetCurrentAbility());
+                projectile.AbilityActivation(isPlayerControlled, abilityController->GetCurrentAbility());
                 AbilityActivation(projectile);
             }
 
@@ -398,8 +398,9 @@ namespace CannonManager {
         // apply the modifier effects this controller has in the abilityModifier vector
         // if the modifier effects needs to be constanly reapply after the shooter has shoot
         for (Ability const& ability : abilityController->GetAbilityModifiers()) {
-            if (ability.GetName() == "Gravity") { 
-                projectile.GravityScale(ability.GetStatus().gravityScale); // value is preset here
+            std::string abilityName = ability.GetName();
+            if (abilityName == "Gravity") {
+                projectile.GravityScale(ability.GetStatus().gravityScale);
             }
         }
     }

@@ -22,6 +22,7 @@ enum class ProjectileMode {
 	CLUSTER_SHOT	= 8,
 	DECAY_SHOT		= 9,
 	POISON			= 10,
+	INSTANT_BASTION = 11,
 };
 
 class Projectile : public GameObject {
@@ -54,6 +55,7 @@ public:
 		case ProjectileMode::CLUSTER_SHOT:		return "CLUSTER_SHOT";
 		case ProjectileMode::DECAY_SHOT:		return "DECAY_SHOT";
 		case ProjectileMode::POISON:			return "POISON";
+		case ProjectileMode::INSTANT_BASTION:	return "INSTANT_BASTION";
 		default:								return "YOU NEED TO ADD A PROJECTILE MODE NAME";
 		}
 	}
@@ -66,6 +68,7 @@ public:
 	bool HasCollided() const { return hasCollided; }
 
 	void GravityScale(float newGravityScale) { gravityScale = newGravityScale; }
+	bool InIgnoredTiles();
 
 	// Member functions
 
@@ -79,7 +82,7 @@ public:
 
 	// Ability effects checker for ability to take effect after projectile has been shot 
 	// Check for inputs to activated PROJECTILE Abilities
-	void AbilityActivation(Ability const& ability);
+	void AbilityActivation(bool isPlayer, Ability const& ability);
 	void ProjectileMovement(float dt);
 
 	// Simulate the projectile physics of bouncing off the walls, checking if it is grounded
@@ -90,6 +93,7 @@ public:
 
 	// Damage tiles based on projectile damage (Blocks & Enemy included)
 	void DamageTile(int x, int y);
+	// Set a effect (Decaying tiles/poison characters) on a tile radius based on ability given
 	void SetAreaEffects(Ability const& ability, bool isDecaying);
 
 	void ConsumeAttackCharge();
@@ -122,9 +126,10 @@ private:
 	bool hasHit = false; // has hit any destructible tiles 
 
 	bool isAbilityTriggered = false;
-
 	bool hasHitShield = false;
 	bool canBypassBlocks = false;
+
+	std::vector<TileIndex> ignoredTiles; // tile index to ignore colliding
 };
 
 #endif // !PROJECTILE_HPP

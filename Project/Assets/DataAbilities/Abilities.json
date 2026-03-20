@@ -199,6 +199,31 @@
     },
 
     {
+        "Name": "Instant Bastion",
+        "Description": "",
+        "Type": 3,
+        "Tier": 1,
+        "Texture": "",
+        "Projectile_Stats": {
+            "ProjectileID": 11,
+            "Damage_Amp": 1.0,
+            "Base_Damage": 10,
+            "Radius": 2,
+            "Charges": 1,
+            "unlimited_charges": false
+        },
+        "Status_Stats": {
+            "Is_Modifier": false,
+            "Rounds": 0,
+            "Is_Postive": true,
+            "Target_Self": true,
+            "Gravity_Scale": 0.0,
+            "Damage_Each_Round": 0,
+            "Effect_Radius": 2
+        }
+    },
+
+    {
         "Name": "Tower Shield",
         "Description": "",
         "Type": 3,
@@ -229,6 +254,23 @@
     },
 
     {
+        "Name": "Invisibility",
+        "Description": "",
+        "Type": 3,
+        "Tier": 1,
+        "Texture": "",
+        "Status_Stats": {
+            "Is_Modifier": true,
+            "Rounds": 3,
+            "Is_Postive": true,
+            "Target_Self": true,
+            "Gravity_Scale": 0.0,
+            "Damage_Each_Round": 0,
+            "Effect_Radius": 0
+        }
+    },
+
+    {
         "Name": "Extra Shot",
         "Description": "",
         "Type": 2,
@@ -238,6 +280,14 @@
 
     {
         "Name": "Skip Turn",
+        "Description": "",
+        "Type": 3,
+        "Tier": 1,
+        "Texture": ""
+    },
+
+    {
+        "Name": "Cleanse",
         "Description": "",
         "Type": 3,
         "Tier": 1,

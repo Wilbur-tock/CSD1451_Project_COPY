@@ -112,7 +112,7 @@ namespace LevelSelect {
 
         titleText = {
             "SELECT LEVEL",
-            2.5f,
+            1.5f,
             Color(0.0f, 0.0f, 0.0f, 1.0f),
             { -0.22f, 0.82f }
         };
@@ -163,40 +163,21 @@ namespace LevelSelect {
     }
 
     void Update() {
+        // Check for inputs
+
         if (AEInputCheckTriggered(AEVK_ESCAPE) || AEInputCheckTriggered(AEVK_BACK)) {
             AudioManager::PlaySFX(AudioManager::SFX::UIButton);
             OnBackClicked();
             return;
         }
 
-        if (AEInputCheckTriggered(AEVK_1) && LevelManager::IsLevelUnlocked(0)) {
-            AudioManager::PlaySFX(AudioManager::SFX::UIButton);
-            OnLevel1Clicked();
-            return;
-        }
-
-        if (AEInputCheckTriggered(AEVK_2) && LevelManager::IsLevelUnlocked(1)) {
-            AudioManager::PlaySFX(AudioManager::SFX::UIButton);
-            OnLevel2Clicked();
-            return;
-        }
-
-        if (AEInputCheckTriggered(AEVK_3) && LevelManager::IsLevelUnlocked(2)) {
-            AudioManager::PlaySFX(AudioManager::SFX::UIButton);
-            OnLevel3Clicked();
-            return;
-        }
-
-        if (AEInputCheckTriggered(AEVK_4) && LevelManager::IsLevelUnlocked(3)) {
-            AudioManager::PlaySFX(AudioManager::SFX::UIButton);
-            OnLevel4Clicked();
-            return;
-        }
-
-        if (AEInputCheckTriggered(AEVK_5) && LevelManager::IsLevelUnlocked(4)) {
-            AudioManager::PlaySFX(AudioManager::SFX::UIButton);
-            OnLevel5Clicked();
-            return;
+        // Debug inputs
+        for (int i = 0; i < LevelManager::TOTAL_LEVEL_COUNT; ++i) {
+            if (AEInputCheckTriggered(static_cast<u8>(AEVK_1 + i)) && LevelManager::IsLevelUnlocked(i)) {
+                AudioManager::PlaySFX(AudioManager::SFX::UIButton);
+                OpenLevel(0);
+                return;
+            }
         }
 
         Draw();

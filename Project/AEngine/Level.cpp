@@ -681,7 +681,7 @@ void Level::UpdateNewRound() {
 		);
 	}
 
-	// Check for poison characters
+	// Check for poison characters and update tick
 	if (poisonCharacters.size() > 0) {
 		for (std::pair<bool, int>& value : poisonCharacters) {
 			bool isPlayerCharacter = value.first;
@@ -689,8 +689,6 @@ void Level::UpdateNewRound() {
 			Character* character = isPlayerCharacter ? FindPlayerCharacterObj(characterId) : FindEnemyCharacterObj(characterId);
 			character->attribute.UpdateTicks();
 			character->UpdateTextureColor(1);
-
-			std::cout << "New HP: " << character->attribute.Health() << '\n';
 		}
 
 		// Erase any poison characters from the vector if poison is not active anymore

@@ -77,8 +77,11 @@ namespace Utils {
 	}
 
 	void CalculateTileBounds(TileIndex const& center, TileIndex& min, TileIndex& max, int radius) {
+		// y is 0 at the top of the screen
+		// min - bottom left corner of the box
 		min.x = center.x - radius;
 		min.y = center.y + radius;
+		// max - top right corner of the box 
 		max.x = center.x + radius;
 		max.y = center.y - radius;
 

@@ -39,11 +39,18 @@ public:
 
 	// return true if attribute health is more than 0 otherwise false
 	bool IsActive() const { return isActive; }
+	bool CanBeDamaged() const { return canBeDamaged; }
 
+	bool HasModifier() const { return isTickDamageActive || isInvisible; }
+
+	void Heal(float percentage);
 	void TakeDamage(int value);
 	// Percentage (0.0f - 1.0f) to damage based on remaining shield health
 	// 0.0f - 10 shield hp > 0 shield hp
 	void DamageShield(float percentage);
+
+	void SetInvisibility(int ticks);
+	void CleanseNegativeEffects() { isTickDamageActive = false; }
 
 	void SetTickDamage(int tickDmg, int ticks);
 	void UpdateTicks();
@@ -72,9 +79,11 @@ private:
 	// Percentages = 0.00 - 1.00
 	float damageReduction = 0, critReduction = 0;
 
+	bool isInvisible = false;
 	bool isTickDamageActive = false; // isActive if the object is poison or decaying
 	int tickDamage = 0;
-	int remainingTicks = 0;
+
+	int remainingTicks = 0; // remaining number of rounds the modifier would last for
 };
 
 #endif // !ATTRIBUTES_HPP

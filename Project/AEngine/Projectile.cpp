@@ -23,7 +23,25 @@ void Projectile::Draw() {
     GraphicsManager::DrawGameObject(texture, mat, Color{ 0.5f, 0.5f, 0, 1 });
 }
 
-void Projectile::AbilityActivation(Ability const& ability) {
+bool Projectile::InIgnoredTiles() {
+    if (ignoredTiles.size() <= 0) return false; // if there is no tiles to ignored return false
+
+    // Current tileIndex based on current projectile transform
+    TileIndex current{ 0,0 };
+    Utils::GetTileIndex(current.x, current.y, transform.pos);
+
+    // Check if current tile index is a tileIndex that should be ignored
+    for (TileIndex const& ignoredTileId : ignoredTiles) {
+        if (ignoredTileId == current) {
+            std::cout << "In ignored Tiles" << '\n';
+            return true;
+        }
+    }
+
+    return false;
+}
+
+void Projectile::AbilityActivation(bool isPlayer, Ability const& ability) {
     if (Mode() == ProjectileMode::ATTACK || isAbilityTriggered) return;
 
     bool leftClick = AEInputCheckTriggered(AEVK_LBUTTON);
@@ -77,7 +95,7 @@ void Projectile::AbilityActivation(Ability const& ability) {
                 for (int i = 0; i <= Config::MAX_GRID_Y; ++i) {
                     Tile& tile = (*MapManager::currentMap)[i][tileX];
                     if (tile.Type() == TileType::TILE_EMPTY) {
-                        tile.Type(TileType::TILE_BLOCK_1);
+                        tile.Type(isPlayer ? TileType::TILE_BLOCK_1 : TileType::TILE_BLOCK_2);
                         tile.attribute.Health(ability.GetStats().hp);
                     }
                 }
@@ -92,29 +110,36 @@ void Projectile::AbilityActivation(Ability const& ability) {
         if (hasCollided) {
             isAbilityTriggered = true;
             SetAreaEffects(ability, true);
-            //int radius = ability.GetStatus().effectRadius;
-
-            //TileIndex center{0,0}, min{0,0}, max{0,0};
-            //Utils::GetTileIndex(center.x, center.y, transform.pos); // set current projectile tile index as center
-            //Utils::CalculateTileBounds(center, min, max, radius); // calculate the bounds to set the blocks inside the bounds to be decaying
-
-            //// add blocks to be decay
-            //for (int y = max.y; y < min.y; ++y) {
-            //    for (int x = min.x; x < max.x; ++x) {
-            //        Tile& tile = (*MapManager::currentMap)[y][x];
-            //        if (tile.IsBlocks()) {
-            //            tile.attribute.SetTickDamage(ability.GetStatus().damageEachRound, ability.GetStatus().rounds); // set decay or to poison
-            //            tile.UpdateTextureColor(1); // update texture color of the tiles after it has been set to decay
-            //            currentLevel->AddDecayTiles(tile.tileId); // add to the vector containing all the decaying tiles
-            //        }
-            //    }
-            //}
         }
         break;
     case ProjectileMode::POISON:
         if (hasCollided) {
             isAbilityTriggered = true;
             SetAreaEffects(ability, false);
+        }
+        break;
+    case ProjectileMode::INSTANT_BASTION:
+        if (leftClick) {
+            isAbilityTriggered = true;
+
+            TileIndex center{ 0,0 }, min{ 0,0 }, max{ 0,0 };
+            Utils::GetTileIndex(center.x, center.y, transform.pos); // center index
+            center.x -= 2;
+            Utils::CalculateTileBounds(center, min, max, ability.GetStatus().effectRadius);
+
+            if (!Utils::IsTileIndexOutOfBounds(center.x, center.y)) {
+                for (int y = max.y; y < min.y; ++y) {
+                    for (int x = min.x; x < max.x; ++x) {
+                        Tile& tile = (*MapManager::currentMap)[y][x];
+                        if (tile.Type() == TileType::TILE_EMPTY) {
+                            tile.Type(isPlayer ? TileType::TILE_BLOCK_1 : TileType::TILE_BLOCK_2);
+                            tile.attribute.Heal(1.0f); // heal tile to full hp incase
+                        }
+
+                        ignoredTiles.push_back({ x,y }); // ignore these newly builded blocks for a turn
+                    }
+                }
+            }
         }
         break;
     }
@@ -173,7 +198,10 @@ void Projectile::Update(bool isPlayerShot, float dt) {
     ProjectileMovement(dt);
     AEVec2 end = transform.pos;
 
+    if (InIgnoredTiles()) return; // if is currently inside a tile block to ignored just return no collision checks
     if (hasHitShield) return; // if projectile has hit a shield it should get destroy instantly no more collision checks
+
+    // Collision Checks
 
     // if its player shot get the AI shield to check shield collision
     TowerShield& shield = LevelManager::CurrentLevel()->GetTowerShield(!isPlayerShot);
@@ -195,6 +223,7 @@ void Projectile::Update(bool isPlayerShot, float dt) {
     }
 
     // Check for collision in a 3x3 area with the projectile
+
     int tileX = 0, tileY = 0;
     Utils::GetTileIndex(tileX, tileY, transform.pos);
 
@@ -236,17 +265,19 @@ void Projectile::ProjectileMovement(float dt) {
         isGrounded = PhysicsManager::IsObjectGrounded(transform);
     }
 
-    // Movement
-    if (isGrounded) {
-        velocity.x *= pow(PhysicsManager::FRICTION, dt);
-        velocity.y = 0; // ensure that the projectile stay on the ground
-        if (std::abs(velocity.x) < PhysicsManager::MINIMUM_VELOCITY) velocity.x = 0;
-    }
-    else { 
-        // Gravity pull
-        velocity.y -= (PhysicsManager::GRAVITY * gravityScale) * dt;
+    if (!InIgnoredTiles()) {
+        if (isGrounded) {
+            velocity.x *= pow(PhysicsManager::FRICTION, dt);
+            velocity.y = 0; // ensure that the projectile stay on the ground
+            if (std::abs(velocity.x) < PhysicsManager::MINIMUM_VELOCITY) velocity.x = 0;
+        }
+        else {
+            // Gravity pull
+            velocity.y -= (PhysicsManager::GRAVITY * gravityScale) * dt;
+        }
     }
 
+    // Movement
     transform.pos.x += velocity.x * dt;
     transform.pos.y += velocity.y * dt;
 }
@@ -324,7 +355,8 @@ void Projectile::PlayModeEffect() {
 
 void Projectile::DamageTile(int tileX, int tileY) {
     Tile& centerTile = (*MapManager::currentMap)[tileY][tileX];
-    if (attackCharges <= 0 || !centerTile.IsDestructible()) return;
+
+    if (attackCharges <= 0 || !centerTile.IsDestructible()) return; // Can't damage return
 
     int blastRadius = attribute.DamageRadius();
 

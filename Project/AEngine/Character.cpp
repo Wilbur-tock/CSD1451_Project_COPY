@@ -111,6 +111,7 @@ void Character::Update() {
 	if (!attribute.IsActive()) return;
 
 	physics.Update(*this);
+
 	Draw();
 	DrawUI();
 }
@@ -224,10 +225,11 @@ void Character::GetCharacterInfo(std::string& str) {
 		+ "\nPos x: " + Utils::FormatFloat(transform.pos.x, 2) + " y: " + Utils::FormatFloat(transform.pos.y, 2)
 		+ "\nSize x: " + Utils::FormatFloat(transform.size.x, 2) + " y: " + Utils::FormatFloat(transform.size.x, 2)
 		+ "\nIsGrounded: " + std::string(physics.IsGrounded() ? "true" : "false")
+		+ "\nCanBeDamaged: " + std::string(attribute.CanBeDamaged() ? "true" : "false")
+		+ "\nIsPoison: " + std::string(attribute.IsTickDamageActive() ? "true" : "false") + attribute.TickDamageInfo()
 		+ "\n\nStats:\nHP: " + std::to_string(attribute.Health()) + "/" + std::to_string(attribute.MaxHealth())
 		+ "\nDamage Multiplier: " + std::to_string(attribute.DamageMultiplier())
-		+ "\nShield: " + std::to_string(attribute.Shield()) + "/" + std::to_string(attribute.MaxShield())
-		+ attribute.TickDamageInfo();
+		+ "\nShield: " + std::to_string(attribute.Shield()) + "/" + std::to_string(attribute.MaxShield());
 }
 
 void Character::DebugInfo() {

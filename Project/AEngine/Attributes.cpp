@@ -1,5 +1,9 @@
 #include "Attributes.hpp"
 
+void Attributes::Heal(float percentage) {
+	Health(static_cast<int>(maxHealth * percentage));
+}
+
 void Attributes::TakeDamage(int value) {
 	if (!canBeDamaged) return;
 
@@ -23,16 +27,30 @@ void Attributes::SetTickDamage(int tickDmg, int ticks) {
 	isTickDamageActive = true;
 	tickDamage = tickDmg;
 	remainingTicks = ticks;
+	std::cout << "Poison! " << ticks <<'\n';
+}
+
+void Attributes::SetInvisibility(int ticks) {
+	isInvisible = true;
+	canBeDamaged = false;
+	remainingTicks = ticks;
 }
 
 void Attributes::UpdateTicks() {
-	if (!isTickDamageActive) return;
+	if (!HasModifier()) return;
+	std::cout << std::boolalpha << HasModifier() << '\n';
 
-	TakeDamage(tickDamage);
-	--remainingTicks;
+	if (isTickDamageActive) {
+		TakeDamage(tickDamage);
+		--remainingTicks;
+	}
 
 	if (remainingTicks <= 0) {
 		isTickDamageActive = false;
+
+		// Reset invisible
+		if (isInvisible) canBeDamaged = true;
+		isInvisible = false;
 	}
 }
 

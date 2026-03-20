@@ -10,8 +10,8 @@ namespace LevelManager {
 
 	void LoadAllLevels(); // Load all levels data
 
-	void LoadLevel(int levelId);
-	void SelectLevel(int levelId);
+	void LoadLevel(int levelId); // Load the level data based on the level index given
+	void SelectLevel(int levelId); 
 	Level* CurrentLevel();
 
 	int LevelCount();
