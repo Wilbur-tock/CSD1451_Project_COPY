@@ -211,7 +211,7 @@ namespace MainMenu {
         }
         if (AEInputCheckTriggered(AEVK_4)) {
             AudioManager::PlaySFX(AudioManager::SFX::UIButton);
-            OnCreditsClicked();
+            OnGuideClicked();
         }
         if (AEInputCheckTriggered(AEVK_5)) {
             AudioManager::PlaySFX(AudioManager::SFX::UIButton);
@@ -262,14 +262,14 @@ namespace MainMenu {
         GameStateManager::next = GameStateManager::GameState::SETTINGS;
     }
 
-    void OnCreditsClicked() {
-        // Transition to Credits screen
-        GameStateManager::next = GameStateManager::GameState::CREDITS;
-    }
-
     void OnGuideClicked() {
         // Transition to Guide screen
         GameStateManager::next = GameStateManager::GameState::GUIDE;
+    }
+
+    void OnCreditsClicked() {
+        // Transition to Credits screen
+        GameStateManager::next = GameStateManager::GameState::CREDITS;
     }
 
     void OnQuitClicked() {
