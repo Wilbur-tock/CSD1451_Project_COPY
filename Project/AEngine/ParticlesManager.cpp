@@ -89,7 +89,10 @@ namespace ParticleManager {
             Color color(cr, cg, cb, ca);
 
             // Lerp scale
-            float scale = p.scaleStart + (p.scaleEnd - p.scaleStart) * t;
+            float tScaled = (p.scaleAcceleration != 0.f)
+                ? powf(t, 1.f / (1.f + p.scaleAcceleration))   // >0 = slow start, fast end
+                : t;
+            float scale = p.scaleStart + (p.scaleEnd - p.scaleStart) * tScaled;
 
             // Build transform: scale -> rotate -> translate
             AEMtx33 mtxScale, mtxRot, mtxTrans, mtxResult;
@@ -153,6 +156,7 @@ namespace ParticleManager {
             // ---- Scale -----------------------------------------------------
             p.scaleStart = params.scaleStart;
             p.scaleEnd = params.scaleEnd;
+            p.scaleAcceleration = params.scaleAcceleration;
 
             // ---- Color -----------------------------------------------------
             p.colorStart = params.colorStart;

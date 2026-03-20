@@ -38,6 +38,8 @@ public:
     float   scaleStart{ 10.f };
     float   scaleEnd{ 0.f };
 
+    float   scaleAcceleration{ 0.f };
+
     // ---- Lifetime -------------------------------------------------------
     float   lifetimeMin{ 0.5f };
     float   lifetimeMax{ 1.5f };
@@ -63,6 +65,7 @@ public:
         colorEnd{ 1.f, 1.f, 1.f, 0.f },
         scaleStart{ 10.f },
         scaleEnd{ 0.f },
+		scaleAcceleration{ 0.f },
         lifetimeMin{ 0.5f },
         lifetimeMax{ 1.5f },
         count{ 10 },
@@ -81,7 +84,8 @@ public:
         int count,
         ParticleShape shape = ParticleShape::SQUARE,  // defaulted
         float accelerationMin = 0.f,                    // defaulted
-        float accelerationMax = 0.f                     // defaulted
+        float accelerationMax = 0.f,                     // defaulted
+        float scaleAcceleration = 0.f
     ) :
         spawnPosition{ spawnPosition }, spawnRadius{ spawnRadius },
         speedMin{ speedMin }, speedMax{ speedMax },
@@ -90,6 +94,7 @@ public:
         accelerationMin{ accelerationMin }, accelerationMax{ accelerationMax },
         colorStart{ colorStart }, colorEnd{ colorEnd },
         scaleStart{ scaleStart }, scaleEnd{ scaleEnd },
+		scaleAcceleration{ scaleAcceleration },
         lifetimeMin{ lifetimeMin }, lifetimeMax{ lifetimeMax },
         count{ count }, shape{ shape }
     {
@@ -117,6 +122,7 @@ public:
     float   rotationSpeed{ 0.f }; // Radians per second (can be negative)
     float   scaleStart{ 1.f }; // Uniform scale at birth
     float   scaleEnd{ 0.f }; // Uniform scale at death (lerped over lifetime)
+    float   scaleAcceleration{ 0.f };
 
     float   acceleration{ 0.f };
 
