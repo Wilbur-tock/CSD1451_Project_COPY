@@ -53,6 +53,12 @@ namespace ParticleManager {
 
             // Integrate rotation
             p.rotation += p.rotationSpeed * dt;
+
+            if (p.acceleration != 0.f) {
+                float factor = 1.f + p.acceleration * dt;
+                p.velocity.x *= factor;
+                p.velocity.y *= factor;
+            }
         }
     }
 
@@ -83,7 +89,10 @@ namespace ParticleManager {
             Color color(cr, cg, cb, ca);
 
             // Lerp scale
-            float scale = p.scaleStart + (p.scaleEnd - p.scaleStart) * t;
+            float tScaled = (p.scaleAcceleration != 0.f)
+                ? powf(t, 1.f / (1.f + p.scaleAcceleration))   // >0 = slow start, fast end
+                : t;
+            float scale = p.scaleStart + (p.scaleEnd - p.scaleStart) * tScaled;
 
             // Build transform: scale -> rotate -> translate
             AEMtx33 mtxScale, mtxRot, mtxTrans, mtxResult;
@@ -138,6 +147,7 @@ namespace ParticleManager {
             float speed = RandRange(params.speedMin, params.speedMax);
             p.velocity.x = cosf(dir) * speed;
             p.velocity.y = sinf(dir) * speed;
+            p.acceleration = RandRange(params.accelerationMin, params.accelerationMax);
 
             // ---- Rotation --------------------------------------------------
             p.rotation = RandRange(0.f, PI);
@@ -146,6 +156,7 @@ namespace ParticleManager {
             // ---- Scale -----------------------------------------------------
             p.scaleStart = params.scaleStart;
             p.scaleEnd = params.scaleEnd;
+            p.scaleAcceleration = params.scaleAcceleration;
 
             // ---- Color -----------------------------------------------------
             p.colorStart = params.colorStart;
