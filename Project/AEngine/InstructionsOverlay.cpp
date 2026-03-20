@@ -3,26 +3,47 @@
 #include "Utils.hpp"
 #include "Color.hpp"
 #include "GameStateManager.hpp"
+#include "Config.hpp"
+#include "LevelManager.hpp"
 
 namespace UIInstructionsOverlay {
 
-    static std::string GetStateName(GameStateManager::GameState s) {
-        using GameStateManager::GameState;
-        switch (s) {
-        case GameState::INITIALIZE:   return "INITIALIZE";
-        case GameState::MAIN_MENU:    return "MAIN MENU";
-        case GameState::LEVEL_SELECT: return "LEVEL SELECT";
-        case GameState::MAP_EDITOR:   return "MAP EDITOR";
-        case GameState::LEVEL_1:      return "LEVEL 1";
-        case GameState::LEVEL_2:      return "LEVEL 2";
-        case GameState::CREDITS:      return "CREDITS";
-        case GameState::SETTINGS:     return "SETTINGS";
-        case GameState::GUIDE:        return "GUIDE";
-        case GameState::RESTART:      return "RESTART";
-        case GameState::EXIT:         return "EXIT";
-        case GameState::QUIT:         return "QUIT";
+    namespace {
+        bool IsGameplayLevel(GameStateManager::GameState s) {
+            using GameStateManager::GameState;
+            switch (s) {
+            case GameState::LEVEL_1:
+            case GameState::LEVEL_2:
+            case GameState::LEVEL_3:
+            case GameState::LEVEL_4:
+            case GameState::LEVEL_5:
+                return true;
+            default:
+                return false;
+            }
         }
-        return "GAME";
+
+        std::string GetStateName(GameStateManager::GameState s) {
+            using GameStateManager::GameState;
+            switch (s) {
+            case GameState::INITIALIZE:   return "INITIALIZE";
+            case GameState::MAIN_MENU:    return "MAIN MENU";
+            case GameState::LEVEL_SELECT: return "LEVEL SELECT";
+            case GameState::MAP_EDITOR:   return "MAP EDITOR";
+            case GameState::LEVEL_1:      return "LEVEL 1";
+            case GameState::LEVEL_2:      return "LEVEL 2";
+            case GameState::LEVEL_3:      return "LEVEL 3";
+            case GameState::LEVEL_4:      return "LEVEL 4";
+            case GameState::LEVEL_5:      return "LEVEL 5";
+            case GameState::CREDITS:      return "CREDITS";
+            case GameState::SETTINGS:     return "SETTINGS";
+            case GameState::GUIDE:        return "GUIDE";
+            case GameState::RESTART:      return "RESTART";
+            case GameState::EXIT:         return "EXIT";
+            case GameState::QUIT:         return "QUIT";
+            }
+            return "GAME";
+        }
     }
 
     UIManager::Panel dimPanel, mainPanel;
@@ -30,13 +51,13 @@ namespace UIInstructionsOverlay {
 
     void Initialize() {
         dimPanel = UIManager::Panel{
-            {static_cast<float>(Config::SCREEN_WIDTH), static_cast<float>(Config::SCREEN_HEIGHT)},
+            { static_cast<float>(Config::SCREEN_WIDTH), static_cast<float>(Config::SCREEN_HEIGHT) },
             Color(0.0f, 0.0f, 0.0f, 0.55f),
             Utils::AnchorMode::CENTER
         };
 
         mainPanel = UIManager::Panel{
-            {1120.0f, 730.0f},
+            { 1120.0f, 730.0f },
             Color(0.12f, 0.12f, 0.16f, 0.95f),
             Utils::AnchorMode::CENTER
         };
@@ -45,7 +66,7 @@ namespace UIInstructionsOverlay {
         float y = mainPanel.Pos().y - 40.0f;
         Utils::NormalizeCoordinates(x, y);
 
-        instructionText = TextObject{ "", 0.65f, Color{1,1,1}, {x,y} };
+        instructionText = TextObject{ "", 0.65f, Color{1,1,1}, {x, y} };
     }
 
     void Draw() {
@@ -65,7 +86,7 @@ namespace UIInstructionsOverlay {
 
         using GameStateManager::GameState;
 
-        if (current == GameState::LEVEL_1 || current == GameState::LEVEL_2) {
+        if (IsGameplayLevel(current)) {
             msg +=
                 "\nLEVEL\n"
                 "Mouse: Aim cannon\n"
@@ -103,8 +124,7 @@ namespace UIInstructionsOverlay {
         else if (current == GameState::LEVEL_SELECT) {
             msg +=
                 "\nLEVEL SELECT\n"
-                "[1] Start Level 1\n"
-                "[2] Start Level 2\n"
+                "[" + std::to_string(1) + "-" + std::to_string(LevelManager::TOTAL_LEVEL_COUNT) + "] Start unlocked level\n"
                 "[ESC] / [BACK]: Return to Main Menu\n";
         }
         else if (current == GameState::GUIDE) {
