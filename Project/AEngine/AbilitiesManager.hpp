@@ -2,7 +2,6 @@
 #define ABILITIESMANAGER_HPP
 
 #include "pch.hpp"
-#include "Projectile.hpp"
 #include "Ability.hpp"
 
 namespace AbilitiesManager {

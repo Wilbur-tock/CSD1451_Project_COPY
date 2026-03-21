@@ -17,6 +17,7 @@ namespace AbilitiesManager {
 
 	// Load all abilities from the JSON file and categorize them into their respective vectors
 	void AbilityController::LoadAllAbilities(bool isPlayer) {
+		// Reset data in the controller
 		offensiveAbilities.clear();
 		statsAbilities.clear();
 		defensiveAbilities.clear();
@@ -55,11 +56,11 @@ namespace AbilitiesManager {
 
 		int abilityId = 0;
 		for (auto& item : data) { // Your JSON is an array at the root
-			Ability newAbility = AbilitiesFileManager::ReadAbilityInfo(abilityId, item);
+			// Reading of json data files
+			Ability newAbility = AbilitiesFileManager::ReadAbilityInfo(item);
+			newAbility.Id(abilityId);
 
-			newAbility.SetStats(AbilitiesFileManager::ReadBaseStats(item));
-			newAbility.SetProjectile(AbilitiesFileManager::ReadProjectileStats(item));
-			newAbility.SetStatus(AbilitiesFileManager::ReadStatusStats(item));
+			AbilitiesFileManager::ReadAllStats(newAbility, item);
 
 			// Add to the type of ability vector
 			switch (newAbility.GetType()) {
@@ -76,7 +77,7 @@ namespace AbilitiesManager {
 
 			allAbilities.push_back(newAbility);
 
-			// checking if the this ability projectileId is new id that has not been added to the allProjectilesAbilities vector
+			// checking if the this ability projectileId is a new id that has not been added to the allProjectilesAbilities vector
 			bool addToProjectilesAbilities = true;
 			for (Ability const& ability : projectileAbilities) {
 				int projectileId = ability.GetProj().projectileId; 
@@ -100,18 +101,7 @@ namespace AbilitiesManager {
 		LoadStartingAbilities();
 		//PrintAllAbilities();
 		//PrintInventory();
-
-		if (!isPlayerControlled) {
-			SetAIAbilitySelection(1);
-			int count = 50;
-			int tierCount[] = { 0,0,0,0 };
-			for (int i = 0; i < count; ++i) {
-				Ability ability = offensiveAbilities[RandomAbilityId(offensiveAbilities)];
-				++tierCount[static_cast<int>(ability.GetTier()) - 1];
-				std::cout << "Tier: " << std::to_string(static_cast<int>(ability.GetTier())) << ' ' << ability.GetName() << '\n';
-			}
-			std::cout << "Tier Count: " << tierCount[0] << ' ' << tierCount[1] << ' ' << tierCount[2] << ' ' << tierCount[3] << ' ' << '\n';
-		}
+		//RandomiserTest(50, 0);
 	}
 
 	// Load the starting abilities for the player and AI

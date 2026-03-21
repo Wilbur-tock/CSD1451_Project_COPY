@@ -47,6 +47,7 @@ public:
 	Ability(int _id, std::string _name, std::string _description, AbilityType _type, Tier _tier, AEGfxTexture* _texture);
 
 	int					Id() const { return id; }
+	void				Id(int newId) { id = newId; }
 	std::string			GetName() const { return name; }
 	std::string			GetDescription() const { return description; }
 	AbilityType			GetType() const { return type; }

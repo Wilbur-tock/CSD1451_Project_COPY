@@ -34,7 +34,7 @@ namespace AbilitiesFileManager {
 		}
 	}
 
-	Ability ReadAbilityInfo(int abilityId, nlohmann::json const& data) {
+	Ability ReadAbilityInfo(nlohmann::json const& data) {
 		// Read information about the ability
 		std::string name = data["Name"];
 		std::string description = data["Description"];
@@ -49,8 +49,17 @@ namespace AbilitiesFileManager {
 			texture = AssetsManager::GetTexture(textureFilePath.c_str());
 		}
 		
-		return Ability{ abilityId, name, description, type, tier, texture };
+		// ability id suppose to be changed after this function is called
+		return Ability{ 0, name, description, type, tier, texture };
 	};
+
+	Ability& ReadAllStats(Ability& ability, nlohmann::json const& data) {
+		ability.SetStats(AbilitiesFileManager::ReadBaseStats(data));
+		ability.SetProjectile(AbilitiesFileManager::ReadProjectileStats(data));
+		ability.SetStatus(AbilitiesFileManager::ReadStatusStats(data));
+
+		return ability;
+	}
 
 	StatsModule ReadBaseStats(nlohmann::json const& data) {
 		if (data.contains(statsName) && !data[statsName].is_null()) {
