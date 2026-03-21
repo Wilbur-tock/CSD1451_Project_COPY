@@ -1048,7 +1048,7 @@ namespace Guide {
         backButton = Button(
             TextObject("< BACK"),
             Utils::AnchorMode::CENTER,
-            { -680.0f, -325.0f },
+            { -680.0f, -300.0f },
             { 220.0f, 70.0f },
             Color(0.82f, 0.28f, 0.28f, 1.0f),
             buttonTexture,

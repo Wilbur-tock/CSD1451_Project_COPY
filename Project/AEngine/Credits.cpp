@@ -53,8 +53,8 @@ namespace Credits {
             "President:\n"
             "Claude Comair\n\n"
 
-            "Executives: \n"
-            "Claude Comair, CHU Jason Yeu Tat, \n Michael GATS, TAN Chek Ming, \n "
+            "Executives:\n"
+            "Claude Comair, CHU Jason Yeu Tat,\n Michael GATS, TAN Chek Ming,\n"
             "Prasanna Kumar GHALI, Mandy WONG, Johnny DEEK\n\n"
 
             "All our playtesters\n"

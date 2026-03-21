@@ -15,6 +15,7 @@ Button::Button(TextObject _textObj, Utils::AnchorMode _anchorMode, AEVec2 _pos, 
     AEGfxTexture* _bgTexture, AEGfxTexture* _iconTexture,  Utils::FuncPtr _onClick)
     : textObj{ _textObj }, transform{ _pos, _size }, color{ _color },
     bgTexture{ _bgTexture }, iconTexture{ _iconTexture }, iconTransform{ {_pos}, {_size} }, onClick{ _onClick } {
+
     // textObject is always in the center of the button by default
     textObj.SetPosition(_anchorMode, transform);
     if (!iconTexture) return; // null icon texture don't need to calculate

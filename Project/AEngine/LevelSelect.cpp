@@ -127,7 +127,7 @@ namespace LevelSelect {
         backButton = Button(
             TextObject{ "< BACK" },
             Utils::AnchorMode::CENTER,
-            { 0.0f, -250.0f },
+            { -125.0f, -250.0f },
             { 250.0f, 75.0f },
             Color(0.82f, 0.28f, 0.28f, 1.0f),
             buttonTexture,
@@ -135,11 +135,12 @@ namespace LevelSelect {
             OnBackClicked
         );
 
+
         titleText = {
-     "SELECT LEVEL",
-     1.7f,
-     Color(0.0f, 0.0f, 0.0f, 1.0f),
-     { 0.0f, 0.0f }
+             "SELECT LEVEL",
+             1.7f,
+             Color(0.0f, 0.0f, 0.0f, 1.0f),
+             { 0.0f, 0.0f }
         };
 
         subtitleText = {
