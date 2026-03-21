@@ -27,7 +27,6 @@ void Attributes::SetTickDamage(int tickDmg, int ticks) {
 	isTickDamageActive = true;
 	tickDamage = tickDmg;
 	remainingTicks = ticks;
-	std::cout << "Poison! " << ticks <<'\n';
 }
 
 void Attributes::SetInvisibility(int ticks) {
@@ -38,7 +37,6 @@ void Attributes::SetInvisibility(int ticks) {
 
 void Attributes::UpdateTicks() {
 	if (!HasModifier()) return;
-	std::cout << std::boolalpha << HasModifier() << '\n';
 
 	if (isTickDamageActive) {
 		TakeDamage(tickDamage);

@@ -146,10 +146,10 @@ namespace CannonManager {
         switch (difficultyLevel) {
         default:
         case 0: // Easy
-            aiDifficulty = 0.95f;
+            aiDifficulty = 0.975f;
             break;
         case 1: // Medium
-            aiDifficulty = 0.975f;
+            aiDifficulty = 0.99f;
             break;
         case 2: // Hard
             aiDifficulty = 1.0f;
@@ -188,6 +188,7 @@ namespace CannonManager {
 
         // Randomise offset to add a variance to 
         float inaccuracy = (1.0f - aiDifficulty);
+        inaccuracy = 0.0f; // TESTING TO BE REMOVED
         float randomOffset = Utils::RandomValue(-inaccuracy, inaccuracy);
 
         // Apply the variables to the cannon
@@ -244,6 +245,7 @@ namespace CannonManager {
             }
         }
 
+        // Check for left mouse click released to fire
         if (AEInputCheckReleased(AEVK_LBUTTON)) {
             isHoldingLeftClick = false;
         }
@@ -392,6 +394,7 @@ namespace CannonManager {
         }
     }
 
+    // Apply ability modifier effects after the player has released left click and shoot
     void Cannon::ApplyModifierEffects(Projectile& projectile) {
         // apply the modifier effects this controller has in the abilityModifier vector
         // if the modifier effects needs to be constanly reapply after the shooter has shoot

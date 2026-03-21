@@ -209,13 +209,8 @@ namespace MapManager {
 				tile.transform.pos = { startX + (x * tileSize), startY - (y * tileSize) };
 				tile.transform.size = { Config::TILE_SIZE,Config::TILE_SIZE };
 				tile.texture = tileTexture;
-				tile.Type(static_cast<TileType>(type));
 				tile.tileId = { x,y };
-				tile.attribute = Attributes{};
-
-				if (tile.IsBlocks()) {
-					tile.attribute.DamageMultiplier(5);
-				}
+				tile.Type(static_cast<TileType>(type));
 			}
 		}
 
@@ -227,7 +222,7 @@ namespace MapManager {
 
 	void DrawMap(std::vector<std::vector<Tile>> const& map, bool drawCharacters) {
 		++GameTrackingManager::data.drawMapCount;
-		AEGfxSetBackgroundColor(0.92f, 0.92f, 0.95f);
+		AEGfxSetBackgroundColor(0.92f, 0.92f, 0.95f); 
 
 		int mapHeight = static_cast<int>(map.size());
 		int mapWidth = static_cast<int>(map[0].size());

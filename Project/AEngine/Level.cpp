@@ -705,6 +705,9 @@ void Level::UpdateNewRound() {
 	// and check if its turn lifespan or hp is not zero remove the ability effects
 	playerController->UpdateModifiers();
 	enemyController->UpdateModifiers();
+
+	RecordPrevDamage(playerDamageLog);
+	RecordPrevDamage(enemyDamageLog);
 }
 
 void Level::UpdateLevelStatus() {
@@ -856,6 +859,36 @@ void Level::ToggleTerritoryTiles(bool isPlayer, bool isBuilding) {
 			currentTile.Type(TileType::TILE_EMPTY);
 		}
 	}
+}
+
+void Level::RecordDamageLog(int damageToAdd, bool isCharacter) {
+	DamageLog& log = isPlayerTurn ? playerDamageLog : enemyDamageLog;
+	if (isCharacter) {
+		log.roundCharacterDamage += damageToAdd;
+		log.totalCharacterDamage += damageToAdd;
+	}
+	else {
+		log.roundTileDamage += damageToAdd;
+		log.totalTileDamage += damageToAdd;
+	}
+}
+
+void Level::RecordPrevDamage(DamageLog& log) {
+	log.prevTurnCharacterDamage = log.totalCharacterDamage - log.roundCharacterDamage;
+	log.prevTurnTileDamage = log.totalTileDamage - log.roundTileDamage;
+
+	//std::cout << "Damage Log: "
+	//	<< "\nTotal Character Damage : " << log.totalCharacterDamage
+	//	<< "\nCurrent Round Character Damage: " << log.roundCharacterDamage
+	//	<< "\nPrevious Round Character Damage: " << log.prevTurnCharacterDamage
+	//	<< "\n\nTotal Tile Damage : " << log.totalTileDamage
+	//	<< "\nCurrent Round Tile Damage: " << log.roundTileDamage
+	//	<< "\nPrevious Round Tile Damage: " << log.prevTurnTileDamage
+	//	<< '\n';
+
+	// Reset current round damage
+	log.roundCharacterDamage = 0;
+	log.roundTileDamage = 0;
 }
 
 void Level::DebugCommands() {

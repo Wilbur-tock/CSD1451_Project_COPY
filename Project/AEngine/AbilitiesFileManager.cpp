@@ -4,9 +4,9 @@
 
 namespace AbilitiesFileManager {
 	std::string filePath = "Assets/DataAbilities/"; // if filepath name is changed only need to change here
-	std::string statsName = "Base_Stats";
-	std::string projectileName = "Projectile_Stats";
-	std::string statusName = "Status_Stats";
+	std::string statsKey = "Base_Stats";
+	std::string projectileKey = "Projectile_Stats";
+	std::string statusKey = "Status_Stats";
 
 	void ReadAbilitiesFromFile(nlohmann::json& jsonData, std::string const& fileName) {
 		std::string filePathAndName = filePath + fileName;
@@ -54,6 +54,7 @@ namespace AbilitiesFileManager {
 	};
 
 	Ability& ReadAllStats(Ability& ability, nlohmann::json const& data) {
+		// Set all the stats here
 		ability.SetStats(AbilitiesFileManager::ReadBaseStats(data));
 		ability.SetProjectile(AbilitiesFileManager::ReadProjectileStats(data));
 		ability.SetStatus(AbilitiesFileManager::ReadStatusStats(data));
@@ -62,8 +63,8 @@ namespace AbilitiesFileManager {
 	}
 
 	StatsModule ReadBaseStats(nlohmann::json const& data) {
-		if (data.contains(statsName) && !data[statsName].is_null()) {
-			auto& s = data[statsName];
+		if (data.contains(statsKey) && !data[statsKey].is_null()) {
+			auto& s = data[statsKey];
 			return StatsModule{
 				s["Hp"],
 				s["Attack"],
@@ -75,8 +76,8 @@ namespace AbilitiesFileManager {
 	}
 
 	ProjectileModule ReadProjectileStats(nlohmann::json const& data) {
-		if (data.contains(projectileName) && !data[projectileName].is_null()) {
-			auto& p = data[projectileName];
+		if (data.contains(projectileKey) && !data[projectileKey].is_null()) {
+			auto& p = data[projectileKey];
 			return ProjectileModule{
 				p["ProjectileID"],
 				p["Damage_Amp"],
@@ -91,8 +92,8 @@ namespace AbilitiesFileManager {
 	}
 
 	StatusModule ReadStatusStats(nlohmann::json const& data) {
-		if (data.contains(statusName) && !data[statusName].is_null()) {
-			auto& status = data[statusName];
+		if (data.contains(statusKey) && !data[statusKey].is_null()) {
+			auto& status = data[statusKey];
 			return StatusModule{
 				status["Is_Modifier"],
 				status["Rounds"],

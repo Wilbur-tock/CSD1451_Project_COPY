@@ -32,7 +32,7 @@ bool Projectile::InIgnoredTiles() {
 
     // Check if current tile index is a tileIndex that should be ignored
     for (TileIndex const& ignoredTileId : ignoredTiles) {
-        if (ignoredTileId == current) {
+        if (current == ignoredTileId) {
             std::cout << "In ignored Tiles" << '\n';
             return true;
         }
@@ -124,7 +124,7 @@ void Projectile::AbilityActivation(bool isPlayer, Ability const& ability) {
 
             TileIndex center{ 0,0 }, min{ 0,0 }, max{ 0,0 };
             Utils::GetTileIndex(center.x, center.y, transform.pos); // center index
-            center.x -= 2;
+            center.x -= ability.GetStatus().effectRadius;
             Utils::CalculateTileBounds(center, min, max, ability.GetStatus().effectRadius);
 
             if (!Utils::IsTileIndexOutOfBounds(center.x, center.y)) {
@@ -387,10 +387,12 @@ void Projectile::DamageTile(int tileX, int tileY) {
 
             if (!tileToDamage.IsDestructible()) continue;
 
-            // Damage tile AFTER it has damage a CHARACTER compononent
+            // Damage a tile and character is also damage inside the TILE class TakeDamage
             std::cout << "[Projectile] Damage Tile: " << tileToDamage << " Current hp: " << tileToDamage.attribute.Health() << " Damage: " << projDamage << '\n';
             tileToDamage.TakeDamage(projDamage);
             hasDamageAnyTile = true;
+
+            LevelManager::CurrentLevel()->RecordDamageLog(projDamage, tileToDamage.IsCharacter());
         }
     }
 

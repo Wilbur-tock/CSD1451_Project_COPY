@@ -743,7 +743,7 @@ namespace AbilitiesManager {
 	void AbilityController::PrintAbilityModifiers() {
 		std::cout << "==============" + controllerName + " Ability Modifiers" + "=============\n";
 		for (Ability const& ability : abilityModifiers) {
-			std::cout << std::setw(15) << std::left << ability.GetName() 
+			std::cout << std::setw(15) << std::left << ability.GetName()
 				<< "Remaining Turns " + std::to_string(ability.GetStatus().rounds) << ' '
 				<< std::boolalpha << ability.JustAddModifier() << '\n';
 		}

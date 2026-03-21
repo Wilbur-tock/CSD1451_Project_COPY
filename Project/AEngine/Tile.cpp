@@ -14,6 +14,14 @@ void Tile::Type(TileType newType) {
 	prevType = type;
 	if (IsEmpty() && IsCharacter()) characterId = -1; // reset characterId
 	type = newType;
+
+	// If new type that been assigned is blocks change to
+	if (IsBlocks()) {
+		attribute.DamageMultiplier(5);
+	}
+	else {
+		attribute.DamageMultiplier(1);
+	}
 }
 
 void Tile::Type(Tile const& toCopy) {

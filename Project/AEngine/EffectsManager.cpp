@@ -93,10 +93,10 @@ namespace EffectsManager {
         AEVec2 acceleration{ 0.f, 0.f };
 
         switch (projectileMode) {
-        case 1: // default
+        case 0: // default
             originOffset = 10.0f;
             break;
-        case 2: // bomb
+        case 1: // bomb
             speed = { 200.0f, 500.0f };
             directional = { 0.0f, 2.0f * PI };
             rotation = { -2.0f * PI, 2.0f * PI };
@@ -106,7 +106,7 @@ namespace EffectsManager {
             count = 40;
             shape = ParticleShape::CIRCLE;
             break;
-        case 3: // nuke
+        case 2: // nuke
             speed = { 500.0f, 1000.0f };
             color.first = { 1.0f, 0, 0, 1.0f };
             speed = { 0,0 };
@@ -116,7 +116,7 @@ namespace EffectsManager {
             shape = ParticleShape::CIRCLE;
 			acceleration = { 20.0f, 50.0f };
             break;
-        case 7: // Shield_buster
+        case 6: // Shield_buster
             originOffset = 20.0f;
             speed = { 400.0f, 800.0f };
             directional = { 0.0f, 2.0f * PI };

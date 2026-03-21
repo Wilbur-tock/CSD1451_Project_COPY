@@ -25,6 +25,18 @@ struct TerritoryTiles {
 	int territoryTileRadius = 15;
 };
 
+// Track how much damage was deal to the characters and tiles throughout out the whole level playthrough
+struct DamageLog {
+	int totalTileDamage = 0;
+	int totalCharacterDamage = 0;
+
+	int roundTileDamage = 0;
+	int roundCharacterDamage = 0;
+
+	int prevTurnTileDamage = 0;
+	int prevTurnCharacterDamage = 0;
+};
+
 // Class that contains all the level information 
 // Level tile map data,
 // instances of ALL player and enemy object, 
@@ -77,6 +89,8 @@ public:
 	void AddDecayTiles(TileIndex const& vectorTileId) { decayingTiles.push_back(vectorTileId); }
 	void AddPoisonCharacters(bool isPlayerCharacter, int vectorCharacterId) {  poisonCharacters.push_back({ isPlayerCharacter, vectorCharacterId }); }
 
+	void RecordDamageLog(int damageToAdd, bool isCharacter);
+
 private:
 	void InitializeUI();
 	void DrawUI();
@@ -96,6 +110,8 @@ private:
 
 	void SetTerritoryIndex(TileIndex const& newTileId, TileIndex& center, TileIndex& min, TileIndex& max);
 	void SetOriginalTerritoryTiles(TerritoryTiles& territoryTiles);
+
+	void RecordPrevDamage(DamageLog& log);
 
 	void DebugCommands();
 	void DebugInfo();
@@ -139,6 +155,8 @@ private:
 
 	std::vector<TileIndex> decayingTiles; // vector ids of activeLevelMap of which tiles having the decaying effect
 	std::vector<std::pair<bool,int>> poisonCharacters; // vector ids of all the characters that are poison, bool isPlayerCharacter, int vectorId
+
+	DamageLog playerDamageLog, enemyDamageLog;
 	
 	bool hasProcessedVictory = false;
 };

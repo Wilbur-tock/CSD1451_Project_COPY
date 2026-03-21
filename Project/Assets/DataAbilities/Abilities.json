@@ -50,7 +50,7 @@
             "ProjectileID": 2,
             "Damage_Amp": 1.0,
             "Base_Damage": 100,
-            "Radius": 15,
+            "Radius": 10,
             "Charges": 1,
             "unlimited_charges": false
         }
@@ -236,7 +236,7 @@
             "Target_Self": true,
             "Gravity_Scale": 0.0,
             "Damage_Each_Round": 0,
-            "Effect_Radius": 5
+            "Effect_Radius": 3
         }
     },
 
