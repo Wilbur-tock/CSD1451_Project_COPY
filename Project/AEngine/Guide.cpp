@@ -50,13 +50,10 @@ namespace Guide {
         struct AbilityGuideEntry {
             std::string name;
             std::string description;
-            std::string sourceLabel;
-            std::string chargesText;
             AbilityGroup group = AbilityGroup::OFFENSIVE;
             AbilityRole role = AbilityRole::ATTACK;
             nlohmann::json raw;
             AEGfxTexture* imageTexture = nullptr;
-            bool usingFallbackImage = false;
         };
 
         struct AbilityDisplayRow {
@@ -145,20 +142,6 @@ namespace Guide {
                 return baseStats.value(key2, 0.0);
             }
             return 0.0;
-        }
-
-        std::string GetChargesText(const nlohmann::json& ability) {
-            if (!ability.contains("Projectile_Stats") || ability["Projectile_Stats"].is_null()) {
-                return "-";
-            }
-
-            const auto& proj = ability["Projectile_Stats"];
-            if (proj.value("unlimited_charges", false)) {
-                return "INF";
-            }
-
-            int charges = proj.value("Charges", 0);
-            return (charges > 0) ? std::to_string(charges) : "-";
         }
 
         std::string GroupToString(AbilityGroup group) {
@@ -273,8 +256,7 @@ namespace Guide {
             return AbilityRole::UTILITY;
         }
 
-        AEGfxTexture* ResolveAbilityTexture(const nlohmann::json& ability, bool& usingFallbackImage) {
-            usingFallbackImage = false;
+        AEGfxTexture* ResolveAbilityTexture(const nlohmann::json& ability) {
             std::vector<std::string> candidates;
 
             const std::string explicitGuideImage = ability.value("Guide_Image", "");
@@ -302,19 +284,17 @@ namespace Guide {
             candidates.push_back("Assets/Abilities/Icon_Blank.png");
             candidates.push_back("Assets/square.png");
 
-            for (size_t i = 0; i < candidates.size(); ++i) {
-                if (!FileExists(candidates[i])) {
+            for (const std::string& candidate : candidates) {
+                if (!FileExists(candidate)) {
                     continue;
                 }
 
-                AEGfxTexture* texture = AssetsManager::GetTexture(candidates[i].c_str());
+                AEGfxTexture* texture = AssetsManager::GetTexture(candidate.c_str());
                 if (texture != nullptr) {
-                    usingFallbackImage = (i >= candidates.size() - 3);
                     return texture;
                 }
             }
 
-            usingFallbackImage = true;
             return AssetsManager::squareTexture;
         }
 
@@ -382,6 +362,23 @@ namespace Guide {
                 color.Alpha());
         }
 
+        void DrawTextCenteredPx(const std::string& text, float centerPixelX, float pixelY, float scale, const Color& color) {
+            f32 textW = 0.0f;
+            f32 textH = 0.0f;
+            AEGfxGetPrintSize(AssetsManager::textFont, text.c_str(), scale, &textW, &textH);
+
+            AEGfxPrint(
+                AssetsManager::textFont,
+                text.c_str(),
+                PixelToNdcX(centerPixelX) - (textW * 0.5f),
+                PixelToNdcY(pixelY),
+                scale,
+                color.Red(),
+                color.Green(),
+                color.Blue(),
+                color.Alpha());
+        }
+
         std::vector<std::string> WrapParagraph(const std::string& paragraph, size_t maxCharsPerLine) {
             std::vector<std::string> lines;
             std::istringstream words(paragraph);
@@ -431,16 +428,6 @@ namespace Guide {
             return result;
         }
 
-        void DrawWrappedTextLeftPx(const std::string& text, float pixelX, float pixelY, float scale,
-            const Color& color, size_t maxCharsPerLine, float lineStep = 24.0f) {
-            std::vector<std::string> lines = WrapText(text, maxCharsPerLine);
-            float y = pixelY;
-            for (const std::string& line : lines) {
-                DrawTextLeftPx(line, pixelX, y, scale, color);
-                y -= lineStep;
-            }
-        }
-
         void DrawWrappedTextLeftPxLimited(
             const std::string& text,
             float pixelX,
@@ -464,31 +451,6 @@ namespace Guide {
             if (static_cast<int>(lines.size()) > maxLines) {
                 DrawTextLeftPx("...", pixelX, y, scale, color);
             }
-        }
-
-        std::string BoolToYesNo(bool value) {
-            return value ? "Yes" : "No";
-        }
-
-        std::string GetSourceLabel(const nlohmann::json& ability, const std::string& defaultSource) {
-            const std::string custom = ability.value("Guide_Source_Label", "");
-            return custom.empty() ? defaultSource : custom;
-        }
-
-        std::string GetAvailabilityText(const AbilityGuideEntry& entry) {
-            const std::string label = ToLower(entry.sourceLabel);
-
-            if (label == "shared") {
-                return "Player + AI";
-            }
-            if (label == "player") {
-                return "Player Only";
-            }
-            if (label == "ai") {
-                return "AI Only";
-            }
-
-            return entry.sourceLabel;
         }
 
         std::string BuildAbilityDescription(const AbilityGuideEntry& entry) {
@@ -553,10 +515,6 @@ namespace Guide {
             const auto& ability = entry.raw;
 
             lines.push_back("Tier: " + std::to_string(ability.value("Tier", 0)));
-
-            if (entry.chargesText != "-") {
-                lines.push_back("Charges: " + entry.chargesText);
-            }
 
             if (entry.role == AbilityRole::ATTACK) {
                 if (ability.contains("Projectile_Stats") && !ability["Projectile_Stats"].is_null()) {
@@ -644,7 +602,7 @@ namespace Guide {
             return ToLower(a.name) < ToLower(b.name);
         }
 
-        void LoadAbilityJsonFile(const char* path, const std::string& sourceLabel) {
+        void LoadAbilityJsonFile(const char* path) {
             std::ifstream file(path);
             if (!file.is_open()) {
                 return;
@@ -657,12 +615,10 @@ namespace Guide {
                 AbilityGuideEntry entry{};
                 entry.name = ability.value("Name", "Unknown Ability");
                 entry.description = ability.value("Description", "");
-                entry.sourceLabel = GetSourceLabel(ability, sourceLabel);
-                entry.chargesText = GetChargesText(ability);
                 entry.group = DetermineGroup(ability);
                 entry.role = DetermineRole(ability, entry.group);
                 entry.raw = ability;
-                entry.imageTexture = ResolveAbilityTexture(ability, entry.usingFallbackImage);
+                entry.imageTexture = ResolveAbilityTexture(ability);
                 abilityEntries.push_back(entry);
             }
         }
@@ -674,9 +630,9 @@ namespace Guide {
             hoveredDisplayRowIndex = -1;
             selectedEntryIndex = -1;
 
-            LoadAbilityJsonFile("Assets/DataAbilities/Abilities.json", "Shared");
-            LoadAbilityJsonFile("Assets/DataAbilities/PlayerAbilities.json", "Player");
-            LoadAbilityJsonFile("Assets/DataAbilities/AiAbilities.json", "AI");
+            LoadAbilityJsonFile("Assets/DataAbilities/Abilities.json");
+            LoadAbilityJsonFile("Assets/DataAbilities/PlayerAbilities.json");
+            LoadAbilityJsonFile("Assets/DataAbilities/AiAbilities.json");
 
             std::sort(abilityEntries.begin(), abilityEntries.end(), CompareAbilityEntries);
             BuildDisplayRows();
@@ -751,11 +707,12 @@ namespace Guide {
                 "TAB  - Debug toggle";
         }
 
-        bool IsPointInsideRect(float x, float y, float centerX, float centerY, float width, float height) {
-            const float halfW = width * 0.5f;
-            const float halfH = height * 0.5f;
-            return (x >= centerX - halfW && x <= centerX + halfW &&
-                y >= centerY - halfH && y <= centerY + halfH);
+        bool IsPointInsideCenteredRect(float pointX, float pointY, float rectCenterX, float rectCenterY, float rectWidth, float rectHeight) {
+            const float halfW = rectWidth * 0.5f;
+            const float halfH = rectHeight * 0.5f;
+
+            return (pointX >= rectCenterX - halfW && pointX <= rectCenterX + halfW &&
+                pointY >= rectCenterY - halfH && pointY <= rectCenterY + halfH);
         }
 
         void UpdateHoveredRow() {
@@ -775,7 +732,7 @@ namespace Guide {
                 const float rowBoxHeight = row.isSectionHeader ? SECTION_HEIGHT : ROW_HEIGHT;
                 const float rowCenterY = FIRST_ROW_CENTER_Y - (i * (ROW_HEIGHT + ROW_GAP));
 
-                if (IsPointInsideRect(mouseX, mouseY, LIST_CENTER_X, rowCenterY, LIST_WIDTH, rowBoxHeight)) {
+                if (IsPointInsideCenteredRect(mouseX, mouseY, LIST_CENTER_X, rowCenterY, LIST_WIDTH, rowBoxHeight)) {
                     hoveredDisplayRowIndex = displayIndex;
                     return;
                 }
@@ -851,13 +808,12 @@ namespace Guide {
             headerBand.AddOffset({ LIST_CENTER_X, LIST_HEADER_CENTER_Y });
             headerBand.Draw();
 
-            const float nameX = LIST_CENTER_X - 285.0f;
-            const float roleX = LIST_CENTER_X + 35.0f;
-            const float chargesX = LIST_CENTER_X + 230.0f;
-
-            DrawTextLeftPx("ABILITY", nameX, LIST_HEADER_CENTER_Y - 10.0f, 0.62f, Color(0.05f, 0.07f, 0.10f, 1.0f));
-            DrawTextLeftPx("ROLE", roleX, LIST_HEADER_CENTER_Y - 10.0f, 0.62f, Color(0.05f, 0.07f, 0.10f, 1.0f));
-            DrawTextLeftPx("CHG", chargesX, LIST_HEADER_CENTER_Y - 10.0f, 0.62f, Color(0.05f, 0.07f, 0.10f, 1.0f));
+            DrawTextCenteredPx(
+                "ABILITY",
+                LIST_CENTER_X,
+                LIST_HEADER_CENTER_Y - 10.0f,
+                0.62f,
+                Color(0.05f, 0.07f, 0.10f, 1.0f));
 
             for (int i = 0; i < VISIBLE_ABILITY_ROWS; ++i) {
                 const int displayIndex = abilityScrollIndex + i;
@@ -883,8 +839,13 @@ namespace Guide {
                             return entry.group == row.group;
                         }));
 
-                    DrawTextLeftPx(row.label, LIST_CENTER_X - 285.0f, rowCenterY - 9.0f, 0.60f, Color(1.0f, 1.0f, 1.0f, 1.0f));
-                    DrawTextLeftPx(std::to_string(count) + " abilities", LIST_CENTER_X + 150.0f, rowCenterY - 9.0f, 0.52f, Color(1.0f, 1.0f, 1.0f, 0.95f));
+                    std::string sectionText = row.label + "  (" + std::to_string(count) + " abilities)";
+                    DrawTextCenteredPx(
+                        sectionText,
+                        LIST_CENTER_X,
+                        rowCenterY - 9.0f,
+                        0.58f,
+                        Color(1.0f, 1.0f, 1.0f, 1.0f));
                     continue;
                 }
 
@@ -910,9 +871,12 @@ namespace Guide {
                 rowBand.AddOffset({ LIST_CENTER_X, rowCenterY });
                 rowBand.Draw();
 
-                DrawTextLeftPx(entry.name, nameX, rowCenterY - 10.0f, 0.52f, Color(0.08f, 0.08f, 0.08f, 1.0f));
-                DrawTextLeftPx(RoleToString(entry.role), roleX, rowCenterY - 10.0f, 0.50f, RoleColor(entry.role));
-                DrawTextLeftPx(entry.chargesText, chargesX, rowCenterY - 10.0f, 0.52f, Color(0.08f, 0.08f, 0.08f, 1.0f));
+                DrawTextCenteredPx(
+                    entry.name,
+                    LIST_CENTER_X,
+                    rowCenterY - 10.0f,
+                    0.52f,
+                    Color(0.08f, 0.08f, 0.08f, 1.0f));
             }
 
             if (static_cast<int>(displayRows.size()) > VISIBLE_ABILITY_ROWS) {
@@ -996,8 +960,6 @@ namespace Guide {
             DrawTextLeftPx(entry.name, DETAIL_CENTER_X - 35.0f, 214.0f, 0.62f, Color(0.05f, 0.07f, 0.10f, 1.0f));
             DrawTextLeftPx(GroupToString(entry.group), DETAIL_CENTER_X - 35.0f, 187.0f, 0.46f, GroupHeaderColor(entry.group));
             DrawTextLeftPx("Role: " + RoleToString(entry.role), DETAIL_CENTER_X - 35.0f, 164.0f, 0.44f, RoleColor(entry.role));
-            DrawTextLeftPx("Availability: " + GetAvailabilityText(entry), DETAIL_CENTER_X - 35.0f, 142.0f, 0.42f, Color(0.18f, 0.20f, 0.24f, 1.0f));
-            DrawTextLeftPx("Charges: " + entry.chargesText, DETAIL_CENTER_X - 35.0f, 121.0f, 0.42f, Color(0.18f, 0.20f, 0.24f, 1.0f));
 
             // Description box
             UIManager::Panel descriptionBox(
@@ -1154,8 +1116,28 @@ namespace Guide {
         subtitleText.TextContent(GetSubtitleText());
         hintText.TextContent(GetHintText());
 
-        titleText.Draw();
-        subtitleText.Draw();
+        if (currentView == GuideView::ABILITIES) {
+            DrawCenteredMultilineText(
+                GetTitleText(),
+                2.05f,
+                Color(0.07f, 0.08f, 0.12f, 1.0f),
+                0.0f,
+                0.84f,
+                1.0f);
+
+            DrawCenteredMultilineText(
+                GetSubtitleText(),
+                0.70f,
+                Color(0.15f, 0.17f, 0.22f, 0.92f),
+                0.0f,
+                0.70f,
+                1.0f);
+        }
+        else {
+            titleText.Draw();
+            subtitleText.Draw();
+        }
+
         hintText.Draw();
 
         if (currentView == GuideView::MENU) {
