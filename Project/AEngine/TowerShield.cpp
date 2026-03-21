@@ -28,9 +28,9 @@ void TowerShield::Draw() {
 	}
 }
 
-void TowerShield::TakeDamage(int damage, bool isShieldBuster, float shieldDmgPercentage) {
+void TowerShield::TakeDamage(int damage, bool isShieldBuster) {
 	if (isShieldBuster) {
-		attribute.DamageShield(shieldDmgPercentage);
+		attribute.DamageShield(0.0f);
 	}
 	else {
 		attribute.TakeDamage(damage);

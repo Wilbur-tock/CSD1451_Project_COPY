@@ -13,9 +13,15 @@ Ability::Ability(int _id, std::string _name, std::string _description, AbilityTy
 	: id{ _id }, name(_name), description{ _description }, type(_type), tier(_tier), texture(_texture), 
 	defaultChance{ tierChances[static_cast<int>(_tier) - 1] }, chance{ defaultChance } {}
 
+void Ability::ResetStats() {
+	SetStats(StatsModule{});
+	SetProjectile(ProjectileModule{});
+	SetStatus(StatusModule{});
+}
+
 std::ostream& operator<<(std::ostream& os, Ability ability) {
-	os << "Ability Name: " << ability.GetName() << " ID: " << ability.GetProj().projectileId 
-		<< " Remaining Charges: " << ability.GetProj().charges;
+	os << "Ability Name: " << ability.GetName() << " ID: " << ability.GetProjectile().projectileId 
+		<< " Remaining Charges: " << ability.GetProjectile().charges;
 	return os;
 }
 

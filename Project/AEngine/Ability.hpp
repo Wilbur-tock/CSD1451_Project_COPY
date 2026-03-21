@@ -25,7 +25,7 @@ struct StatsModule {
 
 struct ProjectileModule {
 	int projectileId = 0; // to determine which projectile mode the ability is using
-	int damageAmp = 0;
+	int damageMultiplier = 0;
 	int baseDamage = 0;
 	int radius = 0;
 	int charges = 0; // projectile attack charges
@@ -37,13 +37,14 @@ struct StatusModule {
 	int rounds = 0; // number of rounds this ability would last
 	bool isPositive = true;// is this ability a postive or negative effect (buff or debuff)
 	bool targetSelf = true;  // stats buff/debuff on self or opponent
-	float gravityScale = 0.0f;
+	float gravityScale = 1.0f;
 	int damageEachRound = 0; // damage dealt over each round
 	int effectRadius = 0;
 };
 
 class Ability {
 public:
+	Ability() = default;
 	Ability(int _id, std::string _name, std::string _description, AbilityType _type, Tier _tier, AEGfxTexture* _texture);
 
 	int					Id() const { return id; }
@@ -74,8 +75,10 @@ public:
 	void Chance(float percentage) { chance = defaultChance * percentage; }
 						
 	StatsModule			GetStats() const { return stats; }
-	ProjectileModule	GetProj() const { return proj; }
+	ProjectileModule	GetProjectile() const { return proj; }
 	StatusModule        GetStatus() const { return status; }
+
+	bool IsDefaultAbility() const { return id == 0 || name == "Default"; }
 
 	void SetStats(StatsModule const& newStats) { stats = newStats; }
 	void SetProjectile(ProjectileModule const& newProj) { proj = newProj; }
@@ -104,6 +107,8 @@ public:
 
 	void JustAddModifier(bool justAdd) { justAddedModifier = justAdd; }
 	bool JustAddModifier() const { return justAddedModifier; }
+
+	void ResetStats();
 private:
 	int id; // To determind what type of ability it is (Bomb projectile, stats ability, etc)
 	int abilityCharges = 0; // count of how many of these ability the player/enemy has

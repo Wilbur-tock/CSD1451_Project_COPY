@@ -31,8 +31,8 @@ public:
 	int  DamageRadius() const { return damageRadius; }
 	void DamageRadius(int value) { damageRadius = value; }
 
-	int	 DamageMultiplier() const { return damageMultiplier; }
-	void DamageMultiplier(int value) { damageMultiplier = std::clamp(value, 1, 10); }
+	int		DamageMultiplier() const { return damageMultiplier; }
+	void	DamageMultiplier(int value) { damageMultiplier = std::clamp(value, 1, 10); }
 
 	float DamageReduction() const { return damageReduction; }
 	void  DamageReduction(float percentage) { damageReduction = std::clamp(percentage, 0.0f, 1.0f); }
@@ -46,8 +46,8 @@ public:
 	void Heal(float percentage);
 	void TakeDamage(int value);
 	// Percentage (0.0f - 1.0f) to damage based on remaining shield health
-	// 0.0f - 10 shield hp > 0 shield hp
-	void DamageShield(float percentage);
+	// if 0.5f, current hp is 10, shield will take 5 damage and have 5 hp remaining
+	void DamageShield(float remainingHPPercentage);
 
 	void SetInvisibility(int ticks);
 	void CleanseNegativeEffects() { isTickDamageActive = false; }

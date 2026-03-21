@@ -16,11 +16,11 @@ void Attributes::TakeDamage(int value) {
 	}
 }
 
-void Attributes::DamageShield(float percentage) {
+void Attributes::DamageShield(float remainingHPPercentage) {
 	if (!IsShieldActive()) return;
 
-	percentage = std::clamp(percentage, 0.0f, 1.0f);
-	Shield(static_cast<int>(shield * percentage));
+	remainingHPPercentage = std::clamp(remainingHPPercentage, 0.0f, 1.0f);
+	Shield(static_cast<int>(shield * remainingHPPercentage));
 }
 
 void Attributes::SetTickDamage(int tickDmg, int ticks) {

@@ -80,8 +80,8 @@ namespace AbilitiesManager {
 			// checking if the this ability projectileId is a new id that has not been added to the allProjectilesAbilities vector
 			bool addToProjectilesAbilities = true;
 			for (Ability const& ability : projectileAbilities) {
-				int projectileId = ability.GetProj().projectileId; 
-				if (projectileId == newAbility.GetProj().projectileId) { // already in the vector don't add
+				int projectileId = ability.GetProjectile().projectileId; 
+				if (projectileId == newAbility.GetProjectile().projectileId) { // already in the vector don't add
 					addToProjectilesAbilities = false;
 					break;
 				}
@@ -121,7 +121,7 @@ namespace AbilitiesManager {
 
 	void AbilityController::Reset() {
 		// Always reset back to default ability
-		ChangeAbility(0);
+		ChangeCurrentAbility(0);
 		currentInventoryId = 0;
 		isAbilityTriggered = false;
 	}
@@ -158,7 +158,7 @@ namespace AbilitiesManager {
 		// Select a random inventory ability
 		int randomInventoryId = Utils::RandomValue(0, InventoryCount());
 
-		ChangeAbility(randomInventoryId);
+		ChangeCurrentAbility(randomInventoryId);
 		hasEnemySelectedAbility = true;
 
 		std::cout << "[AbilitiesManager] Enemy selected ability: " << GetCurrentAbility().GetName() << ' ' << currentInventoryId << '\n';
@@ -189,6 +189,35 @@ namespace AbilitiesManager {
 			int selectedId = RandomAbilityId(pool);
 			previousIds.push_back(selectedId);
 			AddAbility(selectedId); // add to inventory
+		}
+	}
+
+	// Randomly select abilities for the ability selector UI
+	void AbilityController::AbilitySelectionRandomiser() {
+		abilitiesCards.clear();
+
+		// Randomise Abilties
+		int count = Config::MAX_ABILITY_SELECTOR_COUNT;
+		if (InventoryCount() >= Config::MAX_INVENTORY_COUNT) {
+			std::cerr << "[AbilitiesManager] Enough abilities in inventory, randomise stats" << std::endl;
+
+			// Currently only 3 stat cards so no need randomise, just push all 3 stat cards into the selector
+			for (int i = 0; i < count; ++i) {
+				abilitiesCards.push_back(*GetAbility(RandomAbilityId(statsAbilities)));
+			}
+		}
+		else {
+			std::cerr << "[AbilitiesManager] Not enough abilities in inventory, randomise offensive and defensive" << std::endl;
+			int offensiveCount = 1;
+			int defensiveCount = 1;
+			OffensiveOrDefensive() == AbilityType::OFFENSIVE ? ++defensiveCount : ++offensiveCount;
+
+			for (int i = 0; i < offensiveCount; ++i) {
+				abilitiesCards.push_back(*GetAbility(RandomAbilityId(offensiveAbilities)));
+			}
+			for (int i = 0; i < defensiveCount; ++i) {
+				abilitiesCards.push_back(*GetAbility(RandomAbilityId(defensiveAbilities)));
+			}
 		}
 	}
 
@@ -282,7 +311,11 @@ namespace AbilitiesManager {
 				character.attribute.CleanseNegativeEffects();
 			}
 		}
+		UseAbilityWithModifier(ability);
+		PrintAbilityModifiers();
+	}
 
+	void AbilityController::UseAbilityWithModifier(Ability const& ability) {
 		// Add modifier after shooter has shot out the projectile if it a modifier
 		if (ability.GetStatus().targetSelf) {
 			// Add modifier to self
@@ -292,8 +325,6 @@ namespace AbilitiesManager {
 			// Add modifier to the opponent
 			isPlayerControlled ? enemyAbilityController.AddModifier(ability) : playerAbilityController.AddModifier(ability);
 		}
-
-		PrintAbilityModifiers();
 	}
 
 	void AbilityController::AddModifier(Ability const& ability) {
@@ -311,9 +342,9 @@ namespace AbilitiesManager {
 		// push_back a copy of the currentAbility if the effects last more than 1 round
 		abilityModifiers.push_back(ability);
 
-		// if the controller does not start the round, and added a modifier the number of rounds remaining 
+		// if the caster does not start the round, and added a modifier that last for more than 1 round 
 		// it should not decrease immediately after its turn end but after the next round end
-		if (LevelManager::CurrentLevel()->IsStarting(isPlayerControlled)) {
+		if (LevelManager::CurrentLevel()->IsStarting(isPlayerControlled) && !ability.GetStatus().isPositive) {
 			abilityModifiers.back().JustAddModifier(true);
 		}
 
@@ -341,7 +372,7 @@ namespace AbilitiesManager {
 		);
 	}
 
-	void AbilityController::ChangeAbility(int newInventoryId) {
+	void AbilityController::ChangeCurrentAbility(int newInventoryId) {
 		if (newInventoryId < 0 || newInventoryId >= Config::MAX_INVENTORY_COUNT) newInventoryId = 0;
 		// Change current inventory id
 		currentInventoryId = newInventoryId;
@@ -362,7 +393,7 @@ namespace AbilitiesManager {
 
 	// Use the currently select ability if it has unlimited or any charges remaining
 	bool AbilityController::UseAbility() {
-		if (GetCurrentAbility().GetProj().unlimitedCharges) return true;
+		if (GetCurrentAbility().GetProjectile().unlimitedCharges) return true;
 
 		// if debugger is on even without having any charges can use ability but don't update the inventory
 		if (Utils::isDebuggerOn || GetCurrentAbility().AbilityCharges() > 0) {
@@ -457,86 +488,21 @@ namespace AbilitiesManager {
 			abilityId += addValue;
 			Utils::Wrap(abilityId, 0, static_cast<int>(allAbilities.size()-1));
 
-			currentInventoryId = Config::MAX_INVENTORY_COUNT - 1; // always the last index if using an ability not inside the inventory
-			inventoryIds[currentInventoryId] = abilityId;
+			// always use the last index if using an ability not inside the inventory
+			currentInventoryId = Config::MAX_INVENTORY_COUNT - 1;
+			if (currentInventoryId >= inventoryIds.size()) {
+				inventoryIds.push_back(abilityId);
+			}
+			else {
+				inventoryIds[currentInventoryId] = abilityId;
+			}
 		}
 		else { // Toggle through inventory abilities
 			currentInventoryId += addValue;
 			Utils::Wrap(currentInventoryId, 0, Config::MAX_INVENTORY_COUNT - 1);
 		}
 
-		ChangeAbility(currentInventoryId);
-	}
-
-	Ability const& AbilityController::AbilityRandomisator(std::vector<Ability> const& abilities) {
-		int minId = 0;
-		if (abilities[0].Id() == 0) minId = 1; // checking if the first ability in abilities vector contains the default ability remove it
-		int randomId = Utils::RandomValue(minId, static_cast<int>(abilities.size() - 1));
-		return abilities[randomId];
-	}
-
-	// Randomly select abilities for the ability selector UI
-	void AbilityController::AbilitySelectionRandomisator() {
-		abilitiesCards.clear();
-
-		// Randomise Abilties
-		if (InventoryCount() >= Config::MAX_INVENTORY_COUNT) { 
-			std::cerr << "[AbilitiesManager] Enough abilities in inventory, randomise stats" << std::endl;
-
-			//// Currently only 3 stat cards so no need randomise, just push all 3 stat cards into the selector
-			//for (int i = 0; i < 3; ++i) {
-			//	//abilitiesCards.push_back(AbilityRandomisator(statsAbilities));
-			//	abilitiesCards.push_back(statsAbilities[i]);
-			//}
-		}
-		else {
-			std::cerr << "[AbilitiesManager] Not enough abilities in inventory, randomise offensive and defensive" << std::endl;
-			if (OffensiveOrDefensive() == AbilityType::OFFENSIVE) {
-				// 2 offensive and 1 defensive
-				abilitiesCards.push_back(offensiveAbilities[1]);
-				//abilitiesCards.push_back(AbilityRandomisator(offensiveAbilities));
-				abilitiesCards.push_back(AbilityRandomisator(offensiveAbilities));
-				abilitiesCards.push_back(AbilityRandomisator(defensiveAbilities));
-			}
-			else {
-				// 2 defensive and 1 offensive
-				abilitiesCards.push_back(offensiveAbilities[1]);
-				//abilitiesCards.push_back(AbilityRandomisator(defensiveAbilities));
-				abilitiesCards.push_back(AbilityRandomisator(defensiveAbilities));
-				abilitiesCards.push_back(AbilityRandomisator(offensiveAbilities));
-			}
-		}
-
-		if (abilitiesCards.size() != 3) {
-			std::cerr << "[AbilitiesManager] Incorrect abilities to display in selector!" << std::endl;
-
-			// Fallback to default abilities if there are not enough abilities to randomise
-			abilitiesCards.clear();
-			abilitiesCards.push_back(offensiveAbilities[0]);
-			abilitiesCards.push_back(offensiveAbilities[1]);
-			abilitiesCards.push_back(defensiveAbilities[0]);
-		}
-
-		// Display the randomised abilities in the console for testing purposes
-		int i = 1;
-		for (Ability ability : abilitiesCards) {
-			std::cout << "[AbilitiesManager] Ability Card " << i << " : "
-				<< ability.GetName()
-				<< " Type: "; 
-			switch (ability.GetType()) {
-			case AbilityType::STATISTICS:
-				std::cout << "Statistics";
-				break;
-			case AbilityType::OFFENSIVE:
-				std::cout << "Offensive";
-				break;
-			case AbilityType::DEFENSIVE:
-				std::cout << "Defensive";
-				break;
-			}
-			std::cout << std::endl;
-			i++;
-		}
+		ChangeCurrentAbility(currentInventoryId);
 	}
 
 	// Display the ability selector UI for the player to select an ability
@@ -554,11 +520,26 @@ namespace AbilitiesManager {
 			AddAbility(ability.Id());
 		}
 		else {
-
+			UseStatsAbility(ability);
 		}
 
 		isSelectingAbility = false;
 		CameraManager::camera.SetState(CameraManager::CameraController::INPUT);
+	}
+
+	void AbilityController::UseStatsAbility(Ability const& ability) {
+		statsAbility = ability;
+
+		if (ability.GetName() == "Invincibility") {
+			isStatsAbilityActive = true;
+		}
+
+		UseAbilityWithModifier(ability);
+	}
+
+	void AbilityController::ResetStatsBoost() {
+		statsAbility.ResetStats();
+		isStatsAbilityActive = false;
 	}
 
 	// UI OBJECTS
@@ -670,7 +651,7 @@ namespace AbilitiesManager {
 				else { 
 					// Can only select ability that is not current selected
 					btn.SetOnClick([this, i]() {
-						ChangeAbility(i);
+						ChangeCurrentAbility(i);
 						});
 				}
 

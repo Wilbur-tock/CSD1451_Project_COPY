@@ -29,7 +29,11 @@ namespace AbilitiesManager {
 
 		// return the projectile Id to change the type of projectile the CANNON is currently using
 		// if the ability type is an offensive which affects the projectile
-		int GetProjectileId() { return GetCurrentAbility().GetProj().projectileId; }
+		int GetProjectileId() { return GetCurrentAbility().GetProjectile().projectileId; }
+
+		bool IsStatsAbilityActive() const { return isStatsAbilityActive; }
+		bool IsGodModeOn() const { return isGodModeOn; }
+		Ability const& StatsAbility() const { return statsAbility; }
 
 	private:
 		Ability& SetCurrentAbility() { return allAbilities[currentAbilityVectorId]; }
@@ -55,6 +59,7 @@ namespace AbilitiesManager {
 
 		// Randomise ability selection functions
 
+		void AbilitySelectionRandomiser();
 		// count the number of offensive and defensive ability in the inventory
 		// add a random ability id based on the type which has the lower number offensive or defensive
 		// to the inventory or card selection based on the given count input and boolean
@@ -69,14 +74,14 @@ namespace AbilitiesManager {
 
 		// Activate ability effects that will be activated once UseAbility() is called
 		void AbilityEffects();
-
+		void UseAbilityWithModifier(Ability const& ability);
 		void AddModifier(Ability const& ability);
 		// Remove 1 round attribute from each ability modifier to be called in every new round
 		void UpdateModifiers();
 		void CheckModifiers();
 
 		// Change the currentInventoryId and ability user is currently using
-		void ChangeAbility(int newInventoryId);
+		void ChangeCurrentAbility(int newInventoryId);
 
 		// Use the currently select ability if it has unlimited or any charges remaining
 		// return true and the selected ability can be use, otherwise false
@@ -96,11 +101,11 @@ namespace AbilitiesManager {
 		// false to toggle through of all the inventory abilities this controller has
 		void ToggleAbility(bool isAllAbilities, int addValue);
 
-		Ability const& AbilityRandomisator(std::vector<Ability> const& abilities);
-
-		void AbilitySelectionRandomisator();
 		void UpdateAbilitySelector();
 		void OnClickAbilityCard(Ability const& ability);
+
+		void UseStatsAbility(Ability const& ability);
+		void ResetStatsBoost();
 
 		// UI functions
 
@@ -145,6 +150,10 @@ namespace AbilitiesManager {
 		bool isPlayerControlled = true;
 
 		bool hasEnemySelectedAbility = false; // has enemy selected their ability
+
+		bool isStatsAbilityActive = false;
+		bool isGodModeOn = false;
+		Ability statsAbility; // stats ability boost to apply onto caster when they shoot
 
 		std::vector<Ability> abilitiesCards; // vector containing the 3 abilities to be displayed in the ability selector for the player to select from
 	};

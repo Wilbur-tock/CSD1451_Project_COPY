@@ -245,7 +245,7 @@ void Character::SetStats(int difficultyLevel) {
 		attribute.MaxHealth(maxHP);
 		attribute.Health(maxHP);
 
-		int shield = 10 * multipler;
+		int shield = 5 * multipler;
 		attribute.SetShield(shield);
 
 		float dmgReduc = 0.0f;

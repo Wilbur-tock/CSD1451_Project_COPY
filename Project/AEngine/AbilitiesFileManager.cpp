@@ -80,7 +80,7 @@ namespace AbilitiesFileManager {
 			auto& p = data[projectileKey];
 			return ProjectileModule{
 				p["ProjectileID"],
-				p["Damage_Amp"],
+				p["Damage_Multiplier"],
 				p["Base_Damage"],
 				p["Radius"],
 				p["Charges"],

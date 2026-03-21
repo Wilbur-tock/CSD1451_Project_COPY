@@ -42,7 +42,7 @@ bool Projectile::InIgnoredTiles() {
 }
 
 void Projectile::AbilityActivation(bool isPlayer, Ability const& ability) {
-    if (Mode() == ProjectileMode::ATTACK || isAbilityTriggered) return;
+    if (mode == ProjectileMode::ATTACK || isAbilityTriggered) return;
 
     bool leftClick = AEInputCheckTriggered(AEVK_LBUTTON);
 
@@ -116,6 +116,7 @@ void Projectile::AbilityActivation(bool isPlayer, Ability const& ability) {
         if (hasCollided) {
             isAbilityTriggered = true;
             SetAreaEffects(ability, false);
+            std::cout << "Poison!" << '\n';
         }
         break;
     case ProjectileMode::INSTANT_BASTION:
@@ -151,7 +152,7 @@ void Projectile::SetProjectileStats(std::string _projectileName, ProjectileModul
     mode = static_cast<ProjectileMode>(data.projectileId);
 
     // Total Damage = Base * Multiplier
-    float totalDamage = static_cast<float>(data.baseDamage) * data.damageAmp;
+    float totalDamage = static_cast<float>(data.baseDamage) * data.damageMultiplier;
     attribute.Damage(static_cast<int>(totalDamage));
 
     // Set Radius directly
@@ -240,12 +241,12 @@ void Projectile::Update(bool isPlayerShot, float dt) {
 
             // Checking collision of the projectile with the tile blocks that is collidable
             if (hasTileCollision) {
+                // Damage tile first, incase of destroying the blocks and bouncing back if damageTile is not called first
+                DamageTile(x, y);
                 if (!canBypassBlocks && !hasCollided) {
                     FirstTimeCollision();
                 }
 
-                // Damage tile first, incase of destroying the blocks and bouncing back if damageTile is not called first
-                DamageTile(x, y);
                 if (!canBypassBlocks) {
                     ConstantCollision(tile);
                 }
@@ -356,7 +357,7 @@ void Projectile::PlayModeEffect() {
 void Projectile::DamageTile(int tileX, int tileY) {
     Tile& centerTile = (*MapManager::currentMap)[tileY][tileX];
 
-    if (attackCharges <= 0 || !centerTile.IsDestructible()) return; // Can't damage return
+    if (attackCharges <= 0 /*|| !centerTile.IsDestructible()*/) return; // Can't damage return
 
     int blastRadius = attribute.DamageRadius();
 
@@ -390,6 +391,11 @@ void Projectile::DamageTile(int tileX, int tileY) {
             // Damage a tile and character is also damage inside the TILE class TakeDamage
             std::cout << "[Projectile] Damage Tile: " << tileToDamage << " Current hp: " << tileToDamage.attribute.Health() << " Damage: " << projDamage << '\n';
             tileToDamage.TakeDamage(projDamage);
+            
+            if (mode == ProjectileMode::SHIELD_BUSTER && tileToDamage.attribute.IsShieldActive()) {
+                tileToDamage.attribute.DamageShield(0.0f);
+            }
+
             hasDamageAnyTile = true;
 
             LevelManager::CurrentLevel()->RecordDamageLog(projDamage, tileToDamage.IsCharacter());

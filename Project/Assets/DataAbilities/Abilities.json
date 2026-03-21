@@ -7,7 +7,7 @@
         "Texture": "",
         "Projectile_Stats": {
             "ProjectileID": 0,
-            "Damage_Amp": 1.0,
+            "Damage_Multiplier": 1,
             "Base_Damage": 10,
             "Radius": 2,
             "Charges": 1,
@@ -23,7 +23,7 @@
         "Texture": "",
         "Projectile_Stats": {
             "ProjectileID": 1,
-            "Damage_Amp": 1.0,
+            "Damage_Multiplier": 1,
             "Base_Damage": 25,
             "Radius": 2,
             "Charges": 1,
@@ -48,7 +48,7 @@
         "Texture": "",
         "Projectile_Stats": {
             "ProjectileID": 2,
-            "Damage_Amp": 1.0,
+            "Damage_Multiplier": 1,
             "Base_Damage": 100,
             "Radius": 10,
             "Charges": 1,
@@ -64,7 +64,7 @@
         "Texture": "",
         "Projectile_Stats": {
             "ProjectileID": 3,
-            "Damage_Amp": 1.0,
+            "Damage_Multiplier": 1,
             "Base_Damage": 50,
             "Radius": 2,
             "Charges": 5,
@@ -80,7 +80,7 @@
         "Texture": "",
         "Projectile_Stats": {
             "ProjectileID": 4,
-            "Damage_Amp": 1.0,
+            "Damage_Multiplier": 1,
             "Base_Damage": 25,
             "Radius": 2,
             "Charges": 1,
@@ -96,7 +96,7 @@
         "Texture": "",
         "Projectile_Stats": {
             "ProjectileID": 6,
-            "Damage_Amp": 1.0,
+            "Damage_Multiplier": 1,
             "Base_Damage": 10,
             "Radius": 2,
             "Charges": 1,
@@ -112,7 +112,7 @@
         "Texture": "",
         "Projectile_Stats": {
             "ProjectileID": 7,
-            "Damage_Amp": 1.0,
+            "Damage_Multiplier": 1,
             "Base_Damage": 25,
             "Radius": 3,
             "Charges": 10,
@@ -128,7 +128,7 @@
         "Texture": "",
         "Projectile_Stats": {
             "ProjectileID": 8,
-            "Damage_Amp": 1.0,
+            "Damage_Multiplier": 1,
             "Base_Damage": 10,
             "Radius": 3,
             "Charges": 1,
@@ -152,7 +152,7 @@
         "Texture": "",
         "Projectile_Stats": {
             "ProjectileID": 9,
-            "Damage_Amp": 1.0,
+            "Damage_Multiplier": 1,
             "Base_Damage": 5,
             "Radius": 1,
             "Charges": 1,
@@ -177,7 +177,7 @@
         "Texture": "",
         "Projectile_Stats": {
             "ProjectileID": 10,
-            "Damage_Amp": 1.0,
+            "Damage_Multiplier": 1,
             "Base_Damage": 5,
             "Radius": 1,
             "Charges": 1,
@@ -195,6 +195,54 @@
     },
 
     {
+        "Name": "Impact",
+        "Description": "",
+        "Type": 2,
+        "Tier": 2,
+        "Texture": "",
+        "Projectile_Stats": {
+            "ProjectileID": 12,
+            "Damage_Multiplier": 2,
+            "Base_Damage": 10,
+            "Radius": 2,
+            "Charges": 1,
+            "unlimited_charges": false
+        }
+    },
+
+    {
+        "Name": "Blast",
+        "Description": "",
+        "Type": 2,
+        "Tier": 1,
+        "Texture": "",
+        "Projectile_Stats": {
+            "ProjectileID": 13,
+            "Damage_Multiplier": 1,
+            "Base_Damage": 10,
+            "Radius": 5,
+            "Charges": 1,
+            "unlimited_charges": false
+        }
+    },
+
+    {
+        "Name": "Bolt",
+        "Description": "",
+        "Type": 2,
+        "Tier": 1,
+        "Texture": "",
+        "Projectile_Stats": {
+            "ProjectileID": 14,
+            "Damage_Multiplier": 1,
+            "Base_Damage": 25,
+            "Radius": 5,
+            "Charges": 2,
+            "unlimited_charges": false
+        }
+    },
+
+    {
         "Name": "Wall",
         "Description": "",
         "Type": 3,
@@ -207,7 +255,7 @@
         },
         "Projectile_Stats": {
             "ProjectileID": 5,
-            "Damage_Amp": 1.0,
+            "Damage_Multiplier": 1,
             "Base_Damage": 10,
             "Radius": 2,
             "Charges": 1,
@@ -223,7 +271,7 @@
         "Texture": "",
         "Projectile_Stats": {
             "ProjectileID": 11,
-            "Damage_Amp": 1.0,
+            "Damage_Multiplier": 1,
             "Base_Damage": 10,
             "Radius": 2,
             "Charges": 1,
@@ -321,11 +369,19 @@
     },
 
     {
-        "Name": "God Mode",
+        "Name": "Invincibility",
         "Description": "",
         "Type": 1,
         "Tier": 4,
         "Texture": "",
+        "Projectile_Stats": {
+            "ProjectileID": 0,
+            "Damage_Multiplier": 5,
+            "Base_Damage": 100,
+            "Radius": 5,
+            "Charges": 5,
+            "unlimited_charges": false
+        },
         "Status_Stats": {
             "Is_Modifier": true,
             "Rounds": 3,

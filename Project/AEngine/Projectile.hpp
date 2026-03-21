@@ -23,6 +23,10 @@ enum class ProjectileMode {
 	DECAY_SHOT		= 9,
 	POISON			= 10,
 	INSTANT_BASTION = 11,
+	BLAST			= 12,
+	IMPACT			= 13,
+	BOLT			= 14,
+	GOD_MODE        = 16,
 };
 
 class Projectile : public GameObject {
@@ -56,6 +60,9 @@ public:
 		case ProjectileMode::DECAY_SHOT:		return "DECAY_SHOT";
 		case ProjectileMode::POISON:			return "POISON";
 		case ProjectileMode::INSTANT_BASTION:	return "INSTANT_BASTION";
+		case ProjectileMode::BLAST:				return "BLAST";
+		case ProjectileMode::IMPACT:			return "IMPACT";
+		case ProjectileMode::BOLT:				return "BOLT";
 		default:								return "YOU NEED TO ADD A PROJECTILE MODE NAME";
 		}
 	}

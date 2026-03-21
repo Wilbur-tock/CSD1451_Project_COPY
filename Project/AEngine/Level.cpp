@@ -378,7 +378,7 @@ void Level::Initalize() {
 
 	AbilitiesManager::AbilityController& playerController = AbilitiesManager::playerAbilityController;
 	playerController.LoadAllAbilities(true);
-	playerController.AbilitySelectionRandomisator();
+	playerController.AbilitySelectionRandomiser();
 	playerCannon.Initialize(&playerController);
 	AbilitiesManager::playerAbilityController.IsSelectingAbility(true);
 
@@ -622,7 +622,7 @@ void Level::SetNewTurn(bool _isPlayerTurn) {
 		activeCannon = &playerCannon;
 		AbilitiesManager::playerAbilityController.IsSelectingAbility(true);
 		// randomise the abilities available to the player for this turn
-		AbilitiesManager::playerAbilityController.AbilitySelectionRandomisator();
+		AbilitiesManager::playerAbilityController.AbilitySelectionRandomiser();
 	}
 	else {
 		// Enemy Turn

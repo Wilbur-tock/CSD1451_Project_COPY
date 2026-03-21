@@ -17,7 +17,7 @@ public:
 	void SetShieldOn(int shield, int turnLifespan);
 
 	void Draw();
-	void TakeDamage(int damage, bool isShieldBuster = false, float shieldDmgPercentage = 0.0f);
+	void TakeDamage(int damage, bool isShieldBuster = false);
 	void UpdateLifespan();
 
 	void DebugInfo(std::string& str);

@@ -30,7 +30,7 @@ namespace CannonManager {
         }
 
         abilityController = controller;
-        controller->ChangeAbility(0); // Set default projectile as the default ability
+        controller->ChangeCurrentAbility(0); // Set default projectile as the default ability
         ProjectileSettings();
 
         //Initialize UI Objects
@@ -61,11 +61,11 @@ namespace CannonManager {
         if (projectiles.empty()) std::cerr << "[CannonManager] Cannon Projectiles vector is EMPTY" << '\n';
 
         for (Ability const& ability : allProjectileAbilities) {
-            Projectile& projectile = projectiles[ability.GetProj().projectileId];
+            Projectile& projectile = projectiles[ability.GetProjectile().projectileId];
 
             // Initialize projectile with its texture
             projectile = Projectile{ AssetsManager::circleTexture };
-            projectile.SetProjectileStats(ability.GetName(), ability.GetProj());
+            projectile.SetProjectileStats(ability.GetName(), ability.GetProjectile());
 
             //std::cout << "[CannonManager] AbilityId: " << ability.Id() << " Projectile Name: " << projectile.ProjectileName() << " Projectile Mode: " << projectile.ModeName() << " "
             //    << projectile.ProjectileId() << " into the cannon projectile vector" << '\n';
@@ -281,8 +281,10 @@ namespace CannonManager {
         // IMPORTANT: use a COPY here so we don't permanently modify the template projectile inside projectiles[].
         Projectile projectile = projectiles[selectedProjectileId];
 
-        AbilityActivation(projectile);
-        ApplyModifierEffects(projectile);
+        // Use selected ability
+        abilityController->UseAbility();
+        AbilityActivation(projectile); // abilities that affects the cannon before and during shooting
+        ApplyModifierEffects(projectile); // apply ability modifier effects such as gravity onto the projectile after projectile has been shot
 
         projectile.Initialize(transform, static_cast<int>(activeProjectiles.size()), cannonAngle, shotPower);
 
@@ -291,9 +293,6 @@ namespace CannonManager {
         activeProjectiles.back().id = static_cast<int>(activeProjectiles.size() - 1);
 
         AudioManager::PlaySFX(AudioManager::SFX::CannonFire);
-
-        // Use selected ability
-        abilityController->UseAbility();
 
         SetCamera(true); // Follow the projectile that is shot out of the cannon
         hasCannonShot = true;
@@ -358,10 +357,15 @@ namespace CannonManager {
 
         bool leftClick = AEInputCheckTriggered(AEVK_LBUTTON);
 
+        if (abilityController->IsStatsAbilityActive()) {
+            projectile.SetProjectileStats(projectile.ProjectileName(), abilityController->StatsAbility().GetProjectile());
+            std::cout << abilityController->StatsAbility().GetProjectile().baseDamage << projectile.attribute.Damage() << '\n';
+
+            // Reset stats boost back to 0
+            abilityController->ResetStatsBoost();
+        }
+
         switch (projectile.Mode()) {
-        case ProjectileMode::ATTACK:
-            // Assign stats boost here
-            break;
         case ProjectileMode::AUTO_AIM:
             // Find new target if target is not alive
             if (!IsTargetAlive()) {
@@ -402,6 +406,14 @@ namespace CannonManager {
             std::string abilityName = ability.GetName();
             if (abilityName == "Gravity") {
                 projectile.GravityScale(ability.GetStatus().gravityScale);
+            }
+            else if (abilityName == "Invincibility") {
+                std::vector<Character>& characterVector = LevelManager::CurrentLevel()->GetCharacters(isPlayerControlled);
+                
+                // Heal all character
+                for (Character& character : characterVector) {
+                    character.attribute.Heal(1.0f);
+                }
             }
         }
     }
@@ -504,6 +516,7 @@ namespace CannonManager {
             + "\nMode: " + selectedProjectile.ModeName()
             + "\nDamage: " + std::to_string(selectedProjectile.attribute.Damage())
             + "\nRadius: " + std::to_string(selectedProjectile.attribute.DamageRadius())
+            + "\nDamage Multiplier: " + std::to_string(selectedProjectile.attribute.DamageMultiplier())
             + "\n\nAbilities Inventory Count: " + std::to_string(abilityController->InventoryCount())
             + "\nCurrent Inventory Id: " + std::to_string(abilityController->CurrentInventoryId());
 
@@ -522,7 +535,7 @@ namespace CannonManager {
             + "\nName: " + selectedAbility.GetName()
             + "\nType: " + selectedAbility.GetTypeName()
             + "\nAbility Charges Remaining: " + std::to_string(selectedAbility.AbilityCharges())
-            + "\nSelected Projectile Id: " + std::to_string(selectedAbility.GetProj().projectileId);
+            + "\nSelected Projectile Id: " + std::to_string(selectedAbility.GetProjectile().projectileId);
 
         if (target) {
             debugStr += "\nTarget: " + target->TypeName();
