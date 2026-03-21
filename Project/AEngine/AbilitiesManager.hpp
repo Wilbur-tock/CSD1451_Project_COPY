@@ -45,7 +45,28 @@ namespace AbilitiesManager {
 		// ensure that an ability with 0 charges cannot be used again
 		void Reset();
 
+		// AI Member functions
+
+		void ResetAIAbilitySelection() { hasEnemySelectedAbility = false; }
+		// Set the chances of ability to increase or decrease based on difficulty level
+		// With hard legendary and gold tier ability will have a increase chances of being selected by AI
+		void SetAIAbilitySelection(int difficulty);
+		// Randomly select an ability for the AI if it has not already selected one
+		void AISelectAbility();
+
+		// Randomise ability selection functions
+
+		// count the number of offensive and defensive ability in the inventory
+		// add a random ability id based on the type which has the lower number offensive or defensive
+		// to the inventory or card selection based on the given count input and boolean
+		void InventoryRandomiser(int count);
+		// Get a random ability ids from the abilities vector input 
+		// the chances of pulling each ability is based on their ability tier
+		int RandomAbilityId(std::vector<Ability> const& abilities);
 		AbilityType OffensiveOrDefensive();
+		// Increase chances of the tier chosen to appear more in selection 
+		// affects allAbiltiies, offensiveAbiltiies and defensiveAbilities
+		void IncreaseAbilityChance(Tier tier, float increasePercentage);
 
 		// Activate ability effects that will be activated once UseAbility() is called
 		void AbilityEffects();
@@ -53,8 +74,10 @@ namespace AbilitiesManager {
 		// Remove 1 turn attribute from each ability modifier
 		void UpdateModifiers();
 		void CheckModifiers();
-		// Change the type of ability this controller is current using
-		void ChangeAbility(int abilityId);
+
+		// Change the currentInventoryId and ability user is currently using
+		void ChangeAbility(int newInventoryId);
+
 		// Use the currently select ability if it has unlimited or any charges remaining
 		// return true and the selected ability can be use, otherwise false
 		bool UseAbility();
@@ -73,22 +96,18 @@ namespace AbilitiesManager {
 		// false to toggle through of all the inventory abilities this controller has
 		void ToggleAbility(bool isAllAbilities, int addValue);
 
-		// AI Member functions
-
-		void ResetAIAbilitySelection() { hasEnemySelectedAbility = false; }
-		void AIAbilitySelection();
-
 		Ability const& AbilityRandomisator(std::vector<Ability> const& abilities);
 
 		void AbilitySelectionRandomisator();
-		void AbilitySelector();
+		void UpdateAbilitySelector();
 		void OnClickAbilityCard(Ability const& ability);
 
 		// UI functions
 
 		void InitializeAllAbilityUI();
-		void AbilitySelectorUI();
-		void UpdateAbilityUI();
+		void DrawAbilitySelectorUI();
+		// Draw ability inventory and checks for button input
+		void DrawAbilityInventoryUI();
 
 	private: // private member functions
 		void PrintInventory();
@@ -96,9 +115,12 @@ namespace AbilitiesManager {
 		void PrintAllAbilities();
 		void PrintInventoryCount();
 		void PrintAbilityModifiers();
+		void RandomiserTest(int count, int levelDifficulty);
 
 	private:
 		std::string controllerName; // use for debugging
+
+		// These vector are used to randomise which ability can be selected
 
 		std::vector<Ability> offensiveAbilities; //vector for offensive abils
 		std::vector<Ability> statsAbilities; //vector for stats abils
@@ -110,7 +132,7 @@ namespace AbilitiesManager {
 		std::vector<Ability> abilityModifiers;// vector containing all the active abilites that last for more than 1 round (HP boost, attack boost, etc)
 
 		int currentAbilityVectorId = 0; // vector id of the current ability stored in the allAbilities vector
-		int currentAbilityId = 0; // id of the current ability 
+
 		// ids of all the abilityId that is stored in the inventory 
 		// for example inventory has 5 max space [0][0][1][2][3] < numbers representing the abilityId
 		// has 2 charges of abilityId 2 in inventory while the rest 1 charges only
@@ -121,6 +143,7 @@ namespace AbilitiesManager {
 		bool isSelectingAbility = false;
 		bool isAbilityTriggered = false;
 		bool isPlayerControlled = true;
+
 		bool hasEnemySelectedAbility = false; // has enemy selected their ability
 
 		std::vector<Ability> abilitiesCards; // vector containing the 3 abilities to be displayed in the ability selector for the player to select from

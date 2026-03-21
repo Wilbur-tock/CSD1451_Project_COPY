@@ -11,10 +11,10 @@ enum class AbilityType {
 };
 
 enum class Tier {
-	Bronze = 1,
-	Silver = 2,
-	Gold = 3,
-	Legendary = 4
+	BRONZE = 1,
+	SLIVER = 2,
+	GOLD = 3,
+	LEGENDARY = 4
 };
 
 struct StatsModule {
@@ -67,6 +67,10 @@ public:
 
 		return "NULL ABILITY TYPE";
 	}
+
+	float Chance() const { return chance; }
+	// Increase or decrease chance of this ability appear 
+	void Chance(float percentage) { chance = defaultChance * percentage; }
 						
 	StatsModule			GetStats() const { return stats; }
 	ProjectileModule	GetProj() const { return proj; }
@@ -107,8 +111,13 @@ private:
 	std::string description = "";
 	AbilityType type;
 	Tier tier;
-	AEGfxTexture* texture;
+	AEGfxTexture* texture = nullptr;
 
+	// 0.0 - 1.0f chance to be choosen by ability selector
+	float defaultChance = 0.0f;
+	float chance = 0.0f; 
+	// true if the ability caster ends the round after shooting, to ensure that the modifier they added
+	// does not decrease by 1 round immediately
 	bool justAddedModifier = false;
 
 	StatsModule stats;

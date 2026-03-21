@@ -19,15 +19,24 @@
         "Name": "Bomb",
         "Description": "The bomb will detonate and deal damage within a 3 tile radius upon collision OR Detonate the projectile upon triggered, deal damage double its original tile radius instead anywhere in the map",
         "Type": 2,
-        "Tier": 1,
+        "Tier": 2,
         "Texture": "",
         "Projectile_Stats": {
             "ProjectileID": 1,
             "Damage_Amp": 1.0,
-            "Base_Damage": 50,
-            "Radius": 5,
+            "Base_Damage": 25,
+            "Radius": 2,
             "Charges": 1,
             "unlimited_charges": false
+        },
+        "Status_Stats": {
+            "Is_Modifier": false,
+            "Rounds": 0,
+            "Is_Postive": true,
+            "Target_Self": true,
+            "Gravity_Scale": 1.0,
+            "Damage_Each_Round": 0,
+            "Effect_Radius": 3
         }
     },
 
@@ -35,7 +44,7 @@
         "Name": "Nuke",
         "Description": "",
         "Type": 2,
-        "Tier": 1,
+        "Tier": 4,
         "Texture": "",
         "Projectile_Stats": {
             "ProjectileID": 2,
@@ -51,7 +60,7 @@
         "Name": "Penta Burst",
         "Description": "",
         "Type": 2,
-        "Tier": 1,
+        "Tier": 2,
         "Texture": "",
         "Projectile_Stats": {
             "ProjectileID": 3,
@@ -83,7 +92,7 @@
         "Name": "Shield Buster",
         "Description": "",
         "Type": 2,
-        "Tier": 1,
+        "Tier": 3,
         "Texture": "",
         "Projectile_Stats": {
             "ProjectileID": 6,
@@ -99,14 +108,14 @@
         "Name": "Piercing",
         "Description": "",
         "Type": 2,
-        "Tier": 1,
+        "Tier": 4,
         "Texture": "",
         "Projectile_Stats": {
             "ProjectileID": 7,
             "Damage_Amp": 1.0,
-            "Base_Damage": 10,
+            "Base_Damage": 25,
             "Radius": 3,
-            "Charges": 5,
+            "Charges": 10,
             "unlimited_charges": false
         }
     },
@@ -115,7 +124,7 @@
         "Name": "Cluster Shot",
         "Description": "",
         "Type": 2,
-        "Tier": 1,
+        "Tier": 3,
         "Texture": "",
         "Projectile_Stats": {
             "ProjectileID": 8,
@@ -128,10 +137,18 @@
     },
 
     {
-        "Name": "Decay Shot",
+        "Name": "Extra Shot",
         "Description": "",
         "Type": 2,
         "Tier": 1,
+        "Texture": ""
+    },
+
+    {
+        "Name": "Decay Shot",
+        "Description": "",
+        "Type": 2,
+        "Tier": 2,
         "Texture": "",
         "Projectile_Stats": {
             "ProjectileID": 9,
@@ -156,7 +173,7 @@
         "Name": "Poison",
         "Description": "",
         "Type": 2,
-        "Tier": 1,
+        "Tier": 3,
         "Texture": "",
         "Projectile_Stats": {
             "ProjectileID": 10,
@@ -202,7 +219,7 @@
         "Name": "Instant Bastion",
         "Description": "",
         "Type": 3,
-        "Tier": 1,
+        "Tier": 2,
         "Texture": "",
         "Projectile_Stats": {
             "ProjectileID": 11,
@@ -219,7 +236,7 @@
             "Target_Self": true,
             "Gravity_Scale": 0.0,
             "Damage_Each_Round": 0,
-            "Effect_Radius": 2
+            "Effect_Radius": 5
         }
     },
 
@@ -227,7 +244,7 @@
         "Name": "Tower Shield",
         "Description": "",
         "Type": 3,
-        "Tier": 1,
+        "Tier": 2,
         "Texture": "",
         "Base_Stats": {
             "Hp": 0,
@@ -249,14 +266,14 @@
         "Name": "Rebuild",
         "Description": "",
         "Type": 3,
-        "Tier": 1,
+        "Tier": 3,
         "Texture": ""
     },
 
     {
         "Name": "Invisibility",
         "Description": "",
-        "Type": 3,
+        "Type": 4,
         "Tier": 1,
         "Texture": "",
         "Status_Stats": {
@@ -271,18 +288,10 @@
     },
 
     {
-        "Name": "Extra Shot",
-        "Description": "",
-        "Type": 2,
-        "Tier": 1,
-        "Texture": ""
-    },
-
-    {
         "Name": "Skip Turn",
         "Description": "",
         "Type": 3,
-        "Tier": 1,
+        "Tier": 2,
         "Texture": ""
     },
 
@@ -306,6 +315,23 @@
             "Is_Postive": false,
             "Target_Self": false,
             "Gravity_Scale": 2.5,
+            "Damage_Each_Round": 0,
+            "Effect_Radius": 0
+        }
+    },
+
+    {
+        "Name": "God Mode",
+        "Description": "",
+        "Type": 1,
+        "Tier": 4,
+        "Texture": "",
+        "Status_Stats": {
+            "Is_Modifier": true,
+            "Rounds": 3,
+            "Is_Postive": true,
+            "Target_Self": true,
+            "Gravity_Scale": 1.0,
             "Damage_Each_Round": 0,
             "Effect_Radius": 0
         }

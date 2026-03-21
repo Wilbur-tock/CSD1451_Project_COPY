@@ -165,14 +165,11 @@ namespace CannonManager {
         }
 
         if (!canAIShoot) {
-            abilityController->AIAbilitySelection();
+            abilityController->AISelectAbility();
             EnemyAICalculation();
 
             // Set a random shoot timer to add a delay between the start of the enemy turn and enemy shooting
-            float minTimer = 1.5f;
-            float maxTimer = 3.0f;
-
-            aiShootTimer = Utils::RandomValue(minTimer, maxTimer);
+            aiShootTimer = Utils::RandomValue(minAIShotDelay, maxAIShotDelay);
             canAIShoot = true;
         }
         else {
@@ -299,6 +296,7 @@ namespace CannonManager {
         SetCamera(true); // Follow the projectile that is shot out of the cannon
         hasCannonShot = true;
 
+        // Track data
         isPlayerControlled ? ++GameTrackingManager::data.playerShotsFired : ++GameTrackingManager::data.enemyShotsFired;
 
         std::cout << "[CannonManager] Projectile Fired!\n";

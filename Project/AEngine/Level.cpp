@@ -378,6 +378,7 @@ void Level::Initalize() {
 
 	AbilitiesManager::AbilityController& playerController = AbilitiesManager::playerAbilityController;
 	playerController.LoadAllAbilities(true);
+	playerController.AbilitySelectionRandomisator();
 	playerCannon.Initialize(&playerController);
 	AbilitiesManager::playerAbilityController.IsSelectingAbility(true);
 
@@ -386,15 +387,13 @@ void Level::Initalize() {
 
 	AbilitiesManager::AbilityController& enemyController = AbilitiesManager::enemyAbilityController;
 	enemyController.LoadAllAbilities(false);
+	enemyController.SetAIAbilitySelection(static_cast<int>(levelDifficulty));
 	enemyCannon.Initialize(&enemyController);
 	enemyCannon.SetEnemyAI(static_cast<int>(levelDifficulty));
 
 	// Reset camera
 	CameraManager::camera.SetPosition(playerCannon.transform.pos);
 	CameraManager::camera.SetState(CameraManager::CameraController::INPUT);
-
-	// Randomise at the start of the level the 3 abilities that the player can choose from in the ability selector UI
-	AbilitiesManager::playerAbilityController.AbilitySelectionRandomisator();
 
 	// Initialize player and enemy shield 
 	playerShield = TowerShield{ MapManager::FindTile(playerTerritory.centerId)->transform.pos, &playerController };
@@ -450,7 +449,7 @@ void Level::Update() {
 
 	// Need to be below DrawLevel to ensure that the Ability Selector UI is shows up infront of the level
 	prevIsAbilitySelectorOn = AbilitiesManager::playerAbilityController.IsSelectingAbility();
-	AbilitiesManager::playerAbilityController.AbilitySelector();
+	AbilitiesManager::playerAbilityController.UpdateAbilitySelector();
 
 	if (AbilitiesManager::playerAbilityController.IsSelectingAbility() != prevIsAbilitySelectorOn) {
 		delayTimer = defaultDelayTimer;
@@ -461,7 +460,7 @@ void Level::Update() {
 	}
 
 	// UI
-	if (isPlayerTurn) AbilitiesManager::playerAbilityController.UpdateAbilityUI();
+	activeCannon->AbilityController()->DrawAbilityInventoryUI();
 	DrawUI();
 	DebugInfo();
 
@@ -570,29 +569,15 @@ void Level::DrawUI() {
 
 void Level::GetCurrentHP(float& currentHP, bool isGettingPlayerHP) {
 	currentHP = 0;
-	if (isGettingPlayerHP) {
-		for (Character& character : playerCharacters) {
-			currentHP += static_cast<float>(character.attribute.Health());
-		}
-	}
-	else {
-		for (Character& character : enemies) {
-			currentHP += static_cast<float>(character.attribute.Health());
-		}
+	for (Character const& character : isGettingPlayerHP ? playerCharacters : enemies) {
+		currentHP += static_cast<float>(character.attribute.Health());
 	}
 }
 
 void Level::GetMaxHP(float& maxHP, bool isGettingPlayerHP) {
 	maxHP = 0;
-	if (isGettingPlayerHP) {
-		for (Character& character : playerCharacters) {
-			maxHP += static_cast<float>(character.attribute.MaxHealth());
-		}
-	}
-	else {
-		for (Character& character : enemies) {
-			maxHP += static_cast<float>(character.attribute.MaxHealth());
-		}
+	for (Character const& character : isGettingPlayerHP ? playerCharacters : enemies) {
+		maxHP += static_cast<float>(character.attribute.MaxHealth());
 	}
 }
 
@@ -791,12 +776,7 @@ void Level::DrawResultsUI() {
 	// -- Draw subtitle text --
 	std::string subStr;
 	if (status == LevelStatus::PLAYER_WON) {
-		if (showNextLevelButton) {
-			subStr = "Level cleared! Press NEXT LEVEL to continue.  [N]";
-		}
-		else {
-			subStr = "You cleared the final level!";
-		}
+		subStr = showNextLevelButton ? "Level cleared! Press NEXT LEVEL to continue.  [N]" : "You cleared the final level!";
 	}
 	else {
 		subStr = "All your units have fallen!  [R]";
@@ -897,10 +877,11 @@ void Level::DebugCommands() {
 		noEnemyTurn = !noEnemyTurn;
 	}
 
+	// Rebuild tower
 	if (AEInputCheckTriggered(AEVK_G)) {
 		ToggleTerritoryTiles(true, true);
 	}
-
+	// Destroy tower
 	if (AEInputCheckTriggered(AEVK_H)) {
 		ToggleTerritoryTiles(true, false);
 	}

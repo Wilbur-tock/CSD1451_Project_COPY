@@ -66,11 +66,11 @@ namespace AbilitiesManager {
 		// Read enemies ONLY ability and merge it to the data
 		if (isPlayer) {
 			controllerName = "Player Ability Controller";
-			ReadAbilitiesFromFile(data, "PlayerAbilities.json");
+			//ReadAbilitiesFromFile(data, "PlayerAbilities.json");
 		}
 		else {
 			controllerName = "Enemy Ability Controller";
-			ReadAbilitiesFromFile(data, "AiAbilities.json");
+			//ReadAbilitiesFromFile(data, "AiAbilities.json");
 		}
 
 		totalAbilityCount = data.size();
@@ -177,22 +177,26 @@ namespace AbilitiesManager {
 		LoadStartingAbilities();
 		//PrintAllAbilities();
 		//PrintInventory();
+
+		if (!isPlayerControlled) {
+			SetAIAbilitySelection(1);
+			int count = 50;
+			int tierCount[] = { 0,0,0,0 };
+			for (int i = 0; i < count; ++i) {
+				Ability ability = offensiveAbilities[RandomAbilityId(offensiveAbilities)];
+				++tierCount[static_cast<int>(ability.GetTier()) - 1];
+				std::cout << "Tier: " << std::to_string(static_cast<int>(ability.GetTier())) << ' ' << ability.GetName() << '\n';
+			}
+			std::cout << "Tier Count: " << tierCount[0] << ' ' << tierCount[1] << ' ' << tierCount[2] << ' ' << tierCount[3] << ' ' << '\n';
+		}
 	}
 
 	// Load the starting abilities for the player and AI
 	void AbilityController::LoadStartingAbilities() {
 		AddAbility(0); // Always add default ability for both player and enemy
-		if (isPlayerControlled) { // Load player starting Abilities
-			// Just randomise the max inventory count - 2 (because of the default ability and leave 1 empty for player to select)
-			int randomCount = Config::MAX_INVENTORY_COUNT - 2;
-			for (int i = 0; i < randomCount; ++i) {
-				OffensiveOrDefensive() == AbilityType::OFFENSIVE ? AddAbility(AbilityRandomisator(offensiveAbilities).Id()) 
-					: AddAbility(AbilityRandomisator(defensiveAbilities).Id());
-			}
-		}
-		else {
-
-		}
+		// Just randomise the max inventory count - 2 (because of the default ability and leave 1 empty for player/enemy to select)
+		int randomCount = Config::MAX_INVENTORY_COUNT - 2;
+		InventoryRandomiser(randomCount);
 
 		Reset();
 
@@ -202,34 +206,101 @@ namespace AbilitiesManager {
 		//}
 	}
 
-	// Randomly select an ability for the AI if it has not already selected one
-	void AbilityController::AIAbilitySelection() {
-		if (hasEnemySelectedAbility) return;
-
-		int selectedId = 0;
-		if (allAbilities.empty()) {
-			std::cerr << "[AbilitiesManager] No abilities loaded!" << '\n';
-			return;
-		}
-		// Randomly select abilities for now TODO:
-		int size = static_cast<int>(allAbilities.size());;
-		if (size > 1) {
-			selectedId = Utils::RandomValue(0, size - 1);
-		}
-
-		selectedId = GetAbility("Gravity")->Id();
-		AddAbility(selectedId);
-		ChangeAbility(selectedId);
-		hasEnemySelectedAbility = true;
-
-		std::cout << "[AbilitiesManager] Enemy selected ability: " << GetCurrentAbility().GetName() << '\n';
-	}
-
 	void AbilityController::Reset() {
 		// Always reset back to default ability
 		ChangeAbility(0);
 		currentInventoryId = 0;
 		isAbilityTriggered = false;
+	}
+
+	void AbilityController::SetAIAbilitySelection(int difficulty) {
+		float bronzeBoost = 1.0f, sliverBoost = 1.0f, goldBoost = 1.0f, legendaryBoost = 1.0f;
+		if (difficulty == 0) {
+			bronzeBoost = 5.0f;
+			sliverBoost = 0.75f;
+			goldBoost = 0.50f;
+			legendaryBoost = 0.1f;
+		}
+		else if (difficulty == 1) {
+			sliverBoost = 4.0f;
+		}
+		else if (difficulty == 2) {
+			bronzeBoost = 0.25f;
+			sliverBoost = 0.5f;
+			goldBoost = 2.5f;
+			legendaryBoost = 2.5f;
+		}
+
+		IncreaseAbilityChance(Tier::BRONZE, bronzeBoost);
+		IncreaseAbilityChance(Tier::SLIVER, sliverBoost);
+		IncreaseAbilityChance(Tier::GOLD, goldBoost);
+		IncreaseAbilityChance(Tier::LEGENDARY, legendaryBoost);
+	}
+
+	void AbilityController::AISelectAbility() {
+		if (hasEnemySelectedAbility) return;
+
+		InventoryRandomiser(1); // randomly select a new ability to add to the inventory
+
+		// Select a random inventory ability
+		int randomInventoryId = Utils::RandomValue(0, InventoryCount());
+
+		ChangeAbility(randomInventoryId);
+		hasEnemySelectedAbility = true;
+
+		std::cout << "[AbilitiesManager] Enemy selected ability: " << GetCurrentAbility().GetName() << ' ' << currentInventoryId << '\n';
+	}
+
+	void AbilityController::InventoryRandomiser(int count) {
+		bool canRandomiseSameAbility = true; // can randomise the same ability
+		std::vector<int> previousIds;
+
+		for (int i = 0; i < count; ++i) {
+			std::vector<Ability> pool = (OffensiveOrDefensive() == AbilityType::OFFENSIVE) ? offensiveAbilities : defensiveAbilities;
+
+			// Clean the ability pool of already selected abilities and default ability
+			pool.erase(std::remove_if(pool.begin(), pool.end(), [&](Ability const& a) {
+				if(a.Id() == 0) return true;
+
+				if (!canRandomiseSameAbility) {
+					for (int prevId : previousIds) {
+						if (prevId == a.Id()) return true;
+					}
+				}
+
+				return false;
+
+				}), pool.end()
+			);
+
+			int selectedId = RandomAbilityId(pool);
+			previousIds.push_back(selectedId);
+			AddAbility(selectedId); // add to inventory
+		}
+	}
+
+	int AbilityController::RandomAbilityId(std::vector<Ability> const& abilities) {
+		// Calculate sum of all chances
+		float totalChance = 0;
+		for (Ability const& ability : abilities) {
+			totalChance += ability.Chance();
+		}
+
+		float roll = Utils::RandomValue(0.0f, 1.0f);
+		float cumulativePercentage = 0;
+
+		for (Ability const& ability : abilities) {
+			float normalizedChance = ability.Chance() / totalChance;
+			cumulativePercentage += normalizedChance;
+			if (roll <= cumulativePercentage) {
+				//std::cout << "Random Ability: " << ability.GetName() << " Tier: " << std::to_string(static_cast<int>(ability.GetTier())) << '\n';
+				int id = ability.Id();
+				if (id == 0) return 1; // if chosen ability is default return 1
+				return id;
+			}
+		}
+
+		return 0; // return default ability should not happen!
 	}
 
 	// Return the type of ability that is lesser in inventory, 
@@ -242,11 +313,30 @@ namespace AbilitiesManager {
 		if (offensiveCount == defensiveCount) {
 			return Utils::RandomValue(0, 1) == 0 ? AbilityType::OFFENSIVE : AbilityType::DEFENSIVE;
 		}
-		else if (offensiveCount < defensiveCount) {
-			return AbilityType::OFFENSIVE;
-		}
 		else {
-			return AbilityType::DEFENSIVE;
+			return offensiveCount < defensiveCount ? AbilityType::OFFENSIVE : AbilityType::DEFENSIVE;
+		}
+	}
+
+	void AbilityController::IncreaseAbilityChance(Tier tier, float increasePercentage) {
+		if (increasePercentage == 1.0f) return; // 1.0f is not an increase return
+
+		for (Ability& ability : offensiveAbilities) {
+			if (ability.GetTier() == tier) {
+				ability.Chance(increasePercentage);
+			}
+		}
+
+		for (Ability& ability : defensiveAbilities) {
+			if (ability.GetTier() == tier) {
+				ability.Chance(increasePercentage);
+			}
+		}
+
+		for (Ability& ability : allAbilities) {
+			if (ability.GetTier() == tier) {
+				ability.Chance(increasePercentage);
+			}
 		}
 	}
 
@@ -338,23 +428,23 @@ namespace AbilitiesManager {
 		);
 	}
 
-	// Change the current ability based on the ability ID
-	void AbilityController::ChangeAbility(int abilityId) {
+	void AbilityController::ChangeAbility(int newInventoryId) {
+		if (newInventoryId < 0 || newInventoryId >= Config::MAX_INVENTORY_COUNT) newInventoryId = 0;
+		// Change current inventory id
+		currentInventoryId = newInventoryId;
+		int abilityId = inventoryIds[newInventoryId];
+
+		// update current ability id and vector id
 		for (int i = 0; i < allAbilities.size(); ++i) {
 			// Found the same ability id in allAbilitiesVector return if found
 			if (allAbilities[i].Id() == abilityId) {
-				currentAbilityId = abilityId;
 				currentAbilityVectorId = i;
 				return;
 			}
 		}
 
-		currentAbilityId = 0;
 		currentAbilityVectorId = 0;
 		std::cerr << "Can't find ability id: " << std::to_string(abilityId) + ' ' + controllerName + ' ' + std::to_string(allAbilities.size()) << '\n';
-
-		//std::cout << "[AbilitiesManager] Current ability: " + currentAbility->GetName()
-		//	+ " Charges Remaining: " + std::to_string(currentAbility->AbilityCharges()) << '\n';
 	}
 
 	// Use the currently select ability if it has unlimited or any charges remaining
@@ -368,6 +458,7 @@ namespace AbilitiesManager {
 
 		if (GetCurrentAbility().AbilityCharges() <= 0) return false; // has no ability charges can't use this ability return false without updating the inventory
 
+		// Minus ability charges from current ability and remove from inventory
 		SetCurrentAbility().AbilityCharges(-1);
 		UpdateInventory(SetCurrentAbility(), false);
 
@@ -446,31 +537,22 @@ namespace AbilitiesManager {
 		return nullptr;
 	}
 
-	// True to toggle through all abilities or false to toggle through of all the active abilities this controller has in its inventory
+	// Debug commands true to toggle through all abilities or false to toggle through of all the active abilities this controller has in its inventory
 	void AbilityController::ToggleAbility(bool isAllAbilities, int addValue) {
-		int abilityId = GetCurrentAbility().Id();
-		abilityId += addValue;
-
 		if (isAllAbilities) {
+			int abilityId = GetCurrentAbility().Id();
+			abilityId += addValue;
 			Utils::Wrap(abilityId, 0, static_cast<int>(allAbilities.size()-1));
+
+			currentInventoryId = Config::MAX_INVENTORY_COUNT - 1; // always the last index if using an ability not inside the inventory
+			inventoryIds[currentInventoryId] = abilityId;
 		}
 		else { // Toggle through inventory abilities
-			bool found = false;
-			for (int i = 0; i < InventoryCount(); ++i) {
-				int newAbilityId = inventoryIds[i];
-				// If toggle until current ability wrap around until the last ability index in the inventory
-				if (inventoryIds[i] == GetCurrentAbility().Id()) {
-					int selectedListId = i + addValue;
-					Utils::Wrap(selectedListId, 0, static_cast<int>(InventoryCount() - 1));
-					abilityId = newAbilityId;
-					found = true;
-					break;
-				}
-			}
-
-			if(!found) abilityId = 0; // Reset to default ability if can't find any
+			currentInventoryId += addValue;
+			Utils::Wrap(currentInventoryId, 0, Config::MAX_INVENTORY_COUNT - 1);
 		}
-		ChangeAbility(abilityId);
+
+		ChangeAbility(currentInventoryId);
 	}
 
 	Ability const& AbilityController::AbilityRandomisator(std::vector<Ability> const& abilities) {
@@ -545,13 +627,13 @@ namespace AbilitiesManager {
 	}
 
 	// Display the ability selector UI for the player to select an ability
-	void AbilityController::AbilitySelector() {
+	void AbilityController::UpdateAbilitySelector() {
 		if (!isSelectingAbility) return;
 
 		//std::cout << "Player Selecting Abilities:\n";
 		CameraManager::camera.SetState(CameraManager::CameraController::STATIC);
 
-		AbilitySelectorUI();
+		DrawAbilitySelectorUI();
 	}
 
 	void AbilityController::OnClickAbilityCard(Ability const& ability) {
@@ -559,7 +641,6 @@ namespace AbilitiesManager {
 			AddAbility(ability.Id());
 		}
 		else {
-			// Update stats
 
 		}
 
@@ -567,15 +648,13 @@ namespace AbilitiesManager {
 		CameraManager::camera.SetState(CameraManager::CameraController::INPUT);
 	}
 
-	static constexpr int inventoryMaxCount = Config::MAX_INVENTORY_COUNT;
-	static constexpr int selectorCount = Config::MAX_ABILITY_SELECTOR_COUNT;
 	// UI OBJECTS
 	UIManager::Panel inventoryBackground;
-	Button inventoryAbilityButton[inventoryMaxCount];
+	Button inventoryAbilityButton[Config::MAX_INVENTORY_COUNT];
 
 	// Selecting Ability UI
 	UIManager::Panel abilitySelectorBG;
-	Card abilitySelectorCards[selectorCount];
+	Card abilitySelectorCards[Config::MAX_ABILITY_SELECTOR_COUNT];
 
 	void AbilityController::InitializeAllAbilityUI() {
 		inventoryBackground = UIManager::Panel{ {750.0f, 100.0f}, Color(0.647f, 0.165f, 0.165f, 1.0f), Utils::AnchorMode::BOTTOM_CENTER };
@@ -590,10 +669,10 @@ namespace AbilitiesManager {
 
 		// Calculate total width of spaces between buttons
 		// [BTN][SPACE][BTN][SPACE].....
-		float spaceTotalWidth = space * (inventoryMaxCount - 1);
+		float spaceTotalWidth = space * (Config::MAX_INVENTORY_COUNT - 1);
 		float totalBtnWidth = totalWidth - spaceTotalWidth - (borderPaddingX * 2.0f);
 
-		float btnSizeX = totalBtnWidth / inventoryMaxCount;
+		float btnSizeX = totalBtnWidth / Config::MAX_INVENTORY_COUNT;
 		float btnSizeY = inventoryBGTrans.size.y - (borderPaddingY * 2.0f);
 
 		// Set starting position
@@ -601,7 +680,7 @@ namespace AbilitiesManager {
 		float startY = inventoryBGTrans.pos.y - borderPaddingY;
 
 		// Initialize Ability Icons at bottom showcasing the list of ability they have in its inventory
-		for (int i = 0; i < inventoryMaxCount; ++i) {
+		for (int i = 0; i < Config::MAX_INVENTORY_COUNT; ++i) {
 			Button& btn = inventoryAbilityButton[i];
 
 			// Set button x and y position
@@ -623,14 +702,14 @@ namespace AbilitiesManager {
 		float gap = (1400.0f - (cardSize.x * abilitiesCards.size())) / (abilitiesCards.size() + 1);
 		AEVec2 cardPos{ -cardSize.x * 1.5f - gap, cardSize.y / 2.0f };
 
-		for (int i = 0; i < selectorCount; ++i) {
+		for (int i = 0; i < Config::MAX_ABILITY_SELECTOR_COUNT; ++i) {
 			Card& card = abilitySelectorCards[i];
 			card = Card{ "", cardPos, Color(1,0,0), AssetsManager::squareTexture, nullptr, nullptr };
 			cardPos.x += cardSize.x + gap; // update pos for the next card in the for loop
 		}
 	}
 
-	void AbilityController::AbilitySelectorUI() {
+	void AbilityController::DrawAbilitySelectorUI() {
 		abilitySelectorBG.Draw();
 
 		for (int i = 0; i < abilitiesCards.size(); ++i) {
@@ -653,14 +732,15 @@ namespace AbilitiesManager {
 		}
 	}
 
-	void AbilityController::UpdateAbilityUI() {
+	void AbilityController::DrawAbilityInventoryUI() {
 		inventoryBackground.Draw();
 
-		// Checking if player is hovering over UI
+		// Checking if player is hovering over inventory UI if it is disable shooting
 		LevelManager::CurrentLevel()->SetHoveringOverUI(CollisionManager::IsPointInRect(
 			inventoryBackground.Pos().x, inventoryBackground.Pos().y, inventoryBackground.Size().x, inventoryBackground.Size().y));
 
-		for (int i = 0; i < inventoryMaxCount; ++i) {
+		// Draw inventory UI
+		for (int i = 0; i < Config::MAX_INVENTORY_COUNT; ++i) {
 			Button& btn = inventoryAbilityButton[i];
 
 			std::string iconName = "Empty";
@@ -676,9 +756,8 @@ namespace AbilitiesManager {
 				}
 				else { 
 					// Can only select ability that is not current selected
-					btn.SetOnClick([this, ability, i]() {
-						ChangeAbility(ability->Id());
-						currentInventoryId = i;
+					btn.SetOnClick([this, i]() {
+						ChangeAbility(i);
 						});
 				}
 
@@ -693,7 +772,8 @@ namespace AbilitiesManager {
 			// Update textContent and color
 			btn.SetColor(iconColor);
 			btn.GetTextObject().TextContent(iconName);
-			if (!isSelectingAbility) {
+			// Only check for inputs if it player controlled
+			if (isPlayerControlled && !isSelectingAbility) {
 				btn.Update();
 			}
 			btn.Draw();
@@ -755,56 +835,17 @@ namespace AbilitiesManager {
 				<< std::boolalpha << ability.JustAddModifier() << '\n';
 		}
 	}
-}
 
-//// Change the current projectile based on the projectile ID
-//void AbilityController::ChangeProjectile(s32 _projectileID) {
-//	for (size_t i = 0; i < offensiveAbilities.size(); ++i) {
-//		if (offensiveAbilities[i].GetProj().projectileId == _projectileID) {
-//			ProjectileSelected = &offensiveAbilities[i];
-//			std::cout << "[AbilitiesManager] Switched to: " << ProjectileSelected->GetName() << std::endl;
-//			return;
-//		}
-//	}
-//	std::cerr << "[AbilitiesManager] ERROR: Projectile ID " << _projectileID << " not found in offensive list!" << std::endl;
-//}
-//
-//// Use the currently selected projectile if it has unlimited or any charges remaining
-//bool AbilityController::UseProjectile() {
-//	if (ProjectileSelected == nullptr) return false;
-//
-//	auto projData = ProjectileSelected->GetProj();
-//
-//	if (!projData.unlimited_charges) {
-//		if (projData.charges <= 0) {
-//			std::cout << "Out of charges for " << ProjectileSelected->GetName() << "!" << std::endl;
-//			return false;
-//		}
-//
-//		ProjectileSelected->UpdateCharges(-1);
-//	}
-//
-//	std::cout << "Used " << ProjectileSelected->GetName() << ". Charges left: " << ProjectileSelected->GetProj().charges << std::endl;
-//
-//	return true;
-//}
-//
-//// Use the currently selected projectile for the AI if it has unlimited or any charges remaining
-//bool AbilityController::AIUseProjectile() {
-//	if (AIProjectileSelected == nullptr) return false;
-//
-//	auto projData = AIProjectileSelected->GetProj();
-//
-//	if (!projData.unlimited_charges) {
-//		if (projData.charges <= 0) {
-//			std::cout << "Out of charges for " << AIProjectileSelected->GetName() << "!" << std::endl;
-//			return false;
-//		}
-//
-//		AIProjectileSelected->UpdateCharges(-1);
-//	}
-//
-//	std::cout << "Used " << AIProjectileSelected->GetName() << ". Charges left: " << AIProjectileSelected->GetProj().charges << std::endl;
-//
-//	return true;
-//}
+	void AbilityController::RandomiserTest(int count, int levelDifficulty) {
+		if (!isPlayerControlled) {
+			SetAIAbilitySelection(levelDifficulty);
+			int tierCount[] = { 0,0,0,0 };
+			for (int i = 0; i < count; ++i) {
+				Ability ability = offensiveAbilities[RandomAbilityId(offensiveAbilities)];
+				++tierCount[static_cast<int>(ability.GetTier()) - 1];
+				std::cout << "Tier: " << std::to_string(static_cast<int>(ability.GetTier())) << ' ' << ability.GetName() << '\n';
+			}
+			std::cout << "Tier Count: " << tierCount[0] << ' ' << tierCount[1] << ' ' << tierCount[2] << ' ' << tierCount[3] << ' ' << '\n';
+		}
+	}
+}

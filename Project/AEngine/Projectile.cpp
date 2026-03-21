@@ -57,7 +57,7 @@ void Projectile::AbilityActivation(bool isPlayer, Ability const& ability) {
 
             // Increased radius damage
             if (!Utils::IsTileIndexOutOfBounds(tileX, tileY)) {
-                attribute.DamageRadius(radius * 2);
+                attribute.DamageRadius(ability.GetStatus().effectRadius);
                 DamageTile(tileX, tileY);
                 InstantDestroy();
             }
