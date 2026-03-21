@@ -87,7 +87,7 @@ namespace MapEditor {
 	static bool ConstraintChecks();
 	void Inputs();
 
-	// Ensure that the file path is going back to my project folder NOT THE BIN FOLDER
+	// Ensure that the file path is going back to my project folder NOT THE BIN FOLDER if the debugger is on
 	static std::string DebugFilePath(std::string filePath) { return "../../" + filePath; }
 
 	// Change the drawing tile type

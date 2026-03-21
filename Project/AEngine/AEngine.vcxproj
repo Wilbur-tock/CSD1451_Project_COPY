@@ -101,6 +101,7 @@ xcopy "$(SolutionDir)Extern\AlphaEngine\lib\fmod.dll" "$(OutDir)" /s /r /y /q</C
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="AbilitiesFileManager.cpp" />
     <ClCompile Include="AbilitiesManager.cpp" />
     <ClCompile Include="Ability.cpp" />
     <ClCompile Include="AssetsManager.cpp" />
@@ -147,6 +148,7 @@ xcopy "$(SolutionDir)Extern\AlphaEngine\lib\fmod.dll" "$(OutDir)" /s /r /y /q</C
     <ClCompile Include="Utils.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="AbilitiesFileManager.hpp" />
     <ClInclude Include="AbilitiesManager.hpp" />
     <ClInclude Include="Ability.hpp" />
     <ClInclude Include="AssetsManager.hpp" />

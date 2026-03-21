@@ -70,8 +70,9 @@ namespace AbilitiesManager {
 
 		// Activate ability effects that will be activated once UseAbility() is called
 		void AbilityEffects();
+
 		void AddModifier(Ability const& ability);
-		// Remove 1 turn attribute from each ability modifier
+		// Remove 1 round attribute from each ability modifier to be called in every new round
 		void UpdateModifiers();
 		void CheckModifiers();
 

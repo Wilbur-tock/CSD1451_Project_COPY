@@ -1,6 +1,6 @@
 #include "AbilitiesManager.hpp"
 
-#include "json.hpp"
+#include "AbilitiesFileManager.hpp"
 
 #include "Utils.hpp"
 #include "Color.hpp"
@@ -10,39 +10,6 @@
 #include "CameraManager.hpp"
 #include "CollisionManager.hpp"
 #include "LevelManager.hpp"
-
-namespace {
-	std::string filePath = "Assets/DataAbilities/";
-	// Helper function to read from JSON file and input the data into a JSON Object
-	static void ReadAbilitiesFromFile(nlohmann::json& jsonData, std::string const& fileName) {
-		std::string filePathAndName = filePath + fileName;
-		// Open the file
-		std::ifstream file(filePathAndName);
-		if (!file.is_open()) {
-			std::cerr << "[AbilitiesManager] ERROR: Could not open " << filePathAndName << '\n';
-			return;
-		}
-
-		// Parse the file into a JSON object
-		//file >> jsonData;
-
-		nlohmann::json newData;
-		file >> newData;
-
-		if (jsonData.is_null()) {
-			jsonData = newData; // First read, just assign
-		}
-		else if (jsonData.is_array() && newData.is_array()) {
-			jsonData.insert(jsonData.end(), newData.begin(), newData.end()); // Merge arrays
-		}
-		else if (jsonData.is_object() && newData.is_object()) {
-			jsonData.update(newData); // Merge objects
-		}
-		else {
-			std::cerr << "[AbilitiesManager] ERROR: JSON type mismatch when merging " << fileName << '\n';
-		}
-	}
-}
 
 namespace AbilitiesManager {
 	AbilityController playerAbilityController;
@@ -61,7 +28,7 @@ namespace AbilitiesManager {
 
 		// Reading of data from json file
 		nlohmann::json data;
-		ReadAbilitiesFromFile(data, "Abilities.json");
+		AbilitiesFileManager::ReadAbilitiesFromFile(data, "Abilities.json");
 
 		// Read enemies ONLY ability and merge it to the data
 		if (isPlayer) {
@@ -88,58 +55,14 @@ namespace AbilitiesManager {
 
 		int abilityId = 0;
 		for (auto& item : data) { // Your JSON is an array at the root
-			std::string name = item["Name"];
-			std::string description = item["Description"];
-			AbilityType type = static_cast<AbilityType>(item["Type"].get<int>());
-			Tier tier = static_cast<Tier>(item["Tier"].get<int>());
-			// Load texture if no texturename is given use a default texture
-			std::string textureName = item["Texture"];
-			std::string textureFilePath = "Assets/Abilities/" + textureName + ".png";
-			AEGfxTexture* texture = AssetsManager::squareTexture;
-			if (textureName != "") {
-				texture = AssetsManager::GetTexture(textureFilePath.c_str());
-			}
+			Ability newAbility = AbilitiesFileManager::ReadAbilityInfo(abilityId, item);
 
-			Ability newAbility{ abilityId, name, description, type, tier, texture };
+			newAbility.SetStats(AbilitiesFileManager::ReadBaseStats(item));
+			newAbility.SetProjectile(AbilitiesFileManager::ReadProjectileStats(item));
+			newAbility.SetStatus(AbilitiesFileManager::ReadStatusStats(item));
 
-			// Load different stats modules if can find
-			std::string statsName = "Base_Stats";
-			if (item.contains(statsName) && !item[statsName].is_null()) {
-				auto& s = item[statsName];
-				newAbility.SetStats(StatsModule{
-					s["Hp"], s["Attack"], s["Shield"]
-				});
-			}
-
-			std::string projectileName = "Projectile_Stats";
-			if (item.contains(projectileName) && !item[projectileName].is_null()) {
-				auto& p = item[projectileName];
-				newAbility.SetProjectile(ProjectileModule{
-					p["ProjectileID"],
-					p["Damage_Amp"],
-					p["Base_Damage"],
-					p["Radius"],
-					p["Charges"],
-					p["unlimited_charges"]
-				});
-			}
-
-			std::string statusName = "Status_Stats";
-			if (item.contains(statusName) && !item[statusName].is_null()) {
-				auto& status = item[statusName];
-				newAbility.SetStatus(StatusModule{
-					status["Is_Modifier"],
-					status["Rounds"],
-					status["Is_Postive"],
-					status["Target_Self"],
-					status["Gravity_Scale"],
-					status["Damage_Each_Round"],
-					status["Effect_Radius"],
-				});
-			}
-
-			// Add to the type of ability list
-			switch (type) {
+			// Add to the type of ability vector
+			switch (newAbility.GetType()) {
 			case AbilityType::STATISTICS:
 				statsAbilities.push_back(newAbility);
 				break;
