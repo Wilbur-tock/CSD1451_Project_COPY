@@ -15,8 +15,6 @@ namespace UIInstructionsOverlay {
             case GameState::LEVEL_1:
             case GameState::LEVEL_2:
             case GameState::LEVEL_3:
-            case GameState::LEVEL_4:
-            case GameState::LEVEL_5:
                 return true;
             default:
                 return false;
@@ -33,8 +31,6 @@ namespace UIInstructionsOverlay {
             case GameState::LEVEL_1:      return "LEVEL 1";
             case GameState::LEVEL_2:      return "LEVEL 2";
             case GameState::LEVEL_3:      return "LEVEL 3";
-            case GameState::LEVEL_4:      return "LEVEL 4";
-            case GameState::LEVEL_5:      return "LEVEL 5";
             case GameState::CREDITS:      return "CREDITS";
             case GameState::SETTINGS:     return "SETTINGS";
             case GameState::GUIDE:        return "GUIDE";
@@ -107,7 +103,7 @@ namespace UIInstructionsOverlay {
                 "[T]: Toggle tile list\n"
                 "[CTRL] + [S]: Save current map\n"
                 "[R]: Reset map\n"
-                "[CTRL] + [1..5]: Load level file\n"
+                "[CTRL] + [1..3]: Load level file\n"
                 "[ESC]: Pause Menu\n\n"
                 "NOTE: Editor input is blocked while this popup is open.\n";
         }
@@ -133,8 +129,7 @@ namespace UIInstructionsOverlay {
                 "[1] Open Game Guide\n"
                 "[2] Open Abilities Guide\n"
                 "Inside Abilities Guide:\n"
-                "[1] Offensive tab\n"
-                "[2] Defensive tab\n"
+                "Click an ability row to inspect it\n"
                 "[W]/[S] or [UP]/[DOWN]: Scroll ability list\n"
                 "[ESC] / [BACK]: Return to Guide Menu or Main Menu\n";
         }
