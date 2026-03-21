@@ -24,6 +24,7 @@ namespace AbilitiesManager {
 
 		allAbilities.clear();
 		inventoryIds.clear();
+		abilityModifiers.clear();
 
 		isPlayerControlled = isPlayer;
 
@@ -50,8 +51,11 @@ namespace AbilitiesManager {
 		offensiveAbilities.reserve(reserveCount);
 		statsAbilities.reserve(reserveCount);
 		defensiveAbilities.reserve(reserveCount);
+		abilityModifiers.reserve(Config::MAX_ABILITY_MODIFIER_COUNT);
 
+		inventoryIds.clear();
 		inventoryIds.reserve(Config::MAX_INVENTORY_COUNT);
+		inventoryTypeCount.clear();
 		inventoryTypeCount.resize(static_cast<int>(AbilityType::COUNT));
 
 		int abilityId = 0;

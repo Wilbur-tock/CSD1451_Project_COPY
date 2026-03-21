@@ -107,9 +107,7 @@ namespace CannonManager {
         // Render UI
         if (isHoldingLeftClick) {
             // Drawing power bar beside the cannon in WORLD SPACE
-            worldSpaceShotBar.Draw(chargingPower, Config::CANNON_MAX_POWER, false);
-
-            if (!isPlayerControlled) return;
+            //worldSpaceShotBar.Draw(chargingPower, Config::CANNON_MAX_POWER, false);
              
             // Only draw power bar in the SCREEN SPACE for player cannon
             screenOverlayShotBar.Draw(chargingPower, Config::CANNON_MAX_POWER);

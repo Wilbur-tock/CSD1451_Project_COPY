@@ -4,7 +4,7 @@
         "Description": "",
         "Type": 2,
         "Tier": 1,
-        "Texture": "",
+        "Texture": "Icon_Default",
         "Projectile_Stats": {
             "ProjectileID": 0,
             "Damage_Multiplier": 1,
@@ -20,7 +20,7 @@
         "Description": "The bomb will detonate and deal damage within a 3 tile radius upon collision OR Detonate the projectile upon triggered, deal damage double its original tile radius instead anywhere in the map",
         "Type": 2,
         "Tier": 2,
-        "Texture": "",
+        "Texture": "Icon_Bomb",
         "Projectile_Stats": {
             "ProjectileID": 1,
             "Damage_Multiplier": 1,
@@ -45,7 +45,7 @@
         "Description": "",
         "Type": 2,
         "Tier": 4,
-        "Texture": "",
+        "Texture": "Icon_Nuke",
         "Projectile_Stats": {
             "ProjectileID": 2,
             "Damage_Multiplier": 1,
@@ -61,7 +61,7 @@
         "Description": "",
         "Type": 2,
         "Tier": 2,
-        "Texture": "",
+        "Texture": "Icon_PentaBurst",
         "Projectile_Stats": {
             "ProjectileID": 3,
             "Damage_Multiplier": 1,
@@ -77,7 +77,7 @@
         "Description": "",
         "Type": 2,
         "Tier": 1,
-        "Texture": "",
+        "Texture": "Icon_AutoAim",
         "Projectile_Stats": {
             "ProjectileID": 4,
             "Damage_Multiplier": 1,
@@ -93,7 +93,7 @@
         "Description": "",
         "Type": 2,
         "Tier": 3,
-        "Texture": "",
+        "Texture": "Icon_ShieldBuster",
         "Projectile_Stats": {
             "ProjectileID": 6,
             "Damage_Multiplier": 1,
@@ -109,7 +109,7 @@
         "Description": "",
         "Type": 2,
         "Tier": 4,
-        "Texture": "",
+        "Texture": "Icon_Piercing",
         "Projectile_Stats": {
             "ProjectileID": 7,
             "Damage_Multiplier": 1,
@@ -125,7 +125,7 @@
         "Description": "",
         "Type": 2,
         "Tier": 3,
-        "Texture": "",
+        "Texture": "Icon_ClusterShot",
         "Projectile_Stats": {
             "ProjectileID": 8,
             "Damage_Multiplier": 1,
@@ -264,7 +264,7 @@
     },
 
     {
-        "Name": "Instant Bastion",
+        "Name": "Bastion",
         "Description": "",
         "Type": 3,
         "Tier": 2,

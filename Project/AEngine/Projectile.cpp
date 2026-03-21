@@ -23,28 +23,18 @@ void Projectile::Draw() {
     GraphicsManager::DrawGameObject(texture, mat, Color{ 0.5f, 0.5f, 0, 1 });
 }
 
-bool Projectile::InIgnoredTiles() {
-    if (ignoredTiles.size() <= 0) return false; // if there is no tiles to ignored return false
-
-    // Current tileIndex based on current projectile transform
-    TileIndex current{ 0,0 };
-    Utils::GetTileIndex(current.x, current.y, transform.pos);
-
-    // Check if current tile index is a tileIndex that should be ignored
-    for (TileIndex const& ignoredTileId : ignoredTiles) {
-        if (current == ignoredTileId) {
-            std::cout << "In ignored Tiles" << '\n';
-            return true;
-        }
-    }
-
-    return false;
-}
-
 void Projectile::AbilityActivation(bool isPlayer, Ability const& ability) {
     if (mode == ProjectileMode::ATTACK || isAbilityTriggered) return;
 
     bool leftClick = AEInputCheckTriggered(AEVK_LBUTTON);
+
+    if (!isPlayer && mode != ProjectileMode::BOMB && mode != ProjectileMode::NUKE) {
+        aiLeftClickTimer += PhysicsManager::g_dt;
+
+        if (Utils::RandomValue(5.0f, 10.0f) <= aiLeftClickTimer) {
+            leftClick = true;
+        }
+    }
 
     switch (Mode()) {
     case ProjectileMode::BOMB:
@@ -89,7 +79,6 @@ void Projectile::AbilityActivation(bool isPlayer, Ability const& ability) {
             // Create a 1 tile width wall, 1 tiles x index behind current projectile x index
             int tileX = 0, tileY = 0;
             Utils::GetTileIndex(tileX, tileY, transform.pos);
-            tileX -= 1; 
 
             if (!Utils::IsTileIndexOutOfBounds(tileX, tileY)) {
                 for (int i = 0; i <= Config::MAX_GRID_Y; ++i) {
@@ -100,11 +89,12 @@ void Projectile::AbilityActivation(bool isPlayer, Ability const& ability) {
                     }
                 }
             }
+            CanPhase({tileX, tileY}, 1);
             std::cout << "WALL mode triggered\n";
         }
         break;
     case ProjectileMode::PIERCING:
-        canBypassBlocks = isAbilityTriggered = true;
+        canAlwaysBypassBlocks = isAbilityTriggered = true;
         break;
     case ProjectileMode::DECAY_SHOT:
         if (hasCollided) {
@@ -125,8 +115,9 @@ void Projectile::AbilityActivation(bool isPlayer, Ability const& ability) {
 
             TileIndex center{ 0,0 }, min{ 0,0 }, max{ 0,0 };
             Utils::GetTileIndex(center.x, center.y, transform.pos); // center index
-            center.x -= ability.GetStatus().effectRadius;
-            Utils::CalculateTileBounds(center, min, max, ability.GetStatus().effectRadius);
+            int radius = ability.GetStatus().effectRadius;
+            //isPlayer ? center.x -= ability.GetStatus().effectRadius : center.x += ability.GetStatus().effectRadius;
+            Utils::CalculateTileBounds(center, min, max, radius);
 
             if (!Utils::IsTileIndexOutOfBounds(center.x, center.y)) {
                 for (int y = max.y; y < min.y; ++y) {
@@ -136,11 +127,11 @@ void Projectile::AbilityActivation(bool isPlayer, Ability const& ability) {
                             tile.Type(isPlayer ? TileType::TILE_BLOCK_1 : TileType::TILE_BLOCK_2);
                             tile.attribute.Heal(1.0f); // heal tile to full hp incase
                         }
-
-                        ignoredTiles.push_back({ x,y }); // ignore these newly builded blocks for a turn
                     }
                 }
             }
+
+            CanPhase(center, radius);
         }
         break;
     }
@@ -194,13 +185,14 @@ void Projectile::Initialize(Transform const& _transform, int _activeId, AEVec2 c
 }
 
 void Projectile::Update(bool isPlayerShot, float dt) {
+    InPhasingTiles();
+
     AEVec2 start = transform.pos;
     // Set movement first
     ProjectileMovement(dt);
     AEVec2 end = transform.pos;
 
-    if (InIgnoredTiles()) return; // if is currently inside a tile block to ignored just return no collision checks
-    if (hasHitShield) return; // if projectile has hit a shield it should get destroy instantly no more collision checks
+    if (hasHitShield || isPhasing) return; // if projectile has hit a shield it should get destroy instantly no more collision checks
 
     // Collision Checks
 
@@ -243,18 +235,14 @@ void Projectile::Update(bool isPlayerShot, float dt) {
             if (hasTileCollision) {
                 // Damage tile first, incase of destroying the blocks and bouncing back if damageTile is not called first
                 DamageTile(x, y);
-                if (!canBypassBlocks && !hasCollided) {
+
+                if (!canAlwaysBypassBlocks && !hasCollided) {
                     FirstTimeCollision();
                 }
 
-                if (!canBypassBlocks) {
+                if (!canAlwaysBypassBlocks) {
                     ConstantCollision(tile);
                 }
-
-                //// After bypassing a block/character immediately disable by pass wall
-                //if (canBypassBlocks) {
-                //    canBypassBlocks = false;
-                //}
             }
         }
     }
@@ -262,20 +250,19 @@ void Projectile::Update(bool isPlayerShot, float dt) {
 
 void Projectile::ProjectileMovement(float dt) {
     // Grounded Check every frame
-    if (!canBypassBlocks) {
-        isGrounded = PhysicsManager::IsObjectGrounded(transform);
+    isGrounded = PhysicsManager::IsObjectGrounded(transform);
+    if (canAlwaysBypassBlocks || isPhasing) {
+        isGrounded = false;
     }
 
-    if (!InIgnoredTiles()) {
-        if (isGrounded) {
-            velocity.x *= pow(PhysicsManager::FRICTION, dt);
-            velocity.y = 0; // ensure that the projectile stay on the ground
-            if (std::abs(velocity.x) < PhysicsManager::MINIMUM_VELOCITY) velocity.x = 0;
-        }
-        else {
-            // Gravity pull
-            velocity.y -= (PhysicsManager::GRAVITY * gravityScale) * dt;
-        }
+    if (isGrounded) {
+        velocity.x *= pow(PhysicsManager::FRICTION, dt);
+        velocity.y = 0; // ensure that the projectile stay on the ground
+        if (std::abs(velocity.x) < PhysicsManager::MINIMUM_VELOCITY) velocity.x = 0;
+    }
+    else {
+        // Gravity pull
+        velocity.y -= (PhysicsManager::GRAVITY * gravityScale) * dt;
     }
 
     // Movement
@@ -345,19 +332,12 @@ bool Projectile::Destroy() {
     return false;
 }
 
-void Projectile::InstantDestroy() {
-    isActive = hasCollided = toBeDestroyed = false;
-    timer = 0.0f;
-}
-
-void Projectile::PlayModeEffect() {
-    EffectsManager::effectsController.PlayProjectiileAbiltiesEffect(static_cast<int>(Mode()), transform.pos);
-}
-
 void Projectile::DamageTile(int tileX, int tileY) {
     Tile& centerTile = (*MapManager::currentMap)[tileY][tileX];
 
-    if (attackCharges <= 0 /*|| !centerTile.IsDestructible()*/) return; // Can't damage return
+    if (attackCharges <= 0 || prevDamageTileUndestructible) return; // Can't damage return
+
+    prevDamageTileUndestructible = !centerTile.IsDestructible();
 
     int blastRadius = attribute.DamageRadius();
 
@@ -392,7 +372,7 @@ void Projectile::DamageTile(int tileX, int tileY) {
             std::cout << "[Projectile] Damage Tile: " << tileToDamage << " Current hp: " << tileToDamage.attribute.Health() << " Damage: " << projDamage << '\n';
             tileToDamage.TakeDamage(projDamage);
             
-            if (mode == ProjectileMode::SHIELD_BUSTER && tileToDamage.attribute.IsShieldActive()) {
+            if ((mode == ProjectileMode::NUKE || mode == ProjectileMode::SHIELD_BUSTER) && tileToDamage.attribute.IsShieldActive()) {
                 tileToDamage.attribute.DamageShield(0.0f);
             }
 
@@ -451,5 +431,42 @@ std::string Projectile::DebugInfo() {
         + "\nAttack Charges: " + std::to_string(AttackCharges())
         + "\nDamage Radius: " + std::to_string(attribute.DamageRadius())
         + "\nCollisionTriggered: " + std::string(hasCollided ? "true" : "false")
-        + "\nCanBypassWall: " + std::string(canBypassBlocks ? "true" : "false");
+        + "\nCanBypassWall: " + std::string(canAlwaysBypassBlocks ? "true" : "false");
+}
+
+
+void Projectile::InstantDestroy() {
+    isActive = hasCollided = toBeDestroyed = false;
+    timer = 0.0f;
+}
+
+void Projectile::PlayModeEffect() {
+    EffectsManager::effectsController.PlayProjectiileAbiltiesEffect(static_cast<int>(Mode()), transform.pos);
+}
+
+void Projectile::CanPhase(TileIndex const& center, int radius) {
+    canPhase = true;
+    TileIndex min, max;
+    Utils::CalculateTileBounds(center, min, max, radius + 1);
+    for (int y = max.y; y < min.y; ++y) {
+        for (int x = min.x; x < max.x; ++x) {
+            tilesToPhase.push_back({ x,y });
+        }
+    }
+}
+
+void Projectile::InPhasingTiles() {
+    if (!canPhase) return; // does not need to check if canPhase not true
+
+    TileIndex current;
+    Utils::GetTileIndex(current.x, current.y, transform.pos);
+
+    for (TileIndex const& phaseId : tilesToPhase) {
+        if (phaseId == current) {
+            isPhasing = true;
+            return;
+        }
+    }
+
+    isPhasing = false;
 }

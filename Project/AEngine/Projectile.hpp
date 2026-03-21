@@ -39,7 +39,7 @@ public:
 	Projectile(AEGfxTexture* _texture, ProjectileMode _mode = ProjectileMode::ATTACK, AEVec2 _pos = {0,0}, int _attackCharges = 1);
 
 	// Accessors
-
+public:
 	int  AttackCharges() const { return attackCharges; }
 	void AttackCharges(int value) { attackCharges = std::clamp(value, 0, 100); }
 
@@ -75,8 +75,8 @@ public:
 	bool HasCollided() const { return hasCollided; }
 
 	void GravityScale(float newGravityScale) { gravityScale = newGravityScale; }
-	bool InIgnoredTiles();
 
+public:
 	// Member functions
 
 	void SetProjectileStats(std::string _projectileName, ProjectileModule const& data);
@@ -117,6 +117,9 @@ private:
 	void InstantDestroy();
 	void PlayModeEffect();
 
+	void CanPhase(TileIndex const& center, int radius);
+	void InPhasingTiles();
+
 private:
 	bool isGrounded = false;
 	int projectileId = 0, attackCharges = 1;
@@ -127,6 +130,12 @@ private:
 	float gravityScale = 1.0f;
 
 	float timer = 0.0f; // lifespan timer
+
+	// Phasing variables to ensure that projectile does not collide with any blocks that are newly build by abilities
+	bool canPhase = false;
+	bool isPhasing = false;
+	bool prevDamageTileUndestructible = false; // does not keep checking if previous center damage tile is undestructible stop checking for destrucitble tiles
+
 	bool isActive = false; // is projectile still alive or dead
 	bool toBeDestroyed = false;
 	bool hasCollided = false; // has hit any tile blocks that is not empty
@@ -134,9 +143,11 @@ private:
 
 	bool isAbilityTriggered = false;
 	bool hasHitShield = false;
-	bool canBypassBlocks = false;
+	bool canAlwaysBypassBlocks = false;
 
-	std::vector<TileIndex> ignoredTiles; // tile index to ignore colliding
+	float aiLeftClickTimer = 0.0f;
+
+	std::vector<TileIndex> tilesToPhase;
 };
 
 #endif // !PROJECTILE_HPP
