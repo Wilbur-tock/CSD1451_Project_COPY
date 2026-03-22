@@ -23,9 +23,9 @@ enum class ProjectileMode {
 	DECAY_SHOT		= 9,
 	POISON			= 10,
 	INSTANT_BASTION = 11,
-	BLAST			= 12,
-	IMPACT			= 13,
-	BOLT			= 14,
+	AIR_DROP		= 12,
+	DRILL			= 13,
+	TELEPORT			= 14,
 	GOD_MODE        = 16,
 };
 
@@ -60,9 +60,9 @@ public:
 		case ProjectileMode::DECAY_SHOT:		return "DECAY_SHOT";
 		case ProjectileMode::POISON:			return "POISON";
 		case ProjectileMode::INSTANT_BASTION:	return "INSTANT_BASTION";
-		case ProjectileMode::BLAST:				return "BLAST";
-		case ProjectileMode::IMPACT:			return "IMPACT";
-		case ProjectileMode::BOLT:				return "BOLT";
+		case ProjectileMode::AIR_DROP:			return "AIR_DROP";
+		case ProjectileMode::DRILL:				return "DRILL";
+		case ProjectileMode::TELEPORT:			return "TELEPORT";
 		default:								return "YOU NEED TO ADD A PROJECTILE MODE NAME";
 		}
 	}
@@ -145,6 +145,7 @@ private:
 	bool isAbilityTriggered = false;
 	bool hasHitShield = false;
 	bool canAlwaysBypassBlocks = false;
+	bool ignorePhysics = false;
 
 	float aiLeftClickTimer = 0.0f;
 

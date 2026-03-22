@@ -134,6 +134,16 @@ void Projectile::AbilityActivation(bool isPlayer, Ability const& ability) {
             CanPhase(center, radius);
         }
         break;
+    case ProjectileMode::DRILL:
+        if (leftClick) {
+            isAbilityTriggered = true;
+            canAlwaysBypassBlocks = true;
+
+            float newXVel = isPlayer ? 750.0f : - 750.0f;
+            velocity = { newXVel, 0.0f };
+            ignorePhysics = true;
+        }
+        break;
     }
 }
 
@@ -261,19 +271,18 @@ void Projectile::Update(bool isPlayerShot, float dt) {
 
 void Projectile::ProjectileMovement(float dt) {
     // Grounded Check every frame
-    isGrounded = PhysicsManager::IsObjectGrounded(transform);
-    if (canAlwaysBypassBlocks || isPhasing) {
-        isGrounded = false;
-    }
+    if (!ignorePhysics) {
+        isGrounded = canAlwaysBypassBlocks || isPhasing ? false : PhysicsManager::IsObjectGrounded(transform);
 
-    if (isGrounded) {
-        velocity.x *= pow(PhysicsManager::FRICTION, dt);
-        velocity.y = 0; // ensure that the projectile stay on the ground
-        if (std::abs(velocity.x) < PhysicsManager::MINIMUM_VELOCITY) velocity.x = 0;
-    }
-    else {
-        // Gravity pull
-        velocity.y -= (PhysicsManager::GRAVITY * gravityScale) * dt;
+        if (isGrounded) {
+            velocity.x *= pow(PhysicsManager::FRICTION, dt);
+            velocity.y = 0; // ensure that the projectile stay on the ground
+            if (std::abs(velocity.x) < PhysicsManager::MINIMUM_VELOCITY) velocity.x = 0;
+        }
+        else {
+            // Gravity pull
+            velocity.y -= (PhysicsManager::GRAVITY * gravityScale) * dt;
+        }
     }
 
     // Movement
@@ -345,6 +354,8 @@ bool Projectile::Destroy() {
 
 void Projectile::DamageTile(int tileX, int tileY) {
     Tile& centerTile = (*MapManager::currentMap)[tileY][tileX];
+
+    if (prevDamageTileUndestructible && centerTile.IsDestructible()) prevDamageTileUndestructible = false;
 
     if (attackCharges <= 0 || prevDamageTileUndestructible) return; // Can't damage return
 

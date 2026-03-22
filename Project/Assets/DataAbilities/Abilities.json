@@ -148,7 +148,7 @@
         "Name": "Decay Shot",
         "Description": "Once it collide with any block, it decay all destructible blocks within a 10 tile radius. Decay blocks will take 25 damage each round",
         "Type": 2,
-        "Tier": 2,
+        "Tier": 1,
         "Texture": "Icon_DecayShot",
         "Projectile_Stats": {
             "ProjectileID": 9,
@@ -173,7 +173,7 @@
         "Name": "Poison",
         "Description": "Posion characters within a 10 tile radius, dealing 10 hp damage each round ignoring shield.",
         "Type": 2,
-        "Tier": 3,
+        "Tier": 2,
         "Texture": "Icon_Poison",
         "Projectile_Stats": {
             "ProjectileID": 10,
@@ -195,14 +195,14 @@
     },
 
     {
-        "Name": "Impact",
-        "Description": "Increase the projectile damage multiplyer by 2. Dealing more damage.",
+        "Name": "Air Drop",
+        "Description": "Randomly choose a opponent target to drop a Bomb onto it",
         "Type": 2,
-        "Tier": 2,
-        "Texture": "",
+        "Tier": 3,
+        "Texture": "Icon_AirDrop",
         "Projectile_Stats": {
             "ProjectileID": 12,
-            "Damage_Multiplier": 2,
+            "Damage_Multiplier": 1,
             "Base_Damage": 10,
             "Radius": 2,
             "Charges": 1,
@@ -211,33 +211,33 @@
     },
 
     {
-        "Name": "Blast",
-        "Description": "Deal damage with an increase tile radius of 5.",
+        "Name": "Drill",
+        "Description": "Triggered upon a second input, the projectile will travel in a straight line constantly dealing 10 damage to everything in its path within a radius of 1 tiles",
         "Type": 2,
-        "Tier": 1,
-        "Texture": "",
+        "Tier": 3,
+        "Texture": "Icon_Drill",
         "Projectile_Stats": {
             "ProjectileID": 13,
             "Damage_Multiplier": 1,
             "Base_Damage": 10,
-            "Radius": 5,
-            "Charges": 1,
+            "Radius": 3,
+            "Charges": 100,
             "unlimited_charges": false
         }
     },
 
     {
-        "Name": "Bolt",
-        "Description": "Deal 25 hp damage with attack charges of 2 and tile radius of 5.",
+        "Name": "Teleport",
+        "Description": "Teleport to a random opponent target dealing damage to the target, it deals 20 damage with the damage radius of 3 tiles",
         "Type": 2,
-        "Tier": 1,
-        "Texture": "",
+        "Tier": 2,
+        "Texture": "Icon_Teleport",
         "Projectile_Stats": {
             "ProjectileID": 14,
             "Damage_Multiplier": 1,
-            "Base_Damage": 25,
-            "Radius": 5,
-            "Charges": 2,
+            "Base_Damage": 20,
+            "Radius": 3,
+            "Charges": 1,
             "unlimited_charges": false
         }
     },
@@ -381,6 +381,15 @@
             "Radius": 5,
             "Charges": 5,
             "unlimited_charges": false
+        },
+        "Status_Stats": {
+            "Is_Modifier": true,
+            "Rounds": 1,
+            "Is_Postive": true,
+            "Target_Self": true,
+            "Gravity_Scale": 0.0,
+            "Damage_Each_Round": 0,
+            "Effect_Radius": 0
         }
     },
 
@@ -436,6 +445,15 @@
             "Radius": 1,
             "Charges": 1,
             "unlimited_charges": false
+        },
+        "Status_Stats": {
+            "Is_Modifier": true,
+            "Rounds": 1,
+            "Is_Postive": true,
+            "Target_Self": true,
+            "Gravity_Scale": 0.0,
+            "Damage_Each_Round": 0,
+            "Effect_Radius": 0
         }
     },
 
@@ -452,6 +470,15 @@
             "Radius": 1,
             "Charges": 1,
             "unlimited_charges": false
+        },
+        "Status_Stats": {
+            "Is_Modifier": true,
+            "Rounds": 1,
+            "Is_Postive": true,
+            "Target_Self": true,
+            "Gravity_Scale": 0.0,
+            "Damage_Each_Round": 0,
+            "Effect_Radius": 0
         }
     },
 
@@ -468,6 +495,15 @@
             "Radius": 1,
             "Charges": 1,
             "unlimited_charges": false
+        },
+        "Status_Stats": {
+            "Is_Modifier": true,
+            "Rounds": 1,
+            "Is_Postive": true,
+            "Target_Self": true,
+            "Gravity_Scale": 0.0,
+            "Damage_Each_Round": 0,
+            "Effect_Radius": 0
         }
     },
 

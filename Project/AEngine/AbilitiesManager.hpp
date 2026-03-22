@@ -32,7 +32,6 @@ namespace AbilitiesManager {
 		int GetProjectileId() { return GetCurrentAbility().GetProjectile().projectileId; }
 
 		bool IsStatsAbilityActive() const { return isStatsAbilityActive; }
-		bool IsGodModeOn() const { return isGodModeOn; }
 		Ability const& StatsAbility() const { return statsAbility; }
 
 	private:
@@ -153,7 +152,6 @@ namespace AbilitiesManager {
 		bool hasEnemySelectedAbility = false; // has enemy selected their ability
 
 		bool isStatsAbilityActive = false;
-		bool isGodModeOn = false;
 		Ability statsAbility; // stats ability boost to apply onto caster when they shoot
 
 		std::vector<Ability> abilitiesCards; // vector containing the 3 abilities to be displayed in the ability selector for the player to select from

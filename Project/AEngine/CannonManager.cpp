@@ -47,7 +47,7 @@ namespace CannonManager {
         trans.pos.y += 100 + 15;
         screenOverlayShotBar = UIManager::Bar{ trans.pos, trans.size, Color{ 0,1,0 }, UIManager::FillType::LEFT_TO_RIGHT };
     }
-    
+
     void Cannon::SetProjectiles() {
         std::vector<Ability> const& allProjectileAbilities = abilityController->GetProjectilesAbilties();
         projectileAbilitiesCount = static_cast<int>(allProjectileAbilities.size());
@@ -71,7 +71,7 @@ namespace CannonManager {
             //    << projectile.ProjectileId() << " into the cannon projectile vector" << '\n';
         }
     }
-    
+
     void Cannon::Update() {
         if (isPlayerControlled) {
             float worldMouseX = 0, worldMouseY = 0;
@@ -108,7 +108,7 @@ namespace CannonManager {
         if (isHoldingLeftClick) {
             // Drawing power bar beside the cannon in WORLD SPACE
             //worldSpaceShotBar.Draw(chargingPower, Config::CANNON_MAX_POWER, false);
-             
+
             // Only draw power bar in the SCREEN SPACE for player cannon
             screenOverlayShotBar.Draw(chargingPower, Config::CANNON_MAX_POWER);
         }
@@ -290,7 +290,6 @@ namespace CannonManager {
 
         // Add the these projectile to the active projectile list
         activeProjectiles.push_back(projectile);
-        activeProjectiles.back().id = static_cast<int>(activeProjectiles.size() - 1);
 
         AudioManager::PlaySFX(AudioManager::SFX::CannonFire);
 
@@ -390,10 +389,30 @@ namespace CannonManager {
 
                     // Add the these projectile to the active projectile list
                     activeProjectiles.push_back(newProjectile);
-                    activeProjectiles.back().id = static_cast<int>(activeProjectiles.size() - 1);
                 }
 
                 abilityController->IsAbilityTriggered(true);
+            }
+            break;
+        case ProjectileMode::AIR_DROP:
+        {
+            abilityController->IsAbilityTriggered(true);
+            Character const& airDropTarget = *(LevelManager::CurrentLevel()->RandomCharacterObj(!isPlayerControlled));
+
+            // Spawn a bomb projectile at y index 0
+            Projectile newBombProjectile = projectiles[static_cast<int>(ProjectileMode::BOMB)];
+            AEVec2 airDropVelocity{ 0, -10.0f };
+            // Spawn at the max Y pos above the target
+            newBombProjectile.Initialize(Transform{ {airDropTarget.transform.pos.x, Config::WORLD_MAX_Y}, {10,10} }, static_cast<int>(activeProjectiles.size()), airDropVelocity);
+            activeProjectiles.push_back(newBombProjectile);
+            break;
+        }
+        case ProjectileMode::TELEPORT:
+            if (hasCannonShot) {
+                abilityController->IsAbilityTriggered(true);
+
+                Character const& teleportTarget = *(LevelManager::CurrentLevel()->RandomCharacterObj(!isPlayerControlled));
+                activeProjectiles.back().transform.pos = teleportTarget.transform.pos;
             }
             break;
         }
@@ -410,7 +429,7 @@ namespace CannonManager {
             }
             else if (abilityName == "Invincibility") {
                 std::vector<Character>& characterVector = LevelManager::CurrentLevel()->GetCharacters(isPlayerControlled);
-                
+
                 // Heal all character
                 for (Character& character : characterVector) {
                     character.attribute.Heal(1.0f);
@@ -439,7 +458,7 @@ namespace CannonManager {
     }
 
     void Cannon::DrawTrajectory() {
-        if (hasCannonShot) return; 
+        if (hasCannonShot) return;
         int numDots = 30;
         float size = 10;
         // Starting position (at the barrel tip, matching ShootProjectile)
