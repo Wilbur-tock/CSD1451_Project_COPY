@@ -1,7 +1,7 @@
 [
     {
         "Name": "Default",
-        "Description": "",
+        "Description": "Default projectile ability",
         "Type": 2,
         "Tier": 1,
         "Texture": "Icon_Default",
@@ -42,7 +42,7 @@
 
     {
         "Name": "Nuke",
-        "Description": "",
+        "Description": "Triggered upon a second input, instanly drop straight down to the ground and explode. Upon colliding, deal 100% damage with a radius of 10 Tiles",
         "Type": 2,
         "Tier": 4,
         "Texture": "Icon_Nuke",
@@ -58,7 +58,7 @@
 
     {
         "Name": "Penta Burst",
-        "Description": "",
+        "Description": "This projectile tears through obstacles and maintains damage for up to 5 consecutive impacts with a increased radius of 3 tiles",
         "Type": 2,
         "Tier": 2,
         "Texture": "Icon_PentaBurst",
@@ -74,7 +74,7 @@
 
     {
         "Name": "Auto Aim",
-        "Description": "",
+        "Description": "Randomly choose an opponent target to aim and will shoot towards the chosen target. Does not guarentee to hit the target.",
         "Type": 2,
         "Tier": 1,
         "Texture": "Icon_AutoAim",
@@ -90,7 +90,7 @@
 
     {
         "Name": "Shield Buster",
-        "Description": "",
+        "Description": "Instantly destroy any type of shield. Upon destruction of the shield, the projectile will be destroyed",
         "Type": 2,
         "Tier": 3,
         "Texture": "Icon_ShieldBuster",
@@ -106,7 +106,7 @@
 
     {
         "Name": "Piercing",
-        "Description": "",
+        "Description": "Phase through everythingg and deal 25 damage to everything within its 3 tile radius path",
         "Type": 2,
         "Tier": 4,
         "Texture": "Icon_Piercing",
@@ -122,14 +122,14 @@
 
     {
         "Name": "Cluster Shot",
-        "Description": "",
+        "Description": "Trigger a second input to divide the projectile. Spawns two additional projectiles travelling at different velocity dealing 15 damage.",
         "Type": 2,
         "Tier": 3,
         "Texture": "Icon_ClusterShot",
         "Projectile_Stats": {
             "ProjectileID": 8,
             "Damage_Multiplier": 1,
-            "Base_Damage": 10,
+            "Base_Damage": 15,
             "Radius": 3,
             "Charges": 1,
             "unlimited_charges": false
@@ -138,7 +138,7 @@
 
     {
         "Name": "Extra Shot",
-        "Description": "",
+        "Description": "Caster can shoot again in the same round after they have shot.",
         "Type": 2,
         "Tier": 1,
         "Texture": ""
@@ -146,7 +146,7 @@
 
     {
         "Name": "Decay Shot",
-        "Description": "",
+        "Description": "Once it collide with any block, it decay all destructible blocks within a 10 tile radius. Decay blocks will take 25 damage each round",
         "Type": 2,
         "Tier": 2,
         "Texture": "",
@@ -171,7 +171,7 @@
 
     {
         "Name": "Poison",
-        "Description": "",
+        "Description": "Posion characters within a 10 tile radius, dealing 10 hp damage each round ignoring shield.",
         "Type": 2,
         "Tier": 3,
         "Texture": "",
@@ -196,7 +196,7 @@
 
     {
         "Name": "Impact",
-        "Description": "",
+        "Description": "Increase the projectile damage multiplyer by 2. Dealing more damage.",
         "Type": 2,
         "Tier": 2,
         "Texture": "",
@@ -212,7 +212,7 @@
 
     {
         "Name": "Blast",
-        "Description": "",
+        "Description": "Deal damage with an increase tile radius of 5.",
         "Type": 2,
         "Tier": 1,
         "Texture": "",
@@ -228,7 +228,7 @@
 
     {
         "Name": "Bolt",
-        "Description": "",
+        "Description": "Deal 25 hp damage with attack charges of 2 and tile radius of 5.",
         "Type": 2,
         "Tier": 1,
         "Texture": "",
@@ -244,7 +244,7 @@
 
     {
         "Name": "Wall",
-        "Description": "",
+        "Description": "Triggered upon a second input, a massive row of 1 tile blocks will be build on the map.",
         "Type": 3,
         "Tier": 1,
         "Texture": "",
@@ -265,7 +265,7 @@
 
     {
         "Name": "Bastion",
-        "Description": "",
+        "Description": "Triggered upon a second input, an 6x6 tile blocks will be build.",
         "Type": 3,
         "Tier": 2,
         "Texture": "",
@@ -290,7 +290,7 @@
 
     {
         "Name": "Tower Shield",
-        "Description": "",
+        "Description": "Circular dome to protect the tower from any projectile, it has 3 HP and will last for 5 rounds",
         "Type": 3,
         "Tier": 2,
         "Texture": "",
@@ -312,7 +312,7 @@
 
     {
         "Name": "Rebuild",
-        "Description": "",
+        "Description": "Rebuild the your tower back to full HP, after the projectile has been shot out",
         "Type": 3,
         "Tier": 3,
         "Texture": ""
@@ -320,9 +320,9 @@
 
     {
         "Name": "Invisibility",
-        "Description": "",
-        "Type": 4,
-        "Tier": 1,
+        "Description": "Randomly choose one of your character to be invinsible, they can't be damage for 3 round",
+        "Type": 3,
+        "Tier": 4,
         "Texture": "",
         "Status_Stats": {
             "Is_Modifier": true,
@@ -337,7 +337,7 @@
 
     {
         "Name": "Skip Turn",
-        "Description": "",
+        "Description": "Skip opponenet turn and proceed to the next round",
         "Type": 3,
         "Tier": 2,
         "Texture": ""
@@ -345,7 +345,7 @@
 
     {
         "Name": "Cleanse",
-        "Description": "",
+        "Description": "Cure all poison characters and decaying blocks",
         "Type": 3,
         "Tier": 1,
         "Texture": ""
@@ -353,7 +353,7 @@
 
     {
         "Name": "Gravity",
-        "Description": "",
+        "Description": "Increase gravity on opponent projectiles, making them miss their shot",
         "Type": 3,
         "Tier": 1,
         "Texture": "Icon_Gravity",
@@ -370,13 +370,13 @@
 
     {
         "Name": "Invincibility",
-        "Description": "",
+        "Description": "100% attack boost, heal every characters to FULL HP, this will last for 3 rounds",
         "Type": 1,
         "Tier": 4,
         "Texture": "",
         "Projectile_Stats": {
             "ProjectileID": 0,
-            "Damage_Multiplier": 5,
+            "Damage_Multiplier": 1,
             "Base_Damage": 100,
             "Radius": 5,
             "Charges": 5,
@@ -387,6 +387,168 @@
             "Rounds": 3,
             "Is_Postive": true,
             "Target_Self": true,
+            "Gravity_Scale": 1.0,
+            "Damage_Each_Round": 0,
+            "Effect_Radius": 0
+        }
+    },
+
+    {
+        "Name": "Max Heal",
+        "Description": "Heal your characters HP by 100%",
+        "Type": 1,
+        "Tier": 3,
+        "Texture": "",
+        "Base_Stats": {
+            "Hp": 100,
+            "Attack": 0,
+            "Shield": 0
+        }
+    },
+
+    {
+        "Name": "Major Heal",
+        "Description": "Heal your characters HP by 50%",
+        "Type": 1,
+        "Tier": 2,
+        "Texture": "",
+        "Base_Stats": {
+            "Hp": 50,
+            "Attack": 0,
+            "Shield": 0
+        }
+    },
+
+    {
+        "Name": "Minor Heal",
+        "Description": "Heal your characters HP by 25%",
+        "Type": 1,
+        "Tier": 1,
+        "Texture": "",
+        "Base_Stats": {
+            "Hp": 25,
+            "Attack": 0,
+            "Shield": 0
+        }
+    },
+
+    {
+        "Name": "Attack Boost",
+        "Description": "Increase your damage by 50",
+        "Type": 1,
+        "Tier": 3,
+        "Texture": "",
+        "Projectile_Stats": {
+            "ProjectileID": 0,
+            "Damage_Multiplier": 1,
+            "Base_Damage": 50,
+            "Radius": 1,
+            "Charges": 1,
+            "unlimited_charges": false
+        }
+    },
+
+    {
+        "Name": "Attack Boost",
+        "Description": "Increase your damage by 25",
+        "Type": 1,
+        "Tier": 2,
+        "Texture": "",
+        "Projectile_Stats": {
+            "ProjectileID": 0,
+            "Damage_Multiplier": 1,
+            "Base_Damage": 25,
+            "Radius": 1,
+            "Charges": 1,
+            "unlimited_charges": false
+        }
+    },
+
+    {
+        "Name": "Attack Boost",
+        "Description": "Increase your damage by 10",
+        "Type": 1,
+        "Tier": 1,
+        "Texture": "",
+        "Projectile_Stats": {
+            "ProjectileID": 0,
+            "Damage_Multiplier": 1,
+            "Base_Damage": 10,
+            "Radius": 1,
+            "Charges": 1,
+            "unlimited_charges": false
+        }
+    },
+
+    {
+        "Name": "Defense Boost",
+        "Description": "",
+        "Type": 1,
+        "Tier": 3,
+        "Texture": "Reduce opponent damage by 50",
+        "Projectile_Stats": {
+            "ProjectileID": 0,
+            "Damage_Multiplier": 1,
+            "Base_Damage": -50,
+            "Radius": 1,
+            "Charges": 1,
+            "unlimited_charges": false
+        },
+        "Status_Stats": {
+            "Is_Modifier": true,
+            "Rounds": 1,
+            "Is_Postive": false,
+            "Target_Self": false,
+            "Gravity_Scale": 1.0,
+            "Damage_Each_Round": 0,
+            "Effect_Radius": 0
+        }
+    },
+
+    {
+        "Name": "Defense Boost",
+        "Description": "Reduce opponent damage by 25",
+        "Type": 1,
+        "Tier": 2,
+        "Texture": "",
+        "Projectile_Stats": {
+            "ProjectileID": 0,
+            "Damage_Multiplier": 1,
+            "Base_Damage": -25,
+            "Radius": 1,
+            "Charges": 1,
+            "unlimited_charges": false
+        },
+        "Status_Stats": {
+            "Is_Modifier": true,
+            "Rounds": 1,
+            "Is_Postive": false,
+            "Target_Self": false,
+            "Gravity_Scale": 1.0,
+            "Damage_Each_Round": 0,
+            "Effect_Radius": 0
+        }
+    },
+
+    {
+        "Name": "Defense Boost",
+        "Description": "Reduce opponent damage by 10",
+        "Type": 1,
+        "Tier": 1,
+        "Texture": "",
+        "Projectile_Stats": {
+            "ProjectileID": 0,
+            "Damage_Multiplier": 1,
+            "Base_Damage": -10,
+            "Radius": 1,
+            "Charges": 1,
+            "unlimited_charges": false
+        },
+        "Status_Stats": {
+            "Is_Modifier": true,
+            "Rounds": 1,
+            "Is_Postive": false,
+            "Target_Self": false,
             "Gravity_Scale": 1.0,
             "Damage_Each_Round": 0,
             "Effect_Radius": 0

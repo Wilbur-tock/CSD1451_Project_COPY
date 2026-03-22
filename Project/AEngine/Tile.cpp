@@ -22,6 +22,8 @@ void Tile::Type(TileType newType) {
 	else {
 		attribute.DamageMultiplier(1);
 	}
+
+	attribute.Heal(100);
 }
 
 void Tile::Type(Tile const& toCopy) {

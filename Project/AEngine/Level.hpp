@@ -102,7 +102,7 @@ private:
 
 	// Toggle turns between player and enemy once they have shot and a timer has been set and reduced to 0
 	void UpdateTurn();
-	void SetNewTurn(bool _isPlayerTurn);
+	void SwitchCannon(bool _isPlayerTurn);
 	void UpdateNewRound();
 
 	void UpdateLevelStatus();

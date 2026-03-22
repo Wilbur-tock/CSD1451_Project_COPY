@@ -55,6 +55,7 @@ public:
 	void SetTickDamage(int tickDmg, int ticks);
 	void UpdateTicks();
 	bool IsTickDamageActive() const { return isTickDamageActive; }
+	int RemainingTicks() const { return remainingTicks; }
 	std::string TickDamageInfo();
 
 private:

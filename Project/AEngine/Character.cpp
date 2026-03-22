@@ -7,62 +7,8 @@
 #include "Utils.hpp"
 #include "CollisionManager.hpp"
 
-//namespace {
-//	// ---- Change these paths to your real filenames if different ----
-//	static const char* PLAYER_IDLE_PATH = "Assets/playerIdle.png";
-//	static const char* PLAYER_HALFHP_PATH = "Assets/playerHalfHp.png";
-//	static const char* PLAYER_SQUAT_PATH = "Assets/playerSquat.png";
-//
-//	static const char* ENEMY_100_PATH = "Assets/enemy100.png";
-//	static const char* ENEMY_75_PATH = "Assets/enemy75.png";
-//	static const char* ENEMY_50_PATH = "Assets/enemy50.png";
-//	static const char* ENEMY_25_PATH = "Assets/enemy25.png";
-//	static const char* ENEMY_BOSS_PATH = "Assets/enemyBoss.png";
-//
-//	static bool gCharTexLoaded = false;
-//
-//	static AEGfxTexture* gPlayerIdleTex = nullptr;
-//	static AEGfxTexture* gPlayerHalfHpTex = nullptr;
-//	static AEGfxTexture* gPlayerSquatTex = nullptr;
-//
-//	static AEGfxTexture* gEnemy100Tex = nullptr;
-//	static AEGfxTexture* gEnemy75Tex = nullptr;
-//	static AEGfxTexture* gEnemy50Tex = nullptr;
-//	static AEGfxTexture* gEnemy25Tex = nullptr;
-//	static AEGfxTexture* gEnemyBossTex = nullptr;
-//
-//	
-//
-//	static void LoadCharacterTexturesOnce() {
-//		if (gCharTexLoaded) return;
-//		gCharTexLoaded = true;
-//
-//		AEGfxTexture* fallback = AssetsManager::squareTexture;
-//
-//		gPlayerIdleTex = AssetsManager::GetTexture(PLAYER_IDLE_PATH);
-//		gPlayerHalfHpTex = AssetsManager::GetTexture(PLAYER_HALFHP_PATH);
-//		gPlayerSquatTex = AssetsManager::GetTexture(PLAYER_SQUAT_PATH);
-//
-//		gEnemy100Tex = AssetsManager::GetTexture(ENEMY_100_PATH);
-//		gEnemy75Tex = AssetsManager::GetTexture(ENEMY_75_PATH);
-//		gEnemy50Tex = AssetsManager::GetTexture(ENEMY_50_PATH);
-//		gEnemy25Tex = AssetsManager::GetTexture(ENEMY_25_PATH);
-//		gEnemyBossTex = AssetsManager::GetTexture(ENEMY_BOSS_PATH);
-//
-//		// Fallbacks (avoid nullptr crashes)
-//		if (!gPlayerIdleTex)   gPlayerIdleTex = fallback;
-//		if (!gPlayerHalfHpTex) gPlayerHalfHpTex = gPlayerIdleTex;
-//		if (!gPlayerSquatTex)  gPlayerSquatTex = gPlayerIdleTex;
-//
-//		if (!gEnemy100Tex) gEnemy100Tex = fallback;
-//		if (!gEnemy75Tex)  gEnemy75Tex = gEnemy100Tex;
-//		if (!gEnemy50Tex)  gEnemy50Tex = gEnemy75Tex;
-//		if (!gEnemy25Tex)  gEnemy25Tex = gEnemy50Tex;
-//		if (!gEnemyBossTex) gEnemyBossTex = gEnemy100Tex;
-//	}
-//}
-
 float barGaps = 2.5f;
+static float PLAYER_SQUAT_FRAME_INTERVAL = 0.25f; // seconds per frame toggle
 
 Character::Character(AEVec2 _pos, AEVec2 _size, AEGfxTexture* _texture, TileIndex _tileId, CharacterType _type)
 	: GameObject{ _pos, _size, _texture, _tileId, Color{1,1,1,1} }, type{ _type } {
@@ -84,27 +30,32 @@ Character::Character(AEVec2 _pos, AEVec2 _size, AEGfxTexture* _texture, TileInde
 	wsShieldBar = UIManager::Bar{ {wsBarX,wsShieldBarY} , { transform.size.x, barHeight * 0.5f }, ShieldColor()};
 
 	float panelYOffset = -60.0f;// add Y offset based on the level player/enemy hp bar
-	characterStatsPanel = UIManager::Panel{ {300,100}, StatsBGColor(), Utils::AnchorMode::TOP_LEFT};
-	characterStatsPanel.AddOffset({ 0, panelYOffset });
+	statsPanel = UIManager::Panel{ {300,100}, StatsBGColor(), Utils::AnchorMode::TOP_LEFT};
+	statsPanel.AddOffset({ 0, panelYOffset });
 
 	float gap = 2.5f;
 	float borderGap = 5.0f;
 	float panelChildYOffset = panelYOffset - borderGap;
 	// Create the character icon
 	AEVec2 iconSize{ 32,32 };
-	characterIcon = UIManager::Panel{ iconSize, {1,1,1}, Utils::AnchorMode::TOP_LEFT,  texture };
-	characterIcon.AddOffset({ borderGap, panelChildYOffset });
+	icon = UIManager::Panel{ iconSize, {1,1,1}, Utils::AnchorMode::TOP_LEFT,  texture };
+	icon.AddOffset({ borderGap, panelChildYOffset });
 
 	float colorTint = 0.9f;
-	characterIconBG = UIManager::Panel{ iconSize, {colorTint,colorTint,colorTint}, Utils::AnchorMode::TOP_LEFT };
-	characterIconBG.AddOffset({ borderGap, panelChildYOffset });
+	iconBG = UIManager::Panel{ iconSize, {colorTint,colorTint,colorTint}, Utils::AnchorMode::TOP_LEFT };
+	iconBG.AddOffset({ borderGap, panelChildYOffset });
 
 	float barWidth = 15.0f;
-	AEVec2 barPos{ characterStatsPanel.GetTransform().pos.x + iconSize.x + borderGap, characterStatsPanel.GetTransform().pos.y - borderGap };
-	AEVec2 barSize{ characterStatsPanel.GetTransform().size.x - iconSize.x - (borderGap * 2),  15.0f };
+	AEVec2 barPos{ statsPanel.GetTransform().pos.x + iconSize.x + borderGap, statsPanel.GetTransform().pos.y - borderGap };
+	AEVec2 barSize{ statsPanel.GetTransform().size.x - iconSize.x - (borderGap * 2),  15.0f };
 
 	soHPBar = UIManager::Bar{ {barPos}, {barSize}, hpBarColor };
 	soShieldBar = UIManager::Bar{ {barPos.x, barPos.y - (barWidth + gap)}, {barSize}, ShieldColor()};
+
+	statusText = TextObject{ "", 0.5f, Color{0.75f,0,0} };
+	statusText.SetPosition(Utils::AnchorMode::CENTER_LEFT, statsPanel.GetTransform());
+
+	SetSquatAnimation(true);
 }
 
 void Character::Update() {
@@ -126,9 +77,7 @@ void Character::SetSquatAnimation(bool enabled) {
 	}
 }
 
-static float PLAYER_SQUAT_FRAME_INTERVAL = 0.15f; // seconds per frame toggle
-
-void Character::UpdateSprite() {
+void Character::SpriteAnimation() {
 	// Defensive: avoid divide-by-zero
 	float hpRatio = 1.0f;
 	if (attribute.MaxHealth() > 0) {
@@ -168,7 +117,8 @@ void Character::UpdateSprite() {
 }
 
 void Character::Draw() {
-	UpdateSprite(); // Update character sprite texture
+	SpriteAnimation(); // Update character sprite texture
+
 	GraphicsManager::DrawCharacter(*this);
 
 	// Draw shield
@@ -200,15 +150,20 @@ void Character::DrawUI() {
 
 	// Drawing stats if player mouse is hovering over the character
 	if (CollisionManager::IsPointInGameObject(*this)) {
-		characterStatsPanel.Draw();
+		statsPanel.Draw();
 
-		characterIconBG.Draw();
-		characterIcon.Draw();
+		iconBG.Draw();
+		icon.Draw();
 
 		soHPBar.Draw(hp, maxHp);
 
 		if (drawShieldStats) {
 			soShieldBar.Draw(shield, maxShield);
+		}
+
+		if (attribute.IsTickDamageActive()) {
+			statusText.TextContent("Poison: " + std::to_string(attribute.RemainingTicks()) + " rounds remaining");
+			statusText.Draw();
 		}
 	}
 

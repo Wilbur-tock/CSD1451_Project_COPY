@@ -22,12 +22,10 @@ TextObject debugText;
 TextObject turnText, roundCountText;
 UIManager::Panel turnStatusPanel;
 
-struct StatsUI {
+struct LevelStatsUI {
 	UIManager::Panel barBG;
 	UIManager::Bar hpBar, shieldBar;
-	std::vector<UIManager::Panel> abilityModifierPanel;
-	std::vector<UIManager::Panel> abilityModifierIcon;
-	std::vector<TextObject> abilityModifierText;
+	std::vector<UIManager::IconWithText> abilityModifierIcons;
 
 	// isLeft = true, is player stats
 	// bgWidth = the width of the hp and shield bar
@@ -58,46 +56,34 @@ struct StatsUI {
 
 		int amCount = Config::MAX_ABILITY_MODIFIER_COUNT;
 		float amPanelGaps = 5.0f;
-		float amPanelWidth = 50.0f, amPanelHeight = 50.0f;
-		float amXOffset = (turnStatusPanel.Size().x * 0.5f) + (amPanelWidth * 0.5f);
+		AEVec2 amPanelSize{ 50.0f, 50.0f };
+
+		// Calculate offset position from the main panel
+		float amXOffset = (turnStatusPanel.Size().x * 0.5f) + (amPanelSize.x * 0.5f);
 		float amYOffset = -barBGSize.y;
 
 		float gapBetweenBorder = 7.5f;
 
 		// Initialize ability modifier UI objects
-		abilityModifierPanel.reserve(amCount);
-		abilityModifierIcon.reserve(amCount);
-		abilityModifierText.reserve(amCount);
+		abilityModifierIcons.reserve(amCount);
 
 		for (int i = 0; i < amCount; ++i) {
-			UIManager::Panel panel = UIManager::Panel{
-				{amPanelWidth, amPanelHeight}, StatsBGColor(), Utils::AnchorMode::TOP_CENTER
-			};
-
 			// Calculate each gap between each panel object [PANEL][GAP][PANEL]
-			float totalWidthAndGaps = (amPanelGaps * i) + (amPanelWidth * i);
-			float xOffset = -amXOffset - totalWidthAndGaps;
-			if (!isLeft) {
-				xOffset = amXOffset + totalWidthAndGaps;
-			}
+			float totalWidthAndGaps = (amPanelGaps * i) + (amPanelSize.x * i);
 
-			panel.AddOffset({ xOffset, amYOffset });
-			abilityModifierPanel.push_back(panel);
+			// Calculate if the icons are on the player/enemy side
+			float xOffset = isLeft ? -amXOffset - totalWidthAndGaps : amXOffset + totalWidthAndGaps;
 
-			AEVec2 iconSize{ amPanelWidth - (gapBetweenBorder * 2.0f), amPanelHeight - (gapBetweenBorder * 2.0f) };
+			AEVec2 iconSize{ amPanelSize.x - (gapBetweenBorder * 2.0f), amPanelSize.y - (gapBetweenBorder * 2.0f) };
 
-			UIManager::Panel icon = UIManager::Panel{
-				{iconSize}, Color{1,1,1}, Utils::AnchorMode::TOP_CENTER
-			};
+			UIManager::IconWithText amIcon;
+			amIcon.Initialize(Transform{ {0,0}, {amPanelSize} }, Transform{ {0,0},{iconSize} });
 
-			icon.AddOffset({ xOffset, amYOffset - gapBetweenBorder });
-			abilityModifierIcon.push_back(icon);
+			// Add position offset to ensure that the icons are position correctly 
+			// position below the bars bg
+			amIcon.OffsetPosition(xOffset, amYOffset, gapBetweenBorder);
 
-			// Display number of rounds this modifier would last
-			TextObject iconText = TextObject{ "5", 0.55f, Color{0.15f, 0.15f, 0.15f}, { {0,0}, {0,0} }, Utils::AnchorMode::BOTTOM_RIGHT };
-			iconText.SetPosition(panel.GetTransform());
-
-			abilityModifierText.push_back(iconText);
+			abilityModifierIcons.push_back(amIcon);
 		}
 	}
 
@@ -110,23 +96,22 @@ struct StatsUI {
 		for (int i = 0; i < abilityModifiers.size(); ++i) {
 			Ability const& ability = abilityModifiers[i];
 
+			// decide colors
 			Color amPanelColor{ 0, 0.9f, 0 };
 			if (!ability.GetStatus().isPositive) {
 				amPanelColor.SetColor(0.9f, 0, 0);
 			}
-			abilityModifierPanel[i].SetColor(amPanelColor);
-			abilityModifierPanel[i].Draw();
-			// Update texture icon then draw
-			abilityModifierIcon[i].SetTexture(ability.GetTexture());
-			abilityModifierIcon[i].Draw();
-			// Update the number of turns remaining
-			abilityModifierText[i].TextContent(std::to_string(ability.GetStatus().rounds));
-			abilityModifierText[i].Draw();
+
+			abilityModifierIcons[i].Draw(amPanelColor, ability.GetTexture(), std::to_string(ability.GetStatus().rounds));
 		}
+
+		//for (int i = 0; i < 5; ++i) {
+		//	abilityModifierIcons[i].Draw(Color{1,1,1}, nullptr, std::to_string(5));
+		//}
 	}
 };
 
-StatsUI playerStatsUI, enemyStatsUI;
+LevelStatsUI playerStatsUI, enemyStatsUI;
 
 // Results UI objects
 bool resultScreenInitialized = false;
@@ -431,11 +416,7 @@ void Level::Update() {
 		UpdateTurn();
 	}
 
-	// Update all Player character instance
-	bool squatNow = isPlayerTurn && AEInputCheckCurr(AEVK_LBUTTON);
-
 	for (Character& playerChar : playerCharacters) {
-		playerChar.SetSquatAnimation(squatNow);
 		playerChar.Update();
 	}
 
@@ -594,14 +575,15 @@ void Level::UpdateTurn() {
 
 		if (switchTurnCooldown <= 0.0f) {
 			// Switch active cannon
-			SetNewTurn(!isPlayerTurn);
+			SwitchCannon(!isPlayerTurn);
 		}
 	}
 }
 
-void Level::SetNewTurn(bool _isPlayerTurn) {
+void Level::SwitchCannon(bool _isPlayerTurn) {
 	bool canSetNewRound = true; // always can set new round expect if the current active shooter has an extra shot to shoot
 	bool isNewRound = isPlayerStarting == _isPlayerTurn;
+	// Check if hasExtraShot ability
 	if (hasExtraShot) {
 		canSetNewRound = false;
 		hasExtraShot = false;
@@ -620,7 +602,6 @@ void Level::SetNewTurn(bool _isPlayerTurn) {
 	// Switching active cannon
 	if (isPlayerTurn) {
 		activeCannon = &playerCannon;
-		AbilitiesManager::playerAbilityController.IsSelectingAbility(true);
 		// randomise the abilities available to the player for this turn
 		AbilitiesManager::playerAbilityController.AbilitySelectionRandomiser();
 	}
@@ -628,6 +609,9 @@ void Level::SetNewTurn(bool _isPlayerTurn) {
 		// Enemy Turn
 		activeCannon = &enemyCannon;
 	}
+
+	// Turn on/off selecting ability if it player turn or not
+	AbilitiesManager::playerAbilityController.IsSelectingAbility(isPlayerTurn);
 
 	// can set new turn and whoever starting the round and current turn is the same
 	if (canSetNewRound && isNewRound) {
@@ -684,6 +668,7 @@ void Level::UpdateNewRound() {
 					int characterId = poisonChar.second;
 					Character* character = isPlayerCharacter ? FindPlayerCharacterObj(characterId) : FindEnemyCharacterObj(characterId);
 
+					// Poison is gone
 					if (!character->attribute.IsTickDamageActive()) {
 						character->UpdateTextureColor(0); // reset texture color back to default
 						return true;
@@ -896,7 +881,7 @@ void Level::DebugCommands() {
 
 	// Input R to change whose turn it is
 	if (AEInputCheckTriggered(AEVK_R)) {
-		SetNewTurn(!isPlayerTurn);
+		SwitchCannon(!isPlayerTurn);
 	}
 	// Input CTRL + R to turn autoPlayOn on/off
 	if (AEInputCheckCurr(AEVK_LCTRL) || AEInputCheckCurr(AEVK_RCTRL)) {
@@ -955,7 +940,7 @@ void Level::DebugCommands() {
 
 	if (noEnemyTurn) { // Skipping enemy turn
 		if (!isPlayerTurn) {
-			SetNewTurn(true);
+			SwitchCannon(true);
 		}
 
 		if (autoPlayOn) autoPlayOn = false;
@@ -964,7 +949,7 @@ void Level::DebugCommands() {
 	if (autoPlayOn) {
 		AbilitiesManager::playerAbilityController.IsSelectingAbility(false);;
 		if (isPlayerTurn) {
-			SetNewTurn(false);
+			SwitchCannon(false);
 		}
 
 		noEnemyTurn = false;

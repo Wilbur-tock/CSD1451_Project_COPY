@@ -49,7 +49,7 @@ public:
 private:
 	// Print out information about the character and draw collision lines
 	void DebugInfo();
-	void UpdateSprite(); // Select correct sprite based on HP / animation state
+	void SpriteAnimation(); // Select correct sprite based on HP / animation state
 
 private:
 	CharacterType type;
@@ -62,7 +62,8 @@ private:
 
 	// UI Objects
 
-	UIManager::Panel characterStatsPanel, characterIconBG, characterIcon;
+	UIManager::Panel statsPanel, iconBG, icon;
+	TextObject statusText;
 	// ws = world space
 	UIManager::Bar wsHPBar, wsShieldBar;
 	// so = screen overlay

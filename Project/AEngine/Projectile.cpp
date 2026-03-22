@@ -73,7 +73,7 @@ void Projectile::AbilityActivation(bool isPlayer, Ability const& ability) {
         }
         break;
     case ProjectileMode::WALL:
-        if (leftClick) {
+        if (!hasCollided && leftClick) {
             isAbilityTriggered = true;
 
             // Create a 1 tile width wall, 1 tiles x index behind current projectile x index
@@ -151,6 +151,18 @@ void Projectile::SetProjectileStats(std::string _projectileName, ProjectileModul
 
     // Set Charges
     AttackCharges(data.charges);
+}
+
+void Projectile::ApplyStatsBoost(ProjectileModule const& data) {
+    int newDamage = attribute.Damage() + data.baseDamage;
+    int newRadius = attribute.DamageRadius() * data.radius;
+    int newCharges = attackCharges * data.charges;
+
+    //std::cout << newDamage << ' ' << data.baseDamage << ' ' << newRadius << ' ' << newCharges << '\n';
+
+    attribute.Damage(newDamage);
+    attribute.DamageRadius(newRadius);
+    AttackCharges(newCharges);
 }
 
 void Projectile::Initialize(Transform const& cannonTransform, int _activeId, float cannonAngle, float shotPower) {
@@ -235,12 +247,11 @@ void Projectile::Update(bool isPlayerShot, float dt) {
             if (hasTileCollision) {
                 // Damage tile first, incase of destroying the blocks and bouncing back if damageTile is not called first
                 DamageTile(x, y);
-
-                if (!canAlwaysBypassBlocks && !hasCollided) {
-                    FirstTimeCollision();
-                }
-
                 if (!canAlwaysBypassBlocks) {
+                    if (!hasCollided) {
+                        FirstTimeCollision();
+                    }
+
                     ConstantCollision(tile);
                 }
             }

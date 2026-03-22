@@ -80,6 +80,7 @@ public:
 	// Member functions
 
 	void SetProjectileStats(std::string _projectileName, ProjectileModule const& data);
+	void ApplyStatsBoost(ProjectileModule const& data);
 
 	// Calculate the spawn position and starting velocity using angle and power
 	void Initialize(Transform const& cannonTransform, int _activeId, float cannonAngle, float shotPower);

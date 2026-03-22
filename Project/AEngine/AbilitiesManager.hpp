@@ -88,6 +88,7 @@ namespace AbilitiesManager {
 		bool UseAbility();
 		// Add ability charges from the based on selection
 		void AddAbility(int abilityId, int chargesToAdd = 1);
+		void RemoveAbility(Ability& ability);
 		void UpdateInventory(Ability& ability, bool toAddToVector);
 
 		// return a pointer to an ability in the AllAbilties vector based on the abilityId

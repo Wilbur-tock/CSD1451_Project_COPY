@@ -116,6 +116,9 @@ namespace CannonManager {
 
     void Cannon::ResetCannon() {
         allProjectileDestroyed = false;
+        // Clear all active projectiles
+        activeProjectiles.clear();
+
         hasCannonShot = false;
         SetCamera(false);
 
@@ -355,11 +358,12 @@ namespace CannonManager {
 
         bool leftClick = AEInputCheckTriggered(AEVK_LBUTTON);
 
+        // Apply stats boost if a stats ability is choosen
         if (abilityController->IsStatsAbilityActive()) {
-            projectile.SetProjectileStats(projectile.ProjectileName(), abilityController->StatsAbility().GetProjectile());
-            std::cout << abilityController->StatsAbility().GetProjectile().baseDamage << projectile.attribute.Damage() << '\n';
+            // Apply stats boost to the projectile ONCE only
+            projectile.ApplyStatsBoost(abilityController->StatsAbility().GetProjectile());
 
-            // Reset stats boost back to 0
+            // Reset stats boost, to avoid applying the stats boost again
             abilityController->ResetStatsBoost();
         }
 
@@ -412,6 +416,9 @@ namespace CannonManager {
                 for (Character& character : characterVector) {
                     character.attribute.Heal(1.0f);
                 }
+            }
+            else if (abilityName == "Defense Boost") {
+                projectile.ApplyStatsBoost(ability.GetProjectile());
             }
         }
     }

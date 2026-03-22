@@ -84,6 +84,16 @@ namespace UIManager {
 		bool isHovered = false;
 		bool isActive = false;
 	};
+
+	class IconWithText {
+	public:
+		void Initialize(Transform const& bgPanelTransform, Transform const& iconTransform, Utils::AnchorMode const& textAnchorMode = Utils::AnchorMode::BOTTOM_RIGHT);
+		void OffsetPosition(float xOffset, float yOffset, float gapsBetweenBorder = 2.5f);
+		void Draw(Color const& bgColor, AEGfxTexture* iconTexture, std::string textContent);
+	private:
+		Panel bgPanel, icon;
+		TextObject textObj;
+	};
 }
 
 #endif // !UIMANAGER_HPP

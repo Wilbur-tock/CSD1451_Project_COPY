@@ -407,8 +407,7 @@ namespace AbilitiesManager {
 		if (GetCurrentAbility().AbilityCharges() <= 0) return false; // has no ability charges can't use this ability return false without updating the inventory
 
 		// Minus ability charges from current ability and remove from inventory
-		SetCurrentAbility().AbilityCharges(-1);
-		UpdateInventory(SetCurrentAbility(), false);
+		RemoveAbility(SetCurrentAbility());
 
 		std::cout << "[AbilitiesManager] Ability used: " + GetCurrentAbility().GetName()
 			+ " Charges Remaining: " + std::to_string(GetCurrentAbility().AbilityCharges()) << '\n';
@@ -433,9 +432,18 @@ namespace AbilitiesManager {
 		UpdateInventory(ability, true);
 	}
 
+	void AbilityController::RemoveAbility(Ability& ability) {
+		ability.AbilityCharges(-1);
+		UpdateInventory(ability, false);
+	}
+
 	// Helper function to add or remove abilities from the inventory vector based on the ability charges
 	void AbilityController::UpdateInventory(Ability& ability, bool toAddToVector) {
 		int typeId = static_cast<int>(ability.GetType()) - 1;
+		if (typeId < 0 || typeId > 3) {
+			std::cerr << "Input Wrong Type Id (0-2): " + ability.GetName() + ' ' + std::to_string(static_cast<int>(ability.GetType())) << '\n';
+		}
+
 		if (toAddToVector) {
 			std::cout << "[AbilitiesManager] Added " << ability << " into inventory" << '\n';
 			// update count
@@ -492,14 +500,13 @@ namespace AbilitiesManager {
 			abilityId += addValue;
 			Utils::Wrap(abilityId, 0, static_cast<int>(allAbilities.size()-1));
 
-			// always use the last index if using an ability not inside the inventory
+			// always use the last index if trying to use an ability not inside the inventory
 			currentInventoryId = Config::MAX_INVENTORY_COUNT - 1;
-			if (currentInventoryId >= inventoryIds.size()) {
-				inventoryIds.push_back(abilityId);
+			if (currentInventoryId < inventoryIds.size()) { // last slot is not empty
+				RemoveAbility(*GetAbility(inventoryIds[currentInventoryId]));
 			}
-			else {
-				inventoryIds[currentInventoryId] = abilityId;
-			}
+
+			AddAbility(abilityId);
 		}
 		else { // Toggle through inventory abilities
 			currentInventoryId += addValue;
@@ -533,11 +540,19 @@ namespace AbilitiesManager {
 
 	void AbilityController::UseStatsAbility(Ability const& ability) {
 		statsAbility = ability;
+		std::string abilityName = ability.GetName();
 
-		if (ability.GetName() == "Invincibility") {
-			isStatsAbilityActive = true;
+		if (abilityName == "Invincibility" || abilityName == "Attack Boost") {
+			isStatsAbilityActive = true; // if stats ability active cannon will be apply with projectile stats boost
+		}
+		else if (abilityName == "Max Heal" || abilityName == "Major Heal" || abilityName == "Minor Heal") {
+			for (Character& character : LevelManager::CurrentLevel()->GetCharacters(isPlayerControlled)) {
+				character.attribute.Heal(static_cast<float>(ability.GetStats().hp/ 100.0f));
+			}
 		}
 
+		// Add if the ability has a modifier (ability that last for more than 1 turn) 
+		// the function will auto check if the ability is a modifier
 		UseAbilityWithModifier(ability);
 	}
 

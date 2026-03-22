@@ -119,4 +119,34 @@ namespace UIManager {
             isActive = false;
         }
     }
+
+    void IconWithText::Initialize(Transform const& bgPanelTransform, Transform const& iconTransform, Utils::AnchorMode const& textAnchorMode) {
+        bgPanel = UIManager::Panel{
+            {bgPanelTransform.size}, StatsBGColor(), Utils::AnchorMode::TOP_CENTER
+        };
+
+        icon = UIManager::Panel{
+            {iconTransform.size}, Color{1,1,1}, Utils::AnchorMode::TOP_CENTER
+        };
+
+        textObj = TextObject{ "5", 0.55f, Color{0.15f, 0.15f, 0.15f}, { {0,0}, {0,0} }, textAnchorMode };
+        textObj.SetPosition(bgPanel.GetTransform());
+    }
+
+    void IconWithText::OffsetPosition(float xOffset, float yOffset, float gapsBetweenBorder) {
+        bgPanel.AddOffset({ xOffset, yOffset });
+        icon.AddOffset({ xOffset, yOffset - gapsBetweenBorder });
+        textObj.SetPosition(bgPanel.GetTransform()); // set anchor position according to bg panel position
+    }
+
+    void IconWithText::Draw(Color const& bgColor, AEGfxTexture* iconTexture, std::string textContent) {
+        bgPanel.SetColor(bgColor);
+        bgPanel.Draw();
+        // Update texture icon then draw
+        icon.SetTexture(iconTexture);
+        icon.Draw();
+        // Update the number of turns remaining
+        textObj.TextContent(textContent);
+        textObj.Draw();
+    }
 }
