@@ -49,7 +49,7 @@ public:
 private:
 	// Print out information about the character and draw collision lines
 	void DebugInfo();
-	void SpriteAnimation(); // Select correct sprite based on HP / animation state
+	void TextureUpdate(); // Select correct sprite based on HP / animation state
 
 private:
 	CharacterType type;

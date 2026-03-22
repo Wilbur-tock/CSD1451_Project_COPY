@@ -43,7 +43,7 @@ namespace CannonManager {
 		// Initialize all the different type of projectile abilities to the CANNON CLASS
 		// Switch between the projectileId to choose the different type of projectile abilities
 		// 0 - Default projectile, 1 - Nuke Projectile , etc
-		void ProjectileSettings();
+		void SetProjectiles();
 
 		void EnemyAI();
 		// Calculate the ideal cannonAngle and shotPower to hit the target,
@@ -78,10 +78,7 @@ namespace CannonManager {
 		bool allProjectileDestroyed = false; // projectile has been shot out and destroyed
 		bool resetCamWhenShooting = false; // When player press left mouse click, reset camera to position the cannon and unable to move the camera or not
 
-		AEVec2 defaultSize{ 30,10 };
-		int projectileCount = 10;
 		int projectileAbilitiesCount = 0;
-
 		int selectedProjectileId = 0; // index of the selected projectile from the vector list of all the different type of projectiles
 		std::vector<Projectile> projectiles; // vector containing all the different type of projectiles (Default, bomb , etc)
 		std::vector<Projectile> activeProjectiles; // vector of all the active projectiles (Projectiles that have been shot out of the cannon)

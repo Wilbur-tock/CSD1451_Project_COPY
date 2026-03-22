@@ -31,7 +31,7 @@ namespace CannonManager {
 
         abilityController = controller;
         controller->ChangeCurrentAbility(0); // Set default projectile as the default ability
-        ProjectileSettings();
+        SetProjectiles();
 
         //Initialize UI Objects
         debugText = { "", Utils::debuggerInfo.first * 0.8f, Utils::debuggerInfo.second, { 0.5f, 0.99f } };
@@ -48,7 +48,7 @@ namespace CannonManager {
         screenOverlayShotBar = UIManager::Bar{ trans.pos, trans.size, Color{ 0,1,0 }, UIManager::FillType::LEFT_TO_RIGHT };
     }
     
-    void Cannon::ProjectileSettings() {
+    void Cannon::SetProjectiles() {
         std::vector<Ability> const& allProjectileAbilities = abilityController->GetProjectilesAbilties();
         projectileAbilitiesCount = static_cast<int>(allProjectileAbilities.size());
         // Reset to default
@@ -147,10 +147,10 @@ namespace CannonManager {
         switch (difficultyLevel) {
         default:
         case 0: // Easy
-            aiDifficulty = 0.975f;
+            aiDifficulty = 0.99f;
             break;
         case 1: // Medium
-            aiDifficulty = 0.99f;
+            aiDifficulty = 0.995f;
             break;
         case 2: // Hard
             aiDifficulty = 1.0f;
@@ -189,7 +189,6 @@ namespace CannonManager {
 
         // Randomise offset to add a variance to 
         float inaccuracy = (1.0f - aiDifficulty);
-        inaccuracy = 0.0f; // TESTING TO BE REMOVED
         float randomOffset = Utils::RandomValue(-inaccuracy, inaccuracy);
 
         // Apply the variables to the cannon

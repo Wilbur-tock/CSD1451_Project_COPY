@@ -20,7 +20,7 @@ public:
 	\param[in] color
 	- color of the text to be displayed
 	\param[in] pos
-	- use NORMALIZED COORDINATES range from -1.0f to 1.0f
+	- use NORMALIZED COORDINATES range from -1.0f to 1.0f 
 	*************************************************************************/
 	TextObject(std::string _text, float _scale = 1.0f, Color _color = Color{ 1,1,1 }, Transform _transform = { {0,0}, {0,0} }, Utils::AnchorMode _anchorMode = Utils::AnchorMode::TOP_LEFT);
 
@@ -34,8 +34,10 @@ public:
 	Transform& GetTransform() { return transform; }
 
 	void TextScale(float newScale) { textScale = newScale; }
+
 	void SetColor(Color const& newColor) { color = newColor; }
 	Color GetColor() const { return color; }
+
 	void SetFont(s8 newFont) { font = newFont; }
 
 	std::string TextContent() { return textContent; }

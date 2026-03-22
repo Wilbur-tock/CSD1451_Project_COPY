@@ -8,21 +8,50 @@ namespace PhysicsManager {
 	float g_dt = 0.0f;
 
     void PerfectShotCalculation(Transform const& current, Transform const& target, float& cannonAngle, float& shotPower) {
+        //float dx = target.pos.x - current.pos.x;
+        //float dy = target.pos.y - current.pos.y;
+        //float distance = sqrt(dx * dx + dy * dy);
+
+        //// Randomise angle between the min and max radian
+        //float min = 30.0f * (PI / 180.0f);
+        //float max = 60.0f * (PI / 180.0f);
+        //float randomAngleBase = Utils::RandomValue(min, max);
+
+        //// Adjust for direction (Shooting left or right)
+        //cannonAngle = (dx > 0) ? randomAngleBase : (PI - randomAngleBase);
+
+        //// Calculate required Power (Initial Velocity)
+        //// Basic range formula: v = sqrt( (g * d) / sin(2 * theta) )
+        //shotPower = sqrt((PhysicsManager::GRAVITY * abs(distance)) / sin(2 * randomAngleBase));
+
         float dx = target.pos.x - current.pos.x;
         float dy = target.pos.y - current.pos.y;
-        float distance = sqrt(dx * dx + dy * dy);
 
-        // Randomise angle between the min and max radian
-        float min = 30.0f * (PI / 180.0f);
-        float max = 60.0f * (PI / 180.0f);
-        float randomAngleBase = Utils::RandomValue(min, max);
+        float absDx = fabsf(dx);
+        bool  shootLeft = (dx < 0);
 
-        // Adjust for direction (Shooting left or right)
-        cannonAngle = (dx > 0) ? randomAngleBase : (PI - randomAngleBase);
+        float minAngle = 30.0f * (PI / 180.0f);
+        float maxAngle = 60.0f * (PI / 180.0f);
+        float angle = Utils::RandomValue(minAngle, maxAngle);
 
-        // Calculate required Power (Initial Velocity)
-        // Basic range formula: v = sqrt( (g * d) / sin(2 * theta) )
-        shotPower = sqrt((PhysicsManager::GRAVITY * abs(distance)) / sin(2 * randomAngleBase));
+        float cosAngle = cosf(angle);
+        float tanAngle = tanf(angle);
+
+        float numerator = PhysicsManager::GRAVITY * absDx * absDx;
+        float denom = 2.0f * cosAngle * cosAngle * (absDx * tanAngle - dy);
+
+        // Find a new angle if denominator is 0
+        if (denom <= 0.0f) {
+            angle = 75.0f * (PI / 180.0f);
+            cosAngle = cosf(angle);
+            tanAngle = tanf(angle);
+            denom = 2.0f * cosAngle * cosAngle * (absDx * tanAngle - dy);
+        }
+
+        shotPower = sqrtf(numerator / denom);
+
+        // Apply direction
+        cannonAngle = shootLeft ? (PI - angle) : angle;
     }
 
     void ResolveHorizontalCollision(Transform& obj, AEVec2& velocity, Transform const& tileTransform) {

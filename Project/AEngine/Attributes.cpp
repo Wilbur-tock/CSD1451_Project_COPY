@@ -1,7 +1,7 @@
 #include "Attributes.hpp"
 
 void Attributes::Heal(float percentage) {
-	Health(static_cast<int>(maxHealth * percentage));
+	Health(health + static_cast<int>(maxHealth * percentage));
 }
 
 void Attributes::TakeDamage(int value) {

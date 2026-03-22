@@ -141,7 +141,7 @@
         "Description": "Caster can shoot again in the same round after they have shot.",
         "Type": 2,
         "Tier": 1,
-        "Texture": ""
+        "Texture": "Icon_ExtraShot"
     },
 
     {
@@ -149,7 +149,7 @@
         "Description": "Once it collide with any block, it decay all destructible blocks within a 10 tile radius. Decay blocks will take 25 damage each round",
         "Type": 2,
         "Tier": 2,
-        "Texture": "",
+        "Texture": "Icon_DecayShot",
         "Projectile_Stats": {
             "ProjectileID": 9,
             "Damage_Multiplier": 1,
@@ -174,7 +174,7 @@
         "Description": "Posion characters within a 10 tile radius, dealing 10 hp damage each round ignoring shield.",
         "Type": 2,
         "Tier": 3,
-        "Texture": "",
+        "Texture": "Icon_Poison",
         "Projectile_Stats": {
             "ProjectileID": 10,
             "Damage_Multiplier": 1,
@@ -247,7 +247,7 @@
         "Description": "Triggered upon a second input, a massive row of 1 tile blocks will be build on the map.",
         "Type": 3,
         "Tier": 1,
-        "Texture": "",
+        "Texture": "Icon_Wall",
         "Base_Stats": {
             "Hp": 1,
             "Attack": 0,
@@ -268,7 +268,7 @@
         "Description": "Triggered upon a second input, an 6x6 tile blocks will be build.",
         "Type": 3,
         "Tier": 2,
-        "Texture": "",
+        "Texture": "Icon_Bastion",
         "Projectile_Stats": {
             "ProjectileID": 11,
             "Damage_Multiplier": 1,
@@ -293,7 +293,7 @@
         "Description": "Circular dome to protect the tower from any projectile, it has 3 HP and will last for 5 rounds",
         "Type": 3,
         "Tier": 2,
-        "Texture": "",
+        "Texture": "Icon_TowerShield",
         "Base_Stats": {
             "Hp": 0,
             "Attack": 0,
@@ -315,7 +315,7 @@
         "Description": "Rebuild the your tower back to full HP, after the projectile has been shot out",
         "Type": 3,
         "Tier": 3,
-        "Texture": ""
+        "Texture": "Icon_Rebuild"
     },
 
     {
@@ -370,7 +370,7 @@
 
     {
         "Name": "Invincibility",
-        "Description": "100% attack boost, heal every characters to FULL HP, this will last for 3 rounds",
+        "Description": "Increase damage by 100, increase damage radius by 5, damage impacts by 5, heal every characters to FULL HP",
         "Type": 1,
         "Tier": 4,
         "Texture": "",
@@ -381,15 +381,6 @@
             "Radius": 5,
             "Charges": 5,
             "unlimited_charges": false
-        },
-        "Status_Stats": {
-            "Is_Modifier": true,
-            "Rounds": 3,
-            "Is_Postive": true,
-            "Target_Self": true,
-            "Gravity_Scale": 1.0,
-            "Damage_Each_Round": 0,
-            "Effect_Radius": 0
         }
     },
 
@@ -398,7 +389,7 @@
         "Description": "Heal your characters HP by 100%",
         "Type": 1,
         "Tier": 3,
-        "Texture": "",
+        "Texture": "Icon_Heal",
         "Base_Stats": {
             "Hp": 100,
             "Attack": 0,
@@ -411,7 +402,7 @@
         "Description": "Heal your characters HP by 50%",
         "Type": 1,
         "Tier": 2,
-        "Texture": "",
+        "Texture": "Icon_Heal",
         "Base_Stats": {
             "Hp": 50,
             "Attack": 0,
@@ -424,7 +415,7 @@
         "Description": "Heal your characters HP by 25%",
         "Type": 1,
         "Tier": 1,
-        "Texture": "",
+        "Texture": "Icon_Heal",
         "Base_Stats": {
             "Hp": 25,
             "Attack": 0,

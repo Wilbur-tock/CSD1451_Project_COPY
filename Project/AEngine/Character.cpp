@@ -55,7 +55,7 @@ Character::Character(AEVec2 _pos, AEVec2 _size, AEGfxTexture* _texture, TileInde
 	statusText = TextObject{ "", 0.5f, Color{0.75f,0,0} };
 	statusText.SetPosition(Utils::AnchorMode::CENTER_LEFT, statsPanel.GetTransform());
 
-	SetSquatAnimation(true);
+	//SetSquatAnimation(true);
 }
 
 void Character::Update() {
@@ -77,7 +77,7 @@ void Character::SetSquatAnimation(bool enabled) {
 	}
 }
 
-void Character::SpriteAnimation() {
+void Character::TextureUpdate() {
 	// Defensive: avoid divide-by-zero
 	float hpRatio = 1.0f;
 	if (attribute.MaxHealth() > 0) {
@@ -117,7 +117,7 @@ void Character::SpriteAnimation() {
 }
 
 void Character::Draw() {
-	SpriteAnimation(); // Update character sprite texture
+	TextureUpdate(); // Update character sprite texture
 
 	GraphicsManager::DrawCharacter(*this);
 
