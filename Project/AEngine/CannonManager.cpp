@@ -73,6 +73,8 @@ namespace CannonManager {
     }
 
     void Cannon::Update() {
+        if (!canCannonShoot) return;
+
         if (isPlayerControlled) {
             float worldMouseX = 0, worldMouseY = 0;
             Utils::GetWorldMousePos(worldMouseX, worldMouseY);
@@ -103,7 +105,12 @@ namespace CannonManager {
     }
 
     void Cannon::DrawUI() {
-        if (hasCannonShot) return;
+        // Check if cannon has been shot or cannot shoot set is holding left click to be false and return
+        if (hasCannonShot || !canCannonShoot) {
+            isHoldingLeftClick = false;
+            return;
+        }
+
         // Render UI
         if (isHoldingLeftClick) {
             // Drawing power bar beside the cannon in WORLD SPACE
@@ -202,7 +209,7 @@ namespace CannonManager {
     }
 
     void Cannon::ChargeShot() {
-        if (!isPlayerControlled && hasCannonShot == true) return; // return if it not player controlled
+        if (!isPlayerControlled && hasCannonShot) return; // return if it not player controlled
 
         // Shoot when the button is RELEASED
         if (isPlayerControlled && AEInputCheckReleased(AEVK_LBUTTON)) {
@@ -530,6 +537,7 @@ namespace CannonManager {
         // Show cannon information
         std::string debugStr = "Cannon " + std::string(isPlayerControlled ? "PLAYER" : "ENEMY")
             + "\nIs Active : " + std::string(hasCannonShot ? "true" : "false")
+            + "\nCanCannonShoot: " + std::string(canCannonShoot ? "true" : "false")
             + "\nAll Projectile destroyed : " + std::string(allProjectileDestroyed ? "true" : "false")
             + "\nActive Projectiles Count: " + std::to_string(activeProjectiles.size())
             + "\nPos x: " + Utils::FormatFloat(transform.pos.x, 2) + " y: " + Utils::FormatFloat(transform.pos.y, 2)

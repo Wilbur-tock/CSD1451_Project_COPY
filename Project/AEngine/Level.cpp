@@ -410,6 +410,7 @@ void Level::Update() {
 		}
 
 		if (activeCannon) {
+			activeCannon->CanCannonShoot(!isHoveringOverInventoryUI); // if mouse is hovering over inventory UI disable cannon left click shooting
 			activeCannon->Update();
 		}
 

@@ -79,7 +79,7 @@ public:
 		return &enemies[bossId];
 	}
 
-	void SetHoveringOverUI(bool isHovering) { isHoveringUI = isHovering; }
+	void SetInventoryHoveringUI(bool isHovering) { isHoveringOverInventoryUI = isHovering; }
 	void SetExtraTurn() { hasExtraShot = true; }
 	void SetSkipOpponentTurn() { skipOpponentTurn = true; }
 
@@ -136,6 +136,7 @@ private:
 	bool skipOpponentTurn = false;
 	bool noEnemyTurn = false; // used for debugging to keep skipping enemy turns
 	bool isHoveringUI = false;
+	bool isHoveringOverInventoryUI = false;
 	float switchTurnCooldown = 0.0f; // Cooldown timer to add a delay between the destruction of the player projectile and starting of enemy turn
 
 	// Map level data

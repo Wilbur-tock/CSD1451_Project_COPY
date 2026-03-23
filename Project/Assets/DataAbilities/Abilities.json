@@ -509,10 +509,10 @@
 
     {
         "Name": "Defense Boost",
-        "Description": "",
+        "Description": "Reduce opponent damage by 50",
         "Type": 1,
         "Tier": 3,
-        "Texture": "Reduce opponent damage by 50",
+        "Texture": "",
         "Projectile_Stats": {
             "ProjectileID": 0,
             "Damage_Multiplier": 1,

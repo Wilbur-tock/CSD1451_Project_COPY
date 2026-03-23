@@ -37,6 +37,7 @@ namespace CannonManager {
 		// Return true if this cannon has a lock in target or the target has been destroyed
 		bool IsTargetAlive();
 		void SetEnemyAI(int difficultyLevel);
+		void CanCannonShoot(bool canShoot) { canCannonShoot = canShoot; }
 
 		void DebugInfo();
 	private:
@@ -72,6 +73,7 @@ namespace CannonManager {
 		void DebugCommands();
 	private:
 		bool isPlayerControlled = true, isShootingRight = true;
+		bool canCannonShoot = true; // can cannon shoot using left click
 		bool hasCannonShot = false; // has projectile has been shot out of the cannon return true if yes
 		bool isHoldingLeftClick = false; // player is holding left mouse click
 		bool canPlayerShoot = true; // can player shoot used for checking if player press right click to cancel his shot
