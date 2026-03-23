@@ -257,6 +257,7 @@ void Projectile::Update(bool isPlayerShot, float dt) {
             if (hasTileCollision) {
                 // Damage tile first, incase of destroying the blocks and bouncing back if damageTile is not called first
                 DamageTile(x, y);
+
                 if (!canAlwaysBypassBlocks) {
                     if (!hasCollided) {
                         FirstTimeCollision();
@@ -291,8 +292,6 @@ void Projectile::ProjectileMovement(float dt) {
 }
 
 void Projectile::ConstantCollision(Tile const& tile) {
-    if (Mode() == ProjectileMode::PENTA_BURST && !isAbilityTriggered) return;
-
     if(CollisionManager::IsHorizontalCollision(transform, tile.transform)) {
         PhysicsManager::ResolveHorizontalCollision(transform, velocity, tile.transform);
     }

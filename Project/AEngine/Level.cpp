@@ -410,7 +410,9 @@ void Level::Update() {
 		}
 
 		if (activeCannon) {
-			activeCannon->CanCannonShoot(!isHoveringOverInventoryUI); // if mouse is hovering over inventory UI disable cannon left click shooting
+			if (isPlayerTurn) {
+				activeCannon->CanCannonShoot(!isHoveringOverInventoryUI); // if mouse is hovering over inventory UI disable cannon left click shooting
+			}
 			activeCannon->Update();
 		}
 
@@ -914,7 +916,6 @@ void Level::DebugCommands() {
 		if (AEInputCheckCurr(AEVK_RBUTTON)) {
 			if (tile.IsBlocks()) {
 				tile.Type(TileType::TILE_EMPTY);
-				EffectsManager::effectsController.PlayTileBreak(tile.transform.pos);
 			}
 		}
 

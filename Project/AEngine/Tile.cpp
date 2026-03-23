@@ -1,6 +1,7 @@
 #include "Tile.hpp"
 
 #include "LevelManager.hpp"
+#include "EffectsManager.hpp"
 
 Tile::Tile(AEVec2 _pos, AEGfxTexture* _texture, TileType _type)
 	: GameObject{ _pos, {defaultSize,defaultSize}, _texture, TileIndex{0,0}, Color{1,1,1} }, type{ _type } {
@@ -46,6 +47,7 @@ void Tile::TakeDamage(int damage) {
 		}
 	}
 	else {
+		EffectsManager::effectsController.PlayTileBreak(transform.pos); // play tile breaking effects if its a block
 		attribute.TakeDamage(damage * attribute.DamageMultiplier());
 	}
 

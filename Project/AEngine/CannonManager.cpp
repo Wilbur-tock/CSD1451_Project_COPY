@@ -106,10 +106,7 @@ namespace CannonManager {
 
     void Cannon::DrawUI() {
         // Check if cannon has been shot or cannot shoot set is holding left click to be false and return
-        if (hasCannonShot || !canCannonShoot) {
-            isHoldingLeftClick = false;
-            return;
-        }
+        if (hasCannonShot || !canCannonShoot) { return; }
 
         // Render UI
         if (isHoldingLeftClick) {

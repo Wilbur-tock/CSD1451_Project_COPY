@@ -79,7 +79,7 @@ public:
 		return &enemies[bossId];
 	}
 
-	void SetInventoryHoveringUI(bool isHovering) { isHoveringOverInventoryUI = isHovering; }
+	void SetInventoryHoveringUI(bool isHovering) {  isHoveringOverInventoryUI = isPlayerTurn ? isHovering : false; }
 	void SetExtraTurn() { hasExtraShot = true; }
 	void SetSkipOpponentTurn() { skipOpponentTurn = true; }
 
