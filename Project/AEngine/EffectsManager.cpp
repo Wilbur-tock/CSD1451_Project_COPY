@@ -91,6 +91,7 @@ namespace EffectsManager {
         ParticleShape shape{ ParticleShape::SQUARE };
 
         AEVec2 acceleration{ 0.f, 0.f };
+		float scaleAcceleration{ 0.f };
 
         switch (projectileMode) {
         case 0: // default
@@ -107,14 +108,14 @@ namespace EffectsManager {
             shape = ParticleShape::CIRCLE;
             break;
         case 2: // nuke
-            speed = { 500.0f, 1000.0f };
+            speed = { 50.0f, 1000.0f };
             color.first = { 1.0f, 0, 0, 1.0f };
             speed = { 0,0 };
-            scale = { 32.0f, 32.0f * 15.0f };
+            scale = { 0.0f, 32.0f * 20.0f };
             lifespan = { 3.0f, 5.0f };
             count = 1;
             shape = ParticleShape::CIRCLE;
-			acceleration = { 20.0f, 50.0f };
+			scaleAcceleration = 0.5f;
             break;
         case 6: // Shield_buster
             originOffset = 20.0f;
@@ -139,6 +140,7 @@ namespace EffectsManager {
 
             color.first,
             color.second,
+
             scale.x,
             scale.y,
             
@@ -149,7 +151,9 @@ namespace EffectsManager {
             shape,
 
 			acceleration.x,
-			acceleration.y
+			acceleration.y,
+			scaleAcceleration
+            
         };
 
         ParticleManager::particleController.Emit(particle);
