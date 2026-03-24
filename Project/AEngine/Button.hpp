@@ -37,6 +37,7 @@ public:
 	void SetTextOffset(float offsetX, float offsetY);
 	// Change the anchorPosition of the button based on the screen transform and anchorMode assigned
 	void SetPosition(Transform const& parent, Utils::AnchorMode mode);
+	void AddOffsetPosition(AEVec2 const& _pos) { transform.pos.x += _pos.x, transform.pos.y += _pos.y; }
 
 	void SetIcon(AEGfxTexture* newTexture) {
 		iconTexture = newTexture;

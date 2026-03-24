@@ -47,9 +47,7 @@ namespace UIManager {
 		Panel(AEVec2 _size, Color _color = { 1,1,1 }, Utils::AnchorMode _anchorMode = Utils::AnchorMode::CENTER, AEGfxTexture* _texture = nullptr);
 
 		Transform GetTransform() const { return transform; }
-		AEVec2 Pos() const { return transform.pos; }
-		void AddOffset(AEVec2 const& _pos) { transform.pos.x += _pos.x , transform.pos.y += _pos.y; }
-		AEVec2 Size() const { return transform.size; }
+		void AddOffsetPosition(AEVec2 const& _pos) { transform.pos.x += _pos.x , transform.pos.y += _pos.y; }
 
 		void SetTexture(AEGfxTexture* _texture) { texture = _texture; }
 		void SetColor(Color newColor) { color = newColor; }
@@ -68,21 +66,25 @@ namespace UIManager {
 	class PopupPanel {
 	public:
 		Panel panel;
-		Button button;
 		TextObject textObj;
+		Button closeButton;
 
-		PopupPanel(std::string textContent, AEVec2 _size, Color _color = { 1,1,1 }, Utils::AnchorMode panelAnchorMode = Utils::AnchorMode::CENTER, AEGfxTexture* _texture = nullptr,
-			AEGfxTexture* btnTexture = nullptr, Utils::FuncPtr onClick = nullptr);
+		PopupPanel() = default;
+		PopupPanel(bool _hasTimer, Panel _panel, TextObject _textObj, Button _closeButton = Button{{0,0}, {50,50}, Color{0,0,0}, nullptr});
 
 		bool IsHovered() const { return isHovered; }
 		bool IsActive() const { return isActive; }
+		// input offset position of the panel anchor position
+		void AddOffsetPosition(AEVec2 const& offsetPos);
 
-		void Popup(std::string msg);
-		void Draw();
+		void Popup(std::string msg, float lifespanTimer = 0.0f);
 		void Update();
+		void Draw();
 	private:
 		bool isHovered = false;
 		bool isActive = false;
+		bool hasTimer = false; // if true popup panel will be deactived once the timer run out
+		float timer = 5.0f;
 	};
 
 	class IconWithText {

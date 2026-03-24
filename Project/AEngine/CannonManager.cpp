@@ -463,7 +463,7 @@ namespace CannonManager {
 
     void Cannon::DrawTrajectory() {
         if (hasCannonShot) return;
-        int numDots = 30;
+        int numDots = 50;
         float size = 10;
         // Starting position (at the barrel tip, matching ShootProjectile)
         float startX = transform.pos.x + cos(cannonAngle) * transform.size.x;

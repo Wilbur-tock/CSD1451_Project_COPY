@@ -79,45 +79,70 @@ namespace UIManager {
         GraphicsManager::DrawScreenOverlay(_texture, mat, color);
     }
 
-    PopupPanel::PopupPanel(std::string textContent, AEVec2 _size, Color _color, Utils::AnchorMode panelAnchorMode, AEGfxTexture* panelTexture, AEGfxTexture* btnTexture, Utils::FuncPtr onClick) 
-        : panel{ _size, _color, panelAnchorMode, panelTexture }, 
-        button{ {0,0}, {50,50}, Color{1,1,1}, btnTexture, nullptr, onClick },
-        textObj{ textContent, 0.5f, Color{1,0,0}, { {0,0}, {0,0} }, Utils::AnchorMode::CENTER } {
+    PopupPanel::PopupPanel(bool _hasTimer, Panel _panel, TextObject _textObj, Button _closeButton)
+        : panel{ _panel },
+        textObj{ _textObj },
+        closeButton{ _closeButton },
+        hasTimer{ _hasTimer } {
         // Set button position to be top right corner to close panel
-        button.SetPosition({panel.Pos(), panel.Size()}, Utils::AnchorMode::TOP_RIGHT);
+        closeButton.SetPosition(panel.GetTransform(), Utils::AnchorMode::TOP_RIGHT);
 
-        button.SetOnClick([this]() {
+        closeButton.SetOnClick([this]() {
             isActive = false;
         });
 
-        textObj.SetPosition(Utils::AnchorMode::CENTER, panel.GetTransform());
+        textObj.SetPosition(panel.GetTransform());
         //std::cout << panel.Pos().x << ' ' << panel.Pos().y << " Pos: " << textObj.Pos().x << ' ' << textObj.Pos().y << '\n';
     }
 
-    void PopupPanel::Popup(std::string msg) {
-        textObj.TextContent(msg);
-        isActive = true;
+    void PopupPanel::AddOffsetPosition(AEVec2 const& offsetPos) {
+        panel.AddOffsetPosition(offsetPos);
+        closeButton.AddOffsetPosition(offsetPos);
+
+        // Align text object to be center of the panel
+        textObj.SetPosition(Utils::AnchorMode::CENTER, panel.GetTransform());
     }
 
-    void PopupPanel::Draw() {
-        if (!isActive) return;
-        panel.Draw();
-        button.Draw();
-        textObj.Draw();
+    void PopupPanel::Popup(std::string msg, float lifespanTimer) {
+        textObj.TextContent(msg);
+        isActive = true;
+        timer = lifespanTimer;
     }
 
     void PopupPanel::Update() {
         if (!isActive) return;
 
-        isHovered = CollisionManager::IsPointInRect(panel.Pos().x, panel.Pos().y, panel.Size().x, panel.Size().y);
+        if (hasTimer) {
+            // Check timer is zero to close the popup panel
+            timer -= static_cast<float>(AEFrameRateControllerGetFrameTime());
 
-        if (isHovered) {
-            button.Update();
+            if (timer <= 0.0f) {
+                isActive = false;
+            }
+        }
+        else {
+            // Check for button input to close the popup panel
+            isHovered = CollisionManager::IsPointInRect(panel.GetTransform().pos.x, panel.GetTransform().pos.y, panel.GetTransform().size.x, panel.GetTransform().size.y);
+
+            if (isHovered) {
+                closeButton.Update();
+            }
+
+            if (closeButton.IsClick()) {
+                isActive = false;
+            }
+        }
+    }
+
+    void PopupPanel::Draw() {
+        if (!isActive) return;
+        panel.Draw();
+
+        if (!hasTimer) {
+            closeButton.Draw();
         }
 
-        if (button.IsClick()) {
-            isActive = false;
-        }
+        textObj.Draw();
     }
 
     void IconWithText::Initialize(Transform const& bgPanelTransform, Transform const& iconTransform, Utils::AnchorMode const& textAnchorMode) {
@@ -134,8 +159,8 @@ namespace UIManager {
     }
 
     void IconWithText::OffsetPosition(float xOffset, float yOffset, float gapsBetweenBorder) {
-        bgPanel.AddOffset({ xOffset, yOffset });
-        icon.AddOffset({ xOffset, yOffset - gapsBetweenBorder });
+        bgPanel.AddOffsetPosition({ xOffset, yOffset });
+        icon.AddOffsetPosition({ xOffset, yOffset - gapsBetweenBorder });
         textObj.SetPosition(bgPanel.GetTransform()); // set anchor position according to bg panel position
     }
 

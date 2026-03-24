@@ -25,8 +25,8 @@ enum class ProjectileMode {
 	INSTANT_BASTION = 11,
 	AIR_DROP		= 12,
 	DRILL			= 13,
-	TELEPORT			= 14,
-	GOD_MODE        = 16,
+	TELEPORT		= 14,
+	SMALL_WALL      = 15,
 };
 
 class Projectile : public GameObject {
@@ -63,6 +63,7 @@ public:
 		case ProjectileMode::AIR_DROP:			return "AIR_DROP";
 		case ProjectileMode::DRILL:				return "DRILL";
 		case ProjectileMode::TELEPORT:			return "TELEPORT";
+		case ProjectileMode::SMALL_WALL:		return "SMALL_WALL";
 		default:								return "YOU NEED TO ADD A PROJECTILE MODE NAME";
 		}
 	}

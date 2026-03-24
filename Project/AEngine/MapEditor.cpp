@@ -68,7 +68,7 @@ namespace MapEditor {
 	bool isHoveringOverUI = false;
 	// UI Objects
 	UIManager::Panel mapLabelPanel{ { 250, 50 }, { 1,1,1 }, Utils::AnchorMode::TOP_CENTER };
-	UIManager::PopupPanel constraintsPopup{ "", AEVec2{250,100}, Color{1,1,0.9f}};
+	UIManager::PopupPanel constraintsPopup;
 	TextObject helpText, debugText, mapLabelText;
 
 	// If the project file does not contain default.txt file it will create a new one if not just return
@@ -383,9 +383,11 @@ namespace MapEditor {
 		helpText = { "",  Utils::debuggerInfo.first * 0.9f, Utils::debuggerInfo.second,{-1.0f,.99f} };
 		debugText = { "",  Utils::debuggerInfo.first * 0.8f, Utils::debuggerInfo.second, { 0.5f, 0.99f} };
 
-		constraintsPopup = UIManager::PopupPanel{ "", AEVec2{500,250}, Color{1,1,0.9f} };
+		constraintsPopup = UIManager::PopupPanel{ false, UIManager::Panel{{500,250}}, TextObject{"", 1.0f, Color{1.0f,0.0f,0.0f}} };
+		constraintsPopup.AddOffsetPosition({ 0,150 });
 
 		mapLabelPanel = UIManager::Panel{ { 250, 50 }, { 1,1,1 }, Utils::AnchorMode::TOP_CENTER };
+
 		// mapLabelText is a child object of the mapLabelPanel
 		mapLabelText = TextObject{ currentMapLabel, 0.75f, {0,0,0}, { {0,0}, {0,0} }, Utils::AnchorMode::CENTER};
 		mapLabelText.SetPosition(mapLabelPanel.GetTransform());

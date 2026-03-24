@@ -243,10 +243,40 @@
     },
 
     {
-        "Name": "Wall",
-        "Description": "Triggered upon a second input, a massive row of 1 tile blocks will be build on the map.",
+        "Name": "Small Wall",
+        "Description": "Left-click to build a 1x5 tile segment while the projectile is active",
         "Type": 3,
         "Tier": 1,
+        "Texture": "Icon_Wall",
+        "Base_Stats": {
+            "Hp": 1,
+            "Attack": 0,
+            "Shield": 0
+        },
+        "Projectile_Stats": {
+            "ProjectileID": 15,
+            "Damage_Multiplier": 1,
+            "Base_Damage": 10,
+            "Radius": 2,
+            "Charges": 1,
+            "unlimited_charges": false
+        },
+        "Status_Stats": {
+            "Is_Modifier": false,
+            "Rounds": 0,
+            "Is_Postive": true,
+            "Target_Self": true,
+            "Gravity_Scale": 0.0,
+            "Damage_Each_Round": 0,
+            "Effect_Radius": 2
+        }
+    },
+
+    {
+        "Name": "Wall",
+        "Description": "Left click to build a massive 1 tile segment covering the entire map while the projectile is active",
+        "Type": 3,
+        "Tier": 3,
         "Texture": "Icon_Wall",
         "Base_Stats": {
             "Hp": 1,
@@ -265,7 +295,7 @@
 
     {
         "Name": "Bastion",
-        "Description": "Triggered upon a second input, an 6x6 tile blocks will be build.",
+        "Description": "Left click to build a 4x4 tile blocks will be build while the projectile is active",
         "Type": 3,
         "Tier": 2,
         "Texture": "Icon_Bastion",
@@ -284,7 +314,7 @@
             "Target_Self": true,
             "Gravity_Scale": 0.0,
             "Damage_Each_Round": 0,
-            "Effect_Radius": 3
+            "Effect_Radius": 2
         }
     },
 

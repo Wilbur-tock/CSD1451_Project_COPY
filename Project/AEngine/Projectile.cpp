@@ -76,7 +76,7 @@ void Projectile::AbilityActivation(bool isPlayer, Ability const& ability) {
         if (!hasCollided && leftClick) {
             isAbilityTriggered = true;
 
-            // Create a 1 tile width wall, 1 tiles x index behind current projectile x index
+            // Create a 1 tile width wall
             int tileX = 0, tileY = 0;
             Utils::GetTileIndex(tileX, tileY, transform.pos);
 
@@ -90,7 +90,28 @@ void Projectile::AbilityActivation(bool isPlayer, Ability const& ability) {
                 }
             }
             CanPhase({tileX, tileY}, 1);
-            std::cout << "WALL mode triggered\n";
+        }
+        break;
+    case ProjectileMode::SMALL_WALL:
+        if (!hasCollided && leftClick) {
+            isAbilityTriggered = true;
+
+            // Create a 1 tile width wall
+            TileIndex center, min, max;
+            Utils::GetTileIndex(center.x, center.y, transform.pos);
+            Utils::CalculateTileBounds(center, min, max, ability.GetStatus().effectRadius);
+
+            if (!Utils::IsTileIndexOutOfBounds(center.x, center.y)) {
+                for (int i = max.y; i <= min.y; ++i) {
+                    Tile& tile = (*MapManager::currentMap)[i][center.x];
+                    if (tile.Type() == TileType::TILE_EMPTY) {
+                        tile.Type(isPlayer ? TileType::TILE_BLOCK_1 : TileType::TILE_BLOCK_2);
+                        tile.attribute.Health(ability.GetStats().hp);
+                    }
+                }
+            }
+
+            CanPhase(center, 1);
         }
         break;
     case ProjectileMode::PIERCING:

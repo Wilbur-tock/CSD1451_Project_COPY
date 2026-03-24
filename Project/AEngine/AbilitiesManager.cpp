@@ -650,7 +650,7 @@ namespace AbilitiesManager {
 
 		// Checking if player is hovering over inventory UI if it is disable shooting
 		LevelManager::CurrentLevel()->SetInventoryHoveringUI(CollisionManager::IsPointInRect(
-			inventoryBackground.Pos().x, inventoryBackground.Pos().y, inventoryBackground.Size().x, inventoryBackground.Size().y));
+			inventoryBackground.GetTransform().pos.x, inventoryBackground.GetTransform().pos.y, inventoryBackground.GetTransform().size.x, inventoryBackground.GetTransform().size.y));
 
 		// Draw inventory UI
 		for (int i = 0; i < Config::MAX_INVENTORY_COUNT; ++i) {

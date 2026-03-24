@@ -64,6 +64,7 @@ public:
 	void Load();
 	void Initalize();
 	void Update();
+	void UpdateUI();
 	void Draw();
 	void Free();
 
@@ -102,7 +103,7 @@ private:
 
 	// Toggle turns between player and enemy once they have shot and a timer has been set and reduced to 0
 	void UpdateTurn();
-	void SwitchCannon(bool _isPlayerTurn);
+	void SwitchTurn(bool _isPlayerTurn);
 	void UpdateNewRound();
 
 	void UpdateLevelStatus();
@@ -123,7 +124,7 @@ private:
 	LevelDifficulty levelDifficulty = LevelDifficulty::EASY;
 
 	LevelStatus status = LevelStatus::PLAYING;
-	int roundCount = 1; // Number of turn after both player has shot
+	int roundCount = 0; // Number of rounds after both player/enemy has taken turn to shoot
 
 	CannonManager::Cannon* activeCannon = nullptr; // pointer to the active instance of the cannon object 
 	CannonManager::Cannon playerCannon; // instance of the player cannon

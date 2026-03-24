@@ -31,7 +31,7 @@ Character::Character(AEVec2 _pos, AEVec2 _size, AEGfxTexture* _texture, TileInde
 
 	float panelYOffset = -60.0f;// add Y offset based on the level player/enemy hp bar
 	statsPanel = UIManager::Panel{ {300,100}, StatsBGColor(), Utils::AnchorMode::TOP_LEFT};
-	statsPanel.AddOffset({ 0, panelYOffset });
+	statsPanel.AddOffsetPosition({ 0, panelYOffset });
 
 	float gap = 2.5f;
 	float borderGap = 5.0f;
@@ -39,11 +39,11 @@ Character::Character(AEVec2 _pos, AEVec2 _size, AEGfxTexture* _texture, TileInde
 	// Create the character icon
 	AEVec2 iconSize{ 32,32 };
 	icon = UIManager::Panel{ iconSize, {1,1,1}, Utils::AnchorMode::TOP_LEFT,  texture };
-	icon.AddOffset({ borderGap, panelChildYOffset });
+	icon.AddOffsetPosition({ borderGap, panelChildYOffset });
 
 	float colorTint = 0.9f;
 	iconBG = UIManager::Panel{ iconSize, {colorTint,colorTint,colorTint}, Utils::AnchorMode::TOP_LEFT };
-	iconBG.AddOffset({ borderGap, panelChildYOffset });
+	iconBG.AddOffsetPosition({ borderGap, panelChildYOffset });
 
 	float barWidth = 15.0f;
 	AEVec2 barPos{ statsPanel.GetTransform().pos.x + iconSize.x + borderGap, statsPanel.GetTransform().pos.y - borderGap };

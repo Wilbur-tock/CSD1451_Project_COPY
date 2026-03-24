@@ -798,14 +798,14 @@ namespace Guide {
                 { LIST_WIDTH, PANEL_HEIGHT },
                 Color(0.98f, 0.985f, 0.99f, 1.0f),
                 Utils::AnchorMode::CENTER);
-            listPanel.AddOffset({ LIST_CENTER_X, 10.0f });
+            listPanel.AddOffsetPosition({ LIST_CENTER_X, 10.0f });
             listPanel.Draw();
 
             UIManager::Panel headerBand(
                 { LIST_WIDTH, 48.0f },
                 Color(0.84f, 0.88f, 0.94f, 1.0f),
                 Utils::AnchorMode::CENTER);
-            headerBand.AddOffset({ LIST_CENTER_X, LIST_HEADER_CENTER_Y });
+            headerBand.AddOffsetPosition({ LIST_CENTER_X, LIST_HEADER_CENTER_Y });
             headerBand.Draw();
 
             DrawTextCenteredPx(
@@ -829,7 +829,7 @@ namespace Guide {
                         { LIST_WIDTH, SECTION_HEIGHT },
                         GroupHeaderColor(row.group),
                         Utils::AnchorMode::CENTER);
-                    sectionBand.AddOffset({ LIST_CENTER_X, rowCenterY });
+                    sectionBand.AddOffsetPosition({ LIST_CENTER_X, rowCenterY });
                     sectionBand.Draw();
 
                     const int count = static_cast<int>(std::count_if(
@@ -868,7 +868,7 @@ namespace Guide {
                     { LIST_WIDTH, ROW_HEIGHT },
                     rowColor,
                     Utils::AnchorMode::CENTER);
-                rowBand.AddOffset({ LIST_CENTER_X, rowCenterY });
+                rowBand.AddOffsetPosition({ LIST_CENTER_X, rowCenterY });
                 rowBand.Draw();
 
                 DrawTextCenteredPx(
@@ -890,7 +890,7 @@ namespace Guide {
                     { trackWidth, trackHeight },
                     Color(0.82f, 0.86f, 0.92f, 1.0f),
                     Utils::AnchorMode::CENTER);
-                scrollTrack.AddOffset({ trackCenterX, trackCenterY });
+                scrollTrack.AddOffsetPosition({ trackCenterX, trackCenterY });
                 scrollTrack.Draw();
 
                 float thumbHeight = trackHeight *
@@ -911,7 +911,7 @@ namespace Guide {
                     { trackWidth, thumbHeight },
                     Color(0.33f, 0.53f, 0.88f, 1.0f),
                     Utils::AnchorMode::CENTER);
-                scrollThumb.AddOffset({ trackCenterX, thumbCenterY });
+                scrollThumb.AddOffsetPosition({ trackCenterX, thumbCenterY });
                 scrollThumb.Draw();
             }
         }
@@ -921,7 +921,7 @@ namespace Guide {
                 { DETAIL_WIDTH, PANEL_HEIGHT },
                 Color(0.98f, 0.985f, 0.99f, 1.0f),
                 Utils::AnchorMode::CENTER);
-            detailPanel.AddOffset({ DETAIL_CENTER_X, 10.0f });
+            detailPanel.AddOffsetPosition({ DETAIL_CENTER_X, 10.0f });
             detailPanel.Draw();
 
             if (selectedEntryIndex < 0 || selectedEntryIndex >= static_cast<int>(abilityEntries.size())) {
@@ -942,7 +942,7 @@ namespace Guide {
                 { 118.0f, 118.0f },
                 GroupMutedColor(entry.group),
                 Utils::AnchorMode::CENTER);
-            imagePanel.AddOffset({ DETAIL_CENTER_X - 175.0f, 172.0f });
+            imagePanel.AddOffsetPosition({ DETAIL_CENTER_X - 175.0f, 172.0f });
             imagePanel.Draw();
 
             if (entry.imageTexture != nullptr) {
@@ -966,7 +966,7 @@ namespace Guide {
                 { DETAIL_WIDTH - 34.0f, 125.0f },
                 Color(0.94f, 0.95f, 0.97f, 1.0f),
                 Utils::AnchorMode::CENTER);
-            descriptionBox.AddOffset({ DETAIL_CENTER_X, 8.0f });
+            descriptionBox.AddOffsetPosition({ DETAIL_CENTER_X, 8.0f });
             descriptionBox.Draw();
 
             DrawTextLeftPx("DESCRIPTION", leftX, 74.0f, 0.50f, Color(0.05f, 0.07f, 0.10f, 1.0f));
@@ -987,7 +987,7 @@ namespace Guide {
                 { DETAIL_WIDTH - 34.0f, 125.0f },
                 Color(0.94f, 0.95f, 0.97f, 1.0f),
                 Utils::AnchorMode::CENTER);
-            statsBox.AddOffset({ DETAIL_CENTER_X, -135.0f });
+            statsBox.AddOffsetPosition({ DETAIL_CENTER_X, -135.0f });
             statsBox.Draw();
 
             DrawTextLeftPx("KEY STATS", leftX, -58.0f, 0.50f, Color(0.05f, 0.07f, 0.10f, 1.0f));
@@ -1043,7 +1043,7 @@ namespace Guide {
             { 1320.0f, 520.0f },
             Color(1.0f, 1.0f, 1.0f, 0.97f),
             Utils::AnchorMode::CENTER);
-        contentPanel.AddOffset({ 0.0f, 5.0f });
+        contentPanel.AddOffsetPosition({ 0.0f, 5.0f });
 
         backButton = Button(
             TextObject("< BACK"),

@@ -58,8 +58,8 @@ namespace UIInstructionsOverlay {
             Utils::AnchorMode::CENTER
         };
 
-        float x = mainPanel.Pos().x + 40.0f;
-        float y = mainPanel.Pos().y - 40.0f;
+        float x = mainPanel.GetTransform().pos.x + 40.0f;
+        float y = mainPanel.GetTransform().pos.y - 40.0f;
         Utils::NormalizeCoordinates(x, y);
 
         instructionText = TextObject{ "", 0.65f, Color{1,1,1}, {x, y} };

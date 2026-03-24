@@ -59,7 +59,7 @@ struct LevelStatsUI {
 		AEVec2 amPanelSize{ 50.0f, 50.0f };
 
 		// Calculate offset position from the main panel
-		float amXOffset = (turnStatusPanel.Size().x * 0.5f) + (amPanelSize.x * 0.5f);
+		float amXOffset = (turnStatusPanel.GetTransform().size.x * 0.5f) + (amPanelSize.x * 0.5f);
 		float amYOffset = -barBGSize.y;
 
 		float gapBetweenBorder = 7.5f;
@@ -112,6 +112,7 @@ struct LevelStatsUI {
 };
 
 LevelStatsUI playerStatsUI, enemyStatsUI;
+UIManager::PopupPanel notificationPanel; // panel to display whose turn it is disappear after a while
 
 // Results UI objects
 bool resultScreenInitialized = false;
@@ -159,9 +160,16 @@ void Level::InitializeUI() {
 	AbilitiesManager::playerAbilityController.InitializeAllAbilityUI();
 
 	// Initialize the stats of player and enemy UI
-	float bgWidth = (Config::SCREEN_WIDTH - turnStatusPanel.Size().x) * 0.5f;
+	float bgWidth = (Config::SCREEN_WIDTH - turnStatusPanel.GetTransform().size.x) * 0.5f;
 	playerStatsUI.Initialize(true, bgWidth);
 	enemyStatsUI.Initialize(false, bgWidth);
+
+	notificationPanel = UIManager::PopupPanel{ 
+		true, 
+		UIManager::Panel{{250,75}},
+		TextObject{"", 0.7f, Color{0.0f,0.1f,0.7f}, Transform{ {0,0}, {0,0} }, Utils::AnchorMode::CENTER }
+	};
+	notificationPanel.AddOffsetPosition({ 0,300 });
 
 	// Initialize ResultsUI
 		// Initialize ResultsUI
@@ -290,6 +298,7 @@ void Level::Initalize() {
 	// Initialize variables
 	activeCannon = isPlayerStarting ? &playerCannon : &enemyCannon;
 	isPlayerTurn = isPlayerStarting;
+	roundCount = 0;
 	// Reset debugging back to false
 	autoPlayOn = false;
 	noEnemyTurn = false;
@@ -384,13 +393,12 @@ void Level::Initalize() {
 	playerShield = TowerShield{ MapManager::FindTile(playerTerritory.centerId)->transform.pos, &playerController };
 	enemyShield = TowerShield{ MapManager::FindTile(enemyTerritory.centerId)->transform.pos, &enemyController };
 
-	//enemyShield.SetShieldOn(5, 5);
-	//enemyController.AddModifier(*(enemyController.GetAbility("Tower Shield")));
-
 	// Initialize Territory tiles
 	SetOriginalTerritoryTiles(playerTerritory);
 
 	InitializeUI();
+
+	SwitchTurn(isPlayerStarting); // called last
 
 	std::cout << "[Level] Initialize " + levelFileName << '\n';
 }
@@ -445,6 +453,7 @@ void Level::Update() {
 
 	// UI
 	activeCannon->AbilityController()->DrawAbilityInventoryUI();
+	UpdateUI();
 	DrawUI();
 	DebugInfo();
 
@@ -457,6 +466,10 @@ void Level::Update() {
 		Utils::isResultScreenOn = false;
 		resultScreenInitialized = false;
 	}
+}
+
+void Level::UpdateUI() {
+	notificationPanel.Update();
 }
 
 void Level::Draw() {
@@ -549,6 +562,9 @@ void Level::DrawUI() {
 	// Draw active cannon UI
 	activeCannon->DrawUI();
 	activeCannon->DebugInfo();
+
+	// Always the last one to be drawn so that it will always appear infront
+	notificationPanel.Draw();
 }
 
 void Level::GetCurrentHP(float& currentHP, bool isGettingPlayerHP) {
@@ -578,12 +594,12 @@ void Level::UpdateTurn() {
 
 		if (switchTurnCooldown <= 0.0f) {
 			// Switch active cannon
-			SwitchCannon(!isPlayerTurn);
+			SwitchTurn(!isPlayerTurn);
 		}
 	}
 }
 
-void Level::SwitchCannon(bool _isPlayerTurn) {
+void Level::SwitchTurn(bool _isPlayerTurn) {
 	bool canSetNewRound = true; // always can set new round expect if the current active shooter has an extra shot to shoot
 	bool isNewRound = isPlayerStarting == _isPlayerTurn;
 	// Check if hasExtraShot ability
@@ -612,6 +628,9 @@ void Level::SwitchCannon(bool _isPlayerTurn) {
 		// Enemy Turn
 		activeCannon = &enemyCannon;
 	}
+
+	std::string newTurnMsg = "Switch to " + std::string(isPlayerTurn ? "PLAYER" : "ENEMY") + " Turn";
+	notificationPanel.Popup(newTurnMsg, 2.5f);
 
 	// Turn on/off selecting ability if it player turn or not
 	AbilitiesManager::playerAbilityController.IsSelectingAbility(isPlayerTurn);
@@ -884,7 +903,7 @@ void Level::DebugCommands() {
 
 	// Input R to change whose turn it is
 	if (AEInputCheckTriggered(AEVK_R)) {
-		SwitchCannon(!isPlayerTurn);
+		SwitchTurn(!isPlayerTurn);
 	}
 	// Input CTRL + R to turn autoPlayOn on/off
 	if (AEInputCheckCurr(AEVK_LCTRL) || AEInputCheckCurr(AEVK_RCTRL)) {
@@ -942,7 +961,7 @@ void Level::DebugCommands() {
 
 	if (noEnemyTurn) { // Skipping enemy turn
 		if (!isPlayerTurn) {
-			SwitchCannon(true);
+			SwitchTurn(true);
 		}
 
 		if (autoPlayOn) autoPlayOn = false;
@@ -951,7 +970,7 @@ void Level::DebugCommands() {
 	if (autoPlayOn) {
 		AbilitiesManager::playerAbilityController.IsSelectingAbility(false);;
 		if (isPlayerTurn) {
-			SwitchCannon(false);
+			SwitchTurn(false);
 		}
 
 		noEnemyTurn = false;
