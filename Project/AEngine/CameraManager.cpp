@@ -98,6 +98,12 @@ namespace CameraManager
         }
         case CameraState::FOLLOW:
         {
+            // Return to 1x zoom at 0.1x per second
+            if (zoomLevel > 1.0f)
+                zoomLevel = AEMax(1.0f, zoomLevel - 0.2f * dt);
+            else if (zoomLevel < 1.0f)
+                zoomLevel = AEMin(1.0f, zoomLevel + 0.2f * dt);
+
             if (followTarget != nullptr)
             {
                 AEVec2 targetPos = *followTarget;
