@@ -38,7 +38,8 @@ public:
 
 	void Update();
 	void Draw();
-	void SetTexture(AEGfxTexture* texture);
+	void SetIconTexture(AEGfxTexture* texture);
+	void SetBGColor(Color newColor) { button.SetColor(newColor); }
 
 private:
 	std::string name;
@@ -46,6 +47,7 @@ private:
 	TextObject title;
 	Button button; 
 	AEGfxTexture* imageTexture = nullptr;
+	Color imageTextureColor{ 1,1,1 };
 };
 
 #endif // !CARD_HPP

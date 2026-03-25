@@ -395,15 +395,18 @@ namespace CannonManager {
             break;
         case ProjectileMode::AIR_DROP:
         {
-            abilityController->IsAbilityTriggered(true);
-            Character const& airDropTarget = *(LevelManager::CurrentLevel()->RandomCharacterObj(!isPlayerControlled));
+            // If has collided with something drop a bomb
+            if (hasCannonShot && activeProjectiles.back().HasCollided()) {
+                abilityController->IsAbilityTriggered(true);
+                Character const& airDropTarget = *(LevelManager::CurrentLevel()->RandomCharacterObj(!isPlayerControlled));
 
-            // Spawn a bomb projectile at y index 0
-            Projectile newBombProjectile = projectiles[static_cast<int>(ProjectileMode::BOMB)];
-            AEVec2 airDropVelocity{ 0, -10.0f };
-            // Spawn at the max Y pos above the target
-            newBombProjectile.Initialize(Transform{ {airDropTarget.transform.pos.x, Config::WORLD_MAX_Y}, {10,10} }, static_cast<int>(activeProjectiles.size()), airDropVelocity);
-            activeProjectiles.push_back(newBombProjectile);
+                // Spawn a bomb projectile at y index 0
+                Projectile newBombProjectile = projectiles[static_cast<int>(ProjectileMode::BOMB)];
+                AEVec2 airDropVelocity{ 0, -10.0f };
+                // Spawn at the max Y pos above the target
+                newBombProjectile.Initialize(Transform{ {airDropTarget.transform.pos.x, Config::WORLD_MAX_Y}, {10,10} }, static_cast<int>(activeProjectiles.size()), airDropVelocity);
+                activeProjectiles.push_back(newBombProjectile);
+            }
             break;
         }
         case ProjectileMode::TELEPORT:

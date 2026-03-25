@@ -29,19 +29,17 @@ void Card::Update() {
 }
 
 void Card::Draw() {
+	// Draw the background of the card and title
 	button.Draw();
 	title.Draw();
 	
-	// Draw the image of the ability on top of the card
+	// Draw the ability icon on top of the card
 	if (imageTexture) {
 		AEVec2 imagePos = { pos.x + (CARD_WIDTH - IMAGE_WIDTH) / 2, pos.y - 50.0f};
 		GraphicsManager::DrawScreenOverlay(imageTexture, GraphicsManager::CreateTransformMatrix(imagePos.x, imagePos.y, IMAGE_WIDTH, IMAGE_HEIGHT, 0), Color(1,1,1));
 	}
-
-	GraphicsManager::DrawScreenOverlay(AssetsManager::squareTexture,
-		GraphicsManager::CreateTransformMatrix(button.GetTextObject().GetTransform().pos.x, button.GetTextObject().GetTransform().pos.x, button.GetTextObject().GetTransform().size.x, button.GetTextObject().GetTransform().size.y, 0), Color(0, 1, 0));
 }
 
-void Card::SetTexture(AEGfxTexture* texture) {
+void Card::SetIconTexture(AEGfxTexture* texture) {
 	imageTexture = texture;
 }

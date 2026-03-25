@@ -243,6 +243,22 @@
     },
 
     {
+        "Name": "Wall Buster",
+        "Description": "Destroy all blocks within the same 1 tile column",
+        "Type": 2,
+        "Tier": 2,
+        "Texture": "Icon_WallBuster",
+        "Projectile_Stats": {
+            "ProjectileID": 16,
+            "Damage_Multiplier": 1,
+            "Base_Damage": 10,
+            "Radius": 2,
+            "Charges": 1,
+            "unlimited_charges": false
+        }
+    },
+
+    {
         "Name": "Small Wall",
         "Description": "Left-click to build a 1x5 tile segment while the projectile is active",
         "Type": 3,
@@ -385,7 +401,7 @@
         "Name": "Gravity",
         "Description": "Increase gravity on opponent projectiles, making them miss their shot",
         "Type": 3,
-        "Tier": 1,
+        "Tier": 2,
         "Texture": "Icon_Gravity",
         "Status_Stats": {
             "Is_Modifier": true,

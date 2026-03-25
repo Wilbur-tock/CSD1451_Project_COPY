@@ -644,7 +644,8 @@ namespace AbilitiesManager {
 			Card& card = abilitySelectorCards[i];
 
 			// Update onClick and texture every frame
-			card.SetTexture(ability.GetTexture());
+			card.SetIconTexture(ability.GetTexture());
+			card.SetBGColor(ability.GetType() == AbilityType::STATISTICS ? Color{ 0.9f,0.9f,0 } : ability.GetType() == AbilityType::OFFENSIVE ? Color{ 0.9f,0,0 } : Color{ 0,0,0.9f });
 
 			Button& button = card.GetButton();
 			button.SetOnClick([this, ability]() {
