@@ -473,6 +473,7 @@ void Level::UpdateUI() {
 }
 
 void Level::Draw() {
+	//GraphicsManager::DrawGameObject(AssetsManager::GetTexture("Assets/level_bg.png"), GraphicsManager::CreateTransformMatrix(0, 0, Config::WORLD_MAX_X, Config::WORLD_MAX_Y), Color(1,1,1));
 	MapManager::DrawMap(activeLevelMap, false);
 
 	// Drawing of assets and UI
