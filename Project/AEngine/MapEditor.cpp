@@ -85,7 +85,7 @@ namespace MapEditor {
 	static void Draw();
 	// Check whatever or not the level satisfy the requirements for editing level
 	static bool ConstraintChecks();
-	void Inputs();
+	void CheckInputs();
 
 	// Ensure that the file path is going back to my project folder NOT THE BIN FOLDER if the debugger is on
 	static std::string DebugFilePath(std::string filePath) { return "../../" + filePath; }
@@ -309,7 +309,7 @@ namespace MapEditor {
 		return true;
 	}
 
-	void Inputs() {
+	void CheckInputs() {
 		if (isHoveringOverUI || prevIsHoveringOverUI) return;
 
 		int gridX = 0, gridY = 0;
@@ -323,7 +323,8 @@ namespace MapEditor {
 			bool shiftHold = AEInputCheckCurr(AEVK_LSHIFT) || AEInputCheckCurr(AEVK_RSHIFT);
 
 			if (leftHold || rightHold) {
-				bool isDrawing = leftHold;
+				std::cout << std::boolalpha << leftHold << ' ' << "Edited map" << '\n';
+				bool isDrawing = leftHold; // left click for drawing right click for erasing
 				ChangeBlock(gridX, gridY, isDrawing);
 
 				// Input to draw/erase a column
@@ -383,7 +384,7 @@ namespace MapEditor {
 		helpText = { "",  Utils::debuggerInfo.first * 0.9f, Utils::debuggerInfo.second,{-1.0f,.99f} };
 		debugText = { "",  Utils::debuggerInfo.first * 0.8f, Utils::debuggerInfo.second, { 0.5f, 0.99f} };
 
-		constraintsPopup = UIManager::PopupPanel{ false, UIManager::Panel{{500,250}}, TextObject{"", 1.0f, Color{1.0f,0.0f,0.0f}} };
+		constraintsPopup = UIManager::PopupPanel{ false, UIManager::Panel{{500,250}}, TextObject{"", 0.5f, Color{1.0f,0.0f,0.0f}} };
 		constraintsPopup.AddOffsetPosition({ 0,150 });
 
 		mapLabelPanel = UIManager::Panel{ { 250, 50 }, { 1,1,1 }, Utils::AnchorMode::TOP_CENTER };
@@ -404,11 +405,11 @@ namespace MapEditor {
 		}
 
 		constraintsPopup.Update();
-		isHoveringOverUI = constraintsPopup.IsHovered() && constraintsPopup.IsActive();
-
-		Inputs();
 
 		prevIsHoveringOverUI = isHoveringOverUI;
+		isHoveringOverUI = constraintsPopup.IsHovered() && constraintsPopup.IsActive();
+
+		CheckInputs();
 
 		Draw();
 	}

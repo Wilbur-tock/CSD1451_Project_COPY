@@ -353,7 +353,7 @@
         "Description": "Randomly choose one of your character to be invinsible, they can't be damage for 3 round",
         "Type": 3,
         "Tier": 4,
-        "Texture": "",
+        "Texture": "Icon_Invisibility",
         "Status_Stats": {
             "Is_Modifier": true,
             "Rounds": 3,
@@ -370,7 +370,7 @@
         "Description": "Skip opponenet turn and proceed to the next round",
         "Type": 3,
         "Tier": 2,
-        "Texture": ""
+        "Texture": "Icon_SkipTurn"
     },
 
     {
@@ -378,7 +378,7 @@
         "Description": "Cure all poison characters and decaying blocks",
         "Type": 3,
         "Tier": 1,
-        "Texture": ""
+        "Texture": "Icon_Cleanse"
     },
 
     {
@@ -403,7 +403,7 @@
         "Description": "Increase damage by 100, increase damage radius by 5, damage impacts by 5, heal every characters to FULL HP",
         "Type": 1,
         "Tier": 4,
-        "Texture": "",
+        "Texture": "Icon_Invincibility",
         "Projectile_Stats": {
             "ProjectileID": 0,
             "Damage_Multiplier": 1,
@@ -467,7 +467,7 @@
         "Description": "Increase your damage by 50",
         "Type": 1,
         "Tier": 3,
-        "Texture": "",
+        "Texture": "Icon_AttackBoost",
         "Projectile_Stats": {
             "ProjectileID": 0,
             "Damage_Multiplier": 1,
@@ -492,7 +492,7 @@
         "Description": "Increase your damage by 25",
         "Type": 1,
         "Tier": 2,
-        "Texture": "",
+        "Texture": "Icon_AttackBoost",
         "Projectile_Stats": {
             "ProjectileID": 0,
             "Damage_Multiplier": 1,
@@ -517,7 +517,7 @@
         "Description": "Increase your damage by 10",
         "Type": 1,
         "Tier": 1,
-        "Texture": "",
+        "Texture": "Icon_AttackBoost",
         "Projectile_Stats": {
             "ProjectileID": 0,
             "Damage_Multiplier": 1,
@@ -542,7 +542,7 @@
         "Description": "Reduce opponent damage by 50",
         "Type": 1,
         "Tier": 3,
-        "Texture": "",
+        "Texture": "Icon_DefenseBoost",
         "Projectile_Stats": {
             "ProjectileID": 0,
             "Damage_Multiplier": 1,
@@ -567,7 +567,7 @@
         "Description": "Reduce opponent damage by 25",
         "Type": 1,
         "Tier": 2,
-        "Texture": "",
+        "Texture": "Icon_DefenseBoost",
         "Projectile_Stats": {
             "ProjectileID": 0,
             "Damage_Multiplier": 1,
@@ -592,7 +592,7 @@
         "Description": "Reduce opponent damage by 10",
         "Type": 1,
         "Tier": 1,
-        "Texture": "",
+        "Texture": "Icon_DefenseBoost",
         "Projectile_Stats": {
             "ProjectileID": 0,
             "Damage_Multiplier": 1,
