@@ -18,7 +18,10 @@ AEGfxTexture* playerCannonTex = nullptr;
 AEGfxTexture* enemyCannonTex = nullptr;
 
 // UI Objects
-TextObject debugText;
+
+// Debug Panel
+UIManager::PanelText debugPanel, cannonDebugPanel;
+
 TextObject turnText, roundCountText;
 UIManager::Panel turnStatusPanel;
 
@@ -147,6 +150,16 @@ static void OnResultMainMenu() {
 }
 
 void Level::InitializeUI() {
+	debugPanel = UIManager::PanelText{
+		UIManager::Panel{ {350, 750}, {1,1,1, 0.8f}, Utils::AnchorMode::TOP_LEFT },
+		TextObject{"", Utils::debuggerInfo.first * 0.8f, Utils::debuggerInfo.second, { -1.0f, 0.99f}}
+	};
+
+	cannonDebugPanel = UIManager::PanelText{
+		UIManager::Panel{ {400, 750}, {1,1,1, 0.8f}, Utils::AnchorMode::TOP_RIGHT },
+		TextObject{"", Utils::debuggerInfo.first * 0.8f, Utils::debuggerInfo.second, { -1.0f, 0.99f} }
+	};
+
 	// Initialize UI objects in level
 	turnStatusPanel = { {150,75}, {1,1,1}, Utils::AnchorMode::TOP_CENTER };
 
@@ -157,7 +170,7 @@ void Level::InitializeUI() {
 	roundCountText.SetPosition(turnStatusPanel.GetTransform());
 	roundCountText.SetOffsetPosition(0, -20.0f);
 
-	AbilitiesManager::playerAbilityController.InitializeAllAbilityUI();
+	activeCannon->AbilityController()->InitializeAllAbilityUI();
 
 	// Initialize the stats of player and enemy UI
 	float bgWidth = (Config::SCREEN_WIDTH - turnStatusPanel.GetTransform().size.x) * 0.5f;
@@ -268,8 +281,6 @@ void Level::Load() {
 
 	if (!playerCannonTex) playerCannonTex = fallbackTex;
 	if (!enemyCannonTex)  enemyCannonTex = playerCannonTex ? playerCannonTex : fallbackTex;
-
-	debugText = { "", Utils::debuggerInfo.first * 0.8f, Utils::debuggerInfo.second, { -1.0f, 0.99f} };
 
 	std::cout << "[Level] Load " + levelFileName << '\n';
 }
@@ -427,6 +438,7 @@ void Level::Update() {
 		UpdateTurn();
 	}
 
+	Draw();
 	for (Character& playerChar : playerCharacters) {
 		playerChar.Update();
 	}
@@ -436,7 +448,6 @@ void Level::Update() {
 		enemy.Update();
 	}
 
-	Draw();
 	ParticleManager::particleController.Update(PhysicsManager::g_dt);
 
 	// Need to be below DrawLevel to ensure that the Ability Selector UI is shows up infront of the level
@@ -978,8 +989,6 @@ void Level::DebugCommands() {
 	}
 }
 
-UIManager::Panel debugPanel{ {350, 750}, {1,1,1, 0.8f}, Utils::AnchorMode::TOP_LEFT };
-
 void Level::DebugInfo() {
 	if (!Utils::isDebuggerOn) return;
 
@@ -1051,8 +1060,9 @@ void Level::DebugInfo() {
 
 	debug += info;
 
+	debugPanel.Update(debug);
 	debugPanel.Draw();
 
-	debugText.TextContent(debug);
-	debugText.Draw();
+	cannonDebugPanel.Update(activeCannon->DebugInfo());
+	cannonDebugPanel.Draw();
 }

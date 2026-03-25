@@ -21,8 +21,6 @@ namespace CannonManager {
         : GameObject(_pos, _size, _texture, _tileId, Color{ 1,1,1,1 }), isShootingRight{ _isShootingRight }, isPlayerControlled{ _isPlayerControlled } {
     }
 
-    TextObject debugText;
-
     void Cannon::Initialize(AbilitiesManager::AbilityController* controller) {
         if (!controller) {
             std::cerr << "[CannonManager] abilityController is nullptr!" << '\n';
@@ -32,9 +30,6 @@ namespace CannonManager {
         abilityController = controller;
         controller->ChangeCurrentAbility(0); // Set default projectile as the default ability
         SetProjectiles();
-
-        //Initialize UI Objects
-        debugText = { "", Utils::debuggerInfo.first * 0.8f, Utils::debuggerInfo.second, { 0.5f, 0.99f } };
 
         float x = transform.pos.x - (transform.size.x * 1.5f);
         if (!isShootingRight) x = transform.pos.x + (transform.size.x * 1.5f);
@@ -400,15 +395,18 @@ namespace CannonManager {
             break;
         case ProjectileMode::AIR_DROP:
         {
-            abilityController->IsAbilityTriggered(true);
-            Character const& airDropTarget = *(LevelManager::CurrentLevel()->RandomCharacterObj(!isPlayerControlled));
+            // If has collided with something drop a bomb
+            if (hasCannonShot && activeProjectiles.back().HasCollided()) {
+                abilityController->IsAbilityTriggered(true);
+                Character const& airDropTarget = *(LevelManager::CurrentLevel()->RandomCharacterObj(!isPlayerControlled));
 
-            // Spawn a bomb projectile at y index 0
-            Projectile newBombProjectile = projectiles[static_cast<int>(ProjectileMode::BOMB)];
-            AEVec2 airDropVelocity{ 0, -10.0f };
-            // Spawn at the max Y pos above the target
-            newBombProjectile.Initialize(Transform{ {airDropTarget.transform.pos.x, Config::WORLD_MAX_Y}, {10,10} }, static_cast<int>(activeProjectiles.size()), airDropVelocity);
-            activeProjectiles.push_back(newBombProjectile);
+                // Spawn a bomb projectile at y index 0
+                Projectile newBombProjectile = projectiles[static_cast<int>(ProjectileMode::BOMB)];
+                AEVec2 airDropVelocity{ 0, -10.0f };
+                // Spawn at the max Y pos above the target
+                newBombProjectile.Initialize(Transform{ {airDropTarget.transform.pos.x, Config::WORLD_MAX_Y}, {10,10} }, static_cast<int>(activeProjectiles.size()), airDropVelocity);
+                activeProjectiles.push_back(newBombProjectile);
+            }
             break;
         }
         case ProjectileMode::TELEPORT:
@@ -518,9 +516,7 @@ namespace CannonManager {
         }
     }
 
-    void Cannon::DebugInfo() {
-        if (!Utils::isDebuggerOn) return;
-
+    std::string Cannon::DebugInfo() {
         float mX = 0, mY = 0;
         Utils::GetWorldMousePos(mX, mY);
         float cX = transform.pos.x, cY = transform.pos.y;
@@ -583,10 +579,6 @@ namespace CannonManager {
             debugStr += activeProjectiles.back().DebugInfo();
         }
 
-        //UIManager::Panel panel{ {500,500}, {1,1,1,0.5f}, Utils::AnchorMode::TOP_RIGHT };
-        //panel.Draw();
-
-        debugText.TextContent(debugStr);
-        debugText.Draw();
+        return debugStr;
     }
 }

@@ -27,6 +27,7 @@ enum class ProjectileMode {
 	DRILL			= 13,
 	TELEPORT		= 14,
 	SMALL_WALL      = 15,
+	WALL_BUSTER		= 16,
 };
 
 class Projectile : public GameObject {
@@ -64,6 +65,7 @@ public:
 		case ProjectileMode::DRILL:				return "DRILL";
 		case ProjectileMode::TELEPORT:			return "TELEPORT";
 		case ProjectileMode::SMALL_WALL:		return "SMALL_WALL";
+		case ProjectileMode::WALL_BUSTER:		return "WALL_BUSTER";
 		default:								return "YOU NEED TO ADD A PROJECTILE MODE NAME";
 		}
 	}

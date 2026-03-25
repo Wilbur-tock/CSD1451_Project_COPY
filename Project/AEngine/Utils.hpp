@@ -55,7 +55,14 @@ namespace Utils {
 
 	template <typename T>
 	T RandomValue(T min, T max) {
-		return static_cast<T>(min + (AERandFloat() * (max - min)));
+		if constexpr (std::is_integral_v<T>) {
+			// Adding 1.0f ensures 'max' is inclusive for integers
+			return static_cast<T>(min + (AERandFloat() * (static_cast<float>(max - min) + 1.0f)));
+		}
+		else {
+			// Standard float range [min, max)
+			return static_cast<T>(min + (AERandFloat() * (max - min)));
+		}
 	}
 
 	// Set val to wrap to min value if it is MORE THAN max and vice versa

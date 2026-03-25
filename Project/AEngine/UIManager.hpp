@@ -96,6 +96,25 @@ namespace UIManager {
 		Panel bgPanel, icon;
 		TextObject textObj;
 	};
+
+	class PanelText {
+	public:
+		PanelText() = default;
+		PanelText(Panel _panel, TextObject _textObj);
+
+		Panel& GetPanel() { return bgPanel; }
+
+		void AddOffsetPosition(AEVec2 const& pos) {
+			bgPanel.AddOffsetPosition(pos);
+			textObj.SetPosition(bgPanel.GetTransform());
+		}
+
+		void Update(std::string text);
+		void Draw();
+	private:
+		Panel bgPanel;
+		TextObject textObj;
+	};
 }
 
 #endif // !UIMANAGER_HPP

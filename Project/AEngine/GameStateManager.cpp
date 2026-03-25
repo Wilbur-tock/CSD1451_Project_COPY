@@ -44,6 +44,9 @@ namespace GameStateManager {
     void Load() {
         GameTrackingManager::GameStart();
 
+        // Used to set randomiser seed
+        srand(static_cast<unsigned int>(time(NULL)));
+
         current = previous = GameState::INITIALIZE;
         next = GameState::MAIN_MENU;
 

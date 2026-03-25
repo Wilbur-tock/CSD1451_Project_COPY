@@ -22,10 +22,11 @@ public:
 		AEGfxTexture* _bgTexture = nullptr, AEGfxTexture* _iconTexture = nullptr, Utils::FuncPtr _onClick = nullptr);
 
 	bool IsClick() const { return isClick; }
-	bool ISHovered() const { return isHovered; }
+	bool IsHovered() const { return isHovered; }
 	Transform GetTransform() const { return transform; }
 
 	void SetOnClick(Utils::FuncPtr _OnClick) { onClick = _OnClick; }
+	void SetOnHovered(Utils::FuncPtr _onHovered) { onHovered = _onHovered; }
 
 	TextObject& GetTextObject() { return textObj; }
 	void SetColor(Color _color) { color = _color; }
@@ -49,7 +50,11 @@ private:
 	Color color{ 1,1,1 };
 	AEGfxTexture* bgTexture = nullptr;
 	AEGfxTexture* iconTexture = nullptr;
+
+	// Functions to calls
+	Utils::FuncPtr onHovered = nullptr;
 	Utils::FuncPtr onClick = nullptr;
+
 	bool isHovered = false;
 	bool isClick = false;
 

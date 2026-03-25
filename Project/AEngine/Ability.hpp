@@ -70,18 +70,20 @@ public:
 		return "NULL ABILITY TYPE";
 	}
 
+	std::string GetDescriptionWithStats() const;
+
 	float Chance() const { return chance; }
 	// Increase or decrease chance of this ability appear 
 	void Chance(float percentage) { chance = defaultChance * percentage; }
 						
 	StatsModule			GetStats() const { return stats; }
-	ProjectileModule	GetProjectile() const { return proj; }
+	ProjectileModule	GetProjectile() const { return projectile; }
 	StatusModule        GetStatus() const { return status; }
 
 	bool IsDefaultAbility() const { return id == 0 || name == "Default"; }
 
 	void SetStats(StatsModule const& newStats) { stats = newStats; }
-	void SetProjectile(ProjectileModule const& newProj) { proj = newProj; }
+	void SetProjectile(ProjectileModule const& newProj) { projectile = newProj; }
 	void SetStatus(StatusModule const& newStatus) { status = newStatus; }
 
 	int	 AbilityCharges() const { return abilityCharges; }
@@ -127,7 +129,7 @@ private:
 	bool justAddedModifier = false;
 
 	StatsModule stats;
-	ProjectileModule proj;
+	ProjectileModule projectile;
 	StatusModule status;
 };
 

@@ -13,6 +13,15 @@ Ability::Ability(int _id, std::string _name, std::string _description, AbilityTy
 	: id{ _id }, name(_name), description{ _description }, type(_type), tier(_tier), texture(_texture), 
 	defaultChance{ tierChances[static_cast<int>(_tier) - 1] }, chance{ defaultChance } {}
 
+std::string Ability::GetDescriptionWithStats() const {
+	if (type == AbilityType::OFFENSIVE) {
+		return "Damage: " + std::to_string(projectile.baseDamage) + '\n'
+			+ "Damage Radius: " + std::to_string(projectile.radius) 
+			+ "\n\n" + description;
+	}
+	return description;
+}
+
 void Ability::ResetStats() {
 	SetStats(StatsModule{});
 	SetProjectile(ProjectileModule{});

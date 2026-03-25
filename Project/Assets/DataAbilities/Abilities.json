@@ -196,7 +196,7 @@
 
     {
         "Name": "Air Drop",
-        "Description": "Randomly choose a opponent target to drop a Bomb onto it",
+        "Description": "Randomly choose a opponent target to drop a Bomb onto it after your projectitle has hit something",
         "Type": 2,
         "Tier": 3,
         "Texture": "Icon_AirDrop",
@@ -237,6 +237,22 @@
             "Damage_Multiplier": 1,
             "Base_Damage": 20,
             "Radius": 3,
+            "Charges": 1,
+            "unlimited_charges": false
+        }
+    },
+
+    {
+        "Name": "Wall Buster",
+        "Description": "Destroy all blocks within the same 1 tile column",
+        "Type": 2,
+        "Tier": 2,
+        "Texture": "Icon_WallBuster",
+        "Projectile_Stats": {
+            "ProjectileID": 16,
+            "Damage_Multiplier": 1,
+            "Base_Damage": 10,
+            "Radius": 2,
             "Charges": 1,
             "unlimited_charges": false
         }
@@ -385,7 +401,7 @@
         "Name": "Gravity",
         "Description": "Increase gravity on opponent projectiles, making them miss their shot",
         "Type": 3,
-        "Tier": 1,
+        "Tier": 2,
         "Texture": "Icon_Gravity",
         "Status_Stats": {
             "Is_Modifier": true,

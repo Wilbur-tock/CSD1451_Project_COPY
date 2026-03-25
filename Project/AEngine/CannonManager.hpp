@@ -42,7 +42,7 @@ namespace CannonManager {
 			if (!canCannonShoot) { isHoldingLeftClick = false; } // reset holding left click if cannon can't shoot
 		}
 
-		void DebugInfo();
+	std::string DebugInfo();
 	private:
 		// Initialize all the different type of projectile abilities to the CANNON CLASS
 		// Switch between the projectileId to choose the different type of projectile abilities
@@ -77,7 +77,7 @@ namespace CannonManager {
 	private:
 		bool isPlayerControlled = true, isShootingRight = true;
 		bool canCannonShoot = true; // can cannon shoot using left click
-		bool hasCannonShot = false; // has projectile has been shot out of the cannon return true if yes
+		bool hasCannonShot = false; // return true if projectile has been shot out of the cannon
 		bool isHoldingLeftClick = false; // player is holding left mouse click
 		bool canPlayerShoot = true; // can player shoot used for checking if player press right click to cancel his shot
 		bool allProjectileDestroyed = false; // projectile has been shot out and destroyed

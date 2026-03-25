@@ -165,6 +165,23 @@ void Projectile::AbilityActivation(bool isPlayer, Ability const& ability) {
             ignorePhysics = true;
         }
         break;
+    case ProjectileMode::WALL_BUSTER:
+        if (hasCollided) {
+            isAbilityTriggered = true;
+            int tileX = 0, tileY = 0;
+            Utils::GetTileIndex(tileX, tileY, transform.pos);
+            ++tileX;
+
+            if (!Utils::IsTileIndexOutOfBounds(tileX, tileY)) {
+                for (int y = 0; y < Config::MAX_GRID_Y; ++y) {
+                    Tile& tile = (*MapManager::currentMap)[y][tileX];
+                    if (tile.IsDestructible()) {
+                        tile.TakeDamage(tile.attribute.Health());
+                    }
+                }
+            }
+        }
+        break;
     }
 }
 
