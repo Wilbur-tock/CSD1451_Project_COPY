@@ -44,6 +44,68 @@ namespace MapManager {
 	static AEGfxTexture* gCracksMediumTex = nullptr;
 	static AEGfxTexture* gCracksHeavyTex = nullptr;
 
+	static float GetBlockDamageFraction(Tile const& tile) {
+		int hp = tile.attribute.Health();
+		int maxHp = tile.attribute.MaxHealth();
+
+		if (maxHp <= 0 || hp >= maxHp) {
+			return 0.0f;
+		}
+
+		float damageFrac = 1.0f - (static_cast<float>(hp) / static_cast<float>(maxHp));
+		return std::clamp(damageFrac, 0.0f, 1.0f);
+	}
+
+	static Color BuildDamagedBlockColor(Tile const& tile, float damageFrac) {
+		// Stronger darkening per damage stage so the block itself reads as damaged
+		float tintMultiplier = 1.0f;
+
+		if (damageFrac < 0.33f) {
+			tintMultiplier = 0.90f; // light damage
+		}
+		else if (damageFrac < 0.66f) {
+			tintMultiplier = 0.82f; // medium damage
+		}
+		else {
+			tintMultiplier = 0.72f; // heavy damage
+		}
+
+		return Color{
+			tile.textureColor.Red() * tintMultiplier,
+			tile.textureColor.Green() * tintMultiplier,
+			tile.textureColor.Blue() * tintMultiplier,
+			tile.textureColor.Alpha()
+		};
+	}
+
+	//Editing of cracked texture
+	static void GetCrackVisualSettings(
+		float damageFrac,
+		AEGfxTexture*& cracksTex,
+		float& primaryAlpha,
+		float& secondaryAlpha)
+	{
+		cracksTex = nullptr;
+		primaryAlpha = 0.0f;
+		secondaryAlpha = 0.0f;
+
+		if (damageFrac < 0.33f) {
+			cracksTex = gCracksLightTex;
+			primaryAlpha = 0.68f;
+			secondaryAlpha = 0.16f;
+		}
+		else if (damageFrac < 0.66f) {
+			cracksTex = gCracksMediumTex;
+			primaryAlpha = 0.82f;
+			secondaryAlpha = 0.24f;
+		}
+		else {
+			cracksTex = gCracksHeavyTex;
+			primaryAlpha = 0.96f;
+			secondaryAlpha = 0.34f;
+		}
+	}
+
 	void Load() {
 		if (gTileTex[static_cast<int>(TileType::TILE_BLOCK_GROUND_0)]) return;	
 
@@ -245,35 +307,34 @@ namespace MapManager {
 					tile.transform.size.x / 2.0f, tile.transform.size.y / 2.0f
 				);
 
-				GraphicsManager::DrawGameObject(baseTex, tileMat, tile.textureColor);
+				Color drawColor = tile.textureColor;
+				float damageFrac = 0.0f;
+
+				//Darken damaged destructible blocks so damage reads clearly even at a glance
+				if (tile.IsBlocks()) {
+					damageFrac = GetBlockDamageFraction(tile);
+					if (damageFrac > 0.0f) {
+						drawColor = BuildDamagedBlockColor(tile, damageFrac);
+					}
+				}
+
+				GraphicsManager::DrawGameObject(baseTex, tileMat, drawColor);
 				++GameTrackingManager::data.drawTilesCount;
 
-				// Draw cracks on blocks based on tile hp
-				if (tile.IsBlocks()) {
-					int hp = tile.attribute.Health();
-					int maxHp = tile.attribute.MaxHealth();
+				if (tile.IsBlocks() && damageFrac > 0.0f) {
+					AEGfxTexture* cracksTex = nullptr;
+					float primaryAlpha = 0.0f;
+					float secondaryAlpha = 0.0f;
 
-					// Only show cracks once it has taken damage
-					if (maxHp > 0 && hp < maxHp) {
-						float damageFrac = 1.0f - (static_cast<float>(hp) / static_cast<float>(maxHp));
-						damageFrac = std::clamp(damageFrac, 0.0f, 1.0f);
+					GetCrackVisualSettings(damageFrac, cracksTex, primaryAlpha, secondaryAlpha);
 
-						// pick crack stage
-						AEGfxTexture* cracksTex = nullptr;
-						if (damageFrac < 0.33f) cracksTex = gCracksLightTex;
-						else if (damageFrac < 0.66f) cracksTex = gCracksMediumTex;
-						else cracksTex = gCracksHeavyTex;
+					if (cracksTex) {
+						// Main crack pass
+						GraphicsManager::DrawGameObject(cracksTex, tileMat, Color{ 1.0f, 1.0f, 1.0f, primaryAlpha });
 
-						// If one is missing, fallback to any available crack texture
-						if (!cracksTex) cracksTex = gCracksHeavyTex ? gCracksHeavyTex
-							: (gCracksMediumTex ? gCracksMediumTex : gCracksLightTex);
-
-						// draw overlay if we have it
-						if (cracksTex) {
-							float alpha = 0.20f + damageFrac * 0.65f; // 0.20 -> 0.85
-							if (alpha > 0.85f) alpha = 0.85f;
-
-							GraphicsManager::DrawGameObject(cracksTex, tileMat, Color{ 1,1,1,alpha });
+						// Extra reinforcing pass for stronger visibility on a zoomed-out map
+						if (secondaryAlpha > 0.0f) {
+							GraphicsManager::DrawGameObject(cracksTex, tileMat, Color{ 1.0f, 1.0f, 1.0f, secondaryAlpha });
 						}
 					}
 				}
