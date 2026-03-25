@@ -37,7 +37,10 @@ namespace CannonManager {
 		// Return true if this cannon has a lock in target or the target has been destroyed
 		bool IsTargetAlive();
 		void SetEnemyAI(int difficultyLevel);
-		void CanCannonShoot(bool canShoot) { canCannonShoot = canShoot; }
+		void CanCannonShoot(bool canShoot) {
+			canCannonShoot = canShoot; 
+			if (!canCannonShoot) { isHoldingLeftClick = false; } // reset holding left click if cannon can't shoot
+		}
 
 		void DebugInfo();
 	private:

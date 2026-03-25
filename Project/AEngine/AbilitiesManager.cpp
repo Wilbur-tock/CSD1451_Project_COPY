@@ -316,7 +316,7 @@ namespace AbilitiesManager {
 			}
 		}
 		UseAbilityWithModifier(ability);
-		PrintAbilityModifiers();
+		//PrintAbilityModifiers();
 	}
 
 	void AbilityController::UseAbilityWithModifier(Ability const& ability) {
@@ -356,13 +356,13 @@ namespace AbilitiesManager {
 	}
 
 	void AbilityController::UpdateModifiers() {
-		PrintAbilityModifiers();
+		//PrintAbilityModifiers();
 		for (Ability& ability : abilityModifiers) {
 			// Update lifespan
 			ability.UpdateRoundLifespan();
 		}
 		CheckModifiers();
-		PrintAbilityModifiers();
+		//PrintAbilityModifiers();
 	}
 
 	void AbilityController::CheckModifiers() {
@@ -593,7 +593,7 @@ namespace AbilitiesManager {
 		float startY = inventoryBGTrans.pos.y - borderPaddingY;
 
 		// get card texture
-		AEGfxTexture* cardTexture = AEGfxTextureLoad("Assets/card_texture.png");
+		AEGfxTexture* cardTexture = AssetsManager::GetTexture("Assets/card_texture.png");
 
 		// Initialize Ability Icons at bottom showcasing the list of ability they have in its inventory
 		for (int i = 0; i < Config::MAX_INVENTORY_COUNT; ++i) {
