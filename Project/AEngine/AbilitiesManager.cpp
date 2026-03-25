@@ -605,7 +605,7 @@ namespace AbilitiesManager {
 
 			btn = Button{ TextObject{"", 0.5f},
 				Utils::AnchorMode::BOTTOM_CENTER, AEVec2{ x, y },
-				AEVec2{ btnSizeX, btnSizeY }, Color{1,1,1}, cardTexture
+				AEVec2{ btnSizeX, btnSizeY }, Color{1,1,1}, AssetsManager::squareTexture
 			};
 			btn.SetIconGaps({ 15,15,5,20 });
 			//btn.SetTextOffset(0, 5);
