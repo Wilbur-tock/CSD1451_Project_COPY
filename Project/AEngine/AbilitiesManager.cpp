@@ -592,6 +592,9 @@ namespace AbilitiesManager {
 		float startX = inventoryBGTrans.pos.x + borderPaddingX;
 		float startY = inventoryBGTrans.pos.y - borderPaddingY;
 
+		// get card texture
+		AEGfxTexture* cardTexture = AEGfxTextureLoad("Assets/card_texture.png");
+
 		// Initialize Ability Icons at bottom showcasing the list of ability they have in its inventory
 		for (int i = 0; i < Config::MAX_INVENTORY_COUNT; ++i) {
 			Button& btn = inventoryAbilityButton[i];
@@ -602,7 +605,7 @@ namespace AbilitiesManager {
 
 			btn = Button{ TextObject{"", 0.5f},
 				Utils::AnchorMode::BOTTOM_CENTER, AEVec2{ x, y },
-				AEVec2{ btnSizeX, btnSizeY }, Color{1,1,1}, AssetsManager::squareTexture
+				AEVec2{ btnSizeX, btnSizeY }, Color{1,1,1}, cardTexture
 			};
 			btn.SetIconGaps({ 15,15,5,20 });
 			//btn.SetTextOffset(0, 5);
@@ -617,7 +620,7 @@ namespace AbilitiesManager {
 
 		for (int i = 0; i < Config::MAX_ABILITY_SELECTOR_COUNT; ++i) {
 			Card& card = abilitySelectorCards[i];
-			card = Card{ "", cardPos, Color(1,0,0), AssetsManager::squareTexture, nullptr, nullptr };
+			card = Card{ "", cardPos, Color(1,0,0), cardTexture, nullptr, nullptr };
 			cardPos.x += cardSize.x + gap; // update pos for the next card in the for loop
 		}
 	}
