@@ -49,6 +49,7 @@ namespace Guide {
 
         struct AbilityGuideEntry {
             std::string name;
+            std::string displayName;
             std::string description;
             AbilityGroup group = AbilityGroup::OFFENSIVE;
             AbilityRole role = AbilityRole::ATTACK;
@@ -298,6 +299,73 @@ namespace Guide {
             return AssetsManager::squareTexture;
         }
 
+        bool ShouldIncludeGuideEntry(const nlohmann::json& ability) {
+            if (!ability.is_object()) {
+                return false;
+            }
+
+            if (ability.value("Guide_Hidden", false)) {
+                return false;
+            }
+
+            const std::string name = Trim(ability.value("Name", ""));
+            if (name.empty()) {
+                return false;
+            }
+
+            return true;
+        }
+
+        struct NameCountEntry {
+            std::string loweredName;
+            int count = 0;
+        };
+
+        int FindNameCountIndex(const std::vector<NameCountEntry>& nameCounts, const std::string& loweredName) {
+            for (int i = 0; i < static_cast<int>(nameCounts.size()); ++i) {
+                if (nameCounts[i].loweredName == loweredName) {
+                    return i;
+                }
+            }
+            return -1;
+        }
+
+        void BuildDisplayNamesForDuplicates() {
+            std::vector<NameCountEntry> nameCounts;
+
+            for (const AbilityGuideEntry& entry : abilityEntries) {
+                const std::string loweredName = ToLower(entry.name);
+                const int existingIndex = FindNameCountIndex(nameCounts, loweredName);
+
+                if (existingIndex >= 0) {
+                    ++nameCounts[existingIndex].count;
+                }
+                else {
+                    NameCountEntry countEntry{};
+                    countEntry.loweredName = loweredName;
+                    countEntry.count = 1;
+                    nameCounts.push_back(countEntry);
+                }
+            }
+
+            for (AbilityGuideEntry& entry : abilityEntries) {
+                entry.displayName = entry.name;
+
+                const int existingIndex = FindNameCountIndex(nameCounts, ToLower(entry.name));
+                if (existingIndex < 0 || nameCounts[existingIndex].count <= 1) {
+                    continue;
+                }
+
+                const int tier = entry.raw.value("Tier", 0);
+                if (tier > 0) {
+                    entry.displayName += " (Tier " + std::to_string(tier) + ")";
+                }
+                else {
+                    entry.displayName += " (Variant)";
+                }
+            }
+        }
+
         int GroupOrder(AbilityGroup group) {
             switch (group) {
             case AbilityGroup::OFFENSIVE: return 0;
@@ -322,7 +390,7 @@ namespace Guide {
                             displayRows.push_back({ true, group, -1, GroupToString(group) });
                             hasAny = true;
                         }
-                        displayRows.push_back({ false, group, i, abilityEntries[i].name });
+                        displayRows.push_back({ false, group, i, abilityEntries[i].displayName });
                     }
                 }
             }
@@ -516,6 +584,8 @@ namespace Guide {
 
             lines.push_back("Tier: " + std::to_string(ability.value("Tier", 0)));
 
+            bool durationAlreadyShown = false;
+
             if (entry.role == AbilityRole::ATTACK) {
                 if (ability.contains("Projectile_Stats") && !ability["Projectile_Stats"].is_null()) {
                     const auto& proj = ability["Projectile_Stats"];
@@ -532,6 +602,16 @@ namespace Guide {
                     }
                     if (amp > 0.0) {
                         lines.push_back("Damage Amp: " + FormatNumber(amp));
+                    }
+
+                    const bool unlimitedCharges = proj.value("unlimited_charges", false);
+                    const int charges = proj.value("Charges", 0);
+
+                    if (unlimitedCharges) {
+                        lines.push_back("Charges: Unlimited");
+                    }
+                    else if (charges > 0) {
+                        lines.push_back("Charges: " + std::to_string(charges));
                     }
                 }
             }
@@ -573,6 +653,7 @@ namespace Guide {
 
                     if (rounds > 0) {
                         lines.push_back("Duration: " + std::to_string(rounds) + " round(s)");
+                        durationAlreadyShown = true;
                     }
                     if (gravityScale > 0.0) {
                         lines.push_back("Gravity Scale: " + FormatNumber(gravityScale));
@@ -583,6 +664,16 @@ namespace Guide {
                     if (effectRadius > 0.0) {
                         lines.push_back("Effect Radius: " + FormatNumber(effectRadius));
                     }
+                }
+            }
+
+            if (!durationAlreadyShown &&
+                ability.contains("Status_Stats") &&
+                !ability["Status_Stats"].is_null()) {
+                const auto& status = ability["Status_Stats"];
+                const int rounds = status.value("Rounds", 0);
+                if (rounds > 0) {
+                    lines.push_back("Duration: " + std::to_string(rounds) + " round(s)");
                 }
             }
 
@@ -599,7 +690,22 @@ namespace Guide {
             if (groupA != groupB) {
                 return groupA < groupB;
             }
-            return ToLower(a.name) < ToLower(b.name);
+
+            const std::string nameA = ToLower(a.name);
+            const std::string nameB = ToLower(b.name);
+
+            if (nameA != nameB) {
+                return nameA < nameB;
+            }
+
+            const int tierA = a.raw.value("Tier", 0);
+            const int tierB = b.raw.value("Tier", 0);
+
+            if (tierA != tierB) {
+                return tierA < tierB;
+            }
+
+            return ToLower(a.displayName) < ToLower(b.displayName);
         }
 
         void LoadAbilityJsonFile(const char* path) {
@@ -612,8 +718,13 @@ namespace Guide {
             file >> data;
 
             for (const auto& ability : data) {
+                if (!ShouldIncludeGuideEntry(ability)) {
+                    continue;
+                }
+
                 AbilityGuideEntry entry{};
-                entry.name = ability.value("Name", "Unknown Ability");
+                entry.name = Trim(ability.value("Name", "Unknown Ability"));
+                entry.displayName = entry.name;
                 entry.description = ability.value("Description", "");
                 entry.group = DetermineGroup(ability);
                 entry.role = DetermineRole(ability, entry.group);
@@ -630,11 +741,13 @@ namespace Guide {
             hoveredDisplayRowIndex = -1;
             selectedEntryIndex = -1;
 
+            // Keep the player-facing guide synced with the actual gameplay pool.
+            // PlayerAbilities.json and AiAbilities.json currently contain entries
+            // that are broader than the live gameplay ability list.
             LoadAbilityJsonFile("Assets/DataAbilities/Abilities.json");
-            LoadAbilityJsonFile("Assets/DataAbilities/PlayerAbilities.json");
-            LoadAbilityJsonFile("Assets/DataAbilities/AiAbilities.json");
 
             std::sort(abilityEntries.begin(), abilityEntries.end(), CompareAbilityEntries);
+            BuildDisplayNamesForDuplicates();
             BuildDisplayRows();
 
             for (const AbilityDisplayRow& row : displayRows) {
@@ -872,7 +985,7 @@ namespace Guide {
                 rowBand.Draw();
 
                 DrawTextCenteredPx(
-                    entry.name,
+                    entry.displayName,
                     LIST_CENTER_X,
                     rowCenterY - 10.0f,
                     0.52f,
@@ -937,7 +1050,6 @@ namespace Guide {
             const AbilityGuideEntry& entry = abilityEntries[selectedEntryIndex];
             const float leftX = DETAIL_CENTER_X - 225.0f;
 
-            // Image block
             UIManager::Panel imagePanel(
                 { 118.0f, 118.0f },
                 GroupMutedColor(entry.group),
@@ -956,48 +1068,50 @@ namespace Guide {
                     Color(1.0f, 1.0f, 1.0f, 1.0f));
             }
 
-            // Summary text
-            DrawTextLeftPx(entry.name, DETAIL_CENTER_X - 35.0f, 214.0f, 0.62f, Color(0.05f, 0.07f, 0.10f, 1.0f));
+            DrawTextLeftPx(entry.displayName, DETAIL_CENTER_X - 35.0f, 214.0f, 0.62f, Color(0.05f, 0.07f, 0.10f, 1.0f));
             DrawTextLeftPx(GroupToString(entry.group), DETAIL_CENTER_X - 35.0f, 187.0f, 0.46f, GroupHeaderColor(entry.group));
             DrawTextLeftPx("Role: " + RoleToString(entry.role), DETAIL_CENTER_X - 35.0f, 164.0f, 0.44f, RoleColor(entry.role));
 
-            // Description box
+            const float descriptionBoxHeight = 132.0f;
+            const float descriptionBoxCenterY = 8.0f;
+            const float statsBoxHeight = 122.0f;
+            const float statsBoxCenterY = -170.0f;
+
             UIManager::Panel descriptionBox(
-                { DETAIL_WIDTH - 34.0f, 125.0f },
+                { DETAIL_WIDTH - 34.0f, descriptionBoxHeight },
                 Color(0.94f, 0.95f, 0.97f, 1.0f),
                 Utils::AnchorMode::CENTER);
-            descriptionBox.AddOffsetPosition({ DETAIL_CENTER_X, 8.0f });
+            descriptionBox.AddOffsetPosition({ DETAIL_CENTER_X, descriptionBoxCenterY });
             descriptionBox.Draw();
 
-            DrawTextLeftPx("DESCRIPTION", leftX, 74.0f, 0.50f, Color(0.05f, 0.07f, 0.10f, 1.0f));
+            DrawTextLeftPx("DESCRIPTION", leftX, 72.0f, 0.50f, Color(0.05f, 0.07f, 0.10f, 1.0f));
 
             DrawWrappedTextLeftPxLimited(
                 BuildAbilityDescription(entry),
                 leftX,
-                46.0f,
-                0.39f,
+                44.0f,
+                0.38f,
                 Color(0.12f, 0.12f, 0.12f, 1.0f),
-                48,
-                20.0f,
+                55,
+                18.0f,
                 4
             );
 
-            // Stats box
+            DrawTextLeftPx("KEY STATS", leftX, -92.0f, 0.50f, Color(0.05f, 0.07f, 0.10f, 1.0f));
+
             UIManager::Panel statsBox(
-                { DETAIL_WIDTH - 34.0f, 125.0f },
+                { DETAIL_WIDTH - 34.0f, statsBoxHeight },
                 Color(0.94f, 0.95f, 0.97f, 1.0f),
                 Utils::AnchorMode::CENTER);
-            statsBox.AddOffsetPosition({ DETAIL_CENTER_X, -135.0f });
+            statsBox.AddOffsetPosition({ DETAIL_CENTER_X, statsBoxCenterY });
             statsBox.Draw();
-
-            DrawTextLeftPx("KEY STATS", leftX, -58.0f, 0.50f, Color(0.05f, 0.07f, 0.10f, 1.0f));
 
             std::vector<std::string> statLines = BuildStatLines(entry);
 
             const float column1X = leftX;
             const float column2X = leftX + 220.0f;
-            float y1 = -88.0f;
-            float y2 = -88.0f;
+            float y1 = -122.0f;
+            float y2 = -122.0f;
 
             int maxTotalLines = 6;
             int visibleLines = std::min<int>(static_cast<int>(statLines.size()), maxTotalLines);
@@ -1055,11 +1169,30 @@ namespace Guide {
             nullptr,
             OnBackClicked);
 
+        const float menuButtonWidth = 300.0f;
+        const float menuButtonHeight = 110.0f;
+        const float menuButtonGap = 70.0f;
+
+        // These are the visual centers we actually want on screen.
+        const float visualGroupCenterX = 0.0f;
+        const float visualButtonCenterY = 25.0f;
+
+        const float leftVisualCenterX =
+            visualGroupCenterX - (menuButtonWidth * 0.5f) - (menuButtonGap * 0.5f);
+        const float rightVisualCenterX =
+            visualGroupCenterX + (menuButtonWidth * 0.5f) + (menuButtonGap * 0.5f);
+
+        // Button placement appears to behave like top-left style placement internally,
+        // even when using AnchorMode::CENTER, so compensate by subtracting half-size.
+        const float buttonPosY = visualButtonCenterY - (menuButtonHeight * 0.5f);
+        const float leftButtonPosX = leftVisualCenterX - (menuButtonWidth * 0.5f);
+        const float rightButtonPosX = rightVisualCenterX - (menuButtonWidth * 0.5f);
+
         gameGuideButton = Button(
             TextObject("GAME GUIDE"),
             Utils::AnchorMode::CENTER,
-            { -300.0f, 70.0f },
-            { 300.0f, 110.0f },
+            { leftButtonPosX, buttonPosY },
+            { menuButtonWidth, menuButtonHeight },
             Color(0.28f, 0.63f, 0.90f, 1.0f),
             buttonTexture,
             nullptr,
@@ -1068,8 +1201,8 @@ namespace Guide {
         abilitiesGuideButton = Button(
             TextObject("ABILITIES GUIDE"),
             Utils::AnchorMode::CENTER,
-            { 40.0f, 70.0f },
-            { 300.0f, 110.0f },
+            { rightButtonPosX, buttonPosY },
+            { menuButtonWidth, menuButtonHeight },
             Color(0.56f, 0.44f, 0.88f, 1.0f),
             buttonTexture,
             nullptr,
@@ -1079,13 +1212,13 @@ namespace Guide {
             GetTitleText(),
             2.05f,
             Color(0.07f, 0.08f, 0.12f, 1.0f),
-            { -0.08f, 0.76f });
+            { 0.0f, 0.0f });
 
         subtitleText = TextObject(
             GetSubtitleText(),
             0.70f,
             Color(0.15f, 0.17f, 0.22f, 0.92f),
-            { -0.28f, 0.64f });
+            { 0.0f, 0.0f });
 
         hintText = TextObject(
             GetHintText(),
@@ -1116,39 +1249,34 @@ namespace Guide {
         subtitleText.TextContent(GetSubtitleText());
         hintText.TextContent(GetHintText());
 
-        if (currentView == GuideView::ABILITIES) {
-            DrawCenteredMultilineText(
-                GetTitleText(),
-                2.05f,
-                Color(0.07f, 0.08f, 0.12f, 1.0f),
-                0.0f,
-                0.84f,
-                1.0f);
+        DrawCenteredMultilineText(
+            GetTitleText(),
+            2.05f,
+            Color(0.07f, 0.08f, 0.12f, 1.0f),
+            0.0f,
+            0.84f,
+            1.0f);
 
-            DrawCenteredMultilineText(
-                GetSubtitleText(),
-                0.70f,
-                Color(0.15f, 0.17f, 0.22f, 0.92f),
-                0.0f,
-                0.70f,
-                1.0f);
-        }
-        else {
-            titleText.Draw();
-            subtitleText.Draw();
-        }
+        DrawCenteredMultilineText(
+            GetSubtitleText(),
+            0.70f,
+            Color(0.15f, 0.17f, 0.22f, 0.92f),
+            0.0f,
+            0.70f,
+            1.0f);
 
         hintText.Draw();
 
         if (currentView == GuideView::MENU) {
-            TextObject menuBlurb(
+            DrawCenteredMultilineText(
                 "Pick the kind of help you want.\n"
                 "Game Guide explains the rules and controls.\n"
-                "Abilities Guide now shows every current ability in one grouped compendium.",
+                "Abilities Guide shows the real gameplay ability pool.",
                 0.72f,
                 Color(0.12f, 0.12f, 0.12f, 1.0f),
-                { -0.48f, 0.28f });
-            menuBlurb.Draw();
+                0.0f,
+                0.33f,
+                1.25f);
         }
         else if (currentView == GuideView::GAME) {
             DrawCenteredMultilineText(
