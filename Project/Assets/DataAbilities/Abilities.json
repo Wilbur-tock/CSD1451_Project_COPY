@@ -196,7 +196,7 @@
 
     {
         "Name": "Air Drop",
-        "Description": "Randomly choose a opponent target to drop a Bomb onto it",
+        "Description": "Randomly choose a opponent target to drop a Bomb onto it after your projectitle has hit something",
         "Type": 2,
         "Tier": 3,
         "Texture": "Icon_AirDrop",
