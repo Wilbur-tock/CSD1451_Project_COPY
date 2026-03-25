@@ -29,21 +29,19 @@ Character::Character(AEVec2 _pos, AEVec2 _size, AEGfxTexture* _texture, TileInde
 	wsHPBar = UIManager::Bar{ { wsBarX, wsBarY}, { transform.size.x, barHeight }, hpBarColor }; // Position just on top of the character
 	wsShieldBar = UIManager::Bar{ {wsBarX,wsShieldBarY} , { transform.size.x, barHeight * 0.5f }, ShieldColor()};
 
-	float panelYOffset = -60.0f;// add Y offset based on the level player/enemy hp bar
-	statsPanel = UIManager::Panel{ {300,100}, StatsBGColor(), Utils::AnchorMode::TOP_LEFT};
-	statsPanel.AddOffsetPosition({ 0, panelYOffset });
+	statsPanel = UIManager::Panel{ {300,150}, PanelColor(), Utils::AnchorMode::BOTTOM_RIGHT };
 
 	float gap = 2.5f;
 	float borderGap = 5.0f;
-	float panelChildYOffset = panelYOffset - borderGap;
+
 	// Create the character icon
 	AEVec2 iconSize{ 32,32 };
-	icon = UIManager::Panel{ iconSize, {1,1,1}, Utils::AnchorMode::TOP_LEFT,  texture };
-	icon.AddOffsetPosition({ borderGap, panelChildYOffset });
+	icon = UIManager::Panel{ iconSize, {1,1,1}, Utils::AnchorMode::TOP_LEFT, texture };
+	icon.SetChildPanelPos(statsPanel.GetTransform().pos, { borderGap,-borderGap });
 
 	float colorTint = 0.9f;
-	iconBG = UIManager::Panel{ iconSize, {colorTint,colorTint,colorTint}, Utils::AnchorMode::TOP_LEFT };
-	iconBG.AddOffsetPosition({ borderGap, panelChildYOffset });
+	iconBG = UIManager::Panel{ iconSize, {colorTint,colorTint,colorTint}, Utils::AnchorMode::TOP_LEFT, };
+	iconBG.SetChildPanelPos(statsPanel.GetTransform().pos, { borderGap,-borderGap });
 
 	float barWidth = 15.0f;
 	AEVec2 barPos{ statsPanel.GetTransform().pos.x + iconSize.x + borderGap, statsPanel.GetTransform().pos.y - borderGap };

@@ -34,4 +34,4 @@ Color statsBGColor	{ 0.75f, 0.75f, 0.75f };
 Color const& PlayerHPColor()	{ return playerHPColor; }
 Color const& EnemyHPColor()		{ return enemyHPColor; }
 Color const& ShieldColor()		{ return shieldColor; }
-Color const& StatsBGColor()		{ return statsBGColor; }
+Color const& PanelColor()		{ return statsBGColor; }

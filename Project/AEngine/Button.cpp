@@ -27,6 +27,10 @@ void Button::Update() {
     isHovered = CollisionManager::IsPointInRect(transform.pos.x, transform.pos.y, transform.size.x, transform.size.y);
 
     if (isHovered) {
+        if (onHovered) {
+            onHovered();
+        }
+
         // Checking if user has click the button
         if (AEInputCheckTriggered(AEVK_LBUTTON) && onClick) {
             AudioManager::PlaySFX(AudioManager::SFX::UIButton);

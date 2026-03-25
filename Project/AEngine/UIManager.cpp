@@ -147,7 +147,7 @@ namespace UIManager {
 
     void IconWithText::Initialize(Transform const& bgPanelTransform, Transform const& iconTransform, Utils::AnchorMode const& textAnchorMode) {
         bgPanel = UIManager::Panel{
-            {bgPanelTransform.size}, StatsBGColor(), Utils::AnchorMode::TOP_CENTER
+            {bgPanelTransform.size}, PanelColor(), Utils::AnchorMode::TOP_CENTER
         };
 
         icon = UIManager::Panel{
@@ -172,6 +172,20 @@ namespace UIManager {
         icon.Draw();
         // Update the number of turns remaining
         textObj.TextContent(textContent);
+        textObj.Draw();
+    }
+
+    PanelText::PanelText(Panel _panel, TextObject _textObj)
+        : bgPanel{ _panel }, textObj{_textObj} {
+        textObj.SetPosition(bgPanel.GetTransform());
+    }
+
+    void PanelText::Update(std::string text) {
+        textObj.TextContent(text);
+    }
+
+    void PanelText::Draw() {
+        bgPanel.Draw();
         textObj.Draw();
     }
 }

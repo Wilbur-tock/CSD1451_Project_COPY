@@ -13,7 +13,8 @@ TextObject::TextObject(std::string _textContent, float _scale, Color _color, Tra
 void TextObject::TextContent(std::string newText) {
 	prevTextContent = textContent;
 	textContent = newText;
-	// Wrap text if there is a width stated
+
+	// Wrap text if there is a width stated for the text object
 	if (transform.size.x > 0) {
 		Utils::WrapText(textContent, font, textScale, transform.size.x);
 		//std::cout << textContent << '\n';

@@ -564,6 +564,7 @@ namespace AbilitiesManager {
 	// UI OBJECTS
 	UIManager::Panel inventoryBackground;
 	Button inventoryAbilityButton[Config::MAX_INVENTORY_COUNT];
+	UIManager::PanelText inventoryInfoPanel;
 
 	// Selecting Ability UI
 	UIManager::Panel abilitySelectorBG;
@@ -592,6 +593,16 @@ namespace AbilitiesManager {
 		float startX = inventoryBGTrans.pos.x + borderPaddingX;
 		float startY = inventoryBGTrans.pos.y - borderPaddingY;
 
+		AEVec2 inventoryInfoPanelPos{ 300,150 };
+		Color panelColor = PanelColor();
+		panelColor.SetAlpha(0.75f);
+
+		inventoryInfoPanel = UIManager::PanelText{
+			UIManager::Panel{inventoryInfoPanelPos, panelColor, Utils::AnchorMode::BOTTOM_RIGHT},
+			TextObject{"", 0.6f, Color{0,0,0}, Transform{{0,0}, {inventoryInfoPanelPos.x - 10,inventoryInfoPanelPos.y - 10}} }
+		};
+		//inventoryInfoPanel.AddOffsetPosition({ 0, -75.0f });
+		
 		// get card texture
 		AEGfxTexture* cardTexture = AssetsManager::GetTexture("Assets/card_texture.png");
 
@@ -640,7 +651,7 @@ namespace AbilitiesManager {
 				OnClickAbilityCard(ability);
 				});
 			card.GetTitle().TextContent(ability.GetName()); // update title
-			button.GetTextObject().TextContent(ability.GetDescription()); // update description
+			button.GetTextObject().TextContent(ability.GetDescriptionWithStats()); // update description
 
 			// Update and draw
 			card.Update();
@@ -674,10 +685,16 @@ namespace AbilitiesManager {
 					// Can only select ability that is not current selected
 					btn.SetOnClick([this, i]() {
 						ChangeCurrentAbility(i);
-						});
+					});
 				}
 
+				// Update icon
 				btn.SetIcon(ability->GetTexture());
+
+				if (btn.IsHovered()) {
+					inventoryInfoPanel.Update(ability->GetDescriptionWithStats());
+					inventoryInfoPanel.Draw();
+				}
 			}
 			else {
 				// Empty slot — clear onclick so it does nothing

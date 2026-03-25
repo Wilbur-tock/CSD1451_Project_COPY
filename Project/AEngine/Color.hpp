@@ -17,6 +17,8 @@ public:
 	void SetColor(float _r, float _g, float _b, float _a = 1.0f);
 	void SetColor(Color const& _color);
 
+	void SetAlpha(float newAlpha) { a = newAlpha; }
+
 private:
 	float r, g, b, a;
 	float min = 0.f, max = 1.f;
@@ -25,6 +27,6 @@ private:
 Color const& PlayerHPColor();
 Color const& EnemyHPColor();
 Color const& ShieldColor();
-Color const& StatsBGColor();
+Color const& PanelColor();
 
 #endif // ! COLOR_HPP

@@ -21,8 +21,6 @@ namespace CannonManager {
         : GameObject(_pos, _size, _texture, _tileId, Color{ 1,1,1,1 }), isShootingRight{ _isShootingRight }, isPlayerControlled{ _isPlayerControlled } {
     }
 
-    TextObject debugText;
-
     void Cannon::Initialize(AbilitiesManager::AbilityController* controller) {
         if (!controller) {
             std::cerr << "[CannonManager] abilityController is nullptr!" << '\n';
@@ -32,9 +30,6 @@ namespace CannonManager {
         abilityController = controller;
         controller->ChangeCurrentAbility(0); // Set default projectile as the default ability
         SetProjectiles();
-
-        //Initialize UI Objects
-        debugText = { "", Utils::debuggerInfo.first * 0.8f, Utils::debuggerInfo.second, { 0.5f, 0.99f } };
 
         float x = transform.pos.x - (transform.size.x * 1.5f);
         if (!isShootingRight) x = transform.pos.x + (transform.size.x * 1.5f);
@@ -518,9 +513,7 @@ namespace CannonManager {
         }
     }
 
-    void Cannon::DebugInfo() {
-        if (!Utils::isDebuggerOn) return;
-
+    std::string Cannon::DebugInfo() {
         float mX = 0, mY = 0;
         Utils::GetWorldMousePos(mX, mY);
         float cX = transform.pos.x, cY = transform.pos.y;
@@ -583,10 +576,6 @@ namespace CannonManager {
             debugStr += activeProjectiles.back().DebugInfo();
         }
 
-        //UIManager::Panel panel{ {500,500}, {1,1,1,0.5f}, Utils::AnchorMode::TOP_RIGHT };
-        //panel.Draw();
-
-        debugText.TextContent(debugStr);
-        debugText.Draw();
+        return debugStr;
     }
 }
