@@ -23,13 +23,25 @@ namespace LevelSelect {
         std::array<Button, kTotalButtons> levelButtons;
         Button backButton;
 
-        TextObject titleText;
-        TextObject subtitleText;
-        TextObject progressText;
         TextObject hintText;
 
         AEGfxTexture* bgTexture = nullptr;
         AEGfxTexture* buttonTexture = nullptr;
+
+        constexpr float kLevelButtonSize = 170.0f;
+        constexpr float kLevelButtonGap = 50.0f;
+        constexpr float kLevelButtonRowCenterY = 40.0f;
+
+        AEVec2 GetLevelButtonTopLeft(int buttonIndex, int totalButtons, float buttonSize, float gap, float rowCenterY) {
+            const float groupWidth = (totalButtons * buttonSize) + ((totalButtons - 1) * gap);
+            const float startX = -groupWidth * 0.5f;
+            const float topY = rowCenterY - (buttonSize * 0.5f);
+
+            return {
+                startX + buttonIndex * (buttonSize + gap),
+                topY
+            };
+        }
 
         GameStateManager::GameState LevelIndexToState(int levelIndex) {
             return static_cast<GameStateManager::GameState>(
@@ -45,28 +57,31 @@ namespace LevelSelect {
             GameStateManager::next = LevelIndexToState(levelIndex);
         }
 
-        void ConfigureLevelButton(Button& button, int levelIndex, float x, float y, float width, float height) {
+        void ConfigureLevelButton(Button& button, int levelIndex, AEVec2 topLeftPos, float buttonSize) {
             const bool unlocked = LevelManager::IsLevelUnlocked(levelIndex);
 
             std::string label = std::to_string(levelIndex + 1);
 
-            Color buttonColor(0.50f, 0.50f, 0.54f, 1.0f); // locked default
+            Color buttonColor(0.46f, 0.46f, 0.50f, 1.0f);
+            Color textColor(0.20f, 0.20f, 0.22f, 1.0f);
+
             if (unlocked) {
-                buttonColor = Color(0.88f, 0.92f, 0.62f, 1.0f); // pale yellow-green like level-select style
+                buttonColor = Color(0.88f, 0.92f, 0.62f, 1.0f);
+                textColor = Color(0.16f, 0.16f, 0.16f, 1.0f);
             }
 
             button = Button(
-                TextObject{ label, 1.5f, Color(0.18f, 0.18f, 0.18f, 1.0f) },
+                TextObject{ label, 1.55f, textColor },
                 Utils::AnchorMode::CENTER,
-                { x, y },
-                { width, height },
+                topLeftPos,
+                { buttonSize, buttonSize },
                 buttonColor,
-                buttonTexture,
+                AssetsManager::squareTexture,
                 nullptr,
                 nullptr
             );
         }
-    }
+    } // close anonymous namespace
 
     float PixelToNdcX(float pixelX) {
         return pixelX / (Config::SCREEN_WIDTH * 0.5f);
@@ -103,25 +118,20 @@ namespace LevelSelect {
         CameraManager::camera.SetPosition({ 0.0f, 0.0f });
         CameraManager::camera.SetState(CameraManager::CameraController::STATIC);
 
-        const float btnWidth = 180.0f;
-        const float btnHeight = 180.0f;
-        const float spacing = 215.0f;
-        const float rowY = 40.0f;
+        for (int i = 0; i < kTotalButtons; ++i) {
+            AEVec2 buttonTopLeft = GetLevelButtonTopLeft(
+                i,
+                kTotalButtons,
+                kLevelButtonSize,
+                kLevelButtonGap,
+                kLevelButtonRowCenterY
+            );
 
-        // Shift the whole 3-button group slightly left side
-        const float groupCenterX = -100.0f;
+            ConfigureLevelButton(levelButtons[i], i, buttonTopLeft, kLevelButtonSize);
+        }
 
-        const float leftX = groupCenterX - spacing;
-        const float centerX = groupCenterX;
-        const float rightX = groupCenterX + spacing;
-
-        ConfigureLevelButton(levelButtons[0], 0, leftX, rowY, btnWidth, btnHeight);
         levelButtons[0].SetOnClick(OnLevel1Clicked);
-
-        ConfigureLevelButton(levelButtons[1], 1, centerX, rowY, btnWidth, btnHeight);
         levelButtons[1].SetOnClick(LevelManager::IsLevelUnlocked(1) ? OnLevel2Clicked : nullptr);
-
-        ConfigureLevelButton(levelButtons[2], 2, rightX, rowY, btnWidth, btnHeight);
         levelButtons[2].SetOnClick(LevelManager::IsLevelUnlocked(2) ? OnLevel3Clicked : nullptr);
 
         backButton = Button(
@@ -134,28 +144,6 @@ namespace LevelSelect {
             nullptr,
             OnBackClicked
         );
-
-
-        titleText = {
-             "SELECT LEVEL",
-             1.7f,
-             Color(0.0f, 0.0f, 0.0f, 1.0f),
-             { 0.0f, 0.0f }
-        };
-
-        subtitleText = {
-            "Complete a level to unlock the next one",
-            0.85f,
-            Color(0.0f, 0.0f, 0.0f, 0.90f),
-            { 0.0f, 0.0f }
-        };
-
-        progressText = {
-            "Currently unlocked: LEVEL " + std::to_string(LevelManager::HighestUnlockedLevel() + 1),
-            0.75f,
-            Color(0.0f, 0.0f, 0.0f, 0.95f),
-            { 0.0f, 0.0f }
-        };
 
         hintText = {
             "Grey buttons are locked   |   [1-3] Select unlocked level   |   ESC / BACK = Main Menu",
