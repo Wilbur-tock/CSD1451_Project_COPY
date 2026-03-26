@@ -77,11 +77,11 @@ namespace CannonManager {
             // Calculate angle toward mouse in world space
             cannonAngle = atan2(worldMouseY - transform.pos.y, worldMouseX - transform.pos.x);
 
-            //std::cout << "Angle: " << cannonAngle << "Mouse x: " << worldMouseX << " y:" << worldMouseY
-            //    << " Cannon pos x: " << transform.pos.x << " y: " << transform.pos.y << '\n';
             // Add limits so it can only turn facing upwards or downwards limits
             ClampAngle(cannonAngle);
-            DrawTrajectory();
+            // DrawTrajectory() is called in Draw() instead of here so the dots
+            // render after MapManager::DrawMap(), not before it. Calling it here
+            // meant the map painted over every dot on the same frame they were drawn.
         }
         else {
             EnemyAI();
@@ -98,11 +98,11 @@ namespace CannonManager {
         AEMtx33 mat = GraphicsManager::CreateTransformMatrix(transform.pos.x, transform.pos.y, transform.size.x, transform.size.y, cannonAngle);
         GraphicsManager::DrawGameObject(texture, mat, textureColor);
 
-        // Draw all active projectiles here, NOT inside UpdateProjectile().
-        // Cannon::Draw() is called from Level::Draw() after BgAnimation::Draw(),
-        // so projectiles are guaranteed to render on top of the scrolling clouds.
-        // Drawing in UpdateProjectile() (which runs during Level::Update() before
-        // Level::Draw()) caused clouds to paint over the projectile every frame.
+        // Draw trajectory here, after the map has been drawn in Level::Draw().
+        // Calling this in Update() caused the map to paint over the dots every frame.
+        if (isPlayerControlled) DrawTrajectory();
+
+        // Draw all active projectiles
         for (Projectile& projectile : activeProjectiles) {
             if (projectile.IsActive()) {
                 projectile.Draw();
@@ -494,7 +494,10 @@ namespace CannonManager {
             float drawX = startX + (vx * t);
             float drawY = startY + (vy * t) - (0.5f * PhysicsManager::GRAVITY * t * t);
 
-            float alpha = 1.0f - static_cast<float>(i / numDots);
+            // Fade out toward the end of the arc.
+            // Cast to float BEFORE dividing - integer division would always produce 0
+            // here since i < numDots, making alpha stuck at 1.0f for every dot.
+            float alpha = 1.0f - (static_cast<float>(i) / static_cast<float>(numDots));
             GraphicsManager::DrawGameObject(AssetsManager::circleTexture, GraphicsManager::CreateTransformMatrix(drawX, drawY, size, size, 0), { 1,1,1, alpha });
         }
     }
