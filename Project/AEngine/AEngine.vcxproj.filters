@@ -231,7 +231,7 @@
     <ClCompile Include="AbilitiesFileManager.cpp">
       <Filter>Source Files\Game</Filter>
     </ClCompile>
-    <ClCompile Include="bgAnimation.cpp">
+    <ClCompile Include="BgAnimation.cpp">
       <Filter>Source Files\Game States</Filter>
     </ClCompile>
   </ItemGroup>
@@ -374,7 +374,7 @@
     <ClInclude Include="AbilitiesFileManager.hpp">
       <Filter>Header Files\Game</Filter>
     </ClInclude>
-    <ClInclude Include="bgAnimation.hpp">
+    <ClInclude Include="BgAnimation.hpp">
       <Filter>Header Files\Game States</Filter>
     </ClInclude>
   </ItemGroup>

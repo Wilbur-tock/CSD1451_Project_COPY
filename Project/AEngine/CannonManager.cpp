@@ -31,8 +31,11 @@ namespace CannonManager {
         controller->ChangeCurrentAbility(0); // Set default projectile as the default ability
         SetProjectiles();
 
+        // Initialize cannon position
         float x = transform.pos.x - (transform.size.x * 1.5f);
         if (!isShootingRight) x = transform.pos.x + (transform.size.x * 1.5f);
+
+        // Initialize UI
 
         worldSpaceShotBar = UIManager::Bar{ { x, transform.pos.y + (transform.size.y * 1.5f) },
             { 15,100 }, Color{ 0,1,0 }, UIManager::FillType::TOP_TO_BOTTOM };
@@ -40,7 +43,7 @@ namespace CannonManager {
         Transform trans{ { 0,0 }, {600,15} };
         Utils::SetAnchoredPosition(trans, Utils::AnchorMode::BOTTOM_CENTER);
         trans.pos.y += 100 + 15;
-        screenOverlayShotBar = UIManager::Bar{ trans.pos, trans.size, Color{ 0,1,0 }, UIManager::FillType::LEFT_TO_RIGHT };
+        screenOverlayShotBar = UIManager::Bar{ trans.pos, trans.size, Color{ 0.8f,0.8f,0 }, UIManager::FillType::LEFT_TO_RIGHT };
     }
 
     void Cannon::SetProjectiles() {
@@ -98,8 +101,6 @@ namespace CannonManager {
         AEMtx33 mat = GraphicsManager::CreateTransformMatrix(transform.pos.x, transform.pos.y, transform.size.x, transform.size.y, cannonAngle);
         GraphicsManager::DrawGameObject(texture, mat, textureColor);
 
-        // Draw trajectory here, after the map has been drawn in Level::Draw().
-        // Calling this in Update() caused the map to paint over the dots every frame.
         if (isPlayerControlled) DrawTrajectory();
 
         // Draw all active projectiles
@@ -494,11 +495,8 @@ namespace CannonManager {
             float drawX = startX + (vx * t);
             float drawY = startY + (vy * t) - (0.5f * PhysicsManager::GRAVITY * t * t);
 
-            // Fade out toward the end of the arc.
-            // Cast to float BEFORE dividing - integer division would always produce 0
-            // here since i < numDots, making alpha stuck at 1.0f for every dot.
-            float alpha = 1.0f - (static_cast<float>(i) / static_cast<float>(numDots));
-            GraphicsManager::DrawGameObject(AssetsManager::circleTexture, GraphicsManager::CreateTransformMatrix(drawX, drawY, size, size, 0), { 1,1,1, alpha });
+            float alpha = 1.0f - (static_cast<float>(i/ numDots));
+            GraphicsManager::DrawGameObject(AssetsManager::circleTexture, GraphicsManager::CreateTransformMatrix(drawX, drawY, size, size, 0), { 0,0,0, alpha });
         }
     }
 

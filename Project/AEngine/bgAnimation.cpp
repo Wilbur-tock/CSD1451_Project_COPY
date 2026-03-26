@@ -93,12 +93,12 @@ namespace BgAnimation::Projectiles {
     static constexpr float kGravity = 240.0f;
 
     struct BgProjectile {
-        float x, y;         // screen-space center (world origin = screen center)
-        float vx, vy;       // velocity in px/s; vx always positive (left-to-right)
-        float size;         // quad diameter in pixels
+        float x = 0, y = 0;         // screen-space center (world origin = screen center)
+        float vx = 0, vy = 0;       // velocity in px/s; vx always positive (left-to-right)
+        float size = 0.0f;         // quad diameter in pixels
         Color color;
-        float respawnTimer; // seconds until relaunch; 0 = currently active
-        bool  active;
+        float respawnTimer = 0.0f; // seconds until relaunch; 0 = currently active
+        bool  active = true;
     };
 
     static BgProjectile  pool[kMaxProjectiles];

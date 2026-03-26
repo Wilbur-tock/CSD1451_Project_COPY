@@ -323,7 +323,6 @@ namespace MapEditor {
 			bool shiftHold = AEInputCheckCurr(AEVK_LSHIFT) || AEInputCheckCurr(AEVK_RSHIFT);
 
 			if (leftHold || rightHold) {
-				std::cout << std::boolalpha << leftHold << ' ' << "Edited map" << '\n';
 				bool isDrawing = leftHold; // left click for drawing right click for erasing
 				ChangeBlock(gridX, gridY, isDrawing);
 

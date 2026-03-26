@@ -138,7 +138,7 @@ namespace Settings {
         float pctY = sliderY + 25.0f;
         Utils::NormalizeCoordinates(pctX, pctY);
 
-        TextObject pctText = {
+        TextObject pctText = TextObject{
             pctStr,
             0.9f,
             Color(0.0f, 0.0f, 0.0f, 1.0f),

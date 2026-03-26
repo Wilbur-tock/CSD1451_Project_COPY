@@ -24,8 +24,8 @@
         "Projectile_Stats": {
             "ProjectileID": 1,
             "Damage_Multiplier": 1,
-            "Base_Damage": 25,
-            "Radius": 2,
+            "Base_Damage": 50,
+            "Radius": 3,
             "Charges": 1,
             "unlimited_charges": false
         },
