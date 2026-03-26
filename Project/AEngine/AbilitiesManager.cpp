@@ -1,6 +1,7 @@
 #include "AbilitiesManager.hpp"
 
 #include "AbilitiesFileManager.hpp"
+#include "GameTrackingManager.hpp"
 
 #include "Utils.hpp"
 #include "Color.hpp"
@@ -396,22 +397,18 @@ namespace AbilitiesManager {
 	}
 
 	// Use the currently select ability if it has unlimited or any charges remaining
-	bool AbilityController::UseAbility() {
-		if (GetCurrentAbility().GetProjectile().unlimitedCharges) return true;
+	void AbilityController::UseAbility() {
+		if (GetCurrentAbility().GetProjectile().unlimitedCharges) return;
+		if (GetCurrentAbility().AbilityCharges() <= 0) return; // has no ability charges can't use this ability return false without updating the inventory
 
-		// if debugger is on even without having any charges can use ability but don't update the inventory
-		if (Utils::isDebuggerOn || GetCurrentAbility().AbilityCharges() > 0) {
-			AbilityEffects();
-		}
-
-		if (GetCurrentAbility().AbilityCharges() <= 0) return false; // has no ability charges can't use this ability return false without updating the inventory
+		AbilityEffects();
+		GameTrackingManager::gameData.AddAbilityUsed(isPlayerControlled, static_cast<int>(GetCurrentAbility().GetType()));
 
 		// Minus ability charges from current ability and remove from inventory
 		RemoveAbility(SetCurrentAbility());
 
 		std::cout << "[AbilitiesManager] Ability used: " + GetCurrentAbility().GetName()
 			+ " Charges Remaining: " + std::to_string(GetCurrentAbility().AbilityCharges()) << '\n';
-		return true;
 	}
 
 	// Add ability charges from the based on selection
@@ -645,7 +642,8 @@ namespace AbilitiesManager {
 
 			// Update onClick and texture every frame
 			card.SetIconTexture(ability.GetTexture());
-			card.SetBGColor(ability.GetType() == AbilityType::STATISTICS ? Color{ 0.9f,0.9f,0 } : ability.GetType() == AbilityType::OFFENSIVE ? Color{ 0.9f,0,0 } : Color{ 0,0,0.9f });
+			card.SetBGColor(ability.GetType() == AbilityType::STATISTICS ? Color{ 0.75f,0.75f,0 } : 
+				ability.GetType() == AbilityType::OFFENSIVE ? Color{ 0.9f,0,0 } : Color{ 0,0,0.9f });
 
 			Button& button = card.GetButton();
 			button.SetOnClick([this, ability]() {

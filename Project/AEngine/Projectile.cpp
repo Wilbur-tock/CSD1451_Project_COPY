@@ -28,6 +28,7 @@ void Projectile::AbilityActivation(bool isPlayer, Ability const& ability) {
 
     bool leftClick = AEInputCheckTriggered(AEVK_LBUTTON);
 
+    // Randomise AI activation of ability
     if (!isPlayer && mode != ProjectileMode::BOMB && mode != ProjectileMode::NUKE) {
         aiLeftClickTimer += PhysicsManager::g_dt;
 
@@ -127,7 +128,6 @@ void Projectile::AbilityActivation(bool isPlayer, Ability const& ability) {
         if (hasCollided) {
             isAbilityTriggered = true;
             SetAreaEffects(ability, false);
-            std::cout << "Poison!" << '\n';
         }
         break;
     case ProjectileMode::INSTANT_BASTION:
@@ -241,7 +241,7 @@ void Projectile::Initialize(Transform const& _transform, int _activeId, AEVec2 c
     // Set velocity
     velocity.x = _velocity.x;
     velocity.y = _velocity.y;
-    timer = Config::PROJECTILE_LIFESPAN;
+    lifespanTimer = Config::PROJECTILE_LIFESPAN;
 }
 
 void Projectile::Update(bool isPlayerShot, float dt) {
@@ -367,13 +367,13 @@ void Projectile::SetDestroy() {
 
     // Start timer if it going to be destroy and projectile stops moving
     if (toBeDestroyed) {
-        timer -= 1.0f * PhysicsManager::g_dt;
+        lifespanTimer -= 1.0f * PhysicsManager::g_dt;
     }
     else { 
         // Check whatever or not projectile is set to be destroyed
         // if it grounded or speedSq is very small, destroyed the projectile after a timer
         if (isGrounded && speedSq <= 0.1f) {
-            timer = Config::PROJECTILE_LIFESPAN;
+            lifespanTimer = Config::PROJECTILE_LIFESPAN;
             toBeDestroyed = true;
         }
     }
@@ -382,7 +382,7 @@ void Projectile::SetDestroy() {
 bool Projectile::Destroy() {
     SetDestroy();
     // Destroy projectile
-    if (timer <= 0.0f || !IsInMapBounds()) {
+    if (lifespanTimer <= 0.0f || !IsInMapBounds()) {
         InstantDestroy();
         return true; // projectile has been destroy
     }
@@ -486,7 +486,7 @@ std::string Projectile::DebugInfo() {
         + "\nVelocity x: " + Utils::FormatFloat(velocity.x, 2) + " y: " + Utils::FormatFloat(velocity.y, 2)
         + "\nGrounded: " + std::string(isGrounded ? "true" : "false")
         + "\nTo Be Destroyed: " + std::string(toBeDestroyed ? "true" : "false")
-        + "\nTimer: " + Utils::FormatFloat(timer, 2)
+        + "\nTimer: " + Utils::FormatFloat(lifespanTimer, 2)
         + "\nAttack Charges: " + std::to_string(AttackCharges())
         + "\nDamage Radius: " + std::to_string(attribute.DamageRadius())
         + "\nCollisionTriggered: " + std::string(hasCollided ? "true" : "false")
@@ -496,7 +496,7 @@ std::string Projectile::DebugInfo() {
 
 void Projectile::InstantDestroy() {
     isActive = hasCollided = toBeDestroyed = false;
-    timer = 0.0f;
+    lifespanTimer = 0.0f;
 }
 
 void Projectile::PlayModeEffect() {

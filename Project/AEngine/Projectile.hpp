@@ -129,11 +129,9 @@ private:
 	int projectileId = 0, attackCharges = 1;
 	std::string projectileName;
 	ProjectileMode mode = ProjectileMode::ATTACK;
-	std::string modeName;
 
 	float gravityScale = 1.0f;
-
-	float timer = 0.0f; // lifespan timer
+	float lifespanTimer = 0.0f;
 
 	// Phasing variables to ensure that projectile does not collide with any blocks that are newly build by abilities
 	bool canPhase = false;

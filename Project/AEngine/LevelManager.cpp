@@ -1,17 +1,19 @@
 #include "LevelManager.hpp"
 
+#include "GameTrackingManager.hpp"
+
 namespace LevelManager {
 	Level* selectedLevel = nullptr;
 	std::vector<Level> levelDatas;
-	int highestUnlockedLevel = FIRST_LEVEL_INDEX;
+	int highestUnlockedLevel = Config::FIRST_LEVEL_INDEX;
 
 	void LoadAllLevels() {
 		selectedLevel = nullptr;
 		levelDatas.clear();
-		levelDatas.reserve(TOTAL_LEVEL_COUNT);
+		levelDatas.reserve(Config::TOTAL_LEVEL_COUNT);
 
 		// Load all the data levels and add into the vector
-		for (int i = 0; i < TOTAL_LEVEL_COUNT; ++i) {
+		for (int i = 0; i < Config::TOTAL_LEVEL_COUNT; ++i) {
 			Level data{ i };
 			levelDatas.push_back(data);
 			levelDatas[i].Load();
@@ -39,11 +41,11 @@ namespace LevelManager {
 	}
 
 	int LevelCount() {
-		return TOTAL_LEVEL_COUNT;
+		return Config::TOTAL_LEVEL_COUNT;
 	}
 
 	bool IsValidLevelIndex(int levelIndex) {
-		return levelIndex >= 0 && levelIndex < TOTAL_LEVEL_COUNT;
+		return levelIndex >= 0 && levelIndex < Config::TOTAL_LEVEL_COUNT;
 	}
 
 	bool IsLevelUnlocked(int levelIndex) {
@@ -68,7 +70,7 @@ namespace LevelManager {
 	}
 
 	void ResetProgress() {
-		highestUnlockedLevel = FIRST_LEVEL_INDEX;
+		highestUnlockedLevel = Config::FIRST_LEVEL_INDEX;
 	}
 
 	void InitializeLevel() {

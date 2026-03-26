@@ -46,10 +46,11 @@ public:
 	// Default ctor
 	Level(int _leveId);
 
-	// Checks for level
+	// Getters and Setters
+public:
 	int Id() const { return levelId; }
 	std::string const& Name() const { return levelName; }
-	// Getters and Setters
+	int Rounds() const { return roundCount; }
 
 	TowerShield& GetTowerShield(bool isPlayer) { return isPlayer ? playerShield : enemyShield; }
 	CannonManager::Cannon& GetCannon(bool isPlayer) { return isPlayer ? playerCannon : enemyCannon; }
@@ -59,7 +60,7 @@ public:
 	std::vector<Character>& GetCharacters(bool isPlayer) { return (isPlayer ? playerCharacters : enemies); }
 
 	// Member functions
-
+public:
 	// Read level map data and load level resources
 	void Load();
 	void Initalize();

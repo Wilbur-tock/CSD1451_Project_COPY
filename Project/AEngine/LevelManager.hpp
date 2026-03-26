@@ -5,9 +5,6 @@
 #include "Level.hpp"
 
 namespace LevelManager {
-	constexpr int TOTAL_LEVEL_COUNT = 3;
-	constexpr int FIRST_LEVEL_INDEX = 0;
-
 	void LoadAllLevels(); // Load all levels data
 
 	void LoadLevel(int levelId); // Load the level data based on the level index given

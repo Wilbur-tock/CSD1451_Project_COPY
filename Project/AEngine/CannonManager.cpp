@@ -296,8 +296,8 @@ namespace CannonManager {
         hasCannonShot = true;
 
         // Track data
-        isPlayerControlled ? ++GameTrackingManager::data.playerShotsFired : ++GameTrackingManager::data.enemyShotsFired;
-
+        GameTrackingManager::gameData.AddShotFired(isPlayerControlled);
+       
         std::cout << "[CannonManager] Projectile Fired!\n";
     }
 
@@ -339,9 +339,8 @@ namespace CannonManager {
         if (activeProjectiles.empty()) return;
         for (int i = static_cast<int>(activeProjectiles.size() - 1); i >= 0; --i) {
             if (!activeProjectiles[i].IsActive()) {
-                activeProjectiles[i].HasHit() ?
-                    isPlayerControlled ? ++GameTrackingManager::data.playerShotsHit : ++GameTrackingManager::data.enemyShotsHit :
-                    isPlayerControlled ? ++GameTrackingManager::data.playerShotsMiss : ++GameTrackingManager::data.enemyShotsMiss;
+
+                GameTrackingManager::gameData.AddShots(isPlayerControlled, activeProjectiles[i].HasHit());
 
                 // Erase from vector
                 activeProjectiles.erase(activeProjectiles.begin() + i);
@@ -396,7 +395,7 @@ namespace CannonManager {
         case ProjectileMode::AIR_DROP:
         {
             // If has collided with something drop a bomb
-            if (hasCannonShot && activeProjectiles.back().HasCollided()) {
+            if (hasCannonShot && activeProjectiles.back().HasHit()) {
                 abilityController->IsAbilityTriggered(true);
                 Character const& airDropTarget = *(LevelManager::CurrentLevel()->RandomCharacterObj(!isPlayerControlled));
 

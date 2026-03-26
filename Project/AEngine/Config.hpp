@@ -11,6 +11,9 @@ namespace Config {
 	constexpr int GRID_HEIGHT = static_cast<int>(900 * heightMultiplier / TILE_SIZE) + 1, GRID_WIDTH = static_cast<int>(SCREEN_WIDTH* widthMultiplier / TILE_SIZE);
 	constexpr int MIN_GRID_X = 0, MAX_GRID_X = GRID_WIDTH - 1, MIN_GRID_Y = 0, MAX_GRID_Y = GRID_HEIGHT - 1;
 
+	constexpr int TOTAL_LEVEL_COUNT = 3;
+	constexpr int FIRST_LEVEL_INDEX = 0;
+
 	// Use font size to load font
 	constexpr int FONT_SIZE = 24;
 	// Use font scale to adjust the size of the text when it is being drawn

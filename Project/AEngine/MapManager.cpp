@@ -6,7 +6,7 @@
 #include "GameTrackingManager.hpp"
 
 namespace MapManager {
-	std::vector<std::vector<Tile>> *currentMap;
+	std::vector<std::vector<Tile>> *currentMap; 
 
 	static const char* FLOOR_TOP_PATH = "Assets/floorTop.png";  // top layer floor
 	static const char* FLOOR_FILL_PATH = "Assets/floorBody.png";  // underground fill of floor
@@ -283,7 +283,6 @@ namespace MapManager {
 	}
 
 	void DrawMap(std::vector<std::vector<Tile>> const& map, bool drawCharacters) {
-		++GameTrackingManager::data.drawMapCount;
 		AEGfxSetBackgroundColor(0.92f, 0.92f, 0.95f); 
 
 		int mapHeight = static_cast<int>(map.size());
@@ -319,7 +318,6 @@ namespace MapManager {
 				}
 
 				GraphicsManager::DrawGameObject(baseTex, tileMat, drawColor);
-				++GameTrackingManager::data.drawTilesCount;
 
 				if (tile.IsBlocks() && damageFrac > 0.0f) {
 					AEGfxTexture* cracksTex = nullptr;

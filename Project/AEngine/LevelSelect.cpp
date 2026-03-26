@@ -18,7 +18,7 @@
 namespace LevelSelect {
 
     namespace {
-        constexpr int kTotalButtons = LevelManager::TOTAL_LEVEL_COUNT;
+        constexpr int kTotalButtons = Config::TOTAL_LEVEL_COUNT;
 
         std::array<Button, kTotalButtons> levelButtons;
         Button backButton;
@@ -206,7 +206,7 @@ namespace LevelSelect {
             return;
         }
 
-        for (int i = 0; i < LevelManager::TOTAL_LEVEL_COUNT; ++i) {
+        for (int i = 0; i < Config::TOTAL_LEVEL_COUNT; ++i) {
             if (AEInputCheckTriggered(static_cast<u8>(AEVK_1 + i)) &&
                 LevelManager::IsLevelUnlocked(i)) {
                 AudioManager::PlaySFX(AudioManager::SFX::UIButton);

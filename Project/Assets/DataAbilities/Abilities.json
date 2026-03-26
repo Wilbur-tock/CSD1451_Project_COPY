@@ -17,7 +17,7 @@
 
     {
         "Name": "Bomb",
-        "Description": "The bomb will detonate and deal damage within a 3 tile radius upon collision OR Detonate the projectile upon triggered, deal damage double its original tile radius instead anywhere in the map",
+        "Description": "The projectile detonates on impact, dealing damage within a 3-tile radius. Alternatively, left click while mid-flight to double the blast radius to deal damage within a 6-tiles radius",
         "Type": 2,
         "Tier": 2,
         "Texture": "Icon_Bomb",
@@ -42,7 +42,7 @@
 
     {
         "Name": "Nuke",
-        "Description": "Triggered upon a second input, instanly drop straight down to the ground and explode. Upon colliding, deal 100% damage with a radius of 10 Tiles",
+        "Description": "Left click while mid-flight to plummet instantly to the ground. Upon impact, trigger an explosion dealing 100% damage within a 10-tile radius",
         "Type": 2,
         "Tier": 4,
         "Texture": "Icon_Nuke",
@@ -73,11 +73,11 @@
     },
 
     {
-        "Name": "Auto Aim",
-        "Description": "Randomly choose an opponent target to aim and will shoot towards the chosen target. Does not guarentee to hit the target.",
+        "Name": "Auto Shot",
+        "Description": "Regardless of player aim, the projectile automatically selects a random opponent target and fires toward them. A hit is not guaranteed",
         "Type": 2,
         "Tier": 1,
-        "Texture": "Icon_AutoAim",
+        "Texture": "Icon_AutoShot",
         "Projectile_Stats": {
             "ProjectileID": 4,
             "Damage_Multiplier": 1,
@@ -106,7 +106,7 @@
 
     {
         "Name": "Piercing",
-        "Description": "Phase through everythingg and deal 25 damage to everything within its 3 tile radius path",
+        "Description": "Phase through everything and deal 25 damage to everything within its 3 tile radius path",
         "Type": 2,
         "Tier": 4,
         "Texture": "Icon_Piercing",
@@ -244,7 +244,7 @@
 
     {
         "Name": "Wall Buster",
-        "Description": "Destroy all blocks within the same 1 tile column",
+        "Description": "Destroys all blocks within a 1-tile width across the entire column",
         "Type": 2,
         "Tier": 2,
         "Texture": "Icon_WallBuster",
@@ -260,7 +260,7 @@
 
     {
         "Name": "Small Wall",
-        "Description": "Left-click to build a 1x5 tile segment while the projectile is active",
+        "Description": "Left click to build a 1x5 tile segment while the projectile is mid-flight",
         "Type": 3,
         "Tier": 1,
         "Texture": "Icon_Wall",
@@ -290,7 +290,7 @@
 
     {
         "Name": "Wall",
-        "Description": "Left click to build a massive 1 tile segment covering the entire map while the projectile is active",
+        "Description": "Left click to build a massive 1 tile segment covering the entire map while the projectile is mid-flight",
         "Type": 3,
         "Tier": 3,
         "Texture": "Icon_Wall",
@@ -366,7 +366,7 @@
 
     {
         "Name": "Invisibility",
-        "Description": "Randomly choose one of your character to be invinsible, they can't be damage for 3 round",
+        "Description": "Randomly choose one of your characters to be invinsible, they can't be damage for 3 round",
         "Type": 3,
         "Tier": 4,
         "Texture": "Icon_Invisibility",
@@ -399,7 +399,7 @@
 
     {
         "Name": "Gravity",
-        "Description": "Increase gravity on opponent projectiles, making them miss their shot",
+        "Description": "Enemy projectiles are now subject to increased gravitational pull, significantly altering their flight paths and reducing their effective range",
         "Type": 3,
         "Tier": 2,
         "Texture": "Icon_Gravity",
@@ -408,7 +408,7 @@
             "Rounds": 1,
             "Is_Postive": false,
             "Target_Self": false,
-            "Gravity_Scale": 2.5,
+            "Gravity_Scale": 1.5,
             "Damage_Each_Round": 0,
             "Effect_Radius": 0
         }

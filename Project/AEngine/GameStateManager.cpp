@@ -42,7 +42,7 @@ namespace GameStateManager {
     static void SetAndPlayBGM();
 
     void Load() {
-        GameTrackingManager::GameStart();
+        GameTrackingManager::gameData.GameStart();
 
         // Used to set randomiser seed
         srand(static_cast<unsigned int>(time(NULL)));
@@ -258,7 +258,7 @@ namespace GameStateManager {
     }
 
     void Exit() {
-        GameTrackingManager::GameEnd();
+        GameTrackingManager::gameData.GameEnd();
         AssetsManager::Unload();
 
         MainMenu::Unload();

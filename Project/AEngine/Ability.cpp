@@ -14,7 +14,7 @@ Ability::Ability(int _id, std::string _name, std::string _description, AbilityTy
 	defaultChance{ tierChances[static_cast<int>(_tier) - 1] }, chance{ defaultChance } {}
 
 std::string Ability::GetDescriptionWithStats() const {
-	if (type == AbilityType::OFFENSIVE) {
+	if (type == AbilityType::OFFENSIVE && (id == 0 || projectile.projectileId != 0)) {
 		return "Damage: " + std::to_string(projectile.baseDamage) + '\n'
 			+ "Damage Radius: " + std::to_string(projectile.radius) 
 			+ "\n\n" + description;

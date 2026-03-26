@@ -13,6 +13,7 @@
 #include "EffectsManager.hpp"
 #include "GraphicsManager.hpp"
 #include "UIManager.hpp"
+#include "GameTrackingManager.hpp"
 
 AEGfxTexture* playerCannonTex = nullptr;
 AEGfxTexture* enemyCannonTex = nullptr;
@@ -286,9 +287,12 @@ void Level::Load() {
 }
 
 void Level::Initalize() {
+	GameTrackingManager::gameData.LevelStart(levelId);
+
 	status = LevelStatus::PLAYING;
 	hasProcessedVictory = false;
-	// Initialize map 
+
+	// Initialize active map 
 	for (int i = 0; i < Config::GRID_HEIGHT; ++i) {
 		for (int j = 0; j < Config::GRID_WIDTH; ++j) {
 			activeLevelMap[i][j] = levelMap[i][j];
@@ -500,6 +504,7 @@ void Level::Draw() {
 }
 
 void Level::Free() {
+	GameTrackingManager::gameData.LevelEnd(levelId);
 }
 
 Character* Level::FindCharacterObj(Tile const& tile) {

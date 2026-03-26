@@ -84,7 +84,7 @@ namespace AbilitiesManager {
 
 		// Use the currently select ability if it has unlimited or any charges remaining
 		// return true and the selected ability can be use, otherwise false
-		bool UseAbility();
+		void UseAbility();
 		// Add ability charges from the based on selection
 		void AddAbility(int abilityId, int chargesToAdd = 1);
 		void RemoveAbility(Ability& ability);
