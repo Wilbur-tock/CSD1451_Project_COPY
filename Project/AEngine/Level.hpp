@@ -162,6 +162,11 @@ private:
 	DamageLog playerDamageLog, enemyDamageLog;
 	
 	bool hasProcessedVictory = false;
+
+	// Sky base texture drawn behind the tile map each frame.
+	// PLACEHOLDER: provide Assets/level_sky.png (1600x900 static sky image).
+	// Clouds and projectiles are handled by BgAnimation and need no member state here.
+	AEGfxTexture* bgTexture = nullptr;
 };
 
 #endif // !LEVEL_HPP

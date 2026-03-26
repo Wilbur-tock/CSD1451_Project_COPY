@@ -6,6 +6,7 @@
 #include "Utils.hpp"
 #include "AudioManager.hpp"
 #include "CameraManager.hpp"
+#include "bgAnimation.hpp"
 
 namespace MainMenu {
     // Menu buttons
@@ -16,19 +17,23 @@ namespace MainMenu {
     bool isInitialized = false;
 
     // Background texture
-    AEGfxTexture* bgTexture = nullptr;
+    AEGfxTexture* bgTexture = nullptr; // static sky base layer
     AEGfxTexture* buttonTexture = nullptr;
 
-    // Game title animations initialize
+    // Game title animation
     float titleAnimTimer = 0.0f;
     float baseTitleScale = 2.5f;
 
     void Load() {
-        // Load any textures or assets needed for the menu
-        // This runs once when the game starts
+        // Load textures that persist for the lifetime of the main menu state.
+        // AssetsManager owns the texture lifetime; do not free them here.
         buttonTexture = AssetsManager::GetTexture("Assets/buttonTexture.png");
+
+        // Static sky base - drawn first, covers the entire screen
         bgTexture = AssetsManager::GetTexture("Assets/game_bg.png");
-        /*bgTexture = nullptr;*/
+
+        // Load shared cloud and cannonball textures for the animated background
+        BgAnimation::Load();
     }
 
     void Initialize() {
@@ -42,7 +47,7 @@ namespace MainMenu {
 
         // Calculate centered positions
         float centerX = -550.0f;  // Center of screen in world coordinates
-        float startY = 200.0f; // Starting Y position for first button
+        float startY = 230.0f; // Starting Y position for first button
 
         // Create Play Button
         // Transitions to LEVEL_1. Blue tint
@@ -134,7 +139,7 @@ namespace MainMenu {
         gameTitle = { "FORTRESS FIGHT",
             1.0f,
             Color(0.0f, 0.0f, 0.0f, 1.0f),  // White color
-            { 0.1f, 0.75f }, // position (normalized)
+            { 0.05f, 0.8f }, // position (normalized)
         };
         gameTitle.SetFont(AssetsManager::titleFont);
 
@@ -147,26 +152,31 @@ namespace MainMenu {
         { -0.98f, -0.9f },
         };
 
-        // Reset camera to orgin pos and can't move
-        CameraManager::camera.SetPosition({ 0, 0 }); // Move the camera to the world origin so UI world-space coordinates map directly to screen positions.
-        CameraManager::camera.SetState(CameraManager::CameraController::STATIC); // Prevent the camera from moving; keeps UI elements from drifting.
+        // Reset camera to origin and lock it so UI world-space coordinates map directly to screen positions.
+        CameraManager::camera.SetPosition({ 0, 0 });
+        CameraManager::camera.SetState(CameraManager::CameraController::STATIC);
+
+        // Reset and stagger the animated background (clouds + projectiles)
+        BgAnimation::Init();
     }
 
     void Draw() {
-        // Draw background image if available
+        // Layer 0: static sky base - drawn first so clouds and projectiles sit on top
         if (bgTexture != nullptr) {
-            // Draw full-screen background
             GraphicsManager::DrawWorldUI(
                 bgTexture,
                 GraphicsManager::CreateTransformMatrix(-Config::SCREEN_WIDTH / 2.0f, Config::SCREEN_HEIGHT / 2.0f,
                     Config::SCREEN_WIDTH, Config::SCREEN_HEIGHT),
-                Color(1.0f, 1.0f, 1.0f, 1.0f)  // White = no color tinting
+                Color(1.0f, 1.0f, 1.0f, 1.0f)  // white = no tint
             );
         }
         else {
-            // Fallback: solid background color if no texture
-            AEGfxSetBackgroundColor(0.1f, 0.1f, 0.15f);  // Dark blue-gray background
+            // Fallback color when no sky texture exists yet
+            AEGfxSetBackgroundColor(0.1f, 0.1f, 0.15f);
         }
+
+        // Animated background: scrolling clouds + arcing cannonball projectiles
+        BgAnimation::Draw();
 
         // Draw title
         gameTitle.Draw();
@@ -176,8 +186,13 @@ namespace MainMenu {
     }
 
     void Update() {
-        // Advance animation timer
-        titleAnimTimer += static_cast<float>(AEFrameRateControllerGetFrameTime());
+        float dt = static_cast<float>(AEFrameRateControllerGetFrameTime());
+
+        // Advance animation timer (drives title pulse + flash)
+        titleAnimTimer += dt;
+
+        // Advance cloud scroll and projectile physics for this frame
+        BgAnimation::Update(dt);
 
         // Pulse: scale oscillates +/- 0.2 around the base scale
         // How big the scale bounce * How fast it grows/shrinks (pulse)
@@ -194,7 +209,7 @@ namespace MainMenu {
             gameTitle.GetColor().Green(),
             gameTitle.GetColor().Blue(),
             flashAlpha
-        });
+            });
 
         // Keyboard shortcuts with sfx (on keyPressed, not held)
         if (AEInputCheckTriggered(AEVK_1)) {

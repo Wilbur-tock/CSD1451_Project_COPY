@@ -60,6 +60,7 @@ namespace GameStateManager {
         LevelManager::LoadAllLevels();
         MapManager::Load();
         MainMenu::Load();
+        Settings::Load();
         AudioManager::Load();
 
         UICursor::Load();

@@ -14,6 +14,8 @@
 #include "Config.hpp"
 #include "UICursor.hpp"
 #include "LevelManager.hpp"
+#include "bgAnimation.hpp"
+#include "ParticlesManager.hpp"
 
 namespace LevelSelect {
 
@@ -112,11 +114,17 @@ namespace LevelSelect {
     void Load() {
         bgTexture = AssetsManager::GetTexture("Assets/game_bg.png");
         buttonTexture = AssetsManager::GetTexture("Assets/buttonTexture.png");
+
+        // Load shared animated background assets (clouds + cannonball projectiles)
+        BgAnimation::Load();
     }
 
     void Initialize() {
         CameraManager::camera.SetPosition({ 0.0f, 0.0f });
         CameraManager::camera.SetState(CameraManager::CameraController::STATIC);
+
+        // Reset and stagger the animated background (clouds + projectiles)
+        BgAnimation::Init();
 
         for (int i = 0; i < kTotalButtons; ++i) {
             AEVec2 buttonTopLeft = GetLevelButtonTopLeft(
@@ -154,6 +162,7 @@ namespace LevelSelect {
     }
 
     void Draw() {
+        // Sky base drawn first so clouds and projectiles sit on top of it
         if (bgTexture != nullptr) {
             GraphicsManager::DrawWorldUI(
                 bgTexture,
@@ -169,6 +178,8 @@ namespace LevelSelect {
             AEGfxSetBackgroundColor(0.12f, 0.12f, 0.16f);
         }
 
+        // Animated background: scrolling clouds + arcing cannonball projectiles
+        BgAnimation::Draw();
         const std::string progressLabel =
             "Currently unlocked: LEVEL " + std::to_string(LevelManager::HighestUnlockedLevel() + 1);
 
@@ -200,6 +211,11 @@ namespace LevelSelect {
     }
 
     void Update() {
+        float dt = static_cast<float>(AEFrameRateControllerGetFrameTime());
+
+        // Advance cloud scroll and projectile physics for this frame
+        BgAnimation::Update(dt);
+
         if (AEInputCheckTriggered(AEVK_ESCAPE) || AEInputCheckTriggered(AEVK_BACK)) {
             AudioManager::PlaySFX(AudioManager::SFX::UIButton);
             OnBackClicked();

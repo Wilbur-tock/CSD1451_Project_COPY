@@ -16,6 +16,11 @@ namespace GameTrackingManager {
 	void GameData::GameEnd() {
 		if (!needToUpdateLog) return;
 
+		// Only finalize level tracking if a level was actually entered.
+		if (LevelManager::CurrentLevel()) {
+			LevelEnd(currentLevelIdTracking);
+		}
+
 		LevelEnd(currentLevelIdTracking);
 
 		globalData.sessionDuration = AEGetTime(nullptr) - globalData.sessionStart;
@@ -45,9 +50,12 @@ namespace GameTrackingManager {
 	void GameData::LevelEnd(int levelId) {
 		levelData[levelId].sessionDuration = AEGetTime(nullptr) - globalData.sessionStart;
 
-		int newRounds = LevelManager::CurrentLevel()->Rounds();
-		levelData[levelId].rounds = newRounds;
-		globalData.rounds += newRounds;
+		Level* level = LevelManager::CurrentLevel();
+		if (level) {
+			int newRounds = level->Rounds();
+			levelData[levelId].rounds = newRounds;
+			globalData.rounds += newRounds;
+		}
 	}
 
 	void GameData::AddShotFired(bool isPlayer) {

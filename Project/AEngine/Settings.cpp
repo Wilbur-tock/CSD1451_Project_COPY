@@ -116,7 +116,7 @@ namespace Settings {
         GraphicsManager::DrawWorldUI(
             nullptr,
             GraphicsManager::CreateTransformMatrix(
-                knobX - knobSz / 2.0f, sliderY - 7.0f,
+                knobX - knobSz / 2.0f, sliderY + 7.0f,
                 knobSz, knobSz),
             Color(1.0f, 1.0f, 1.0f, 1.0f)
         );
@@ -135,7 +135,7 @@ namespace Settings {
         std::string pctStr = std::to_string(pct) + "%";
 
         float pctX = SLIDER_LEFT_X + SLIDER_W + 70.0f;
-        float pctY = sliderY + 10.0f;
+        float pctY = sliderY + 25.0f;
         Utils::NormalizeCoordinates(pctX, pctY);
 
         TextObject pctText = {
@@ -155,7 +155,7 @@ namespace Settings {
     }
 
     void Load() {
-        bgTexture = AssetsManager::GetTexture("Assets/game_bg.png");
+        bgTexture = AssetsManager::GetTexture("Assets/game_bg1.png");
         btnTexture = AssetsManager::GetTexture("Assets/buttonTexture.png");
     }
 
@@ -187,7 +187,7 @@ namespace Settings {
         masterVolumeDownButton = Button(
             TextObject{ "-" },
             Utils::AnchorMode::CENTER,
-            { leftButtonX, MASTER_Y - 8.0f },
+            { leftButtonX, MASTER_Y + 8.0f },
             { smallBtnW, smallBtnH },
             Color(0.7f, 0.3f, 0.3f, 1.0f),
             btnTexture,
@@ -198,7 +198,7 @@ namespace Settings {
         masterVolumeUpButton = Button(
             TextObject{ "+" },
             Utils::AnchorMode::CENTER,
-            { rightButtonX, MASTER_Y - 8.0f },
+            { rightButtonX, MASTER_Y + 8.0f },
             { smallBtnW, smallBtnH },
             Color(0.3f, 0.7f, 0.3f, 1.0f),
             btnTexture,
@@ -209,7 +209,7 @@ namespace Settings {
         bgmVolumeDownButton = Button(
             TextObject{ "-" },
             Utils::AnchorMode::CENTER,
-            { leftButtonX, BGM_Y - 8.0f },
+            { leftButtonX, BGM_Y + 8.0f },
             { smallBtnW, smallBtnH },
             Color(0.7f, 0.3f, 0.3f, 1.0f),
             btnTexture,
@@ -220,7 +220,7 @@ namespace Settings {
         bgmVolumeUpButton = Button(
             TextObject{ "+" },
             Utils::AnchorMode::CENTER,
-            { rightButtonX, BGM_Y - 8.0f },
+            { rightButtonX, BGM_Y + 8.0f },
             { smallBtnW, smallBtnH },
             Color(0.3f, 0.7f, 0.3f, 1.0f),
             btnTexture,
@@ -231,7 +231,7 @@ namespace Settings {
         sfxVolumeDownButton = Button(
             TextObject{ "-" },
             Utils::AnchorMode::CENTER,
-            { leftButtonX, SFX_Y - 8.0f },
+            { leftButtonX, SFX_Y + 8.0f },
             { smallBtnW, smallBtnH },
             Color(0.7f, 0.3f, 0.3f, 1.0f),
             btnTexture,
@@ -242,7 +242,7 @@ namespace Settings {
         sfxVolumeUpButton = Button(
             TextObject{ "+" },
             Utils::AnchorMode::CENTER,
-            { rightButtonX, SFX_Y - 8.0f },
+            { rightButtonX, SFX_Y + 8.0f },
             { smallBtnW, smallBtnH },
             Color(0.3f, 0.7f, 0.3f, 1.0f),
             btnTexture,

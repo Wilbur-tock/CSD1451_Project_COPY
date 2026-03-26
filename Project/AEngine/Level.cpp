@@ -14,6 +14,7 @@
 #include "GraphicsManager.hpp"
 #include "UIManager.hpp"
 #include "GameTrackingManager.hpp"
+#include "bgAnimation.hpp"
 
 AEGfxTexture* playerCannonTex = nullptr;
 AEGfxTexture* enemyCannonTex = nullptr;
@@ -178,8 +179,8 @@ void Level::InitializeUI() {
 	playerStatsUI.Initialize(true, bgWidth);
 	enemyStatsUI.Initialize(false, bgWidth);
 
-	notificationPanel = UIManager::PopupPanel{ 
-		true, 
+	notificationPanel = UIManager::PopupPanel{
+		true,
 		UIManager::Panel{{250,75}},
 		TextObject{"", 0.7f, Color{0.0f,0.1f,0.7f}, Transform{ {0,0}, {0,0} }, Utils::AnchorMode::CENTER }
 	};
@@ -275,6 +276,14 @@ void Level::Load() {
 	// Load map data
 	MapManager::ReadMapData(levelFileName, levelMap);
 
+	// Sky base texture - drawn behind everything else each frame.
+	// PLACEHOLDER: provide Assets/level_sky.png (1600x900 static sky image).
+	bgTexture = AssetsManager::GetTexture("Assets/level_sky.png");
+
+	// Load cloud layer textures via BgAnimation.
+	// Shares the same PNGs as MainMenu and LevelSelect - no extra files needed.
+	BgAnimation::Clouds::Load();
+
 	playerCannonTex = AssetsManager::GetTexture("Assets/cannonBarrel.png");
 	enemyCannonTex = AssetsManager::GetTexture("Assets/enemyCannon.png");
 
@@ -287,6 +296,10 @@ void Level::Load() {
 }
 
 void Level::Initalize() {
+	// Reset cloud scroll offsets so re-entering the level always starts cleanly.
+	// Called here (not in Load) so a restart also resets the animation.
+	BgAnimation::Clouds::Init();
+
 	GameTrackingManager::gameData.LevelStart(levelId);
 
 	status = LevelStatus::PLAYING;
@@ -337,7 +350,7 @@ void Level::Initalize() {
 			}
 			else if (tile.Type() == TileType::TILE_PLAYER_CHARACTER || tile.Type() == TileType::TILE_ENEMY_MINION || tile.Type() == TileType::TILE_ENEMY_BOSS) {
 				AEVec2 characterSize{ 32.0f, 32.0f };
-				Character characterObj{ tile.transform.pos, characterSize, AssetsManager::GetCharacterTexture(0)[0], {x,y}, CharacterType::PLAYER};
+				Character characterObj{ tile.transform.pos, characterSize, AssetsManager::GetCharacterTexture(0)[0], {x,y}, CharacterType::PLAYER };
 				int listId = 0;
 
 				switch (tile.Type()) {
@@ -354,7 +367,7 @@ void Level::Initalize() {
 					break;
 
 				case TileType::TILE_ENEMY_MINION:
-					characterObj = { tile.transform.pos, characterSize, AssetsManager::GetCharacterTexture(1)[0], {x,y}, CharacterType::ENEMY_MINION};
+					characterObj = { tile.transform.pos, characterSize, AssetsManager::GetCharacterTexture(1)[0], {x,y}, CharacterType::ENEMY_MINION };
 					enemies.push_back(characterObj);
 					listId = static_cast<int>(enemies.size() - 1);
 					enemies[listId].id = listId;
@@ -364,7 +377,7 @@ void Level::Initalize() {
 					break;
 
 				case TileType::TILE_ENEMY_BOSS:
-					characterObj = { tile.transform.pos, characterSize, AssetsManager::GetCharacterTexture(2)[0], {x,y}, CharacterType::ENEMY_BOSS};
+					characterObj = { tile.transform.pos, characterSize, AssetsManager::GetCharacterTexture(2)[0], {x,y}, CharacterType::ENEMY_BOSS };
 					enemies.push_back(characterObj);
 					listId = static_cast<int>(enemies.size() - 1);
 					enemies[listId].id = listId;
@@ -422,6 +435,10 @@ bool prevIsAbilitySelectorOn = false;
 float delayTimer = 0.0f, defaultDelayTimer = 0.5f;;
 
 void Level::Update() {
+	// Advance cloud scroll for this frame.
+	// PhysicsManager::g_dt is used for consistency with all other per-frame motion here.
+	BgAnimation::Clouds::Update(PhysicsManager::g_dt);
+
 	UpdateLevelStatus();
 	DebugCommands();
 
@@ -488,6 +505,26 @@ void Level::UpdateUI() {
 }
 
 void Level::Draw() {
+	// Sky base: drawn first so everything else renders on top of it.
+	// DrawScreenOverlay keeps it screen-fixed even as the world camera pans/zooms.
+	if (bgTexture) {
+		GraphicsManager::DrawScreenOverlay(
+			bgTexture,
+			GraphicsManager::CreateTransformMatrix(
+				-Config::SCREEN_WIDTH / 2.0f,
+				Config::SCREEN_HEIGHT / 2.0f,
+				Config::SCREEN_WIDTH,
+				Config::SCREEN_HEIGHT),
+			Color(1.0f, 1.0f, 1.0f, 1.0f)
+		);
+	}
+
+	// Animated cloud layers drawn on top of the sky base, behind game content.
+	// BgAnimation::Clouds uses DrawScreenOverlay internally so the layers stay
+	// screen-fixed even as the world camera pans and zooms during gameplay.
+	BgAnimation::Clouds::Draw();
+
+	// Tile map and game objects drawn on top of the background
 	//GraphicsManager::DrawGameObject(AssetsManager::GetTexture("Assets/level_bg.png"), GraphicsManager::CreateTransformMatrix(0, 0, Config::WORLD_MAX_X, Config::WORLD_MAX_Y), Color(1,1,1));
 	MapManager::DrawMap(activeLevelMap, false);
 
@@ -568,7 +605,7 @@ void Level::DrawUI() {
 	float currentHP = 0, maxHP = 0;
 	GetCurrentHP(currentHP);
 	GetMaxHP(maxHP);
-	playerStatsUI.Draw(currentHP, maxHP, playerShield.IsShieldOn(), static_cast<float>(playerShield.attribute.Shield()), static_cast<float>(playerShield.attribute.MaxShield()), 
+	playerStatsUI.Draw(currentHP, maxHP, playerShield.IsShieldOn(), static_cast<float>(playerShield.attribute.Shield()), static_cast<float>(playerShield.attribute.MaxShield()),
 		playerCannon.AbilityController()->GetAbilityModifiers());
 
 	GetCurrentHP(currentHP, false);
@@ -718,8 +755,8 @@ void Level::UpdateNewRound() {
 		);
 	}
 
-	AbilitiesManager::AbilityController *playerController = playerCannon.AbilityController();
-	AbilitiesManager::AbilityController *enemyController = enemyCannon.AbilityController();
+	AbilitiesManager::AbilityController* playerController = playerCannon.AbilityController();
+	AbilitiesManager::AbilityController* enemyController = enemyCannon.AbilityController();
 
 	// Update turn lifespan of active tower shields
 	playerShield.UpdateLifespan();
@@ -826,7 +863,7 @@ void Level::SetTerritoryIndex(TileIndex const& newTileId, TileIndex& center, Til
 	if (min.x == 0) {
 		min = newTileId;
 	}
-	
+
 	// Find min/max x axis
 	if (newTileId.x < min.x) {
 		min = newTileId;
@@ -855,7 +892,7 @@ void Level::SetOriginalTerritoryTiles(TerritoryTiles& territoryTiles) {
 	// Set new min and max tileIndex
 	// a box : min = bottom left corner, max = top right corner
 	int radius = territoryTiles.territoryTileRadius;
-	TileIndex min {0,0}, max{0,0};
+	TileIndex min{ 0,0 }, max{ 0,0 };
 	Utils::CalculateTileBounds(territoryTiles.centerId, min, max, radius);
 
 	// Store the starting tiles of the min and max territory to the vector

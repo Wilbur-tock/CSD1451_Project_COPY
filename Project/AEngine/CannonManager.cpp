@@ -94,9 +94,20 @@ namespace CannonManager {
     }
 
     void Cannon::Draw() {
-        // Render cannon
+        // Render cannon barrel
         AEMtx33 mat = GraphicsManager::CreateTransformMatrix(transform.pos.x, transform.pos.y, transform.size.x, transform.size.y, cannonAngle);
         GraphicsManager::DrawGameObject(texture, mat, textureColor);
+
+        // Draw all active projectiles here, NOT inside UpdateProjectile().
+        // Cannon::Draw() is called from Level::Draw() after BgAnimation::Draw(),
+        // so projectiles are guaranteed to render on top of the scrolling clouds.
+        // Drawing in UpdateProjectile() (which runs during Level::Update() before
+        // Level::Draw()) caused clouds to paint over the projectile every frame.
+        for (Projectile& projectile : activeProjectiles) {
+            if (projectile.IsActive()) {
+                projectile.Draw();
+            }
+        }
     }
 
     void Cannon::DrawUI() {
@@ -297,7 +308,7 @@ namespace CannonManager {
 
         // Track data
         GameTrackingManager::gameData.AddShotFired(isPlayerControlled);
-       
+
         std::cout << "[CannonManager] Projectile Fired!\n";
     }
 
@@ -328,7 +339,10 @@ namespace CannonManager {
 
             // Check if projectile need to be destroy and destroy after it lifespan
             projectile.Destroy();
-            projectile.Draw();
+            // projectile.Draw() is NOT called here intentionally.
+            // Drawing in the middle of Update() means BgAnimation::Draw() (called later in
+            // Level::Draw()) would paint clouds on top of the projectile and hide it.
+            // Projectiles are drawn in Cannon::Draw() instead, which runs after BgAnimation.
         }
 
         RemoveInactiveProjectiles();

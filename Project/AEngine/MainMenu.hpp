@@ -5,7 +5,7 @@
 #include "Button.hpp"
 
 namespace MainMenu {
-    // Game title animation declaration
+    // Game title animation
     extern float titleAnimTimer;
     extern float baseTitleScale;
 
