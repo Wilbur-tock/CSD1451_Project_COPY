@@ -49,6 +49,7 @@ public:
 
     // ---- Mesh ----------------------------------------------------------
     ParticleShape shape{ ParticleShape::SQUARE }; // Shape of the particle
+    AEGfxTexture* texture{ nullptr };
 
     EmitParams() :
         spawnPosition{ 0.f, 0.f },

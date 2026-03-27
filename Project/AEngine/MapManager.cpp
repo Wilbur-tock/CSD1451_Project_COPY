@@ -352,4 +352,10 @@ namespace MapManager {
 		std::cerr << "[MapManager] Can't find Tile: " << tileId << std::endl;
 		return nullptr;
 	}
+
+	AEGfxTexture* GetTileTexture(TileType type) {
+		int idx = static_cast<int>(type);
+		if (idx < 0 || idx >= static_cast<int>(TileType::TILE_COUNT)) return nullptr;
+		return gTileTex[idx];
+	}
 }

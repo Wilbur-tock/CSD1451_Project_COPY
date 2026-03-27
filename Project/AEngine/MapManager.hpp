@@ -22,6 +22,7 @@ namespace MapManager {
 	// Rendering of the map layout
 	void DrawMap(std::vector<std::vector<Tile>> const& map, bool drawCharacters = true);
 	Tile* FindTile(TileIndex const& tileId);
+	AEGfxTexture* GetTileTexture(TileType type);
 }
 
 #endif // !MapManager_HPP

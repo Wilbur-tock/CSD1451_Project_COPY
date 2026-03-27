@@ -26,20 +26,22 @@ namespace EffectsManager {
         std::cout << "[EffectsManager] PlayExplosion at (" << position.x << ", " << position.y << ")\n";
     }
 
-    void EffectsController::PlayTileBreak(AEVec2 position) {
-        Emit({
-            position,   8.f,                                // spawn pos, radius
-            60.f,       180.f,                              // speed min, max
-            0.f,        2.f * PI,                           // direction min, max
-            -1.5f,      1.5f,                               // rotation speed min, max
-            Color(0.55f, 0.40f, 0.28f, 1.f),               // color start
-            Color(0.40f, 0.30f, 0.20f, 0.f),               // color end
-            12.f,       4.f,                                // scale start, end (smaller)
-            0.6f,       1.2f,                               // lifetime min, max
-            18,                                             // count
+    void EffectsController::PlayTileBreak(AEVec2 position, AEGfxTexture* texture) {
+        std::cout << "[EffectsManager] PlayTileBreak texture ptr: " << texture << "\n";
+        EmitParams params{
+            position,   8.f,
+            60.f,       180.f,
+            0.f,        2.f * PI,
+            -1.5f,      1.5f,
+            Color(1.f, 1.f, 1.f, 1.f),     
+            Color(1.f, 1.f, 1.f, 0.f),
+            12.f,       4.f,
+            0.6f,       1.2f,
+            18,
             ParticleShape::SQUARE
-            });
-        std::cout << "[EffectsManager] PlayTileBreak at (" << position.x << ", " << position.y << ")\n";
+        };
+        params.texture = texture;
+        Emit(params);
     }
 
     void EffectsController::PlaySmoke(AEVec2 position) {

@@ -8,7 +8,7 @@ namespace EffectsManager {
     class EffectsController {
     public:
         void PlayExplosion(AEVec2 position);
-        void PlayTileBreak(AEVec2 position);
+        void PlayTileBreak(AEVec2 position, AEGfxTexture* texture = nullptr);
 		void PlaySmoke(AEVec2 position);
         void PlaySmokeCloud(AEVec2 position);
         void PlayProjectiileAbiltiesEffect(int projectileMode, AEVec2 pos);
