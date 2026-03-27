@@ -62,7 +62,14 @@ namespace CannonManager {
             Projectile& projectile = projectiles[ability.GetProjectile().projectileId];
 
             // Initialize projectile with its texture
-            projectile = Projectile{ AssetsManager::circleTexture };
+            AEGfxTexture* projectileTexture = AssetsManager::circleTexture; // default texture
+
+            switch (static_cast<ProjectileMode>(ability.GetProjectile().projectileId)) {
+            case ProjectileMode::BOMB: projectileTexture = AssetsManager::GetTexture("Assets/Bomb_Proj.png"); break;
+            case ProjectileMode::DRILL: projectileTexture = AssetsManager::GetTexture("Assets/Drill_Proj.png"); break;
+            }
+
+            projectile = Projectile{ projectileTexture };
             projectile.SetProjectileStats(ability.GetName(), ability.GetProjectile());
 
             //std::cout << "[CannonManager] AbilityId: " << ability.Id() << " Projectile Name: " << projectile.ProjectileName() << " Projectile Mode: " << projectile.ModeName() << " "
@@ -106,7 +113,7 @@ namespace CannonManager {
         // Draw all active projectiles
         for (Projectile& projectile : activeProjectiles) {
             if (projectile.IsActive()) {
-                projectile.Draw();
+                projectile.Draw(isShootingRight); // adjust texture according to rotation
             }
         }
     }
@@ -496,7 +503,7 @@ namespace CannonManager {
             float drawY = startY + (vy * t) - (0.5f * PhysicsManager::GRAVITY * t * t);
 
             float alpha = 1.0f - (static_cast<float>(i/ numDots));
-            GraphicsManager::DrawGameObject(AssetsManager::circleTexture, GraphicsManager::CreateTransformMatrix(drawX, drawY, size, size, 0), { 0,0,0, alpha });
+            GraphicsManager::DrawGameObject(AssetsManager::circleTexture, GraphicsManager::CreateTransformMatrix(drawX, drawY, size, size), { 0,0,0, alpha });
         }
     }
 

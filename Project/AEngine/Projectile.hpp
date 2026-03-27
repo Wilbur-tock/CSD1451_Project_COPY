@@ -89,7 +89,7 @@ public:
 	void Initialize(Transform const& cannonTransform, int _activeId, float cannonAngle, float shotPower);
 	void Initialize(Transform const& _transform, int _activeId, AEVec2 const& _velocity);
 	void Update(bool isPlayerShot, float dt);
-	void Draw();
+	void Draw(bool isShootingRight);
 
 	// Ability effects checker for ability to take effect after projectile has been shot 
 	// Check for inputs to activated PROJECTILE Abilities

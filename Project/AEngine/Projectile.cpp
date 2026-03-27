@@ -18,8 +18,9 @@ Projectile::Projectile(AEGfxTexture* _texture, ProjectileMode _mode, AEVec2 _pos
     : GameObject(_pos, defaultSize, _texture), mode(_mode), attackCharges{_attackCharges} {
 }
 
-void Projectile::Draw() {
-    AEMtx33 mat = GraphicsManager::CreateTransformMatrix(transform.pos.x, transform.pos.y, transform.size.x, transform.size.y);
+void Projectile::Draw(bool isShootingRight) {
+    float rotation = isShootingRight ? AEDegToRad(0) : AEDegToRad(180);
+    AEMtx33 mat = GraphicsManager::CreateTransformMatrix(transform.pos.x, transform.pos.y, transform.size.x, transform.size.y, rotation);
     GraphicsManager::DrawGameObject(texture, mat, Color{ 0.5f, 0.5f, 0, 1 });
 }
 

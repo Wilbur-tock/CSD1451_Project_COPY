@@ -21,7 +21,7 @@ namespace GraphicsManager {
 	// Create the transform matrix to be used to draw out the texture on the mesh,
 	// x,y - WORLD COORDINATES position of where the texture is going to be draw at
 	// scaleX, scaleY, size of the texture
-	// rot - rotation, 
+	// rot - rotation in radian NOT DEGREES, 
 	AEMtx33 CreateTransformMatrix(float x, float y, float scaleX = 100.f, float scaleY = 100.f, float rotation = 0.f);
 
 	// Draw game object on the map using pMeshMiddle rect mode middle
