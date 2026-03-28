@@ -60,9 +60,6 @@ void Character::Update() {
 	if (!attribute.IsActive()) return;
 
 	physics.Update(*this);
-
-	Draw();
-	DrawUI();
 }
 
 void Character::SetSquatAnimation(bool enabled) {
@@ -128,6 +125,8 @@ void Character::Draw() {
 			Color{ 0.9f,0.9f,0, 0.3f }
 		);
 	}
+
+	DrawUI();
 }
 
 void Character::DrawUI() {

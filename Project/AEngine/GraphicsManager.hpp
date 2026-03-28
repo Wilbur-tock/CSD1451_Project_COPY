@@ -42,8 +42,8 @@ namespace GraphicsManager {
 	// screenX/Y – center position of the sprite (screen coordinates)
 	// w, h      – render size in pixels
 	void DrawSpriteFrame(AEGfxTexture* tex, int frame, float screenX, float screenY, float w, float h);
-	void DrawLine(AEVec2 pos, AEVec2 size);
-	void DrawCircle(AEVec2 center, float radius);
+	void DrawBoxLines(AEVec2 pos, AEVec2 size);
+	void DrawCircleLines(AEVec2 center, float radius);
 }
 
 #endif // !GRAPHICSMANAGER_HPP

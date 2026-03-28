@@ -234,6 +234,9 @@
     <ClCompile Include="BgAnimation.cpp">
       <Filter>Source Files\Game States</Filter>
     </ClCompile>
+    <ClCompile Include="ResultsUI.cpp">
+      <Filter>Source Files\UI</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="UIManager.hpp">
@@ -376,6 +379,9 @@
     </ClInclude>
     <ClInclude Include="BgAnimation.hpp">
       <Filter>Header Files\Game States</Filter>
+    </ClInclude>
+    <ClInclude Include="ResultsUI.hpp">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

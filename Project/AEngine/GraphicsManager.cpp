@@ -294,7 +294,7 @@ namespace GraphicsManager {
 		DrawTexture(CoordinateType::SCREEN_TOP_LEFT_CORNER, pTex, newTrans, color);
 	}
 
-	void DrawLine(AEVec2 pos, AEVec2 size) {
+	void DrawBoxLines(AEVec2 pos, AEVec2 size) {
 		float halfW = size.x * 0.5f;
 		float halfH = size.y * 0.5f;
 		float lineSize = 1.0f;
@@ -306,6 +306,7 @@ namespace GraphicsManager {
 		AEVec2 right	= { pos.x + halfW, pos.y };
 		AEVec2 left		= { pos.x - halfW, pos.y };
 
+		// Draw box lines
 		AEMtx33 mat = CreateTransformMatrix(top.x, top.y, halfW, lineSize);
 		DrawTexture(CoordinateType::WORLD_CENTER, AssetsManager::squareTexture, mat, lineColor);
 
@@ -319,7 +320,7 @@ namespace GraphicsManager {
 		DrawTexture(CoordinateType::WORLD_CENTER, AssetsManager::squareTexture, mat, lineColor);
 	}
 
-	void DrawCircle(AEVec2 center, float radius) {
+	void DrawCircleLines(AEVec2 center, float radius) {
 		const int segments = 60; // More segments = smoother circle
 		const float step = 2.0f * 3.14159f / segments;
 
