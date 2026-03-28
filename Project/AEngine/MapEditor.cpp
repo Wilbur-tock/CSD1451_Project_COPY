@@ -43,7 +43,7 @@ using namespace MapManager;
 
 namespace MapEditor {
 	bool isDrawingNewMap = true, isShowingTileList = true;
-	int totalLevelMap = 5;
+	int totalLevelMap = Config::TOTAL_LEVEL_COUNT;
 
 	std::string const defaultMapLabel = "Editing Custom Map";
 	std::string currentMapLabel = defaultMapLabel;
@@ -361,7 +361,7 @@ namespace MapEditor {
 
 		if (AEInputCheckCurr(AEVK_LCTRL) || AEInputCheckCurr(AEVK_RCTRL)) {
 			// Input CTRL + {NUMBER} to load a new LEVEL MAP to edit
-			for (int i = 1; i <= totalLevelMap; ++i) {
+			for (int i = 0; i <= totalLevelMap; ++i) {
 				if (AEInputCheckTriggered(static_cast<u8>(AEVK_0 + i))) {
 					// Load file from bin folder only
 					std::string newLoadFile = "level" + std::to_string(i);

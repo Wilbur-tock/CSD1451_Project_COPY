@@ -40,9 +40,6 @@ namespace LevelManager {
 		return selectedLevel;
 	}
 
-	int LevelCount() {
-		return Config::TOTAL_LEVEL_COUNT;
-	}
 
 	bool IsValidLevelIndex(int levelIndex) {
 		return levelIndex >= 0 && levelIndex < Config::TOTAL_LEVEL_COUNT;

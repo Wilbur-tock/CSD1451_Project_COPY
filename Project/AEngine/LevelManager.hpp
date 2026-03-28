@@ -11,7 +11,6 @@ namespace LevelManager {
 	void SelectLevel(int levelId); 
 	Level* CurrentLevel();
 
-	int LevelCount();
 	bool IsValidLevelIndex(int levelIndex);
 	bool IsLevelUnlocked(int levelIndex);
 	int HighestUnlockedLevel();

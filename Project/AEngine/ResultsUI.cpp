@@ -22,7 +22,7 @@ namespace ResultsUI {
 
 		const int nextLevelIndex = currentLevel->Id() + 1;
 
-		if (nextLevelIndex < 0 || nextLevelIndex >= LevelManager::LevelCount()) return;
+		if (nextLevelIndex < 0 || nextLevelIndex >= Config::TOTAL_LEVEL_COUNT) return; // level index out of range
 		if (!LevelManager::IsLevelUnlocked(nextLevelIndex)) return;
 
 		// proceed to next level
@@ -129,11 +129,6 @@ namespace ResultsUI {
 		}
 
 		// Debug Commands for results UI
-		if (AEInputCheckTriggered(AEVK_R)) {
-			AudioManager::PlaySFX(AudioManager::SFX::UIButton);
-			OnResultRestart();
-		}
-
 		if (AEInputCheckTriggered(AEVK_N)) {
 			AudioManager::PlaySFX(AudioManager::SFX::UIButton);
 			OnResultNextLevel();

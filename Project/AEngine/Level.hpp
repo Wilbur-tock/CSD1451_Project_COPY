@@ -108,7 +108,6 @@ private:
 	void UpdateNewRound();
 
 	void UpdateLevelStatus();
-	void DrawResultsUI();
 
 	void SetTerritoryIndex(TileIndex const& newTileId, TileIndex& center, TileIndex& min, TileIndex& max);
 	void SetOriginalTerritoryTiles(TerritoryTiles& territoryTiles);

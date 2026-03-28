@@ -20,9 +20,6 @@ namespace UIManager {
         float x = transform.pos.x, y = transform.pos.y;
         float w = transform.size.x, h = transform.size.y;
 
-        //float halfWidth = transform.size.x / 2.0f;
-        //x -= halfWidth;
-
         // Lighter background bar
         if (isScreenOverlay) {
             GraphicsManager::DrawScreenOverlay(tex, GraphicsManager::CreateTransformMatrix(x, y, w, h), bgColor);
@@ -34,6 +31,7 @@ namespace UIManager {
         float percentage = (currValue / maxValue);
         float newW = w, newH = h;
 
+        // Change how the bar moves
         switch (type) {
         case FillType::RIGHT_TO_LEFT:
             x += w * (1.0f - percentage); // shift origin so right edge stays fixed
@@ -51,7 +49,7 @@ namespace UIManager {
             break;
         }
 
-        // Bar
+        // Draw based on ui type
         if (isScreenOverlay) {
             GraphicsManager::DrawScreenOverlay(tex, GraphicsManager::CreateTransformMatrix(x, y, newW, newH), fillColor);
         }

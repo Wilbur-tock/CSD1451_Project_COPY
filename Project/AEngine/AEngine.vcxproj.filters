@@ -61,12 +61,6 @@
     <Filter Include="Header Files\Collision">
       <UniqueIdentifier>{de1ef2d7-8c7f-4dbd-aaac-65c2ae57cd38}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\Game">
-      <UniqueIdentifier>{b2adb27b-3427-4468-bd00-58b45bf3c40f}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Header Files\Game">
-      <UniqueIdentifier>{61fb8fbe-ca91-4f38-b1c6-f026160535c8}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source Files\Graphics">
       <UniqueIdentifier>{64dd3167-48be-43db-9a2e-e42b12ce85c3}</UniqueIdentifier>
     </Filter>
@@ -93,6 +87,30 @@
     </Filter>
     <Filter Include="Source Files\Particles">
       <UniqueIdentifier>{0ce8be5f-ad4d-419e-8d07-044229088b02}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Abilties">
+      <UniqueIdentifier>{442b73f5-b001-4877-ba28-84c017a32ebe}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Abilties">
+      <UniqueIdentifier>{043f56d7-e274-43fa-8cd0-be41e8631a88}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Animations">
+      <UniqueIdentifier>{4abc2944-e5c7-44a8-b661-cf8ec5b27c0e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\AnImations">
+      <UniqueIdentifier>{b9bc8eb6-71e9-425f-a343-89a1dbc65431}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Shooting">
+      <UniqueIdentifier>{b2adb27b-3427-4468-bd00-58b45bf3c40f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\GameData">
+      <UniqueIdentifier>{cdd276f8-33b9-4511-ae7c-1dbec72d2708}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Game Data">
+      <UniqueIdentifier>{8c6b8fcf-d26f-44ca-b33b-3f5a72e60362}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Shooting">
+      <UniqueIdentifier>{61fb8fbe-ca91-4f38-b1c6-f026160535c8}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -121,9 +139,6 @@
       <Filter>Source Files\Components</Filter>
     </ClCompile>
     <ClCompile Include="Attributes.cpp">
-      <Filter>Source Files\Components</Filter>
-    </ClCompile>
-    <ClCompile Include="TileIndex.cpp">
       <Filter>Source Files\Components</Filter>
     </ClCompile>
     <ClCompile Include="GameObject.cpp">
@@ -160,16 +175,10 @@
       <Filter>Source Files\Collision</Filter>
     </ClCompile>
     <ClCompile Include="CannonManager.cpp">
-      <Filter>Source Files\Game</Filter>
+      <Filter>Source Files\Shooting</Filter>
     </ClCompile>
     <ClCompile Include="Projectile.cpp">
-      <Filter>Source Files\Game</Filter>
-    </ClCompile>
-    <ClCompile Include="AbilitiesManager.cpp">
-      <Filter>Source Files\Game</Filter>
-    </ClCompile>
-    <ClCompile Include="Ability.cpp">
-      <Filter>Source Files\Game</Filter>
+      <Filter>Source Files\Shooting</Filter>
     </ClCompile>
     <ClCompile Include="GraphicsManager.cpp">
       <Filter>Source Files\Graphics</Filter>
@@ -198,9 +207,6 @@
     <ClCompile Include="InstructionsOverlay.cpp">
       <Filter>Source Files\UI</Filter>
     </ClCompile>
-    <ClCompile Include="Loading.cpp">
-      <Filter>Source Files\Game States</Filter>
-    </ClCompile>
     <ClCompile Include="Settings.cpp">
       <Filter>Source Files\Game States</Filter>
     </ClCompile>
@@ -213,12 +219,6 @@
     <ClCompile Include="Guide.cpp">
       <Filter>Source Files\Game States</Filter>
     </ClCompile>
-    <ClCompile Include="GameTrackingManager.cpp">
-      <Filter>Source Files\Game</Filter>
-    </ClCompile>
-    <ClCompile Include="LevelSelect.cpp">
-      <Filter>Source Files\Game States</Filter>
-    </ClCompile>
     <ClCompile Include="ParticlesManager.cpp">
       <Filter>Source Files\Particles</Filter>
     </ClCompile>
@@ -228,14 +228,32 @@
     <ClCompile Include="TowerShield.cpp">
       <Filter>Source Files\Components</Filter>
     </ClCompile>
-    <ClCompile Include="AbilitiesFileManager.cpp">
-      <Filter>Source Files\Game</Filter>
-    </ClCompile>
-    <ClCompile Include="BgAnimation.cpp">
-      <Filter>Source Files\Game States</Filter>
-    </ClCompile>
     <ClCompile Include="ResultsUI.cpp">
       <Filter>Source Files\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="AbilitiesFileManager.cpp">
+      <Filter>Source Files\Abilties</Filter>
+    </ClCompile>
+    <ClCompile Include="AbilitiesManager.cpp">
+      <Filter>Source Files\Abilties</Filter>
+    </ClCompile>
+    <ClCompile Include="Ability.cpp">
+      <Filter>Source Files\Abilties</Filter>
+    </ClCompile>
+    <ClCompile Include="TileIndex.cpp">
+      <Filter>Source Files\Map</Filter>
+    </ClCompile>
+    <ClCompile Include="BgAnimation.cpp">
+      <Filter>Source Files\Animations</Filter>
+    </ClCompile>
+    <ClCompile Include="Loading.cpp">
+      <Filter>Source Files\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="GameTrackingManager.cpp">
+      <Filter>Source Files\GameData</Filter>
+    </ClCompile>
+    <ClCompile Include="LevelSelect.cpp">
+      <Filter>Source Files\Game States</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -269,9 +287,6 @@
     <ClInclude Include="Config.hpp">
       <Filter>Header Files\Common</Filter>
     </ClInclude>
-    <ClInclude Include="TileIndex.hpp">
-      <Filter>Header Files\Components</Filter>
-    </ClInclude>
     <ClInclude Include="MapManager.hpp">
       <Filter>Header Files\Map</Filter>
     </ClInclude>
@@ -303,16 +318,10 @@
       <Filter>Header Files\Collision</Filter>
     </ClInclude>
     <ClInclude Include="Projectile.hpp">
-      <Filter>Header Files\Game</Filter>
-    </ClInclude>
-    <ClInclude Include="AbilitiesManager.hpp">
-      <Filter>Header Files\Game</Filter>
-    </ClInclude>
-    <ClInclude Include="Ability.hpp">
-      <Filter>Header Files\Game</Filter>
+      <Filter>Header Files\Shooting</Filter>
     </ClInclude>
     <ClInclude Include="CannonManager.hpp">
-      <Filter>Header Files\Game</Filter>
+      <Filter>Header Files\Shooting</Filter>
     </ClInclude>
     <ClInclude Include="AssetsManager.hpp">
       <Filter>Header Files\Graphics</Filter>
@@ -341,9 +350,6 @@
     <ClInclude Include="UICursor.hpp">
       <Filter>Header Files\UI</Filter>
     </ClInclude>
-    <ClInclude Include="Loading.hpp">
-      <Filter>Header Files\Game States</Filter>
-    </ClInclude>
     <ClInclude Include="Settings.hpp">
       <Filter>Header Files\Game States</Filter>
     </ClInclude>
@@ -354,12 +360,6 @@
       <Filter>Header Files\Game States</Filter>
     </ClInclude>
     <ClInclude Include="Guide.hpp">
-      <Filter>Header Files\Game States</Filter>
-    </ClInclude>
-    <ClInclude Include="GameTrackingManager.hpp">
-      <Filter>Header Files\Game</Filter>
-    </ClInclude>
-    <ClInclude Include="LevelSelect.hpp">
       <Filter>Header Files\Game States</Filter>
     </ClInclude>
     <ClInclude Include="EffectsManager.hpp">
@@ -375,13 +375,31 @@
       <Filter>Header Files\Components</Filter>
     </ClInclude>
     <ClInclude Include="AbilitiesFileManager.hpp">
-      <Filter>Header Files\Game</Filter>
+      <Filter>Header Files\Abilties</Filter>
+    </ClInclude>
+    <ClInclude Include="AbilitiesManager.hpp">
+      <Filter>Header Files\Abilties</Filter>
+    </ClInclude>
+    <ClInclude Include="Ability.hpp">
+      <Filter>Header Files\Abilties</Filter>
+    </ClInclude>
+    <ClInclude Include="TileIndex.hpp">
+      <Filter>Header Files\Map</Filter>
     </ClInclude>
     <ClInclude Include="BgAnimation.hpp">
+      <Filter>Header Files\AnImations</Filter>
+    </ClInclude>
+    <ClInclude Include="Loading.hpp">
+      <Filter>Header Files\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="GameTrackingManager.hpp">
+      <Filter>Header Files\Game Data</Filter>
+    </ClInclude>
+    <ClInclude Include="LevelSelect.hpp">
       <Filter>Header Files\Game States</Filter>
     </ClInclude>
     <ClInclude Include="ResultsUI.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\UI</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

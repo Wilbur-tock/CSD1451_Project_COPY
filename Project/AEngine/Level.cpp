@@ -17,15 +17,12 @@
 #include "BgAnimation.hpp"
 #include "ResultsUI.hpp"
 
-AEGfxTexture* playerCannonTex = nullptr;
-AEGfxTexture* enemyCannonTex = nullptr;
-
 // UI Objects
 
 // Debug Panel
 UIManager::PanelText debugPanel, cannonDebugPanel;
 
-TextObject turnText, roundCountText;
+TextObject levelText, turnText, roundCountText;
 UIManager::Panel turnStatusPanel;
 
 struct LevelStatsUI {
@@ -113,6 +110,10 @@ struct LevelStatsUI {
 	}
 };
 
+// Store cannon texture here
+AEGfxTexture* playerCannonTex = nullptr;
+AEGfxTexture* enemyCannonTex = nullptr;
+
 LevelStatsUI playerStatsUI, enemyStatsUI; // UI object to display the overall stats of the player and enemy
 UIManager::PopupPanel notificationPanel; // panel to display whose turn it is disappear after a while
 
@@ -129,6 +130,10 @@ void Level::InitializeUI() {
 
 	// Initialize UI objects in level
 	turnStatusPanel = { {150,75}, {1,1,1}, Utils::AnchorMode::TOP_CENTER };
+
+	levelText = TextObject{ levelName, 0.6f, {0,0,0}, { {0,0}, {0,0} }, Utils::AnchorMode::CENTER };
+	levelText.SetPosition(turnStatusPanel.GetTransform());
+	levelText.SetOffsetPosition(0, 20.0f);
 
 	turnText = TextObject{ "", 0.8f,{0,0.75f,0}, { {0,0}, {0,0} }, Utils::AnchorMode::CENTER };
 	turnText.SetPosition(turnStatusPanel.GetTransform());
@@ -155,7 +160,8 @@ void Level::InitializeUI() {
 }
 
 Level::Level(int _leveId)
-	: levelId{ _leveId }, levelName{ "Level " + std::to_string(levelId + 1) }, levelFileName{ "level" + std::to_string(levelId + 1) } {
+	: levelId{ _leveId }, levelName{ levelId == 0 ? "Tutorial" : "Level " + std::to_string(levelId)},
+	levelFileName{ "level" + std::to_string(levelId) } {
 }
 
 void Level::Load() {
@@ -208,6 +214,7 @@ void Level::Initalize() {
 	enemies.clear();
 	decayingTiles.clear();
 
+	// reverse tiles
 	int reserveCount = 10;
 	enemies.reserve(reserveCount);
 	playerCharacters.reserve(reserveCount);
@@ -418,11 +425,55 @@ void Level::Draw() {
 	playerCannon.Draw();
 	enemyCannon.Draw();
 
-	ParticleManager::particleController.Draw();
-
 	// Draw shield 
 	playerShield.Draw();
 	enemyShield.Draw();
+
+	ParticleManager::particleController.Draw();
+}
+
+void Level::DrawUI() {
+	// Update UI before drawing it
+	if (isPlayerTurn) {
+		turnText.TextContent("PLAYER TURN");
+		turnText.SetColor(Color{ 0, 0.75f,0 });
+	}
+	else {
+		turnText.TextContent("ENEMY TURN");
+		turnText.SetColor(Color{ 1.0f, 0, 0 });
+	}
+
+
+	// UI to display whose turn it is
+	turnStatusPanel.Draw();
+	turnText.Draw();
+	levelText.Draw();
+
+	// Display how many numbers of round 
+	roundCountText.TextContent("Round " + std::to_string(roundCount));
+	roundCountText.Draw();
+
+	// Draw stats of player and enemy
+	playerStatsUI.barBG.Draw();
+	enemyStatsUI.barBG.Draw();
+
+	float currentHP = 0, maxHP = 0;
+	GetCurrentHP(currentHP);
+	GetMaxHP(maxHP);
+	playerStatsUI.Draw(currentHP, maxHP, playerShield.IsShieldOn(), static_cast<float>(playerShield.attribute.Shield()), static_cast<float>(playerShield.attribute.MaxShield()),
+		playerCannon.AbilityController()->GetAbilityModifiers());
+
+	GetCurrentHP(currentHP, false);
+	GetMaxHP(maxHP, false);
+	enemyStatsUI.Draw(currentHP, maxHP, enemyShield.IsShieldOn(), static_cast<float>(enemyShield.attribute.Shield()), static_cast<float>(enemyShield.attribute.MaxShield()),
+		enemyCannon.AbilityController()->GetAbilityModifiers());
+
+	// Draw active cannon UI
+	activeCannon->DrawUI();
+	activeCannon->DebugInfo();
+
+	// Always the last one to be drawn so that it will always appear infront
+	notificationPanel.Draw();
 }
 
 void Level::Free() {
@@ -462,48 +513,6 @@ Character* Level::RandomCharacterObj(bool isPlayerObj) {
 
 	int id = Utils::RandomValue(0, static_cast<int>(characters.size() - 1));
 	return &characters[id];
-}
-
-void Level::DrawUI() {
-	// Update UI before drawing it
-	if (isPlayerTurn) {
-		turnText.TextContent("PLAYER TURN");
-		turnText.SetColor(Color{ 0, 0.75f,0 });
-	}
-	else {
-		turnText.TextContent("ENEMY TURN");
-		turnText.SetColor(Color{ 1.0f, 0, 0 });
-	}
-
-	// UI to display whose turn it is
-	turnStatusPanel.Draw();
-	turnText.Draw();
-
-	// Display how many numbers of round 
-	roundCountText.TextContent("Round " + std::to_string(roundCount));
-	roundCountText.Draw();
-
-	// Draw stats of player and enemy
-	playerStatsUI.barBG.Draw();
-	enemyStatsUI.barBG.Draw();
-
-	float currentHP = 0, maxHP = 0;
-	GetCurrentHP(currentHP);
-	GetMaxHP(maxHP);
-	playerStatsUI.Draw(currentHP, maxHP, playerShield.IsShieldOn(), static_cast<float>(playerShield.attribute.Shield()), static_cast<float>(playerShield.attribute.MaxShield()),
-		playerCannon.AbilityController()->GetAbilityModifiers());
-
-	GetCurrentHP(currentHP, false);
-	GetMaxHP(maxHP, false);
-	enemyStatsUI.Draw(currentHP, maxHP, enemyShield.IsShieldOn(), static_cast<float>(enemyShield.attribute.Shield()), static_cast<float>(enemyShield.attribute.MaxShield()),
-		enemyCannon.AbilityController()->GetAbilityModifiers());
-
-	// Draw active cannon UI
-	activeCannon->DrawUI();
-	activeCannon->DebugInfo();
-
-	// Always the last one to be drawn so that it will always appear infront
-	notificationPanel.Draw();
 }
 
 void Level::GetCurrentHP(float& currentHP, bool isGettingPlayerHP) {
