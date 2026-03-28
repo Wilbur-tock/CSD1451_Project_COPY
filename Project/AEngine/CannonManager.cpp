@@ -15,6 +15,7 @@
 #include "AudioManager.hpp"
 #include "GameTrackingManager.hpp"
 #include "EffectsManager.hpp"
+#include "Tutorial.hpp"
 
 namespace CannonManager {
     Cannon::Cannon(AEVec2 _pos, AEGfxTexture* _texture, TileIndex _tileId, AEVec2 _size, bool _isShootingRight, bool _isPlayerControlled)
@@ -295,6 +296,8 @@ namespace CannonManager {
 
     void Cannon::ShootProjectile() {
         if (hasCannonShot) return;
+
+        Tutorial::SetTutorialMsg(5);
 
         // IMPORTANT: use a COPY here so we don't permanently modify the template projectile inside projectiles[].
         Projectile projectile = projectiles[selectedProjectileId];

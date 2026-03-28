@@ -23,6 +23,8 @@ Button::Button(TextObject _textObj, Utils::AnchorMode _anchorMode, AEVec2 _pos, 
 }
 
 void Button::Update() {
+    if (!onClick) return;
+
     isClick = false;
     isHovered = CollisionManager::IsPointInRect(transform.pos.x, transform.pos.y, transform.size.x, transform.size.y);
 

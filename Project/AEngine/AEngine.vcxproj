@@ -145,6 +145,7 @@ xcopy "$(SolutionDir)Extern\AlphaEngine\lib\fmod.dll" "$(OutDir)" /s /r /y /q</C
     <ClCompile Include="Tile.cpp" />
     <ClCompile Include="BaseTypes.cpp" />
     <ClCompile Include="TowerShield.cpp" />
+    <ClCompile Include="Turtorial.cpp" />
     <ClCompile Include="UICursor.cpp" />
     <ClCompile Include="UIManager.cpp" />
     <ClCompile Include="Utils.cpp" />
@@ -196,6 +197,7 @@ xcopy "$(SolutionDir)Extern\AlphaEngine\lib\fmod.dll" "$(OutDir)" /s /r /y /q</C
     <ClInclude Include="Tile.hpp" />
     <ClInclude Include="BaseTypes.hpp" />
     <ClInclude Include="TowerShield.hpp" />
+    <ClInclude Include="Tutorial.hpp" />
     <ClInclude Include="UICursor.hpp" />
     <ClInclude Include="UIManager.hpp" />
     <ClInclude Include="Utils.hpp" />

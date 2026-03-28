@@ -134,8 +134,13 @@ private:
 	bool isPlayerTurn = true; // is player or enemy turn to shoot
 	bool autoPlayOn = false; // used for debugging let enemy play ONLY
 	bool hasExtraShot = false; // does the current shooter have an extra shot
-	bool skipOpponentTurn = false;
-	bool noEnemyTurn = false; // used for debugging to keep skipping enemy turns
+	bool skipOpponentTurn = false; // skip enemy turn to shot
+
+	bool disableEnemyTurn = false; // used for debugger to toggle on/off of skipping enemy round
+	bool noEnemy = false; // if true no enemy can shoot at all can't toggle enemy on and off even with debugger on
+	bool canSelectAbility = true;
+
+	bool resetMapEveryRound = false;
 	bool isHoveringUI = false;
 	bool isHoveringOverInventoryUI = false;
 	float switchTurnCooldown = 0.0f; // Cooldown timer to add a delay between the destruction of the player projectile and starting of enemy turn

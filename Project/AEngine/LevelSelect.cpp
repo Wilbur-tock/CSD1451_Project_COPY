@@ -1,30 +1,29 @@
 #include "LevelSelect.hpp"
 
-#include <array>
-#include <string>
-
 #include "GraphicsManager.hpp"
 #include "GameStateManager.hpp"
 #include "AssetsManager.hpp"
 #include "CameraManager.hpp"
 #include "AudioManager.hpp"
-#include "TextObject.hpp"
 #include "Color.hpp"
 #include "Utils.hpp"
 #include "Config.hpp"
 #include "UICursor.hpp"
 #include "LevelManager.hpp"
-#include "bgAnimation.hpp"
+#include "BgAnimation.hpp"
 #include "ParticlesManager.hpp"
+#include "UIManager.hpp"
 
 namespace LevelSelect {
 
     namespace {
         constexpr int kTotalButtons = Config::TOTAL_LEVEL_COUNT;
 
-        std::array<Button, kTotalButtons> levelButtons;
-        Button backButton;
+        std::vector<Button> levelButtons;
 
+        bool ignoredTutorialLevel = false;
+        UIManager::PanelText titlePanel;
+        Button backButton;
         TextObject hintText;
 
         AEGfxTexture* bgTexture = nullptr;
@@ -85,32 +84,6 @@ namespace LevelSelect {
         }
     } // close anonymous namespace
 
-    float PixelToNdcX(float pixelX) {
-        return pixelX / (Config::SCREEN_WIDTH * 0.5f);
-    }
-
-    float PixelToNdcY(float pixelY) {
-        return pixelY / (Config::SCREEN_HEIGHT * 0.5f);
-    }
-
-    void DrawCenteredTextPx(const std::string& text, float centerPixelX, float pixelY, float scale, const Color& color) {
-        f32 textW = 0.0f;
-        f32 textH = 0.0f;
-        AEGfxGetPrintSize(AssetsManager::textFont, text.c_str(), scale, &textW, &textH);
-
-        AEGfxPrint(
-            AssetsManager::textFont,
-            text.c_str(),
-            PixelToNdcX(centerPixelX) - (textW * 0.5f),
-            PixelToNdcY(pixelY),
-            scale,
-            color.Red(),
-            color.Green(),
-            color.Blue(),
-            color.Alpha()
-        );
-    }
-
     void Load() {
         bgTexture = AssetsManager::GetTexture("Assets/game_bg.png");
         buttonTexture = AssetsManager::GetTexture("Assets/buttonTexture.png");
@@ -127,6 +100,10 @@ namespace LevelSelect {
         BgAnimation::Init();
 
         for (int i = 0; i < kTotalButtons; ++i) {
+            if (ignoredTutorialLevel) continue;
+
+            levelButtons.push_back(Button{});
+            int levelId = i; 
             AEVec2 buttonTopLeft = GetLevelButtonTopLeft(
                 i,
                 kTotalButtons,
@@ -136,11 +113,15 @@ namespace LevelSelect {
             );
 
             ConfigureLevelButton(levelButtons[i], i, buttonTopLeft, kLevelButtonSize);
-        }
 
-        levelButtons[0].SetOnClick(OnLevel1Clicked);
-        levelButtons[1].SetOnClick(LevelManager::IsLevelUnlocked(1) ? OnLevel2Clicked : nullptr);
-        levelButtons[2].SetOnClick(LevelManager::IsLevelUnlocked(2) ? OnLevel3Clicked : nullptr);
+            // Added on blick function
+            levelButtons[i].SetOnClick([levelId]() {
+                    if (LevelManager::IsLevelUnlocked(levelId)) {
+                        OpenLevel(levelId);
+                    }
+                }
+            );
+        }
 
         backButton = Button(
             TextObject{ "< BACK" },
@@ -159,6 +140,13 @@ namespace LevelSelect {
             Color(0.0f, 0.0f, 0.0f, 0.95f),
             { -0.95f, -0.92f }
         };
+
+        titlePanel = UIManager::PanelText{
+            UIManager::Panel{{250,50}, Color{0,0,0, 0.5f}},
+            TextObject{"SELECT LEVEL", 1.0f, Color{1,1,1}, {}, Utils::AnchorMode::CENTER}
+        };
+
+        titlePanel.AddOffsetPosition({ 0,100 });
     }
 
     void Draw() {
@@ -183,29 +171,7 @@ namespace LevelSelect {
         const std::string progressLabel =
             "Currently unlocked: LEVEL " + std::to_string(LevelManager::HighestUnlockedLevel() + 1);
 
-        DrawCenteredTextPx(
-            "SELECT LEVEL",
-            0.0f,
-            285.0f,
-            1.7f,
-            Color(0.0f, 0.0f, 0.0f, 1.0f)
-        );
-
-        DrawCenteredTextPx(
-            "Complete a level to unlock the next one",
-            0.0f,
-            225.0f,
-            0.85f,
-            Color(0.0f, 0.0f, 0.0f, 0.90f)
-        );
-
-        DrawCenteredTextPx(
-            progressLabel,
-            0.0f,
-            185.0f,
-            0.75f,
-            Color(0.0f, 0.0f, 0.0f, 0.95f)
-        );
+        titlePanel.Draw();
 
         hintText.Draw();
     }
@@ -249,10 +215,6 @@ namespace LevelSelect {
     void Free() {}
 
     void Unload() {}
-
-    void OnLevel1Clicked() { OpenLevel(0); }
-    void OnLevel2Clicked() { OpenLevel(1); }
-    void OnLevel3Clicked() { OpenLevel(2); }
 
     void OnBackClicked() {
         GameStateManager::next = GameStateManager::GameState::MAIN_MENU;

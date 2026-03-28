@@ -17,6 +17,8 @@
 #include "BgAnimation.hpp"
 #include "ResultsUI.hpp"
 
+#include "Tutorial.hpp"
+
 // UI Objects
 
 // Debug Panel
@@ -151,7 +153,7 @@ void Level::InitializeUI() {
 
 	notificationPanel = UIManager::PopupPanel{
 		true,
-		UIManager::Panel{{250,75}},
+		UIManager::Panel{{500,75}},
 		TextObject{"", 0.7f, Color{0.0f,0.1f,0.7f}, Transform{ {0,0}, {0,0} }, Utils::AnchorMode::CENTER }
 	};
 	notificationPanel.AddOffsetPosition({ 0,300 });
@@ -160,7 +162,7 @@ void Level::InitializeUI() {
 }
 
 Level::Level(int _leveId)
-	: levelId{ _leveId }, levelName{ levelId == 0 ? "Tutorial" : "Level " + std::to_string(levelId)},
+	: levelId{ _leveId }, levelName{ levelId == 0 ? "Sandbox" : "Level " + std::to_string(levelId)},
 	levelFileName{ "level" + std::to_string(levelId) } {
 }
 
@@ -201,12 +203,27 @@ void Level::Initalize() {
 	status = LevelStatus::PLAYING;
 	hasProcessedVictory = false;
 
+	switch (levelId) {
+	case 0:
+		Tutorial::Initialize();
+		noEnemy = resetMapEveryRound = true;
+		canSelectAbility = false;
+		AbilitiesManager::playerAbilityController.SetTestingMode();
+
+		break;
+	case 1:
+		Tutorial::Initialize();
+		break;
+	}
+
 	// Initialize active map 
 	for (int i = 0; i < Config::GRID_HEIGHT; ++i) {
 		for (int j = 0; j < Config::GRID_WIDTH; ++j) {
 			activeLevelMap[i][j] = levelMap[i][j];
 		}
 	}
+
+	// Set map to be displayed
 	MapManager::currentMap = &activeLevelMap;
 
 	// Reset
@@ -226,7 +243,7 @@ void Level::Initalize() {
 	roundCount = 0;
 	// Reset debugging back to false
 	autoPlayOn = false;
-	noEnemyTurn = false;
+	disableEnemyTurn = false;
 	switchTurnCooldown = 0.0f;
 
 	AEVec2 playerCannonStartPos = { 0,0 }, enemyCannonStartPos = { 0,0 };
@@ -325,6 +342,10 @@ void Level::Initalize() {
 
 	SwitchTurn(isPlayerStarting); // called last
 
+	if (levelId == 0) {
+		notificationPanel.Popup("Use Q and E to toggle through all the abilities", 10.0f);
+	}
+
 	std::cout << "[Level] Initialize " + levelFileName << '\n';
 }
 
@@ -340,6 +361,8 @@ void Level::Update() {
 	DebugCommands();
 
 	if (status == LevelStatus::PLAYING) {
+		if (noEnemy) disableEnemyTurn = true;
+
 		// Find new target if current target is not alive
 		if (!isPlayerTurn && !enemyCannon.IsTargetAlive()) {
 			enemyCannon.SetTarget(RandomCharacterObj(true));
@@ -354,6 +377,17 @@ void Level::Update() {
 		}
 
 		UpdateTurn();
+	}
+
+	// For testing levels only
+	if (levelId == 0) {
+		if (AEInputCheckTriggered(AEVK_Q)) {
+			playerCannon.AbilityController()->ToggleAbility(true, -1);
+		}
+
+		if (AEInputCheckTriggered(AEVK_E)) {
+			playerCannon.AbilityController()->ToggleAbility(true, 1);
+		}
 	}
 
 	Draw();
@@ -393,6 +427,7 @@ void Level::Update() {
 }
 
 void Level::UpdateUI() {
+	// update to check if timer lifespan reaches 0 then disable panel
 	notificationPanel.Update();
 }
 
@@ -474,6 +509,8 @@ void Level::DrawUI() {
 
 	// Always the last one to be drawn so that it will always appear infront
 	notificationPanel.Draw();
+
+	Tutorial::Draw();
 }
 
 void Level::Free() {
@@ -571,6 +608,8 @@ void Level::SwitchTurn(bool _isPlayerTurn) {
 		activeCannon = &playerCannon;
 		// randomise the abilities available to the player for this turn
 		AbilitiesManager::playerAbilityController.AbilitySelectionRandomiser();
+
+		Tutorial::SetTutorialMsg(6);
 	}
 	else {
 		// Enemy Turn
@@ -581,7 +620,7 @@ void Level::SwitchTurn(bool _isPlayerTurn) {
 	notificationPanel.Popup(newTurnMsg, 2.5f);
 
 	// Turn on/off selecting ability if it player turn or not
-	AbilitiesManager::playerAbilityController.IsSelectingAbility(isPlayerTurn);
+	AbilitiesManager::playerAbilityController.IsSelectingAbility(isPlayerTurn && canSelectAbility);
 
 	// can set new turn and whoever starting the round and current turn is the same
 	if (canSetNewRound && isNewRound) {
@@ -663,6 +702,11 @@ void Level::UpdateNewRound() {
 
 	RecordPrevDamage(playerDamageLog);
 	RecordPrevDamage(enemyDamageLog);
+
+	if (resetMapEveryRound) {
+		ToggleTerritoryTiles(true, true);
+		ToggleTerritoryTiles(false, true);
+	}
 }
 
 void Level::UpdateLevelStatus() {
@@ -804,7 +848,7 @@ void Level::DebugCommands() {
 
 	// Input E to skip enemy turn
 	if (AEInputCheckTriggered(AEVK_E)) {
-		noEnemyTurn = !noEnemyTurn;
+		disableEnemyTurn = !disableEnemyTurn;
 	}
 
 	// Rebuild tower
@@ -849,7 +893,7 @@ void Level::DebugCommands() {
 		}
 	}
 
-	if (noEnemyTurn) { // Skipping enemy turn
+	if (disableEnemyTurn) { // Skipping enemy turn
 		if (!isPlayerTurn) {
 			SwitchTurn(true);
 		}
@@ -863,7 +907,8 @@ void Level::DebugCommands() {
 			SwitchTurn(false);
 		}
 
-		noEnemyTurn = false;
+		// toggle on enemy turn
+		disableEnemyTurn = false;
 	}
 }
 
@@ -884,7 +929,7 @@ void Level::DebugInfo() {
 	Utils::GetWorldMousePos(mX, mY);
 
 	std::string debug = "Shortcuts:\n[CTRL + R] Auto play " + std::string(autoPlayOn ? "ON" : "OFF")
-		+ "\n[E] Skipping enemy turn " + std::string(noEnemyTurn ? "ON" : "OFF")
+		+ "\n[E] Skipping enemy turn " + std::string(disableEnemyTurn ? "ON" : "OFF")
 		+ "\n[R] Skip to enemy turn\n\nLevel:\nLevel Status: " + std::to_string(static_cast<int>(status))
 		+ "\n\nTile Map\nIndex X: " + std::to_string(gridX) + " Y: " + std::to_string(gridY)
 		+ "\nTile: " + GetTileName(tile.Type());

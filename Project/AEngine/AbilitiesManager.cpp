@@ -12,6 +12,8 @@
 #include "CollisionManager.hpp"
 #include "LevelManager.hpp"
 
+#include "Tutorial.hpp"
+
 namespace AbilitiesManager {
 	AbilityController playerAbilityController;
 	AbilityController enemyAbilityController;
@@ -117,6 +119,13 @@ namespace AbilitiesManager {
 		InventoryRandomiser(randomCount);
 
 		Reset();
+
+		// Add default at the last slot if it in testing mode
+		if (testingMode) {
+			AddAbility(0);
+			ChangeCurrentAbility(Config::MAX_INVENTORY_COUNT - 1);
+			std::cout << inventoryIds.size() << '\n';
+		}
 
 		//std::cout << "[AbilitiesManager] List of starting abilities:" << '\n';
 		//for (Ability* ability : inventory) {
@@ -404,8 +413,10 @@ namespace AbilitiesManager {
 		AbilityEffects();
 		GameTrackingManager::gameData.AddAbilityUsed(isPlayerControlled, static_cast<int>(GetCurrentAbility().GetType()));
 
-		// Minus ability charges from current ability and remove from inventory
-		RemoveAbility(SetCurrentAbility());
+		if (!testingMode) {
+			// Minus ability charges from current ability and remove from inventory
+			RemoveAbility(SetCurrentAbility());
+		}
 
 		std::cout << "[AbilitiesManager] Ability used: " + GetCurrentAbility().GetName()
 			+ " Charges Remaining: " + std::to_string(GetCurrentAbility().AbilityCharges()) << '\n';
@@ -524,6 +535,8 @@ namespace AbilitiesManager {
 	}
 
 	void AbilityController::OnClickAbilityCard(Ability const& ability) {
+		Tutorial::SetTutorialMsg(2);
+
 		if (ability.GetType() != AbilityType::STATISTICS) {
 			AddAbility(ability.Id());
 		}
@@ -673,17 +686,20 @@ namespace AbilitiesManager {
 			Color iconColor{ 0.5f, 0.5f, 0.5f };
 
 			if (i < InventoryCount()) {
-				Ability* ability = GetAbility(inventoryIds[i]);
+				int inventoryId = testingMode ? static_cast<int>(inventoryIds.size() - 1) : i;
+				Ability* ability = GetAbility(inventoryIds[inventoryId]);
+
 				iconName = ability->GetName();
 				iconColor = ability->GetType() == AbilityType::OFFENSIVE ? Color(1, 0, 0) : Color(0, 0, 1);
 				// Highlight current ability
 				if (GetCurrentAbility().Id() == ability->Id() && currentInventoryId == i) {
 					iconColor = Color(0, 0, 0);
 				}
-				else { 
+				else {
 					// Can only select ability that is not current selected
-					btn.SetOnClick([this, i]() {
-						ChangeCurrentAbility(i);
+					btn.SetOnClick([this, inventoryId]() {
+						Tutorial::SetTutorialMsg(3);
+						ChangeCurrentAbility(inventoryId);;
 					});
 				}
 

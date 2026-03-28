@@ -43,6 +43,7 @@ namespace AbilitiesManager {
 		//void LoadAllAIAbilities(); //Loads all AI abils from AiAbilities.json file
 		void LoadStartingAbilities();
 
+		void SetTestingMode() { testingMode = true; }
 		// Reset to default ability if current ability if an offensive and charges remaining is 0 to 
 		// ensure that an ability with 0 charges cannot be used again
 		void Reset();
@@ -150,6 +151,8 @@ namespace AbilitiesManager {
 		bool isPlayerControlled = true;
 
 		bool hasEnemySelectedAbility = false; // has enemy selected their ability
+
+		bool testingMode = false;
 
 		bool isStatsAbilityActive = false;
 		Ability statsAbility; // stats ability boost to apply onto caster when they shoot

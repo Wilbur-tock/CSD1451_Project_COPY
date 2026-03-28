@@ -1,6 +1,7 @@
 #include "pch.hpp"
 #include "CameraManager.hpp"
 #include "GameStateManager.hpp"
+#include "Tutorial.hpp"
 
 namespace CameraManager
 {
@@ -23,11 +24,9 @@ namespace CameraManager
         , zoomMin(0.5f)
         , zoomMax(2.0f)
         , isZoomAllow(true)
-    {
-    }
+    {}
 
-    void CameraController::ClampPosition()
-    {
+    void CameraController::ClampPosition() {
         if (!useBounds) return;
 
         // Half screen in world units depends on current zoom.
@@ -41,8 +40,7 @@ namespace CameraManager
         position.y = std::clamp(position.y, boundMinY + halfH, boundMaxY - halfH);
     }
 
-    void CameraController::Init()
-    {
+    void CameraController::Init() {
         position = { 0.0f, 0.0f };
         moveSpeed = 300.0f;
         followSpeed = 5.0f;
@@ -63,8 +61,7 @@ namespace CameraManager
         );
     }
 
-    void CameraController::Update(float dt)
-    {
+    void CameraController::Update(float dt) {
         switch (currentState)
         {
         case CameraState::STATIC:
@@ -94,6 +91,12 @@ namespace CameraManager
             AEInputMouseWheelDelta(&scrollDelta);
             if (scrollDelta > 0)        ZoomIn(dt);
             else if (scrollDelta < 0)   ZoomOut(dt);
+
+            // Has any input
+            if (movement.x > 0 || movement.y > 0 || scrollDelta > 0) {
+                Tutorial::SetTutorialMsg(4);
+            }
+
             break;
         }
         case CameraState::FOLLOW:
@@ -128,8 +131,7 @@ namespace CameraManager
         AEGfxSetCamPosition(position.x, position.y);
     }
 
-    void CameraController::SetPosition(const AEVec2& pos)
-    {
+    void CameraController::SetPosition(const AEVec2& pos) {
         position = pos;
 
         // Apply boundary clamping if enabled
@@ -148,8 +150,7 @@ namespace CameraManager
         AEGfxSetCamPosition(position.x, position.y);
     }
 
-    void CameraController::SetBounds(float minX, float maxX, float minY, float maxY)
-    {
+    void CameraController::SetBounds(float minX, float maxX, float minY, float maxY){
         boundMinX = minX;
         boundMaxX = maxX;
         boundMinY = minY;
@@ -157,33 +158,27 @@ namespace CameraManager
         useBounds = true;
     }
 
-    void CameraController::SetState(CameraState newState)
-    {
+    void CameraController::SetState(CameraState newState) {
         currentState = newState;
     }
 
-    void CameraController::SetFollowTarget(const AEVec2* target)
-    {
+    void CameraController::SetFollowTarget(const AEVec2* target) {
         followTarget = target;
     }
 
-    void CameraController::SetFollowSpeed(float speed)
-    {
+    void CameraController::SetFollowSpeed(float speed) {
         followSpeed = speed;
     }
 
-    AEVec2 CameraController::GetPosition() const
-    {
+    AEVec2 CameraController::GetPosition() const {
         return position;
     }
 
-    CameraController::CameraState CameraController::GetState() const
-    {
+    CameraController::CameraState CameraController::GetState() const {
         return currentState;
     }
 
-    std::string CameraController::PrintState() const
-    {
+    std::string CameraController::PrintState() const {
         switch (currentState)
         {
         case CameraState::STATIC: return "STATIC";
@@ -193,8 +188,7 @@ namespace CameraManager
         }
 	}
 
-    std::string CameraController::PrintVisibleTiles() const
-    {
+    std::string CameraController::PrintVisibleTiles() const {
         float visibleW = static_cast<float>(Config::SCREEN_WIDTH) / (static_cast<float>(Config::TILE_SIZE) * zoomLevel);
         float visibleH = static_cast<float>(Config::SCREEN_HEIGHT) / (static_cast<float>(Config::TILE_SIZE) * zoomLevel);
 
@@ -202,43 +196,36 @@ namespace CameraManager
             + " Height: " + Utils::FormatFloat(visibleH, 2);
 	}
 
-    void CameraController::SetMoveSpeed(float speed)
-    {
+    void CameraController::SetMoveSpeed(float speed) {
         moveSpeed = speed;
     }
 
     // ===== ZOOM FUNCTION =====
 
-    float CameraController::GetZoom() const
-    {
+    float CameraController::GetZoom() const {
         return zoomLevel;
     }
 
-    void CameraController::SetZoom(float zoom)
-    {
+    void CameraController::SetZoom(float zoom) {
         zoomLevel = std::clamp(zoom, zoomMin, zoomMax);
     }
 
-    void CameraController::SetZoomSpeed(float speed)
-    {
+    void CameraController::SetZoomSpeed(float speed) {
         zoomSpeed = speed;
     }
 
-    void CameraController::SetZoomBounds(float minZoom, float maxZoom)
-    {
+    void CameraController::SetZoomBounds(float minZoom, float maxZoom) {
         zoomMin = minZoom;
         zoomMax = maxZoom;
     }
 
-    void CameraController::ZoomIn(float dt)
-    {
+    void CameraController::ZoomIn(float dt) {
         zoomLevel += zoomSpeed * dt;
         if (zoomLevel > zoomMax) zoomLevel = zoomMax;
         ClampPosition();
     }
 
-    void CameraController::ZoomOut(float dt)
-    {
+    void CameraController::ZoomOut(float dt) {
         zoomLevel -= zoomSpeed * dt;
         if (zoomLevel < zoomMin) zoomLevel = zoomMin;
         ClampPosition();
@@ -247,5 +234,4 @@ namespace CameraManager
     void CameraController::SetZoomAllow(bool isAllow) {
         isZoomAllow = isAllow;
     }
-
 }
