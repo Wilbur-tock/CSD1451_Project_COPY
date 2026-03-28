@@ -393,6 +393,7 @@ bool Projectile::Destroy() {
 void Projectile::DamageTile(int tileX, int tileY) {
     Tile& centerTile = (*MapManager::currentMap)[tileY][tileX];
 
+    // reset prev damage tile if the projectile hits a destructible
     if (prevDamageTileUndestructible && centerTile.IsDestructible()) prevDamageTileUndestructible = false;
 
     if (attackCharges <= 0 || prevDamageTileUndestructible) return; // Can't damage return

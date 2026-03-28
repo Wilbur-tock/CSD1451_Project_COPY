@@ -38,9 +38,6 @@ namespace CannonManager {
 
         // Initialize UI
 
-        worldSpaceShotBar = UIManager::Bar{ { x, transform.pos.y + (transform.size.y * 1.5f) },
-            { 15,100 }, Color{ 0,1,0 }, UIManager::FillType::TOP_TO_BOTTOM };
-
         Transform trans{ { 0,0 }, {600,15} };
         Utils::SetAnchoredPosition(trans, Utils::AnchorMode::BOTTOM_CENTER);
         trans.pos.y += 100 + 15;
@@ -109,7 +106,7 @@ namespace CannonManager {
         AEMtx33 mat = GraphicsManager::CreateTransformMatrix(transform.pos.x, transform.pos.y, transform.size.x, transform.size.y, cannonAngle);
         GraphicsManager::DrawGameObject(texture, mat, textureColor);
 
-        if (isPlayerControlled) DrawTrajectory();
+        //if (isPlayerControlled) DrawTrajectory();
 
         // Draw all active projectiles
         for (Projectile& projectile : activeProjectiles) {
@@ -125,12 +122,11 @@ namespace CannonManager {
 
         // Render UI
         if (isHoldingLeftClick) {
-            // Drawing power bar beside the cannon in WORLD SPACE
-            //worldSpaceShotBar.Draw(chargingPower, Config::CANNON_MAX_POWER, false);
-
             // Only draw power bar in the SCREEN SPACE for player cannon
             screenOverlayShotBar.Draw(chargingPower, Config::CANNON_MAX_POWER);
         }
+
+        DrawTrajectory();
     }
 
     void Cannon::ResetCannon() {

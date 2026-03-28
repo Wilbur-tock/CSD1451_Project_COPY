@@ -134,10 +134,12 @@ namespace AbilitiesManager {
 	}
 
 	void AbilityController::Reset() {
+		isAbilityTriggered = false;
+
+		if (testingMode) return;
 		// Always reset back to default ability
 		ChangeCurrentAbility(0);
 		currentInventoryId = 0;
-		isAbilityTriggered = false;
 	}
 
 	void AbilityController::SetAIAbilitySelection(int difficulty) {

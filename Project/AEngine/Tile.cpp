@@ -47,7 +47,7 @@ void Tile::TakeDamage(int damage) {
 			attribute.Health(character->attribute.Health()); // Assign tile health to character health
 		}
 	}
-	else {
+	else if(IsBlocks()) {
 		AEGfxTexture* tileTexture = MapManager::GetTileTexture(type); 
 		EffectsManager::effectsController.PlayTileBreak(transform.pos, tileTexture);
 		attribute.TakeDamage(damage * attribute.DamageMultiplier());

@@ -202,13 +202,14 @@ void Level::Initalize() {
 
 	status = LevelStatus::PLAYING;
 	hasProcessedVictory = false;
+	AbilitiesManager::playerAbilityController.SetTestingMode(false);
 
 	switch (levelId) {
 	case 0:
 		Tutorial::Initialize();
 		noEnemy = resetMapEveryRound = true;
 		canSelectAbility = false;
-		AbilitiesManager::playerAbilityController.SetTestingMode();
+		AbilitiesManager::playerAbilityController.SetTestingMode(true);
 
 		break;
 	case 1:
@@ -337,6 +338,7 @@ void Level::Initalize() {
 
 	// Initialize Territory tiles
 	SetOriginalTerritoryTiles(playerTerritory);
+	SetOriginalTerritoryTiles(enemyTerritory);
 
 	InitializeUI();
 
@@ -390,6 +392,7 @@ void Level::Update() {
 		}
 	}
 
+	// Draw objects here
 	Draw();
 	for (Character& playerChar : playerCharacters) {
 		playerChar.Update();
@@ -402,12 +405,11 @@ void Level::Update() {
 		enemy.Draw();
 	}
 
-	ParticleManager::particleController.Update(PhysicsManager::g_dt);
-
-	// Need to be below DrawLevel to ensure that the Ability Selector UI is shows up infront of the level
+	// Need to be below Draw to ensure that the Ability Selector UI is shows up infront of the level
 	prevIsAbilitySelectorOn = AbilitiesManager::playerAbilityController.IsSelectingAbility();
 	AbilitiesManager::playerAbilityController.UpdateAbilitySelector();
 
+	// Timer to prevent accidently shooting after selecting an ability
 	if (AbilitiesManager::playerAbilityController.IsSelectingAbility() != prevIsAbilitySelectorOn) {
 		delayTimer = defaultDelayTimer;
 	}
@@ -417,10 +419,11 @@ void Level::Update() {
 	}
 
 	// UI
-	activeCannon->AbilityController()->DrawAbilityInventoryUI();
 	UpdateUI();
 	DrawUI();
 	DebugInfo();
+
+	ParticleManager::particleController.Update(PhysicsManager::g_dt);
 
 	// Draw result screen LAST so it renders on top of everything
 	ResultsUI::Update(status);
@@ -478,7 +481,6 @@ void Level::DrawUI() {
 		turnText.SetColor(Color{ 1.0f, 0, 0 });
 	}
 
-
 	// UI to display whose turn it is
 	turnStatusPanel.Draw();
 	turnText.Draw();
@@ -492,6 +494,7 @@ void Level::DrawUI() {
 	playerStatsUI.barBG.Draw();
 	enemyStatsUI.barBG.Draw();
 
+	// Update health and shield bar
 	float currentHP = 0, maxHP = 0;
 	GetCurrentHP(currentHP);
 	GetMaxHP(maxHP);
@@ -504,6 +507,7 @@ void Level::DrawUI() {
 		enemyCannon.AbilityController()->GetAbilityModifiers());
 
 	// Draw active cannon UI
+	activeCannon->AbilityController()->DrawAbilityInventoryUI();
 	activeCannon->DrawUI();
 	activeCannon->DebugInfo();
 
@@ -704,8 +708,8 @@ void Level::UpdateNewRound() {
 	RecordPrevDamage(enemyDamageLog);
 
 	if (resetMapEveryRound) {
-		ToggleTerritoryTiles(true, true);
 		ToggleTerritoryTiles(false, true);
+		ToggleTerritoryTiles(true, true);
 	}
 }
 
@@ -853,10 +857,12 @@ void Level::DebugCommands() {
 
 	// Rebuild tower
 	if (AEInputCheckTriggered(AEVK_G)) {
+		ToggleTerritoryTiles(false, true);
 		ToggleTerritoryTiles(true, true);
 	}
 	// Destroy tower
 	if (AEInputCheckTriggered(AEVK_H)) {
+		ToggleTerritoryTiles(false, false);
 		ToggleTerritoryTiles(true, false);
 	}
 

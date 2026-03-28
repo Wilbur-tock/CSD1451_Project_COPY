@@ -27,7 +27,7 @@ namespace ResultsUI {
 
 		// proceed to next level
 		int levelId = LevelManager::CurrentLevel()->Id() + 1;
-		GameStateManager::GameState nextGameState = static_cast<GameStateManager::GameState>(static_cast<int>(GameStateManager::GameState::LEVEL_1) + levelId);
+		GameStateManager::GameState nextGameState = static_cast<GameStateManager::GameState>(static_cast<int>(GameStateManager::GameState::LEVEL_0) + levelId);
 
 		// if finished final level back to main menu (addtional checks not really needed)
 		if (levelId >= Config::TOTAL_LEVEL_COUNT) {

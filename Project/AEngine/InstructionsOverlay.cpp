@@ -12,7 +12,7 @@ namespace UIInstructionsOverlay {
         bool IsGameplayLevel(GameStateManager::GameState s) {
             using GameStateManager::GameState;
             switch (s) {
-            case GameState::LEVEL_1:
+            case GameState::LEVEL_0:
             case GameState::LEVEL_2:
             case GameState::LEVEL_3:
                 return true;
@@ -28,7 +28,7 @@ namespace UIInstructionsOverlay {
             case GameState::MAIN_MENU:    return "MAIN MENU";
             case GameState::LEVEL_SELECT: return "LEVEL SELECT";
             case GameState::MAP_EDITOR:   return "MAP EDITOR";
-            case GameState::LEVEL_1:      return "LEVEL 1";
+            case GameState::LEVEL_0:      return "LEVEL 1";
             case GameState::LEVEL_2:      return "LEVEL 2";
             case GameState::LEVEL_3:      return "LEVEL 3";
             case GameState::CREDITS:      return "CREDITS";

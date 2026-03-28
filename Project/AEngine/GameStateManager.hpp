@@ -10,6 +10,7 @@ namespace GameStateManager {
 		MAIN_MENU,
 		LEVEL_SELECT,
 		MAP_EDITOR,
+		LEVEL_0,
 		LEVEL_1,
 		LEVEL_2,
 		LEVEL_3,

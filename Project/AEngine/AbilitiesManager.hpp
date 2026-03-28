@@ -34,6 +34,8 @@ namespace AbilitiesManager {
 		bool IsStatsAbilityActive() const { return isStatsAbilityActive; }
 		Ability const& StatsAbility() const { return statsAbility; }
 
+		void SetTestingMode(bool _testingMode) { testingMode = _testingMode; }
+
 	private:
 		Ability& SetCurrentAbility() { return allAbilities[currentAbilityVectorId]; }
 
@@ -43,7 +45,6 @@ namespace AbilitiesManager {
 		//void LoadAllAIAbilities(); //Loads all AI abils from AiAbilities.json file
 		void LoadStartingAbilities();
 
-		void SetTestingMode() { testingMode = true; }
 		// Reset to default ability if current ability if an offensive and charges remaining is 0 to 
 		// ensure that an ability with 0 charges cannot be used again
 		void Reset();

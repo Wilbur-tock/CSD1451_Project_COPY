@@ -46,7 +46,7 @@ namespace LevelSelect {
 
         GameStateManager::GameState LevelIndexToState(int levelIndex) {
             return static_cast<GameStateManager::GameState>(
-                static_cast<int>(GameStateManager::GameState::LEVEL_1) + levelIndex
+                static_cast<int>(GameStateManager::GameState::LEVEL_0) + levelIndex
                 );
         }
 
@@ -61,7 +61,7 @@ namespace LevelSelect {
         void ConfigureLevelButton(Button& button, int levelIndex, AEVec2 topLeftPos, float buttonSize) {
             const bool unlocked = LevelManager::IsLevelUnlocked(levelIndex);
 
-            std::string label = std::to_string(levelIndex + 1);
+            std::string label = levelIndex == 0 ? "Sandbox" : std::to_string(levelIndex);
 
             Color buttonColor(0.46f, 0.46f, 0.50f, 1.0f);
             Color textColor(0.20f, 0.20f, 0.22f, 1.0f);
@@ -72,17 +72,15 @@ namespace LevelSelect {
             }
 
             button = Button(
-                TextObject{ label, 1.55f, textColor },
+                TextObject{ label, 1.0f, textColor },
                 Utils::AnchorMode::CENTER,
                 topLeftPos,
                 { buttonSize, buttonSize },
                 buttonColor,
-                AssetsManager::squareTexture,
-                nullptr,
-                nullptr
+                AssetsManager::squareTexture
             );
         }
-    } // close anonymous namespace
+    }
 
     void Load() {
         bgTexture = AssetsManager::GetTexture("Assets/game_bg.png");

@@ -298,6 +298,7 @@ namespace MapManager {
 				if (tile.Type() == TileType::TILE_EMPTY) continue; // don't draw empty tiles
 				if (!drawCharacters && tile.IsCharacter()) continue; // don't draw character tiles
 
+				// Get texture
 				AEGfxTexture* baseTex = gTileTex[static_cast<int>(tile.Type())];
 				if (!baseTex) continue;
 
@@ -319,6 +320,7 @@ namespace MapManager {
 
 				GraphicsManager::DrawGameObject(baseTex, tileMat, drawColor);
 
+				// Draw cracks texture
 				if (tile.IsBlocks() && damageFrac > 0.0f) {
 					AEGfxTexture* cracksTex = nullptr;
 					float primaryAlpha = 0.0f;

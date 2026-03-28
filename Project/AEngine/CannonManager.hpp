@@ -42,7 +42,7 @@ namespace CannonManager {
 			if (!canCannonShoot) { isHoldingLeftClick = false; } // reset holding left click if cannon can't shoot
 		}
 
-	std::string DebugInfo();
+		std::string DebugInfo();
 	private:
 		// Initialize all the different type of projectile abilities to the CANNON CLASS
 		// Switch between the projectileId to choose the different type of projectile abilities
@@ -107,7 +107,7 @@ namespace CannonManager {
 		Character* target = nullptr;
 
 		//UI Object tied to this class
-		UIManager::Bar screenOverlayShotBar, worldSpaceShotBar;
+		UIManager::Bar screenOverlayShotBar;
 	};
 }
 
