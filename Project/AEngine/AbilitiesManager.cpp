@@ -576,7 +576,7 @@ namespace AbilitiesManager {
 	// UI OBJECTS
 	UIManager::Panel inventoryBackground;
 	Button inventoryAbilityButton[Config::MAX_INVENTORY_COUNT];
-	UIManager::PanelText inventoryInfoPanel;
+	UIManager::PanelText abilityTooltip;
 
 	// Selecting Ability UI
 	UIManager::Panel abilitySelectorBG;
@@ -607,9 +607,8 @@ namespace AbilitiesManager {
 
 		AEVec2 inventoryInfoPanelPos{ 300,150 };
 		Color panelColor = PanelColor();
-		panelColor.SetAlpha(0.75f);
 
-		inventoryInfoPanel = UIManager::PanelText{
+		abilityTooltip = UIManager::PanelText{
 			UIManager::Panel{inventoryInfoPanelPos, panelColor, Utils::AnchorMode::BOTTOM_RIGHT},
 			TextObject{"", 0.6f, Color{0,0,0}, Transform{{0,0}, {inventoryInfoPanelPos.x - 10,inventoryInfoPanelPos.y - 10}} }
 		};
@@ -709,8 +708,8 @@ namespace AbilitiesManager {
 				btn.SetIcon(ability->GetTexture());
 
 				if (btn.IsHovered()) {
-					inventoryInfoPanel.Update(ability->GetDescriptionWithStats());
-					inventoryInfoPanel.Draw();
+					abilityTooltip.Update(ability->GetDescriptionWithStats());
+					abilityTooltip.Draw();
 				}
 			}
 			else {

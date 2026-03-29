@@ -100,8 +100,8 @@ namespace CannonManager {
 		AbilitiesManager::AbilityController* abilityController = nullptr;
 
 		// Enemy AI variables
-		float aiDifficulty = 0.0f; // 0 - 1 Range, 0 - easier, 1 - hardest
-		float minAIShotDelay = 1.5f, maxAIShotDelay = 5.0f;
+		float aiDifficulty = 0.0f; // 0 - 1 Range, 0.0 - easier, 1.0 - hardest
+		float minAIShotDelay = 1.5f, maxAIShotDelay = 3.0f;
 		float aiShootTimer = 0.0f; // randomise timer to visualise a delay for when the enemy when shoot out the prorjectile
 		bool canAIShoot = false;
 		Character* target = nullptr;

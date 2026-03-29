@@ -120,13 +120,14 @@ namespace CannonManager {
         // Check if cannon has been shot or cannot shoot set is holding left click to be false and return
         if (hasCannonShot || !canCannonShoot) { return; }
 
-        // Render UI
-        if (isHoldingLeftClick) {
-            // Only draw power bar in the SCREEN SPACE for player cannon
-            screenOverlayShotBar.Draw(chargingPower, Config::CANNON_MAX_POWER);
+        // Render UI for player only
+        if (isPlayerControlled) {
+            if (isHoldingLeftClick) {
+                // Only draw power bar in the SCREEN SPACE for player cannon
+                screenOverlayShotBar.Draw(chargingPower, Config::CANNON_MAX_POWER);
+            }
+            DrawTrajectory();
         }
-
-        DrawTrajectory();
     }
 
     void Cannon::ResetCannon() {

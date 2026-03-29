@@ -1,5 +1,6 @@
 #include "Guide.hpp"
 
+#include "pch.hpp"
 #include "GraphicsManager.hpp"
 #include "GameStateManager.hpp"
 #include "AssetsManager.hpp"
@@ -13,15 +14,6 @@
 #include "Button.hpp"
 #include "TextObject.hpp"
 #include "json.hpp"
-
-#include <algorithm>
-#include <cctype>
-#include <cmath>
-#include <fstream>
-#include <iomanip>
-#include <sstream>
-#include <string>
-#include <vector>
 
 namespace Guide {
 
@@ -71,7 +63,6 @@ namespace Guide {
         Button abilitiesGuideButton;
 
         TextObject titleText;
-        TextObject subtitleText;
         TextObject hintText;
 
         UIManager::Panel mainPanel;
@@ -1210,19 +1201,14 @@ namespace Guide {
 
         titleText = TextObject(
             GetTitleText(),
-            2.05f,
-            Color(0.07f, 0.08f, 0.12f, 1.0f),
-            { 0.0f, 0.0f });
-
-        subtitleText = TextObject(
-            GetSubtitleText(),
-            0.70f,
-            Color(0.15f, 0.17f, 0.22f, 0.92f),
-            { 0.0f, 0.0f });
+            1.0f,
+            Color(0.07f, 0.08f, 0.12f, 1.0f));
+        titleText.SetPosition(Utils::AnchorMode::TOP_CENTER, mainPanel.GetTransform());
+        titleText.SetOffsetPosition(0, -10.0f);
 
         hintText = TextObject(
             GetHintText(),
-            0.52f,
+            0.5f,
             Color(0.05f, 0.05f, 0.05f, 0.92f),
             { -0.93f, -0.88f });
     }
@@ -1246,25 +1232,9 @@ namespace Guide {
         contentPanel.Draw();
 
         titleText.TextContent(GetTitleText());
-        subtitleText.TextContent(GetSubtitleText());
+        titleText.Draw();
+
         hintText.TextContent(GetHintText());
-
-        DrawCenteredMultilineText(
-            GetTitleText(),
-            2.05f,
-            Color(0.07f, 0.08f, 0.12f, 1.0f),
-            0.0f,
-            0.84f,
-            1.0f);
-
-        DrawCenteredMultilineText(
-            GetSubtitleText(),
-            0.70f,
-            Color(0.15f, 0.17f, 0.22f, 0.92f),
-            0.0f,
-            0.70f,
-            1.0f);
-
         hintText.Draw();
 
         if (currentView == GuideView::MENU) {

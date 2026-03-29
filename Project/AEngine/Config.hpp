@@ -15,7 +15,7 @@ namespace Config {
 	int constexpr MIN_GRID_X = 0, MAX_GRID_X = GRID_WIDTH - 1, MIN_GRID_Y = 0, MAX_GRID_Y = GRID_HEIGHT - 1;
 
 	int constexpr TOTAL_LEVEL_COUNT = 4;
-	int constexpr FIRST_LEVEL_INDEX = 0;
+	int constexpr FIRST_LEVEL_INDEX = 1;
 
 	// Use font size to load font
 	int constexpr FONT_SIZE = 24;

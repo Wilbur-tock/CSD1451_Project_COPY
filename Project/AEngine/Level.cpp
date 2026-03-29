@@ -405,6 +405,10 @@ void Level::Update() {
 		enemy.Draw();
 	}
 
+	// UI
+	UpdateUI();
+	DrawUI();
+
 	// Need to be below Draw to ensure that the Ability Selector UI is shows up infront of the level
 	prevIsAbilitySelectorOn = AbilitiesManager::playerAbilityController.IsSelectingAbility();
 	AbilitiesManager::playerAbilityController.UpdateAbilitySelector();
@@ -418,9 +422,6 @@ void Level::Update() {
 		delayTimer -= PhysicsManager::g_dt;
 	}
 
-	// UI
-	UpdateUI();
-	DrawUI();
 	DebugInfo();
 
 	ParticleManager::particleController.Update(PhysicsManager::g_dt);
@@ -507,8 +508,8 @@ void Level::DrawUI() {
 		enemyCannon.AbilityController()->GetAbilityModifiers());
 
 	// Draw active cannon UI
-	activeCannon->AbilityController()->DrawAbilityInventoryUI();
 	activeCannon->DrawUI();
+	activeCannon->AbilityController()->DrawAbilityInventoryUI();
 	activeCannon->DebugInfo();
 
 	// Always the last one to be drawn so that it will always appear infront

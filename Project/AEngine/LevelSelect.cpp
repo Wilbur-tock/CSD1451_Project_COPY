@@ -166,11 +166,7 @@ namespace LevelSelect {
 
         // Animated background: scrolling clouds + arcing cannonball projectiles
         BgAnimation::Draw();
-        const std::string progressLabel =
-            "Currently unlocked: LEVEL " + std::to_string(LevelManager::HighestUnlockedLevel() + 1);
-
         titlePanel.Draw();
-
         hintText.Draw();
     }
 
@@ -180,6 +176,7 @@ namespace LevelSelect {
         // Advance cloud scroll and projectile physics for this frame
         BgAnimation::Update(dt);
 
+        // Debug Inputs
         if (AEInputCheckTriggered(AEVK_ESCAPE) || AEInputCheckTriggered(AEVK_BACK)) {
             AudioManager::PlaySFX(AudioManager::SFX::UIButton);
             OnBackClicked();
