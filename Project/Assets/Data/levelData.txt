@@ -1,0 +1,15 @@
+Level0:
+Difficulty: 0
+IsUnlocked: 1
+
+Level1:
+Difficulty: 0
+IsUnlocked: 1
+
+Level2:
+Difficulty: 1
+IsUnlocked: 0
+
+Level3:
+Difficulty: 2
+IsUnlocked: 0

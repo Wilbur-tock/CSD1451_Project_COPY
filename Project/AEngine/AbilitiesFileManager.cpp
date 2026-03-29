@@ -8,12 +8,12 @@ namespace AbilitiesFileManager {
 	std::string projectileKey = "Projectile_Stats";
 	std::string statusKey = "Status_Stats";
 
-	void ReadAbilitiesFromFile(nlohmann::json& jsonData, std::string const& fileName) {
+	void ReadJsonFile(nlohmann::json& jsonData, std::string const& fileName) {
 		std::string filePathAndName = filePath + fileName;
 		// Open the file
 		std::ifstream file(filePathAndName);
 		if (!file.is_open()) {
-			std::cerr << "[AbilitiesManager] ERROR: Could not open " << filePathAndName << '\n';
+			std::cerr << "ERROR: Could not open " << filePathAndName << '\n';
 			return;
 		}
 
@@ -30,7 +30,7 @@ namespace AbilitiesFileManager {
 			jsonData.update(newData); // Merge objects
 		}
 		else {
-			std::cerr << "[AbilitiesManager] ERROR: JSON type mismatch when merging " << fileName << '\n';
+			std::cerr << "ERROR: JSON type mismatch when merging " << fileName << '\n';
 		}
 	}
 

@@ -7,6 +7,8 @@ namespace LevelManager {
 	std::vector<Level> levelDatas;
 	int highestUnlockedLevel = Config::FIRST_LEVEL_INDEX;
 
+	std::string filePath = "Assets/Data/levelData.txt";
+
 	void LoadAllLevels() {
 		selectedLevel = nullptr;
 		levelDatas.clear();
@@ -19,7 +21,33 @@ namespace LevelManager {
 			levelDatas[i].Load();
 		}
 
-		ResetProgress();
+		// Read level data from file
+		std::ifstream ifs{ filePath };
+		if (!ifs.is_open()) {
+			std::cerr << "Can't open " + filePath << std::endl;
+			highestUnlockedLevel = Config::FIRST_LEVEL_INDEX;
+			return;
+		}
+
+		highestUnlockedLevel = 0;
+		int id = 0;
+		std::string levelName = "";
+		while (ifs >> levelName) {
+			std::string label = "";
+			int diff = 0;
+			bool isUnlocked = false;
+			ifs >> label >> diff
+				>> label >> isUnlocked;
+
+			if(isUnlocked) highestUnlockedLevel = id;
+			levelDatas[id].Difficulty(diff);
+			++id;
+
+			//std::cout <<  levelName << " Difficulty: " << diff
+			//	<< ", Unlocked: " << (isUnlocked ? "Yes" : "No") << ' '<< highestUnlockedLevel << '\n';
+		}
+
+		ifs.close();
 	}
 
 	void LoadLevel(int levelId) {
@@ -88,6 +116,22 @@ namespace LevelManager {
 	}
 
 	void UnloadLevel() {
+		// Save levelData file
+		std::ofstream ofs{ filePath };
+		if (!ofs.is_open()) {
+			std::cerr << "Can't open " + filePath << std::endl;
+			return;
+		}
+
+		for (int i = 0; i < levelDatas.size(); ++i) {
+			Level const& levelData = levelDatas[i];
+			ofs << "level" + std::to_string(i)
+				<< "\nDifficulty: " << static_cast<int>(levelData.Difficulty())
+				<< "\nIsUnlocked: " << static_cast<int>(levelData.Id() <= highestUnlockedLevel) << "\n\n";
+		}
+
+		ofs.close();
+
 		levelDatas.clear();
 		selectedLevel = nullptr;
 	}

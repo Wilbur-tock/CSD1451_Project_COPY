@@ -586,6 +586,8 @@ void Level::UpdateTurn() {
 }
 
 void Level::SwitchTurn(bool _isPlayerTurn) {
+	Tutorial::SetTutorialMsg(6);
+
 	bool canSetNewRound = true; // always can set new round expect if the current active shooter has an extra shot to shoot
 	bool isNewRound = isPlayerStarting == _isPlayerTurn;
 	// Check if hasExtraShot ability
@@ -609,8 +611,6 @@ void Level::SwitchTurn(bool _isPlayerTurn) {
 		activeCannon = &playerCannon;
 		// randomise the abilities available to the player for this turn
 		AbilitiesManager::playerAbilityController.AbilitySelectionRandomiser();
-
-		Tutorial::SetTutorialMsg(6);
 	}
 	else {
 		// Enemy Turn

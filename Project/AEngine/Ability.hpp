@@ -4,7 +4,7 @@
 #include "pch.hpp"
 
 enum class AbilityType {
-	STATISTICS = 1,
+	STATS = 1,
 	OFFENSIVE = 2,
 	DEFENSIVE = 3,
 	COUNT = DEFENSIVE, // ALWAYS THE LAST ONE
@@ -56,7 +56,7 @@ public:
 	AEGfxTexture*		GetTexture() const { return texture; }
 	std::string	GetTypeName() const {
 		switch (type) {
-		case AbilityType::STATISTICS:
+		case AbilityType::STATS:
 			return "STATISTICS";
 			break;
 		case AbilityType::OFFENSIVE:
