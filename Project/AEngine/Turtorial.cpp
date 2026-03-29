@@ -15,7 +15,7 @@ namespace Tutorial {
 
 		isActive = true;
 		currentSteps = 0;
-
+		std::cout << std::boolalpha << isActive << '\n';
 		SetTutorialMsg(1);
 	}
 
@@ -49,8 +49,8 @@ namespace Tutorial {
 	}
 
 	void Draw() {
+		std::cout << std::boolalpha << isActive << '\n';
 		if (!isActive) return;
-
 		panel.Draw();
 	}
 }

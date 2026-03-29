@@ -60,6 +60,7 @@ void Character::Update() {
 	if (!attribute.IsActive()) return;
 
 	physics.Update(*this);
+	Draw();
 }
 
 void Character::SetSquatAnimation(bool enabled) {

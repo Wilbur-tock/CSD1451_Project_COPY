@@ -206,14 +206,10 @@ void Level::Initalize() {
 
 	switch (levelId) {
 	case 0:
-		Tutorial::Initialize();
 		noEnemy = resetMapEveryRound = true;
 		canSelectAbility = false;
 		AbilitiesManager::playerAbilityController.SetTestingMode(true);
 
-		break;
-	case 1:
-		Tutorial::Initialize();
 		break;
 	}
 
@@ -347,6 +343,9 @@ void Level::Initalize() {
 	if (levelId == 0) {
 		notificationPanel.Popup("Use Q and E to toggle through all the abilities", 10.0f);
 	}
+	else if (levelId == 1) {
+		Tutorial::Initialize();
+	}
 
 	std::cout << "[Level] Initialize " + levelFileName << '\n';
 }
@@ -396,13 +395,11 @@ void Level::Update() {
 	Draw();
 	for (Character& playerChar : playerCharacters) {
 		playerChar.Update();
-		playerChar.Draw();
 	}
 
 	// Update all enemy instance
 	for (Character& enemy : enemies) {
 		enemy.Update();
-		enemy.Draw();
 	}
 
 	// UI
@@ -456,7 +453,6 @@ void Level::Draw() {
 	BgAnimation::Clouds::Draw();
 
 	// Tile map and game objects drawn on top of the background
-	//GraphicsManager::DrawGameObject(AssetsManager::GetTexture("Assets/level_bg.png"), GraphicsManager::CreateTransformMatrix(0, 0, Config::WORLD_MAX_X, Config::WORLD_MAX_Y), Color(1,1,1));
 	MapManager::DrawMap(activeLevelMap, false);
 
 	// Drawing of assets and UI
