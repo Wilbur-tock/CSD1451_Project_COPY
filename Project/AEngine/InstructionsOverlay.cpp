@@ -42,6 +42,7 @@ namespace UIInstructionsOverlay {
             }
             return "GAME";
         }
+    }
 
     UIManager::Panel dimPanel, mainPanel;
     TextObject instructionText;
@@ -121,7 +122,7 @@ namespace UIInstructionsOverlay {
         else if (current == GameState::LEVEL_SELECT) {
             msg +=
                 "\nLEVEL SELECT\n"
-                "[" + std::to_string(1) + "-" + std::to_string(Config::TOTAL_LEVEL_COUNT) + "] Start unlocked level\n"
+                "Press [1-" + std::to_string(Config::TOTAL_LEVEL_COUNT) + "] to open the matching unlocked button\n"
                 "[ESC] / [BACK]: Return to Main Menu\n";
         }
         else if (current == GameState::GUIDE) {
