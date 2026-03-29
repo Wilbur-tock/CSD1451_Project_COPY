@@ -26,6 +26,7 @@ namespace AudioManager {
     void PlayBGM(Track t);
     void StopBGM();
     void PlaySFX(SFX sfx);
+    void PlayAbilitySFX(const std::string& abilityName);
 
     // Master volume
     void SetVolume(float v);

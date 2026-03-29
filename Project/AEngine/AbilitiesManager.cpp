@@ -11,6 +11,7 @@
 #include "CameraManager.hpp"
 #include "CollisionManager.hpp"
 #include "LevelManager.hpp"
+#include "AudioManager.hpp"
 
 #include "Tutorial.hpp"
 
@@ -303,9 +304,14 @@ namespace AbilitiesManager {
 		std::string abilityName = GetCurrentAbility().GetName();
 		Level* level = LevelManager::CurrentLevel();
 
+		AudioManager::PlayAbilitySFX(abilityName);
+
 		// Activate a ability effect here
 		if (abilityName == "Tower Shield") {
-			level->GetTowerShield(isPlayerControlled).SetShieldOn(GetCurrentAbility().GetStats().shield, GetCurrentAbility().GetStatus().rounds);
+			level->GetTowerShield(isPlayerControlled).SetShieldOn(
+				GetCurrentAbility().GetStats().shield,
+				GetCurrentAbility().GetStatus().rounds
+			);
 			//std::cout << "[AbilitiesManager] Activate Tower Shield ability!" << '\n';
 		}
 		else if (abilityName == "Rebuild") {
@@ -327,6 +333,7 @@ namespace AbilitiesManager {
 				character.attribute.CleanseNegativeEffects();
 			}
 		}
+
 		UseAbilityWithModifier(ability);
 		//PrintAbilityModifiers();
 	}
@@ -554,12 +561,14 @@ namespace AbilitiesManager {
 		statsAbility = ability;
 		std::string abilityName = ability.GetName();
 
+		AudioManager::PlayAbilitySFX(abilityName);
+
 		if (abilityName == "Invincibility" || abilityName == "Attack Boost") {
 			isStatsAbilityActive = true; // if stats ability active cannon will be apply with projectile stats boost
 		}
 		else if (abilityName == "Max Heal" || abilityName == "Major Heal" || abilityName == "Minor Heal") {
 			for (Character& character : LevelManager::CurrentLevel()->GetCharacters(isPlayerControlled)) {
-				character.attribute.Heal(static_cast<float>(ability.GetStats().hp/ 100.0f));
+				character.attribute.Heal(static_cast<float>(ability.GetStats().hp / 100.0f));
 			}
 		}
 

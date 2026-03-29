@@ -94,6 +94,9 @@ namespace LevelSelect {
         CameraManager::camera.SetPosition({ 0.0f, 0.0f });
         CameraManager::camera.SetState(CameraManager::CameraController::STATIC);
 
+        // Ensure Level Select starts fresh each time it is entered
+        levelButtons.clear();
+
         // Reset and stagger the animated background (clouds + projectiles)
         BgAnimation::Init();
 
@@ -101,7 +104,7 @@ namespace LevelSelect {
             if (ignoredTutorialLevel) continue;
 
             levelButtons.push_back(Button{});
-            int levelId = i; 
+            int levelId = i;
             AEVec2 buttonTopLeft = GetLevelButtonTopLeft(
                 i,
                 kTotalButtons,
@@ -112,13 +115,11 @@ namespace LevelSelect {
 
             ConfigureLevelButton(levelButtons[i], i, buttonTopLeft, kLevelButtonSize);
 
-            // Added on blick function
             levelButtons[i].SetOnClick([levelId]() {
-                    if (LevelManager::IsLevelUnlocked(levelId)) {
-                        OpenLevel(levelId);
-                    }
+                if (LevelManager::IsLevelUnlocked(levelId)) {
+                    OpenLevel(levelId);
                 }
-            );
+                });
         }
 
         backButton = Button(
@@ -133,9 +134,9 @@ namespace LevelSelect {
         );
 
         hintText = {
-            "Grey buttons are locked   |   [1-3] Select unlocked level   |   ESC / BACK = Main Menu",
-            0.60f,
-            Color(0.0f, 0.0f, 0.0f, 0.95f),
+        "Grey buttons are locked   |   Press number keys to open matching unlocked button   |   ESC / BACK = Main Menu", 
+        0.60f, 
+        Color(0.0f, 0.0f, 0.0f, 0.95f), 
             { -0.95f, -0.92f }
         };
 
@@ -207,7 +208,9 @@ namespace LevelSelect {
         UICursor::Draw();
     }
 
-    void Free() {}
+    void Free() {
+        levelButtons.clear();
+    }
 
     void Unload() {}
 

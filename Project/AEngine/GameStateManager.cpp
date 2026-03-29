@@ -312,6 +312,7 @@ namespace GameStateManager {
             break;
 
         case GameState::LEVEL_0:
+        case GameState::LEVEL_1:
         case GameState::LEVEL_2:
         case GameState::LEVEL_3:
             AudioManager::PlayBGM(AudioManager::Track::Level);
