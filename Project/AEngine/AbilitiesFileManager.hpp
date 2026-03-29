@@ -5,7 +5,7 @@
 #include "Ability.hpp"
 
 namespace AbilitiesFileManager {
-	void ReadAbilitiesFromFile(nlohmann::json& jsonData, std::string const& fileName);
+	void ReadJsonFile(nlohmann::json& jsonData, std::string const& fileName);
 	// Read all the basic information from the json data file, name, description, tier, etc
 	Ability ReadAbilityInfo(nlohmann::json const& data);
 	// Read all the keys of the different stats and assigned the values to the Ability class

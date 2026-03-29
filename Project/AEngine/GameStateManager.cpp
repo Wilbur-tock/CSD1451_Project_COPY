@@ -192,7 +192,6 @@ namespace GameStateManager {
 
         // PAUSE MENU
         if (IsGameplayState() && !Utils::isInstructionOn && !Utils::isResultScreenOn) {
-            std::cout << "Paused" << '\n';
             if (AEInputCheckTriggered(AEVK_ESCAPE)) {
                 AudioManager::PlaySFX(AudioManager::SFX::UIButton);
                 Utils::isPaused = !Utils::isPaused;
@@ -263,6 +262,7 @@ namespace GameStateManager {
 
         MainMenu::Unload();
         LevelSelect::Unload();
+        LevelManager::UnloadLevel();
         Guide::Unload();
         UICursor::Unload();
         MapManager::Unload();

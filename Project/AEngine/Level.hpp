@@ -52,6 +52,9 @@ public:
 	std::string const& Name() const { return levelName; }
 	int Rounds() const { return roundCount; }
 
+	void Difficulty(int id) { levelDifficulty = static_cast<LevelDifficulty>(id); }
+	LevelDifficulty Difficulty() const { return levelDifficulty; }
+
 	TowerShield& GetTowerShield(bool isPlayer) { return isPlayer ? playerShield : enemyShield; }
 	CannonManager::Cannon& GetCannon(bool isPlayer) { return isPlayer ? playerCannon : enemyCannon; }
 	// Checking who is starting the level

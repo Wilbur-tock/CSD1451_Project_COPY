@@ -365,11 +365,11 @@
     },
 
     {
-        "Name": "Invisibility",
-        "Description": "Randomly choose one of your characters to be invinsible, they can't be damage for 3 round",
+        "Name": "Invincibility",
+        "Description": "Randomly choose one of your characters to be invincible, they can't be damage for 3 round",
         "Type": 3,
         "Tier": 4,
-        "Texture": "Icon_Invisibility",
+        "Texture": "Icon_Invincibility",
         "Status_Stats": {
             "Is_Modifier": true,
             "Rounds": 3,
@@ -415,11 +415,11 @@
     },
 
     {
-        "Name": "Invincibility",
-        "Description": "Increase damage by 100, increase damage radius by 5, damage impacts by 5, heal every characters to FULL HP",
+        "Name": "God Mode",
+        "Description": "Increase damage by 100, damage radius by 5 and damage hits by 5, heal every characters to FULL HP",
         "Type": 1,
         "Tier": 4,
-        "Texture": "Icon_Invincibility",
+        "Texture": "Icon_GodMode",
         "Projectile_Stats": {
             "ProjectileID": 0,
             "Damage_Multiplier": 1,

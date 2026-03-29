@@ -34,7 +34,7 @@ namespace AbilitiesManager {
 
 		// Reading of data from json file
 		nlohmann::json data;
-		AbilitiesFileManager::ReadAbilitiesFromFile(data, "Abilities.json");
+		AbilitiesFileManager::ReadJsonFile(data, "Abilities.json");
 
 		// Read enemies ONLY ability and merge it to the data
 		if (isPlayer) {
@@ -72,7 +72,7 @@ namespace AbilitiesManager {
 
 			// Add to the type of ability vector
 			switch (newAbility.GetType()) {
-			case AbilityType::STATISTICS:
+			case AbilityType::STATS:
 				statsAbilities.push_back(newAbility);
 				break;
 			case AbilityType::OFFENSIVE:
@@ -215,18 +215,17 @@ namespace AbilitiesManager {
 
 		// Randomise Abilties
 		int count = Config::MAX_ABILITY_SELECTOR_COUNT;
+		// if player only uses default ability they are able to choose a stats ability
 		if (InventoryCount() >= Config::MAX_INVENTORY_COUNT) {
-			std::cerr << "[AbilitiesManager] Enough abilities in inventory, randomise stats" << std::endl;
-
-			// Currently only 3 stat cards so no need randomise, just push all 3 stat cards into the selector
 			for (int i = 0; i < count; ++i) {
 				abilitiesCards.push_back(*GetAbility(RandomAbilityId(statsAbilities)));
 			}
 		}
 		else {
-			std::cerr << "[AbilitiesManager] Not enough abilities in inventory, randomise offensive and defensive" << std::endl;
+			// out of the 3 card at least should have 1 offensive and defensive ability
 			int offensiveCount = 1;
 			int defensiveCount = 1;
+			// too many offensive ability cards would have more defensive options
 			OffensiveOrDefensive() == AbilityType::OFFENSIVE ? ++defensiveCount : ++offensiveCount;
 
 			for (int i = 0; i < offensiveCount; ++i) {
@@ -524,6 +523,10 @@ namespace AbilitiesManager {
 			}
 
 			AddAbility(abilityId);
+
+			if (GetCurrentAbility().GetType() == AbilityType::STATS) {
+				UseStatsAbility(GetCurrentAbility());
+			}
 		}
 		else { // Toggle through inventory abilities
 			currentInventoryId += addValue;
@@ -546,7 +549,7 @@ namespace AbilitiesManager {
 	void AbilityController::OnClickAbilityCard(Ability const& ability) {
 		Tutorial::SetTutorialMsg(2);
 
-		if (ability.GetType() != AbilityType::STATISTICS) {
+		if (ability.GetType() != AbilityType::STATS) {
 			AddAbility(ability.Id());
 		}
 		else {
@@ -665,7 +668,7 @@ namespace AbilitiesManager {
 
 			// Update onClick and texture every frame
 			card.SetIconTexture(ability.GetTexture());
-			card.SetBGColor(ability.GetType() == AbilityType::STATISTICS ? Color{ 0.75f,0.75f,0 } : 
+			card.SetBGColor(ability.GetType() == AbilityType::STATS ? Color{ 0.75f,0.75f,0 } : 
 				ability.GetType() == AbilityType::OFFENSIVE ? Color{ 0.9f,0,0 } : Color{ 0,0,0.9f });
 
 			Button& button = card.GetButton();

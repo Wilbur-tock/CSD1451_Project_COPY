@@ -25,8 +25,8 @@ namespace GameTrackingManager {
 
 		globalData.sessionDuration = AEGetTime(nullptr) - globalData.sessionStart;
 
-		// Write data into a log.txt
-		std::string filepath = "Assets/log.txt";
+		// Write data into a log file
+		std::string filepath = "Assets/data/GameLog.txt";
 		std::ofstream ofs{ filepath };
 		if (!ofs.is_open()) {
 			std::cerr << "Error: Could not open file at " << filepath << std::endl;
@@ -37,7 +37,7 @@ namespace GameTrackingManager {
 		PrintData(ofs, globalData);
 
 		for (int i = 0; i < Config::TOTAL_LEVEL_COUNT; ++i) {
-			PrintHeader(ofs, "Level " + std::to_string(i+1) + " Data");
+			PrintHeader(ofs, "Level " + std::to_string(i) + " Data");
 			PrintData(ofs, levelData[i]);
 		}
 	}
