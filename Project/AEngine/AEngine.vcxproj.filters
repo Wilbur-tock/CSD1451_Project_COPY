@@ -210,7 +210,7 @@
     <ClCompile Include="Settings.cpp">
       <Filter>Source Files\Game States</Filter>
     </ClCompile>
-    <ClCompile Include="Pausemenu.cpp">
+    <ClCompile Include="PauseMenu.cpp">
       <Filter>Source Files\Game States</Filter>
     </ClCompile>
     <ClCompile Include="AudioManager.cpp">
@@ -359,7 +359,7 @@
     <ClInclude Include="json.hpp">
       <Filter>Header Files\External Library</Filter>
     </ClInclude>
-    <ClInclude Include="Pausemenu.hpp">
+    <ClInclude Include="PauseMenu.hpp">
       <Filter>Header Files\Game States</Filter>
     </ClInclude>
     <ClInclude Include="Guide.hpp">

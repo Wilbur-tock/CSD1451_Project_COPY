@@ -31,6 +31,7 @@ void Projectile::AbilityActivation(bool isPlayer, Ability const& ability) {
 
     // Randomise AI activation of ability
     if (!isPlayer && mode != ProjectileMode::BOMB && mode != ProjectileMode::NUKE) {
+        if (mode == ProjectileMode::DRILL) leftClick = true; // if it drill just active it straight away
         aiLeftClickTimer += PhysicsManager::g_dt;
 
         if (Utils::RandomValue(5.0f, 10.0f) <= aiLeftClickTimer) {
@@ -40,7 +41,7 @@ void Projectile::AbilityActivation(bool isPlayer, Ability const& ability) {
 
     switch (Mode()) {
     case ProjectileMode::BOMB:
-        if (leftClick) {
+        if (!hasCollided && leftClick) {
             isAbilityTriggered = true;
             // Bomb instant explode and damage tile blocks double its radius once activated
             int tileX = 0, tileY = 0;
@@ -61,7 +62,7 @@ void Projectile::AbilityActivation(bool isPlayer, Ability const& ability) {
         }
         break;
     case ProjectileMode::NUKE:
-        if (leftClick) {
+        if (!hasCollided && leftClick) {
             isAbilityTriggered = true;
             velocity = { 0,0 }; // fall straight down immediately
             std::cout << "NUKE mode triggered\n";
@@ -132,15 +133,15 @@ void Projectile::AbilityActivation(bool isPlayer, Ability const& ability) {
         }
         break;
     case ProjectileMode::INSTANT_BASTION:
-        if (leftClick) {
+        if (!hasCollided && leftClick) {
             isAbilityTriggered = true;
 
             TileIndex center{ 0,0 }, min{ 0,0 }, max{ 0,0 };
             Utils::GetTileIndex(center.x, center.y, transform.pos); // center index
             int radius = ability.GetStatus().effectRadius;
-            //isPlayer ? center.x -= ability.GetStatus().effectRadius : center.x += ability.GetStatus().effectRadius;
             Utils::CalculateTileBounds(center, min, max, radius);
 
+            // Build blocks
             if (!Utils::IsTileIndexOutOfBounds(center.x, center.y)) {
                 for (int y = max.y; y < min.y; ++y) {
                     for (int x = min.x; x < max.x; ++x) {
@@ -157,7 +158,7 @@ void Projectile::AbilityActivation(bool isPlayer, Ability const& ability) {
         }
         break;
     case ProjectileMode::DRILL:
-        if (leftClick) {
+        if (!hasCollided && leftClick) {
             isAbilityTriggered = true;
             canAlwaysBypassBlocks = true;
 

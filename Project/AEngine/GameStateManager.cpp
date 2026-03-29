@@ -31,10 +31,7 @@ namespace GameStateManager {
     bool setNewState = false;
 
     static bool IsGameplayState() {
-        return current == GameState::LEVEL_0
-            || current == GameState::LEVEL_2
-            || current == GameState::LEVEL_3
-            || current == GameState::MAP_EDITOR;
+        return current >= GameState::MAP_EDITOR && current <= GameState::LEVEL_3;
     }
 
     static void DebugCommands();
@@ -195,6 +192,7 @@ namespace GameStateManager {
 
         // PAUSE MENU
         if (IsGameplayState() && !Utils::isInstructionOn && !Utils::isResultScreenOn) {
+            std::cout << "Paused" << '\n';
             if (AEInputCheckTriggered(AEVK_ESCAPE)) {
                 AudioManager::PlaySFX(AudioManager::SFX::UIButton);
                 Utils::isPaused = !Utils::isPaused;
