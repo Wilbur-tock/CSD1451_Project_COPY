@@ -37,6 +37,23 @@ namespace LevelManager {
 			return IsCampaignLevel(levelIndex) &&
 				levelIndex <= highestUnlockedCampaignLevel;
 		}
+
+		void WriteLevelDataFile() {
+			std::ofstream ofs{ LEVEL_DATA_PATH, std::ios::trunc };
+			if (!ofs.is_open()) {
+				std::cerr << "Can't open " << LEVEL_DATA_PATH << std::endl;
+				return;
+			}
+
+			for (int i = 0; i < static_cast<int>(levelDatas.size()); ++i) {
+				Level const& levelData = levelDatas[i];
+
+				ofs << "Level" << i
+					<< ":\nDifficulty: " << static_cast<int>(levelData.Difficulty())
+					<< "\nIsUnlocked: " << static_cast<int>(ComputeUnlockedState(i))
+					<< "\n\n";
+			}
+		}
 	}
 
 	void LoadAllLevels() {
@@ -74,7 +91,7 @@ namespace LevelManager {
 				levelDatas[id].Difficulty(diff);
 
 				// Sandbox does not participate in progression tracking.
-				// Only levels update the saved progression state.
+				// Only campaign levels update the saved progression state.
 				if (IsCampaignLevel(id) && isUnlocked) {
 					highestUnlockedCampaignLevel = (highestUnlockedCampaignLevel > id) ? highestUnlockedCampaignLevel : id;
 				}
@@ -147,6 +164,14 @@ namespace LevelManager {
 		highestUnlockedCampaignLevel = Config::FIRST_CAMPAIGN_LEVEL_INDEX;
 	}
 
+	void SaveProgress() {
+		if (levelDatas.empty()) {
+			std::cerr << "No level data loaded. Progress was not saved.\n";
+			return;
+		}
+		WriteLevelDataFile();
+	}
+
 	void InitializeLevel() {
 		if (selectedLevel) {
 			selectedLevel->Initalize();
@@ -166,23 +191,7 @@ namespace LevelManager {
 	}
 
 	void UnloadLevel() {
-		// Save level data file
-		std::ofstream ofs{ LEVEL_DATA_PATH };
-		if (!ofs.is_open()) {
-			std::cerr << "Can't open " << LEVEL_DATA_PATH << std::endl;
-		}
-		else {
-			for (int i = 0; i < static_cast<int>(levelDatas.size()); ++i) {
-				Level const& levelData = levelDatas[i];
-
-				ofs << "Level" << i
-					<< ":\nDifficulty: " << static_cast<int>(levelData.Difficulty())
-					<< "\nIsUnlocked: " << static_cast<int>(ComputeUnlockedState(i))
-					<< "\n\n";
-			}
-
-			ofs.close();
-		}
+		SaveProgress();
 
 		levelDatas.clear();
 		selectedLevel = nullptr;

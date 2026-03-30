@@ -31,6 +31,7 @@ namespace LevelSelect {
         bool ignoredTutorialLevel = false;
         UIManager::PanelText titlePanel;
         Button backButton;
+        Button resetProgressButton;
         TextObject hintText;
 
         AEGfxTexture* bgTexture = nullptr;
@@ -87,6 +88,32 @@ namespace LevelSelect {
                 AssetsManager::squareTexture
             );
         }
+
+        void RefreshLevelButtons() {
+            levelButtons.clear();
+
+            for (int i = 0; i < kTotalButtons; ++i) {
+                levelButtons.push_back(Button{});
+
+                int levelId = i;
+                AEVec2 buttonTopLeft = GetLevelButtonTopLeft(
+                    i,
+                    kTotalButtons,
+                    kLevelButtonSize,
+                    kLevelButtonGap,
+                    kLevelButtonRowCenterY
+                );
+
+                ConfigureLevelButton(levelButtons[i], i, buttonTopLeft, kLevelButtonSize);
+
+                levelButtons[i].SetOnClick([levelId]() {
+                    if (LevelManager::IsLevelUnlocked(levelId)) {
+                        AudioManager::PlaySFX(AudioManager::SFX::UIButton);
+                        OpenLevel(levelId);
+                    }
+                    });
+            }
+        }
     }
 
     void Load() {
@@ -107,43 +134,42 @@ namespace LevelSelect {
         // Reset and stagger the animated background (clouds + projectiles)
         BgAnimation::Init();
 
-        for (int i = 0; i < kTotalButtons; ++i) {
-            if (ignoredTutorialLevel) continue;
-
-            levelButtons.push_back(Button{});
-            int levelId = i;
-            AEVec2 buttonTopLeft = GetLevelButtonTopLeft(
-                i,
-                kTotalButtons,
-                kLevelButtonSize,
-                kLevelButtonGap,
-                kLevelButtonRowCenterY
-            );
-
-            ConfigureLevelButton(levelButtons[i], i, buttonTopLeft, kLevelButtonSize);
-
-            levelButtons[i].SetOnClick([levelId]() {
-                if (LevelManager::IsLevelUnlocked(levelId)) {
-                    OpenLevel(levelId);
-                }
-                });
-        }
+        RefreshLevelButtons();
 
         backButton = Button(
-            TextObject{ "< BACK" },
+            TextObject{ "< BACK", 0.85f, Color{ 1,1,1 } },
             Utils::AnchorMode::CENTER,
-            { -125.0f, -250.0f },
-            { 250.0f, 75.0f },
-            Color(0.82f, 0.28f, 0.28f, 1.0f),
+            { -370.0f, -250.0f },
+            { 300.0f, 75.0f },
+            Color(0.70f, 0.22f, 0.18f, 1.0f),
             buttonTexture,
             nullptr,
-            OnBackClicked
+            []() {
+                AudioManager::PlaySFX(AudioManager::SFX::UIButton);
+                OnBackClicked();
+            }
+        );
+
+        resetProgressButton = Button(
+            TextObject{ "RESET PROGRESS", 0.85f, Color{ 1,1,1 } },
+            Utils::AnchorMode::CENTER,
+            { 60.0f, -250.0f },
+            { 300.0f, 75.0f },
+            Color(0.90f, 0.58f, 0.18f, 1.0f),
+            buttonTexture,
+            nullptr,
+            []() {
+                AudioManager::PlaySFX(AudioManager::SFX::UIButton);
+                LevelManager::ResetProgress();
+                LevelManager::SaveProgress();
+                RefreshLevelButtons();
+            }
         );
 
         hintText = {
-        "Grey buttons are locked   |   0 = Sandbox, 1 = Level 1, 2 = Level 2, 3 = Level 3   |   ESC / BACK = Main Menu", 
-        0.60f, 
-        Color(0.0f, 0.0f, 0.0f, 0.95f), 
+            "Grey buttons are locked   |   0 = Sandbox, 1 = Level 1, 2 = Level 2, 3 = Level 3   |   RESET PROGRESS resets campaign unlocks",
+            0.60f,
+            Color(0.0f, 0.0f, 0.0f, 0.95f),
             { -0.95f, -0.92f }
         };
 
@@ -227,6 +253,7 @@ namespace LevelSelect {
         }
 
         backButton.Update();
+        resetProgressButton.Update();
         UICursor::Draw();
     }
 

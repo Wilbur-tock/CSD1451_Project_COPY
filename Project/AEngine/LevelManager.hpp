@@ -24,6 +24,7 @@ namespace LevelManager {
 	void UnlockLevel(int levelIndex);
 	void UnlockNextLevel(int completedLevelIndex);
 	void ResetProgress();
+	void SaveProgress();
 
 	void InitializeLevel();
 	void UpdateLevel();
