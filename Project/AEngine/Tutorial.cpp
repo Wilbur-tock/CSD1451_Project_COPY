@@ -1,3 +1,10 @@
+/*
+Authors: Dayrius
+Description: Display the tutorial messages
+
+All content © 2026 DigiPen Institute of Technology Singapore. All Rights Reserved
+*/
+
 #include "Tutorial.hpp"
 
 #include "UIManager.hpp"

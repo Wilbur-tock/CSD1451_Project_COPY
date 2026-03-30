@@ -1,3 +1,10 @@
+/*
+Authors: Dayrius
+Description: Stores game constants
+
+All content © 2026 DigiPen Institute of Technology Singapore. All Rights Reserved
+*/
+
 #ifndef CONFIG_HPP
 #define CONFIG_HPP
 

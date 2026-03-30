@@ -1,3 +1,10 @@
+/*
+Authors: Dayrius
+Description: Stores data and functions about colors
+
+All content © 2026 DigiPen Institute of Technology Singapore. All Rights Reserved
+*/
+
 #ifndef COLOR_HPP
 #define COLOR_HPP
 

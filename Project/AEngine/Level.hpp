@@ -1,3 +1,12 @@
+/*
+Authors: Dayrius, Nixon
+Description: Stores information about each gameplay level (enemies and player units, tiles blocks, etc)
+and manage the transition between player and enemy turns. 
+Drawing of the game tiles, map and background.
+
+All content © 2026 DigiPen Institute of Technology Singapore. All Rights Reserved
+*/
+
 #ifndef LEVEL_HPP
 #define LEVEL_HPP
 

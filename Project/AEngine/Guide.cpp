@@ -1,3 +1,10 @@
+/*
+Authors: Bryan
+Description: Display the game guide information
+
+All content © 2026 DigiPen Institute of Technology Singapore. All Rights Reserved
+*/
+
 #include "Guide.hpp"
 
 #include "pch.hpp"

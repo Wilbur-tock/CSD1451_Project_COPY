@@ -1,3 +1,10 @@
+/*
+Authors: Bryan, Dayrius
+Description: Display the level selection page
+
+All content © 2026 DigiPen Institute of Technology Singapore. All Rights Reserved
+*/
+
 #include "LevelSelect.hpp"
 
 #include "GraphicsManager.hpp"

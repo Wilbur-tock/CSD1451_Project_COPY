@@ -1,3 +1,10 @@
+/*
+Authors: Dayrius
+Description: Stores physics data
+
+All content © 2026 DigiPen Institute of Technology Singapore. All Rights Reserved
+*/
+
 #ifndef PHYSICS_HPP
 #define PHYSICS_HPP
 

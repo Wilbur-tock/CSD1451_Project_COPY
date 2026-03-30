@@ -1,3 +1,10 @@
+/*
+Authors: Nixon
+Description: Manage and draw the loading UI and animations
+
+All content © 2026 DigiPen Institute of Technology Singapore. All Rights Reserved
+*/
+
 #include "Loading.hpp"
 
 #include "GraphicsManager.hpp"

@@ -1,3 +1,11 @@
+/*
+Authors: Dayrius
+Description: Stores data and functions about each character unit in the game
+
+All content © 2026 DigiPen Institute of Technology Singapore. All Rights Reserved
+*/
+
+
 #ifndef CHARACTER_HPP
 #define CHARACTER_HPP
 

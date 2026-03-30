@@ -1,3 +1,12 @@
+/*
+Authors: Dayrius
+Description: Stores data about the projectile mode, velocity, etc and
+checks for the trigger to activate abilities and damage tiles once it collide with
+a destructible tile
+
+All content © 2026 DigiPen Institute of Technology Singapore. All Rights Reserved
+*/
+
 #ifndef PROJECTILE_HPP
 #define PROJECTILE_HPP
 

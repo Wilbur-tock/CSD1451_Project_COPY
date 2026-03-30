@@ -1,3 +1,10 @@
+/*
+Authors: Justin
+Description: Create particle effects
+
+All content © 2026 DigiPen Institute of Technology Singapore. All Rights Reserved
+*/
+
 #ifndef EFFECTSMANAGER_HPP
 #define EFFECTSMANAGER_HPP
 

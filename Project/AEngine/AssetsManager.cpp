@@ -1,3 +1,10 @@
+/*
+Authors: Dayrius, Bryan
+Description: Managed the loading and unloading of all textures asset in the game
+
+All content © 2026 DigiPen Institute of Technology Singapore. All Rights Reserved
+*/
+
 #include "pch.hpp"
 
 #include "AssetsManager.hpp"

@@ -1,3 +1,11 @@
+/*
+Authors: Dayrius
+Description: Stores the character unit and tiles attributes such as
+HP, Shield, Damage
+
+All content © 2026 DigiPen Institute of Technology Singapore. All Rights Reserved
+*/
+
 #include "Attributes.hpp"
 
 void Attributes::Heal(float percentage) {

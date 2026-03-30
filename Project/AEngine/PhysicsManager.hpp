@@ -1,3 +1,10 @@
+/*
+Authors: Dayrius
+Description: Manage physics of the game and check for collision to trigger physics
+
+All content © 2026 DigiPen Institute of Technology Singapore. All Rights Reserved
+*/
+
 #ifndef PHYSICSMANAGER_HPP
 #define PHYSICSMANAGER_HPP
 

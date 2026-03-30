@@ -1,3 +1,10 @@
+/*
+Authors: Dayrius
+Description: Stores the tile index data and overloading functions
+
+All content © 2026 DigiPen Institute of Technology Singapore. All Rights Reserved
+*/
+
 #include "TileIndex.hpp"
 
 #include "Utils.hpp"

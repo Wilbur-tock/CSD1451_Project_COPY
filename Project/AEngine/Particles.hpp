@@ -1,3 +1,10 @@
+/*
+Authors: Justin
+Description: Store particles data
+
+All content © 2026 DigiPen Institute of Technology Singapore. All Rights Reserved
+*/
+
 #ifndef PARTICLE_HPP
 #define PARTICLE_HPP
 

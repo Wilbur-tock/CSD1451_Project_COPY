@@ -1,4 +1,11 @@
-﻿#include "AudioManager.hpp"
+﻿/*
+Authors: Bryan
+Description: Controls and play the audio
+
+All content © 2026 DigiPen Institute of Technology Singapore. All Rights Reserved
+*/
+
+#include "AudioManager.hpp"
 #include <vector>
 #include <string>
 

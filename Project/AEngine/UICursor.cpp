@@ -1,3 +1,10 @@
+/*
+Authors: Bryan
+Description: Change the cursor to the game cursor
+
+All content © 2026 DigiPen Institute of Technology Singapore. All Rights Reserved
+*/
+
 #include "UICursor.hpp"
 
 #include "AssetsManager.hpp"

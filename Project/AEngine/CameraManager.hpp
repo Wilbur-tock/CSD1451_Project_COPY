@@ -1,4 +1,13 @@
-#pragma once
+/*
+Authors: Justin
+Description: Controls and manage the camera system
+
+All content © 2026 DigiPen Institute of Technology Singapore. All Rights Reserved
+*/
+
+#ifndef CAMERAMANAGER_HPP
+#define CAMERAMANAGER_HPP
+
 #include "pch.hpp"
 
 namespace CameraManager
@@ -23,11 +32,11 @@ namespace CameraManager
         void SetFollowTarget(const AEVec2* target);
         void SetFollowSpeed(float speed);
 
-		// ===== GETTERS =====
+        // ===== GETTERS =====
         AEVec2 GetPosition() const;
         CameraState GetState() const;
-		std::string PrintState() const;
-		std::string PrintVisibleTiles() const;
+        std::string PrintState() const;
+        std::string PrintVisibleTiles() const;
 
         void SetMoveSpeed(float speed);
 
@@ -56,11 +65,11 @@ namespace CameraManager
         CameraState currentState;
         const AEVec2* followTarget;
 
-		// Zoom Members
-        float zoomLevel;      
-        float zoomSpeed;      
-        float zoomMin;        
-        float zoomMax;        
+        // Zoom Members
+        float zoomLevel;
+        float zoomSpeed;
+        float zoomMin;
+        float zoomMax;
         bool isZoomAllow = true;
 
         void ClampPosition();
@@ -69,3 +78,5 @@ namespace CameraManager
     // Global camera instance
     extern CameraController camera;
 }
+
+#endif // !CAMERAMANAGER_HPP

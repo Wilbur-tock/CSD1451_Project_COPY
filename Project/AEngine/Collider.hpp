@@ -1,3 +1,10 @@
+/*
+Authors: Dayrius
+Description: Collider class to store collision data
+
+All content © 2026 DigiPen Institute of Technology Singapore. All Rights Reserved
+*/
+
 #ifndef COLLIDER_HPP
 #define COLLIDER_HPP
 

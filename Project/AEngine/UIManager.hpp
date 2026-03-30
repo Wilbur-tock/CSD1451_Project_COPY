@@ -1,3 +1,10 @@
+/*
+Authors: Dayrius
+Description: Manage and stores the commonly used UI objects
+
+All content © 2026 DigiPen Institute of Technology Singapore. All Rights Reserved
+*/
+
 #ifndef UIMANAGER_HPP
 #define UIMANAGER_HPP
 

@@ -1,3 +1,10 @@
+/*
+Authors: Dayrius, Nixon
+Description: Contains common helper functions for the game
+
+All content © 2026 DigiPen Institute of Technology Singapore. All Rights Reserved
+*/
+
 #include "Utils.hpp"
 
 #include "GraphicsManager.hpp"

@@ -1,3 +1,11 @@
+/*
+Authors: Dayrius
+Description: Editor to edit the map layout, Load/Save map data files
+UI to display the controls of the edtior
+
+All content © 2026 DigiPen Institute of Technology Singapore. All Rights Reserved
+*/
+
 #include "MapEditor.hpp"
 
 #include "MapManager.hpp"

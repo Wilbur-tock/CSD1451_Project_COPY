@@ -1,3 +1,10 @@
+/*
+Authors: Dayrius
+Description: Stores data and functions about the Tower Shield mechanic
+
+All content © 2026 DigiPen Institute of Technology Singapore. All Rights Reserved
+*/
+
 #include "TowerShield.hpp"
 
 #include "AssetsManager.hpp"

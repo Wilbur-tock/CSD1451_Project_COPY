@@ -1,3 +1,11 @@
+/*
+Authors: Wilbur, Dayrius
+Description: Loading of the JSON data about the abilities and storing the data
+into the abilities list
+
+All content © 2026 DigiPen Institute of Technology Singapore. All Rights Reserved
+*/
+
 #ifndef ABILITIESFILEMANAGER_HPP
 #define ABILITIESFILEMANAGER_HPP
 

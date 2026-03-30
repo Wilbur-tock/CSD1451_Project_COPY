@@ -1,3 +1,10 @@
+/*
+Authors: Nixon
+Description: Display and manage functions about the main menu page
+
+All content © 2026 DigiPen Institute of Technology Singapore. All Rights Reserved
+*/
+
 #include "MainMenu.hpp"
 #include "GraphicsManager.hpp"
 #include "GameStateManager.hpp"

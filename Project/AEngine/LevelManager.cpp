@@ -1,3 +1,10 @@
+/*
+Authors: Dayrius, Bryan
+Description: Manage all level data in the game
+
+All content © 2026 DigiPen Institute of Technology Singapore. All Rights Reserved
+*/
+
 #include "LevelManager.hpp"
 
 #include "GameTrackingManager.hpp"

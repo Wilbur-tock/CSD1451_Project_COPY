@@ -1,5 +1,12 @@
+/*
+Authors: Dayrius, Wilbur
+Description: Ability class which stores all the information about each ability such as
+name, type, tier, etc.
+
+All content © 2026 DigiPen Institute of Technology Singapore. All Rights Reserved
+*/
+
 #include "Ability.hpp"
-//#include "AbilitiesManager.hpp"
 
 std::vector<float> tierChances{
 	0.5f,

@@ -1,3 +1,10 @@
+/*
+Authors: Dayrius
+Description: Stores data and functions about game objects in the game such as character unit and tiles
+
+All content © 2026 DigiPen Institute of Technology Singapore. All Rights Reserved
+*/
+
 #include "GameObject.hpp"
 
 #include "GraphicsManager.hpp"

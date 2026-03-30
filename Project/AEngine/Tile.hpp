@@ -1,3 +1,11 @@
+/*
+Authors: Dayrius
+Description: Stores data about each tile in the game, data such as attribute, tile type
+and name, etc
+
+All content © 2026 DigiPen Institute of Technology Singapore. All Rights Reserved
+*/
+
 #ifndef TILE_HPP
 #define TILE_HPP
 

@@ -1,4 +1,11 @@
-﻿#include "MapManager.hpp"
+﻿/*
+Authors: Dayrius, Bryan
+Description: Load/unload map textures, read the map data file and draw the map layout
+
+All content © 2026 DigiPen Institute of Technology Singapore. All Rights Reserved
+*/
+
+#include "MapManager.hpp"
 
 #include "GraphicsManager.hpp"
 #include "AssetsManager.hpp"

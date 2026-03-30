@@ -1,3 +1,12 @@
+/*
+Authors: Dayrius
+Description: Manage cannon shooting and aim trajectory system,
+initialize and destruction of the projectiles object once it has been shot out and
+triggering abilities.
+
+All content © 2026 DigiPen Institute of Technology Singapore. All Rights Reserved
+*/
+
 #ifndef CANNONMANAGER_H
 #define CANNONMANAGER_H
 

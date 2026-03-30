@@ -1,4 +1,10 @@
-#include "pch.hpp"
+/*
+Authors: Justin
+Description: Controls and manage the camera system
+
+All content © 2026 DigiPen Institute of Technology Singapore. All Rights Reserved
+*/
+
 #include "CameraManager.hpp"
 #include "GameStateManager.hpp"
 #include "Tutorial.hpp"

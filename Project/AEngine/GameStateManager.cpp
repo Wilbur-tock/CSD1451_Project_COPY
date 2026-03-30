@@ -1,4 +1,11 @@
-﻿#include "GameStateManager.hpp"
+﻿/*
+Authors: Dayrius, Nixon, Bryan
+Description: Manage all the game states in the game and transition between each states
+
+All content © 2026 DigiPen Institute of Technology Singapore. All Rights Reserved
+*/
+
+#include "GameStateManager.hpp"
 
 #include "MapManager.hpp"
 #include "MapEditor.hpp"

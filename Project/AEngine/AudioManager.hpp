@@ -1,3 +1,10 @@
+/*
+Authors: Bryan
+Description: Controls and play the audio
+
+All content © 2026 DigiPen Institute of Technology Singapore. All Rights Reserved
+*/
+
 #ifndef AUDIO_MANAGER_HPP
 #define AUDIO_MANAGER_HPP
 

@@ -1,3 +1,10 @@
+/*
+Authors: Nixon
+Description: Background animations for the main menu and game levels
+
+All content © 2026 DigiPen Institute of Technology Singapore. All Rights Reserved
+*/
+
 #ifndef BGANIMATION_HPP
 #define BGANIMATION_HPP
 

@@ -1,3 +1,10 @@
+/*
+Authors: Nixon
+Description: Display credits information
+
+All content © 2026 DigiPen Institute of Technology Singapore. All Rights Reserved
+*/
+
 #include "Credits.hpp"
 #include "GraphicsManager.hpp"
 #include "GameStateManager.hpp"

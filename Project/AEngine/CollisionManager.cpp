@@ -1,3 +1,10 @@
+/*
+Authors: Dayrius
+Description: To manage and check collision between objects
+
+All content © 2026 DigiPen Institute of Technology Singapore. All Rights Reserved
+*/
+
 #include "CollisionManager.hpp"
 #include "Utils.hpp"
 

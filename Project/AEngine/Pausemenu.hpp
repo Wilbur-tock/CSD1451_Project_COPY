@@ -1,3 +1,10 @@
+/*
+Authors: Nixon
+Description: Display and manage functions about the pause menu page
+
+All content © 2026 DigiPen Institute of Technology Singapore. All Rights Reserved
+*/
+
 #ifndef PAUSEMENU_HPP
 #define PAUSEMENU_HPP
 

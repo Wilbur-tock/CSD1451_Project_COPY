@@ -1,3 +1,10 @@
+/*
+Authors: Bryan
+Description: Draws the UI instructions popup
+
+All content © 2026 DigiPen Institute of Technology Singapore. All Rights Reserved
+*/
+
 #include "InstructionsOverlay.hpp"
 #include "UIManager.hpp"
 #include "Utils.hpp"

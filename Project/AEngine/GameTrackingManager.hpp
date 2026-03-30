@@ -1,3 +1,10 @@
+/*
+Authors: Dayrius
+Description: Track game data throughout the whole game and save the data to a file
+
+All content © 2026 DigiPen Institute of Technology Singapore. All Rights Reserved
+*/
+
 #pragma once
 #ifndef GAMETRACKINGAMANAGER_HPP
 #define GAMETRACKINGAMANAGER_HPP

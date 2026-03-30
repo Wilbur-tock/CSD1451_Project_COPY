@@ -1,3 +1,10 @@
+/*
+Authors: Justin
+Description: Display UI data about abilities to be selected
+
+All content © 2026 DigiPen Institute of Technology Singapore. All Rights Reserved
+*/
+
 #ifndef CARD_HPP
 #define CARD_HPP
 

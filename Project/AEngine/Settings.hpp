@@ -1,3 +1,10 @@
+/*
+Authors: Nixon
+Description: Display and manage functions about the settings page
+
+All content © 2026 DigiPen Institute of Technology Singapore. All Rights Reserved
+*/
+
 #ifndef SETTINGS_HPP
 #define SETTINGS_HPP
 

@@ -1,3 +1,11 @@
+/*
+Authors: Dayrius
+Description: Manage the button functions and drawing,
+checking for hovering and clicking of buttons.
+
+All content © 2026 DigiPen Institute of Technology Singapore. All Rights Reserved
+*/
+
 #include "Button.hpp"
 #include "AssetsManager.hpp"
 #include "CollisionManager.hpp"

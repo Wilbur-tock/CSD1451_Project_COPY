@@ -1,3 +1,10 @@
+/*
+Authors: Dayrius
+Description: Manage and draw the text object UI
+
+All content © 2026 DigiPen Institute of Technology Singapore. All Rights Reserved
+*/
+
 #include "TextObject.hpp"
 
 #include "AssetsManager.hpp"

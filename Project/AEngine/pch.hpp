@@ -1,3 +1,10 @@
+/*
+Authors: Dayrius
+Description: Commonly used header files
+
+All content © 2026 DigiPen Institute of Technology Singapore. All Rights Reserved
+*/
+
 #ifndef PCH_HPP
 #define PCH_HPP
 

@@ -1,3 +1,12 @@
+/*
+Authors: Dayrius, Justin, Wilbur
+Description: Store the data of the player and enemy ability controllers which contains
+ability data informatiton about the player and enemy. Functions to control and manage the ability
+data.
+
+All content © 2026 DigiPen Institute of Technology Singapore. All Rights Reserved
+*/
+
 #ifndef ABILITIESMANAGER_HPP
 #define ABILITIESMANAGER_HPP
 

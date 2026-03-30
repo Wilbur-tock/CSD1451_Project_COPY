@@ -1,3 +1,11 @@
+/*
+Authors: Dayrius, Nixon, Justin
+Description: Contains functions to load/unload commonly used mesh, 
+draw textures and sprite animations
+
+All content © 2026 DigiPen Institute of Technology Singapore. All Rights Reserved
+*/
+
 #ifndef GRAPHICSMANAGER_HPP
 #define GRAPHICSMANAGER_HPP
 

@@ -1,3 +1,11 @@
+/*
+Authors: Dayrius
+Description: Manage the button functions and drawing, 
+checking for hovering and clicking of buttons.
+
+All content © 2026 DigiPen Institute of Technology Singapore. All Rights Reserved
+*/
+
 #ifndef BUTTON_HPP
 #define BUTTON_HPP
 

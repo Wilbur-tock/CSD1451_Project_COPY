@@ -1,3 +1,11 @@
+/*
+Authors: Dayrius, Wilbur
+Description: Ability class which stores all the information about each ability such as
+name, type, tier, etc.
+
+All content © 2026 DigiPen Institute of Technology Singapore. All Rights Reserved
+*/
+
 #ifndef ABILITY_HPP
 #define ABILITY_HPP
 

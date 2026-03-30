@@ -1,3 +1,10 @@
+/*
+Authors: Justin
+Description: Load and display particles effects to the game
+
+All content © 2026 DigiPen Institute of Technology Singapore. All Rights Reserved
+*/
+
 #ifndef PARTICLEMANAGER_HPP
 #define PARTICLEMANAGER_HPP
 

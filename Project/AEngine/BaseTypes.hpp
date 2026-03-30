@@ -1,3 +1,10 @@
+/*
+Authors: Dayrius
+Description: Commonly used struct data
+
+All content © 2026 DigiPen Institute of Technology Singapore. All Rights Reserved
+*/
+
 #ifndef BASETYPES_HPP
 #define BASETYPES_HPP
 
