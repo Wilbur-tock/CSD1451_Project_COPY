@@ -8,6 +8,7 @@ All content © 2026 DigiPen Institute of Technology Singapore. All Rights Reser
 #include "AudioManager.hpp"
 #include <vector>
 #include <string>
+#include <fstream>
 
 namespace AudioManager {
 
@@ -40,6 +41,21 @@ namespace AudioManager {
         const char* path;
         AEAudio audio{};
     };
+
+    static constexpr const char* AUDIO_SETTINGS_PATH = "Assets/Data/audioSettings.txt";
+    static bool gSettingsDirty = false;
+
+    static void ApplyDefaultVolumes() {
+        gMasterVolume = 0.35f;
+        gBgmVolume = 1.0f;
+        gSfxVolume = 1.0f;
+    }
+
+    static void ClampStoredVolumes() {
+        gMasterVolume = std::clamp(gMasterVolume, 0.0f, 1.0f);
+        gBgmVolume = std::clamp(gBgmVolume, 0.0f, 1.0f);
+        gSfxVolume = std::clamp(gSfxVolume, 0.0f, 1.0f);
+    }
 
     // ---------------- Paths ----------------
     static constexpr const char* BGM_MAINMENU       = "Assets/Audio/bgm_mainmenu.wav";
@@ -142,6 +158,58 @@ namespace AudioManager {
         return AEAudio{};
     }
 
+    void SaveSettings() {
+        ClampStoredVolumes();
+
+        std::ofstream ofs{ AUDIO_SETTINGS_PATH, std::ios::trunc };
+        if (!ofs.is_open()) {
+            std::cerr << "[AudioManager] Failed to save audio settings: "
+                << AUDIO_SETTINGS_PATH << "\n";
+            return;
+        }
+
+        ofs << "MasterVolume: " << gMasterVolume << "\n";
+        ofs << "BGMVolume: " << gBgmVolume << "\n";
+        ofs << "SFXVolume: " << gSfxVolume << "\n";
+
+        gSettingsDirty = false;
+    }
+
+    void LoadSettings() {
+        ApplyDefaultVolumes();
+
+        std::ifstream ifs{ AUDIO_SETTINGS_PATH };
+        if (!ifs.is_open()) {
+            // First run or missing file: keep defaults and create the file.
+            SaveSettings();
+            return;
+        }
+
+        std::string label;
+        float master = gMasterVolume;
+        float bgm = gBgmVolume;
+        float sfx = gSfxVolume;
+
+        while (ifs >> label) {
+            if (label == "MasterVolume:") {
+                ifs >> master;
+            }
+            else if (label == "BGMVolume:") {
+                ifs >> bgm;
+            }
+            else if (label == "SFXVolume:") {
+                ifs >> sfx;
+            }
+        }
+
+        gMasterVolume = master;
+        gBgmVolume = bgm;
+        gSfxVolume = sfx;
+
+        ClampStoredVolumes();
+        gSettingsDirty = false;
+    }
+
     void Load() {
         if (gIsInitialized) {
             return;
@@ -185,16 +253,9 @@ namespace AudioManager {
 
         gCurrentTrack = Track::None;
 
-        gMasterVolume = std::clamp(gMasterVolume, 0.0f, 1.0f);
-        gBgmVolume = std::clamp(gBgmVolume, 0.0f, 1.0f);
-        gSfxVolume = std::clamp(gSfxVolume, 0.0f, 1.0f);
-
+        LoadSettings();
+        ClampStoredVolumes();
         ApplyVolumes();
-
-        // Starting variables for audio
-        SetVolume(0.35f); // Master volume
-        SetBGMVolume(1.0f);
-        SetSFXVolume(1.0f);
 
         gIsInitialized = true;
     }
@@ -206,6 +267,10 @@ namespace AudioManager {
     void Shutdown() {
         if (!gIsInitialized) {
             return;
+        }
+
+        if (gSettingsDirty) {
+            SaveSettings();
         }
 
         if (IsValidGroup(gBgmGroup)) {
@@ -346,6 +411,7 @@ namespace AudioManager {
 
     void SetVolume(float v) {
         gMasterVolume = std::clamp(v, 0.0f, 1.0f);
+        gSettingsDirty = true;
         ApplyVolumes();
     }
 
@@ -355,6 +421,7 @@ namespace AudioManager {
 
     void SetBGMVolume(float v) {
         gBgmVolume = std::clamp(v, 0.0f, 1.0f);
+        gSettingsDirty = true;
         ApplyVolumes();
     }
 
@@ -364,6 +431,7 @@ namespace AudioManager {
 
     void SetSFXVolume(float v) {
         gSfxVolume = std::clamp(v, 0.0f, 1.0f);
+        gSettingsDirty = true;
         ApplyVolumes();
     }
 

@@ -369,6 +369,7 @@ namespace Settings {
 
     void OnBackClicked() {
         currentDragTarget = DragTarget::None;
+        AudioManager::SaveSettings();
 
         if (Utils::isSettingsOpen) {
             Utils::isSettingsOpen = false;

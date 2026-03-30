@@ -30,6 +30,9 @@ namespace AudioManager {
     void Update();
     void Shutdown();
 
+    void LoadSettings();
+    void SaveSettings();
+
     void PlayBGM(Track t);
     void StopBGM();
     void PlaySFX(SFX sfx);
