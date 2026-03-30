@@ -279,7 +279,6 @@ namespace Guide {
                 candidates.push_back("Assets/Abilities/Icon_" + token + ".png");
             }
 
-            candidates.push_back("Assets/Abilities/Card_Blank.png");
             candidates.push_back("Assets/Abilities/Icon_Blank.png");
             candidates.push_back("Assets/square.png");
 

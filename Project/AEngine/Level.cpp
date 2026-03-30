@@ -202,7 +202,7 @@ void Level::Load() {
 	std::cout << "[Level] Load " + levelFileName << '\n';
 }
 
-void Level::Initalize() {
+void Level::Initialize() {
 	// Reset cloud scroll offsets so re-entering the level always starts cleanly.
 	// Called here (not in Load) so a restart also resets the animation.
 	BgAnimation::Clouds::Init();

@@ -14,55 +14,56 @@ namespace GameTrackingManager {
 	void GameData::GameStart() {
 		globalData.sessionStart = AEGetTime(nullptr);
 
-		// Load all level tracking data
+		levelData.clear();
+		levelData.reserve(Config::TOTAL_LEVEL_COUNT);
+
 		for (int i = 0; i < Config::TOTAL_LEVEL_COUNT; ++i) {
 			levelData.push_back(GameSession{});
 		}
 	}
 
 	void GameData::GameEnd() {
-		if (!needToUpdateLog) return;
+		globalData.sessionDuration = AEGetTime(nullptr) - globalData.sessionStart;
 
-		// Only finalize level tracking if a level was actually entered.
 		if (LevelManager::CurrentLevel()) {
 			LevelEnd(currentLevelIdTracking);
 		}
 
-		LevelEnd(currentLevelIdTracking);
+		if (needToUpdateLog) {
+			std::string filepath = "Assets/Data/gameLog.txt";
 
-		globalData.sessionDuration = AEGetTime(nullptr) - globalData.sessionStart;
+			std::ofstream ofs(filepath, std::ios::app);
+			if (ofs.is_open()) {
+				PrintHeader(ofs, "All game data");
+				PrintData(ofs, globalData);
 
-		// Write data into a log file
-		std::string filepath = "Assets/data/gameLog.txt";
-		std::ofstream ofs{ filepath };
-		if (!ofs.is_open()) {
-			std::cerr << "Error: Could not open file at " << filepath << std::endl;
-			return;
+				for (int i = 0; i < static_cast<int>(levelData.size()); ++i) {
+					PrintHeader(ofs, "Level " + std::to_string(i + 1) + " data");
+					PrintData(ofs, levelData[i]);
+				}
+
+				ofs.close();
+			}
 		}
 
-		PrintHeader(ofs, "Game Data");
-		PrintData(ofs, globalData);
-
-		for (int i = 0; i < Config::TOTAL_LEVEL_COUNT; ++i) {
-			PrintHeader(ofs, "Level " + std::to_string(i) + " Data");
-			PrintData(ofs, levelData[i]);
-		}
+		needToUpdateLog = false;
 	}
 
 	void GameData::LevelStart(int levelId) {
+		if (levelId < 0 || levelId >= static_cast<int>(levelData.size())) {
+			return;
+		}
+
 		levelData[levelId].sessionStart = AEGetTime(nullptr);
 		currentLevelIdTracking = levelId;
 	}
 
 	void GameData::LevelEnd(int levelId) {
-		levelData[levelId].sessionDuration = AEGetTime(nullptr) - globalData.sessionStart;
-
-		Level* level = LevelManager::CurrentLevel();
-		if (level) {
-			int newRounds = level->Rounds();
-			levelData[levelId].rounds = newRounds;
-			globalData.rounds += newRounds;
+		if (levelId < 0 || levelId >= static_cast<int>(levelData.size())) {
+			return;
 		}
+
+		levelData[levelId].sessionDuration = AEGetTime(nullptr) - levelData[levelId].sessionStart;
 	}
 
 	void GameData::AddShotFired(bool isPlayer) {
@@ -105,6 +106,31 @@ namespace GameTrackingManager {
 			++levelStats.defensiveAbilityUsed;
 			break;
 		}
+	}
+
+	CombatStatsSnapshot GameData::GetLevelStats(int levelId, bool isPlayer) const {
+		CombatStatsSnapshot snapshot{};
+
+		if (levelId < 0 || levelId >= static_cast<int>(levelData.size())) {
+			return snapshot;
+		}
+
+		GameStats const& stats = levelData[levelId].GetGameStats(isPlayer);
+
+		snapshot.shotsFired = stats.shotsFired;
+		snapshot.shotsHit = stats.shotsHit;
+		snapshot.shotsMiss = stats.shotsMiss;
+
+		snapshot.totalAbilityUsed = stats.totalAbilityUsed;
+		snapshot.offensiveAbilityUsed = stats.offensiveAbilityUsed;
+		snapshot.defensiveAbilityUsed = stats.defensiveAbilityUsed;
+		snapshot.statsAbilityUsed = stats.statsAbilityUsed;
+
+		return snapshot;
+	}
+
+	CombatStatsSnapshot GameData::GetCurrentLevelStats(bool isPlayer) const {
+		return GetLevelStats(currentLevelIdTracking, isPlayer);
 	}
 
 	void GameData::PrintHeader(std::ofstream& ofs, std::string title) {

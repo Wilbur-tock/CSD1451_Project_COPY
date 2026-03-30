@@ -12,6 +12,17 @@ All content © 2026 DigiPen Institute of Technology Singapore. All Rights Reserve
 #include "pch.hpp"
 
 namespace GameTrackingManager {
+	struct CombatStatsSnapshot {
+		size_t shotsFired = 0;
+		size_t shotsHit = 0;
+		size_t shotsMiss = 0;
+
+		size_t totalAbilityUsed = 0;
+		size_t offensiveAbilityUsed = 0;
+		size_t defensiveAbilityUsed = 0;
+		size_t statsAbilityUsed = 0;
+	};
+
 	class GameData {
 	private:
 		struct GameStats {
@@ -28,6 +39,7 @@ namespace GameTrackingManager {
 		class GameSession {
 		public:
 			GameStats& GetGameStats(bool isPlayer) { return isPlayer ? player : enemy; }
+			GameStats const& GetGameStats(bool isPlayer) const { return isPlayer ? player : enemy; }
 
 			int rounds = 0;
 			double sessionStart = 0;    // store start time
@@ -47,6 +59,9 @@ namespace GameTrackingManager {
 		void AddShotFired(bool isPlayer);
 		void AddShots(bool isPlayer, bool isHit);
 		void AddAbilityUsed(bool isPlayer, int typeId);
+
+		CombatStatsSnapshot GetLevelStats(int levelId, bool isPlayer) const;
+		CombatStatsSnapshot GetCurrentLevelStats(bool isPlayer) const;
 
 	private:
 		void PrintHeader(std::ofstream& ofs, std::string title);

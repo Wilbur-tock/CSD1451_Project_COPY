@@ -61,6 +61,10 @@ public:
 	std::string const& Name() const { return levelName; }
 	int Rounds() const { return roundCount; }
 
+	DamageLog const& GetDamageLog(bool isPlayer) const {
+		return isPlayer ? playerDamageLog : enemyDamageLog;
+	}
+
 	void Difficulty(int id) { levelDifficulty = static_cast<LevelDifficulty>(id); }
 	LevelDifficulty Difficulty() const { return levelDifficulty; }
 
@@ -75,7 +79,7 @@ public:
 public:
 	// Read level map data and load level resources
 	void Load();
-	void Initalize();
+	void Initialize();
 	void Update();
 	void UpdateUI();
 	void Draw();

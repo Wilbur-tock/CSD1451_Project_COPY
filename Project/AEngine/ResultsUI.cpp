@@ -11,13 +11,16 @@ All content © 2026 DigiPen Institute of Technology Singapore. All Rights Reserve
 #include "AssetsManager.hpp"
 #include "AudioManager.hpp"
 #include "GameStateManager.hpp"
+#include "GameTrackingManager.hpp"
+
+#include <sstream>
+#include <iomanip>
 
 namespace ResultsUI {
 	// Results UI objects
-	bool resultScreenInitialized = false;
 	UIManager::Panel resultOverlay, centerPanel;
 	Button resultRestartButton, resultNextLevelButton, resultMainMenuButton;
-	TextObject resultTitle, subtitle;
+	TextObject resultTitle, subtitle, summaryText;
 
 	static void OnResultRestart() {
 		GameStateManager::next = GameStateManager::GameState::RESTART;
@@ -48,6 +51,51 @@ namespace ResultsUI {
 		GameStateManager::next = GameStateManager::GameState::MAIN_MENU;
 	}
 
+	static int GetAccuracyPercent(GameTrackingManager::CombatStatsSnapshot const& stats) {
+		if (stats.shotsFired == 0) return 0;
+
+		float ratio = static_cast<float>(stats.shotsHit) / static_cast<float>(stats.shotsFired);
+		return static_cast<int>(ratio * 100.0f + 0.5f);
+	}
+
+	static std::string BuildResultSummaryText() {
+		Level* currentLevel = LevelManager::CurrentLevel();
+		if (!currentLevel) {
+			return "No level data available.";
+		}
+
+		GameTrackingManager::CombatStatsSnapshot const playerStats =
+			GameTrackingManager::gameData.GetCurrentLevelStats(true);
+		GameTrackingManager::CombatStatsSnapshot const enemyStats =
+			GameTrackingManager::gameData.GetCurrentLevelStats(false);
+
+		DamageLog const& playerDamage = currentLevel->GetDamageLog(true);
+		DamageLog const& enemyDamage = currentLevel->GetDamageLog(false);
+
+		std::ostringstream oss;
+
+		auto AddRow = [&oss](std::string const& label, std::string const& playerValue, std::string const& enemyValue) {
+			oss << std::left << std::setw(18) << label
+				<< std::setw(16) << playerValue
+				<< enemyValue << '\n';
+			};
+
+		oss << "Rounds Played: " << currentLevel->Rounds() << "\n\n";
+		oss << std::left << std::setw(18) << ""
+			<< std::setw(16) << "PLAYER"
+			<< "ENEMY\n";
+
+		AddRow("Shots Fired", std::to_string(playerStats.shotsFired), std::to_string(enemyStats.shotsFired));
+		AddRow("Hits", std::to_string(playerStats.shotsHit), std::to_string(enemyStats.shotsHit));
+		AddRow("Misses", std::to_string(playerStats.shotsMiss), std::to_string(enemyStats.shotsMiss));
+		AddRow("Accuracy", std::to_string(GetAccuracyPercent(playerStats)) + "%", std::to_string(GetAccuracyPercent(enemyStats)) + "%");
+		AddRow("Abilities Used", std::to_string(playerStats.totalAbilityUsed), std::to_string(enemyStats.totalAbilityUsed));
+		AddRow("Tile Damage", std::to_string(playerDamage.totalTileDamage), std::to_string(enemyDamage.totalTileDamage));
+		AddRow("Char Damage", std::to_string(playerDamage.totalCharacterDamage), std::to_string(enemyDamage.totalCharacterDamage));
+
+		return oss.str();
+	}
+
 	void Intialize() {
 		// Initialize ResultsUI
 		AEGfxTexture* btnTex = AssetsManager::GetTexture("Assets/buttonTexture.png");
@@ -60,7 +108,7 @@ namespace ResultsUI {
 		// 3-button layout: [RESTART] [NEXT LEVEL] [MAIN MENU]
 		float totalW = btnW * 3.0f + gap * 2.0f;
 		float startX = -totalW * 0.5f;
-		float buttonY = -35.0f;
+		float buttonY = -125.0f;
 
 		float restartX = startX;
 		float nextX = restartX + btnW + gap;
@@ -108,7 +156,7 @@ namespace ResultsUI {
 
 		// Slightly wider panel now because of 3 buttons
 		centerPanel = UIManager::Panel{
-			{ 820.0f, 320.0f },
+			{ 920.0f, 430.0f },
 			Color{ 1,1,1 },
 			Utils::AnchorMode::CENTER
 		};
@@ -117,35 +165,54 @@ namespace ResultsUI {
 			"", 2.0f, Color{ 1,1,1 }, { {0,0}, {0,0} }, Utils::AnchorMode::CENTER
 		};
 		resultTitle.SetPosition(centerPanel.GetTransform());
-		resultTitle.SetOffsetPosition(0, 70.0f);
+		resultTitle.SetOffsetPosition(0, 140.0f);
 
 		subtitle = TextObject{
 			"", 0.7f, Color{ 1,1,1, 0.9f }, { {0,0}, {0,0} }, Utils::AnchorMode::CENTER
 		};
 		subtitle.SetPosition(centerPanel.GetTransform());
-		subtitle.SetOffsetPosition(0, 10.0f);
+		subtitle.SetOffsetPosition(0, 95.0f);
+
+		summaryText = TextObject{
+			"", 0.55f, Color{ 1,1,1, 0.95f }, { {0,0}, {0,0} }, Utils::AnchorMode::CENTER
+		};
+		summaryText.SetPosition(centerPanel.GetTransform());
+		summaryText.SetOffsetPosition(0, 15.0f);
 	}
 
 	void Update(LevelStatus status) {
-		if (status == LevelStatus::PLAYER_WON || status == LevelStatus::ENEMY_WON) {
-			Utils::isResultScreenOn = true;
-			Draw(status);
+		const bool isShowingResults =
+			(status == LevelStatus::PLAYER_WON || status == LevelStatus::ENEMY_WON);
+
+		Utils::isResultScreenOn = isShowingResults;
+
+		if (!isShowingResults) {
+			return;
 		}
-		else {
-			Utils::isResultScreenOn = false;
-		}
+
+		Draw(status);
 
 		// Debug Commands for results UI
 		if (AEInputCheckTriggered(AEVK_N)) {
 			AudioManager::PlaySFX(AudioManager::SFX::UIButton);
 			OnResultNextLevel();
 		}
+
+		if (AEInputCheckTriggered(AEVK_R)) {
+			AudioManager::PlaySFX(AudioManager::SFX::UIButton);
+			OnResultRestart();
+		}
 	}
 
 	void Draw(LevelStatus status) {
 		resultOverlay.Draw();
 
-		int nextLevelId = LevelManager::CurrentLevel()->Id() + 1;
+		Level* currentLevel = LevelManager::CurrentLevel();
+		if (!currentLevel) {
+			return;
+		}
+
+		int nextLevelId = currentLevel->Id() + 1;
 		bool const showNextLevelButton = nextLevelId < Config::TOTAL_LEVEL_COUNT && status == LevelStatus::PLAYER_WON;
 
 		Color panelColor = (status == LevelStatus::PLAYER_WON)
@@ -171,11 +238,14 @@ namespace ResultsUI {
 			subStr = showNextLevelButton ? "Level cleared! Press NEXT LEVEL to continue.  [N]" : "You cleared the final level!";
 		}
 		else {
-			subStr = "All your units have fallen!  [R]";
+			subStr = "All your units have fallen!";
 		}
 
 		subtitle.TextContent(subStr);
 		subtitle.Draw();
+
+		summaryText.TextContent(BuildResultSummaryText());
+		summaryText.Draw();
 
 		// -- Draw buttons --
 		resultRestartButton.Update();
