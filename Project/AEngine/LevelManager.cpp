@@ -2,7 +2,7 @@
 Authors: Dayrius, Bryan
 Description: Manage all level data in the game
 
-All content © 2026 DigiPen Institute of Technology Singapore. All Rights Reserved
+All content © 2026 DigiPen Institute of Technology Singapore. All Rights Reserved
 */
 
 #include "LevelManager.hpp"
@@ -10,16 +10,43 @@ All content © 2026 DigiPen Institute of Technology Singapore. All Rights Reserve
 #include "GameTrackingManager.hpp"
 
 namespace LevelManager {
-	char const* LEVEL_DATA_PATH = "Assets/Data/levelData.txt";
+	namespace {
+		constexpr char const* LEVEL_DATA_PATH = "Assets/Data/levelData.txt";
 
-	Level* selectedLevel = nullptr;
-	std::vector<Level> levelDatas;
-	int highestUnlockedLevel = Config::FIRST_LEVEL_INDEX;
+		Level* selectedLevel = nullptr;
+		std::vector<Level> levelDatas;
+
+		// Campaign progression only.
+		// Sandbox is handled separately and is always unlocked.
+		int highestUnlockedCampaignLevel = Config::FIRST_CAMPAIGN_LEVEL_INDEX;
+
+		bool IsSandboxLevel(int levelIndex) {
+			return levelIndex == Config::SANDBOX_LEVEL_INDEX;
+		}
+
+		bool IsCampaignLevel(int levelIndex) {
+			return levelIndex >= Config::FIRST_CAMPAIGN_LEVEL_INDEX &&
+				levelIndex < Config::TOTAL_LEVEL_COUNT;
+		}
+
+		bool ComputeUnlockedState(int levelIndex) {
+			if (IsSandboxLevel(levelIndex)) {
+				return true;
+			}
+
+			return IsCampaignLevel(levelIndex) &&
+				levelIndex <= highestUnlockedCampaignLevel;
+		}
+	}
 
 	void LoadAllLevels() {
 		selectedLevel = nullptr;
 		levelDatas.clear();
 		levelDatas.reserve(Config::TOTAL_LEVEL_COUNT);
+
+		// Reset progression baseline:
+		// Sandbox is always unlocked, and the first campaign level is always unlocked.
+		highestUnlockedCampaignLevel = Config::FIRST_CAMPAIGN_LEVEL_INDEX;
 
 		// Load all the data levels and add into the vector
 		for (int i = 0; i < Config::TOTAL_LEVEL_COUNT; ++i) {
@@ -27,9 +54,6 @@ namespace LevelManager {
 			levelDatas.push_back(data);
 			levelDatas[i].Load();
 		}
-
-		// Fallback unlock state from level data file (for backward compatibility)
-		int fallbackHighestUnlockedLevel = Config::FIRST_LEVEL_INDEX;
 
 		std::ifstream ifs{ LEVEL_DATA_PATH };
 		if (!ifs.is_open()) {
@@ -49,8 +73,10 @@ namespace LevelManager {
 
 				levelDatas[id].Difficulty(diff);
 
-				if (isUnlocked) {
-					fallbackHighestUnlockedLevel = id;
+				// Sandbox does not participate in progression tracking.
+				// Only levels update the saved progression state.
+				if (IsCampaignLevel(id) && isUnlocked) {
+					highestUnlockedCampaignLevel = (highestUnlockedCampaignLevel > id) ? highestUnlockedCampaignLevel : id;
 				}
 
 				++id;
@@ -58,8 +84,6 @@ namespace LevelManager {
 
 			ifs.close();
 		}
-
-		highestUnlockedLevel = fallbackHighestUnlockedLevel;
 	}
 
 	void LoadLevel(int levelId) {
@@ -86,27 +110,41 @@ namespace LevelManager {
 
 	bool IsLevelUnlocked(int levelIndex) {
 		if (Utils::isDebuggerOn) return true; // unlock all levels if debugger is on
-		return IsValidLevelIndex(levelIndex) && levelIndex <= highestUnlockedLevel;
+		if (!IsValidLevelIndex(levelIndex)) return false;
+
+		// Sandbox is always open.
+		if (IsSandboxLevel(levelIndex)) {
+			return true;
+		}
+
+		return IsCampaignLevel(levelIndex) &&
+			levelIndex <= highestUnlockedCampaignLevel;
 	}
 
 	int HighestUnlockedLevel() {
-		return highestUnlockedLevel;
+		return highestUnlockedCampaignLevel;
 	}
 
 	void UnlockLevel(int levelIndex) {
-		if (!IsValidLevelIndex(levelIndex)) return;
+		// Only campaign levels should affect progression.
+		if (!IsCampaignLevel(levelIndex)) return;
 
-		if (levelIndex > highestUnlockedLevel) {
-			highestUnlockedLevel = levelIndex;
+		if (levelIndex > highestUnlockedCampaignLevel) {
+			highestUnlockedCampaignLevel = levelIndex;
 		}
 	}
 
 	void UnlockNextLevel(int completedLevelIndex) {
-		UnlockLevel(completedLevelIndex + 1);
+		const int nextLevelIndex = completedLevelIndex + 1;
+
+		// This automatically ignores invalid/final-next cases.
+		UnlockLevel(nextLevelIndex);
 	}
 
 	void ResetProgress() {
-		highestUnlockedLevel = Config::FIRST_LEVEL_INDEX;
+		// Reset campaign only.
+		// Sandbox remains always unlocked through IsLevelUnlocked().
+		highestUnlockedCampaignLevel = Config::FIRST_CAMPAIGN_LEVEL_INDEX;
 	}
 
 	void InitializeLevel() {
@@ -136,9 +174,10 @@ namespace LevelManager {
 		else {
 			for (int i = 0; i < static_cast<int>(levelDatas.size()); ++i) {
 				Level const& levelData = levelDatas[i];
-				ofs << "level" + std::to_string(i)
-					<< "\nDifficulty: " << static_cast<int>(levelData.Difficulty())
-					<< "\nIsUnlocked: " << static_cast<int>(levelData.Id() <= highestUnlockedLevel)
+
+				ofs << "Level" << i
+					<< ":\nDifficulty: " << static_cast<int>(levelData.Difficulty())
+					<< "\nIsUnlocked: " << static_cast<int>(ComputeUnlockedState(i))
 					<< "\n\n";
 			}
 

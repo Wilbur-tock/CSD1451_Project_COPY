@@ -141,7 +141,7 @@ namespace LevelSelect {
         );
 
         hintText = {
-        "Grey buttons are locked   |   Press number keys to open matching unlocked button   |   ESC / BACK = Main Menu", 
+        "Grey buttons are locked   |   0 = Sandbox, 1 = Level 1, 2 = Level 2, 3 = Level 3   |   ESC / BACK = Main Menu", 
         0.60f, 
         Color(0.0f, 0.0f, 0.0f, 0.95f), 
             { -0.95f, -0.92f }
@@ -191,13 +191,28 @@ namespace LevelSelect {
             return;
         }
 
-        for (int i = 0; i < Config::TOTAL_LEVEL_COUNT; ++i) {
-            if (AEInputCheckTriggered(static_cast<u8>(AEVK_1 + i)) &&
-                LevelManager::IsLevelUnlocked(i)) {
-                AudioManager::PlaySFX(AudioManager::SFX::UIButton);
-                OpenLevel(i);
-                return;
-            }
+        if (AEInputCheckTriggered(AEVK_0) && LevelManager::IsLevelUnlocked(0)) {
+            AudioManager::PlaySFX(AudioManager::SFX::UIButton);
+            OpenLevel(0);
+            return;
+        }
+
+        if (AEInputCheckTriggered(AEVK_1) && LevelManager::IsLevelUnlocked(1)) {
+            AudioManager::PlaySFX(AudioManager::SFX::UIButton);
+            OpenLevel(1);
+            return;
+        }
+
+        if (AEInputCheckTriggered(AEVK_2) && LevelManager::IsLevelUnlocked(2)) {
+            AudioManager::PlaySFX(AudioManager::SFX::UIButton);
+            OpenLevel(2);
+            return;
+        }
+
+        if (AEInputCheckTriggered(AEVK_3) && LevelManager::IsLevelUnlocked(3)) {
+            AudioManager::PlaySFX(AudioManager::SFX::UIButton);
+            OpenLevel(3);
+            return;
         }
 
         Draw();
