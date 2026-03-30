@@ -72,8 +72,8 @@ namespace CannonManager {
             AEGfxTexture* projectileTexture = AssetsManager::circleTexture; // default texture
 
             switch (static_cast<ProjectileMode>(ability.GetProjectile().projectileId)) {
-            case ProjectileMode::BOMB: projectileTexture = AssetsManager::GetTexture("Assets/Bomb_Proj.png"); break;
-            case ProjectileMode::DRILL: projectileTexture = AssetsManager::GetTexture("Assets/Drill_Proj.png"); break;
+            case ProjectileMode::BOMB: projectileTexture = AssetsManager::GetTexture("Assets/Projectiles/projectilesBomb.png"); break;
+            case ProjectileMode::DRILL: projectileTexture = AssetsManager::GetTexture("Assets/Projectiles/projectilesDrill.png"); break;
             }
 
             projectile = Projectile{ projectileTexture };

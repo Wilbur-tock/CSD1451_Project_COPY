@@ -242,20 +242,20 @@ namespace MapEditor {
 		std::string helpStr =
 			"Current File: " + loadPath +
 			"\nSave File: " + savePath +
-			"\n\nMap Constraints:";
-
-		for (MapConstraint const& constraint : constraints) {
-			helpStr += "\n" + GetTileName(constraint.type) + ' ' + std::to_string(constraint.currentCount) + '/' + std::to_string(constraint.requiredCount);
-		}
-
-		helpStr +="\n\nShortcuts:"
+			"\n\nShortcuts:"
+			"\n[CTRL+NUMBER] Level level file (1-3)"
 			"\n[M] Back to MAIN MENU"
 			"\n[CTRL + S] Save file"
 			"\n[R] Reset Map"
 			"\n[LEFT CLICK] Place Tile"
-			"\n[RIGHT CLICK] Erase Tile"
-			"\n\n[T] Toggle Tile List ";
+			"\n[RIGHT CLICK] Erase Tile";
 
+		helpStr += "\n\nMap Requirements:";
+		for (MapConstraint const& constraint : constraints) {
+			helpStr += "\n" + GetTileName(constraint.type) + ' ' + std::to_string(constraint.currentCount) + '/' + std::to_string(constraint.requiredCount);
+		}
+
+		helpStr += "\n\n[T] Toggle Tile List ";
 		if (isShowingTileList) {
 			helpStr += "[SHOWING]\n[Q] Scroll UP\n[E] Scroll DOWN\nSelected Tile: "
 				+ GetTileName(static_cast<TileType>(tileId)) + " (" + std::to_string(tileId) + ")";
@@ -369,7 +369,7 @@ namespace MapEditor {
 
 		if (AEInputCheckCurr(AEVK_LCTRL) || AEInputCheckCurr(AEVK_RCTRL)) {
 			// Input CTRL + {NUMBER} to load a new LEVEL MAP to edit
-			for (int i = 0; i <= totalLevelMap; ++i) {
+			for (int i = 0; i < totalLevelMap; ++i) {
 				if (AEInputCheckTriggered(static_cast<u8>(AEVK_0 + i))) {
 					// Load file from bin folder only
 					std::string newLoadFile = "level" + std::to_string(i);

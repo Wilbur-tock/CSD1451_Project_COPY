@@ -1082,7 +1082,7 @@ namespace Guide {
             descriptionBox.AddOffsetPosition({ DETAIL_CENTER_X, descriptionBoxCenterY });
             descriptionBox.Draw();
 
-            DrawTextLeftPx("DESCRIPTION", leftX, 72.0f, 0.50f, Color(0.05f, 0.07f, 0.10f, 1.0f));
+            DrawTextLeftPx("DESCRIPTION", leftX, 80.0f, 0.5f, Color(0.05f, 0.07f, 0.10f, 1.0f));
 
             DrawWrappedTextLeftPxLimited(
                 BuildAbilityDescription(entry),

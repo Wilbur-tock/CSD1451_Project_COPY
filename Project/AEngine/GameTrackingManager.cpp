@@ -33,7 +33,7 @@ namespace GameTrackingManager {
 		globalData.sessionDuration = AEGetTime(nullptr) - globalData.sessionStart;
 
 		// Write data into a log file
-		std::string filepath = "Assets/data/GameLog.txt";
+		std::string filepath = "Assets/data/gameLog.txt";
 		std::ofstream ofs{ filepath };
 		if (!ofs.is_open()) {
 			std::cerr << "Error: Could not open file at " << filepath << std::endl;

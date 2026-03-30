@@ -15,24 +15,21 @@ All content © 2026 DigiPen Institute of Technology Singapore. All Rights Reser
 namespace MapManager {
 	std::vector<std::vector<Tile>> *currentMap; 
 
-	static const char* FLOOR_TOP_PATH = "Assets/floorTop.png";  // top layer floor
-	static const char* FLOOR_FILL_PATH = "Assets/floorBody.png";  // underground fill of floor
+	static const char* FLOOR_TOP_PATH = "Assets/Tiles/floorTop.png";  // top layer floor
+	static const char* FLOOR_FILL_PATH = "Assets/Tiles/floorBody.png";  // underground fill of floor
 
-	static const char* TOWER_BLOCK_TOP_1_PATH = "Assets/towerBlockTop1.png"; // Tower Block Top (1)
-	static const char* TOWER_BLOCK_1_PATH = "Assets/towerBlockBody1.png"; // Tower Block Body (1)
-	static const char* TOWER_BLOCK_TOP_2_PATH = "Assets/towerBlockTop2.png"; // Tower Block Top (2)
-	static const char* TOWER_BLOCK_2_PATH = "Assets/towerBlockBody2.png"; // Tower Block Body (2)
+	static const char* TOWER_BLOCK_TOP_1_PATH = "Assets/Tiles/towerBlockTop1.png"; // Tower Block Top (1)
+	static const char* TOWER_BLOCK_1_PATH = "Assets/Tiles/towerBlockBody1.png"; // Tower Block Body (1)
+	static const char* TOWER_BLOCK_TOP_2_PATH = "Assets/Tiles/towerBlockTop2.png"; // Tower Block Top (2)
+	static const char* TOWER_BLOCK_2_PATH = "Assets/Tiles/towerBlockBody2.png"; // Tower Block Body (2)
 
-	static const char* CANNON_BASE_TOP_PATH = "Assets/cannonBaseTop.png";
-	static const char* CANNON_BASE_PATH = "Assets/cannonBase.png";
-	static const char* PLAYER_IDLE_PATH = "Assets/playerIdle.png";      //player
-	static const char* ENEMY_100_PATH = "Assets/enemy100.png";        //enemy (full hp)
-	static const char* ENEMY_BOSS_PATH = "Assets/enemyBoss.png";
+	static const char* CANNON_BASE_TOP_PATH = "Assets/Tiles/cannonBaseTop.png";
+	static const char* CANNON_BASE_PATH = "Assets/Tiles/cannonBase.png";
 	
 	//Cracks textures for blocks based on their health (light, medium, heavy)
-	static const char* CRACKS_LIGHT_PATH = "Assets/lightCracks.png";
-	static const char* CRACKS_MEDIUM_PATH = "Assets/mediumCracks.png";
-	static const char* CRACKS_HEAVY_PATH = "Assets/heavyCracks.png";
+	static const char* CRACKS_LIGHT_PATH = "Assets/Tiles/cracksLight.png";
+	static const char* CRACKS_MEDIUM_PATH = "Assets/Tiles/cracksMedium.png";
+	static const char* CRACKS_HEAVY_PATH = "Assets/Tiles/cracksHeavy.png";
 	// Cached textures
 	static AEGfxTexture* gTileTex[static_cast<int>(TileType::TILE_COUNT)] = { nullptr };
 	static AEGfxTexture* gFloorTopTex = nullptr;
@@ -44,9 +41,6 @@ namespace MapManager {
 	static AEGfxTexture* gCannonBaseTopTex = nullptr;
 	static AEGfxTexture* gCannonBaseTex = nullptr;
 	static AEGfxTexture* gFallbackTex = nullptr;
-	static AEGfxTexture* gPlayerIdleTex = nullptr;
-	static AEGfxTexture* gEnemy100Tex = nullptr;
-	static AEGfxTexture* gEnemyBossTex = nullptr;
 	static AEGfxTexture* gCracksLightTex = nullptr;
 	static AEGfxTexture* gCracksMediumTex = nullptr;
 	static AEGfxTexture* gCracksHeavyTex = nullptr;
@@ -125,9 +119,6 @@ namespace MapManager {
 		gTower2BodyTex = AssetsManager::GetTexture(TOWER_BLOCK_2_PATH);
 		gCannonBaseTopTex = AssetsManager::GetTexture(CANNON_BASE_TOP_PATH);
 		gCannonBaseTex = AssetsManager::GetTexture(CANNON_BASE_PATH);
-		gPlayerIdleTex = AssetsManager::GetTexture(PLAYER_IDLE_PATH);
-		gEnemy100Tex = AssetsManager::GetTexture(ENEMY_100_PATH);
-		gEnemyBossTex = AssetsManager::GetTexture(ENEMY_BOSS_PATH);
 
 		gCracksLightTex = AssetsManager::GetTexture(CRACKS_LIGHT_PATH);
 		gCracksMediumTex = AssetsManager::GetTexture(CRACKS_MEDIUM_PATH);
@@ -142,9 +133,6 @@ namespace MapManager {
 		if (!gTower2BodyTex)     gTower2BodyTex = gFallbackTex;
 		if (!gCannonBaseTopTex)  gCannonBaseTopTex = gFallbackTex;
 		if (!gCannonBaseTex)     gCannonBaseTex = gFallbackTex;
-		if (!gPlayerIdleTex)     gPlayerIdleTex = gFallbackTex;
-		if (!gEnemy100Tex)   gEnemy100Tex = gFallbackTex;
-		if (!gEnemyBossTex)  gEnemyBossTex = gEnemy100Tex;
 
 		gTileTex[static_cast<int>(TileType::TILE_EMPTY)] = nullptr;
 		// ground uses top/fill selection in RenderMap (this just marks “loaded”)
@@ -163,11 +151,6 @@ namespace MapManager {
 		// cannon base tile texture
 		gTileTex[static_cast<int>(TileType::TILE_PLAYER_CANNON)] = gCannonBaseTopTex;
 		gTileTex[static_cast<int>(TileType::TILE_ENEMY_CANNON)] = gCannonBaseTopTex;
-
-		// other types can stay fallback for now
-		gTileTex[static_cast<int>(TileType::TILE_PLAYER_CHARACTER)] = gPlayerIdleTex;
-		gTileTex[static_cast<int>(TileType::TILE_ENEMY_MINION)] = gEnemy100Tex;
-		gTileTex[static_cast<int>(TileType::TILE_ENEMY_BOSS)] = gEnemyBossTex;
 	}
 
 	void Unload() {
@@ -182,9 +165,6 @@ namespace MapManager {
 		gTower2BodyTex = nullptr;
 		gCannonBaseTopTex = nullptr;
 		gCannonBaseTex = nullptr;
-		gPlayerIdleTex = nullptr;
-		gEnemy100Tex = nullptr;
-		gEnemyBossTex = nullptr;
 		gCracksLightTex = nullptr;
 		gCracksMediumTex = nullptr;
 		gCracksHeavyTex = nullptr;
