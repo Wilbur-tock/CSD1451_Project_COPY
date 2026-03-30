@@ -4,7 +4,7 @@
 #include "CameraManager.hpp"
 
 namespace Utils {
-	bool isDebuggerOn = true;
+	bool isDebuggerOn = false;
 	bool isInstructionOn = false;
 	bool isPaused = false;                                         // <-- NEW
 	bool isSettingsOpen = false;                                    // settings overlay inside pause menu

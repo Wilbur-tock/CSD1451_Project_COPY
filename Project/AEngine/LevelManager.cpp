@@ -3,40 +3,7 @@
 #include "GameTrackingManager.hpp"
 
 namespace LevelManager {
-	namespace {
-		constexpr const char* LEVEL_DATA_PATH = "Assets/Data/levelData.txt";
-		constexpr const char* PROGRESS_SAVE_PATH = "Assets/Data/progress.txt";
-
-		bool TryLoadProgressFromFile(int& outHighestUnlockedLevel) {
-			std::ifstream ifs{ PROGRESS_SAVE_PATH };
-			if (!ifs.is_open()) {
-				return false;
-			}
-
-			int savedLevelIndex = Config::FIRST_LEVEL_INDEX;
-			if (!(ifs >> savedLevelIndex)) {
-				return false;
-			}
-
-			outHighestUnlockedLevel = std::clamp(
-				savedLevelIndex,
-				Config::FIRST_LEVEL_INDEX,
-				Config::TOTAL_LEVEL_COUNT - 1
-			);
-
-			return true;
-		}
-
-		void SaveProgressToFile(int highestUnlocked) {
-			std::ofstream ofs{ PROGRESS_SAVE_PATH, std::ios::trunc };
-			if (!ofs.is_open()) {
-				std::cerr << "Can't open " << PROGRESS_SAVE_PATH << std::endl;
-				return;
-			}
-
-			ofs << highestUnlocked << '\n';
-		}
-	}
+	char const* LEVEL_DATA_PATH = "Assets/Data/levelData.txt";
 
 	Level* selectedLevel = nullptr;
 	std::vector<Level> levelDatas;
@@ -86,15 +53,6 @@ namespace LevelManager {
 		}
 
 		highestUnlockedLevel = fallbackHighestUnlockedLevel;
-
-		// Dedicated progress save overrides fallback data when available
-		int savedUnlockedLevel = Config::FIRST_LEVEL_INDEX;
-		if (TryLoadProgressFromFile(savedUnlockedLevel)) {
-			highestUnlockedLevel = savedUnlockedLevel;
-		}
-
-		// Ensure the save file exists after load
-		SaveProgressToFile(highestUnlockedLevel);
 	}
 
 	void LoadLevel(int levelId) {
@@ -133,7 +91,6 @@ namespace LevelManager {
 
 		if (levelIndex > highestUnlockedLevel) {
 			highestUnlockedLevel = levelIndex;
-			SaveProgressToFile(highestUnlockedLevel);
 		}
 	}
 
@@ -143,7 +100,6 @@ namespace LevelManager {
 
 	void ResetProgress() {
 		highestUnlockedLevel = Config::FIRST_LEVEL_INDEX;
-		SaveProgressToFile(highestUnlockedLevel);
 	}
 
 	void InitializeLevel() {
@@ -181,9 +137,6 @@ namespace LevelManager {
 
 			ofs.close();
 		}
-
-		// Save dedicated progression file too
-		SaveProgressToFile(highestUnlockedLevel);
 
 		levelDatas.clear();
 		selectedLevel = nullptr;

@@ -32,7 +32,7 @@ void TextObject::Draw() {
 		hasUpdatePos = true;
 	}
 
-	// Update position if there is a offset need to constantly updated if textContent is updated
+	// Update position if there is a offset need to constantly updated if the textContent string is updated every loop
 	float x = transform.pos.x, y = transform.pos.y;
 	if (offsetPos.x != 0 || offsetPos.y != 0) {
 		x += offsetPos.x;

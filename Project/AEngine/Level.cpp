@@ -204,15 +204,6 @@ void Level::Initalize() {
 	hasProcessedVictory = false;
 	AbilitiesManager::playerAbilityController.SetTestingMode(false);
 
-	switch (levelId) {
-	case 0:
-		noEnemy = resetMapEveryRound = true;
-		canSelectAbility = false;
-		AbilitiesManager::playerAbilityController.SetTestingMode(true);
-
-		break;
-	}
-
 	// Initialize active map 
 	for (int i = 0; i < Config::GRID_HEIGHT; ++i) {
 		for (int j = 0; j < Config::GRID_WIDTH; ++j) {
@@ -242,6 +233,15 @@ void Level::Initalize() {
 	autoPlayOn = false;
 	disableEnemyTurn = false;
 	switchTurnCooldown = 0.0f;
+
+	switch (levelId) {
+	case 0:
+		noEnemy = resetMapEveryRound = true;
+		canSelectAbility = false;
+		AbilitiesManager::playerAbilityController.SetTestingMode(true);
+
+		break;
+	}
 
 	AEVec2 playerCannonStartPos = { 0,0 }, enemyCannonStartPos = { 0,0 };
 
@@ -580,7 +580,9 @@ void Level::UpdateTurn() {
 
 		if (switchTurnCooldown <= 0.0f) {
 			// Switch active cannon
-			SwitchTurn(!isPlayerTurn);
+			bool isPlayer = !isPlayerTurn;
+			if (noEnemy) isPlayer = true;
+			SwitchTurn(isPlayer);
 		}
 	}
 }
@@ -819,22 +821,19 @@ void Level::RecordPrevDamage(DamageLog& log) {
 	log.prevTurnCharacterDamage = log.totalCharacterDamage - log.roundCharacterDamage;
 	log.prevTurnTileDamage = log.totalTileDamage - log.roundTileDamage;
 
-	//std::cout << "Damage Log: "
-	//	<< "\nTotal Character Damage : " << log.totalCharacterDamage
-	//	<< "\nCurrent Round Character Damage: " << log.roundCharacterDamage
-	//	<< "\nPrevious Round Character Damage: " << log.prevTurnCharacterDamage
-	//	<< "\n\nTotal Tile Damage : " << log.totalTileDamage
-	//	<< "\nCurrent Round Tile Damage: " << log.roundTileDamage
-	//	<< "\nPrevious Round Tile Damage: " << log.prevTurnTileDamage
-	//	<< '\n';
-
 	// Reset current round damage
 	log.roundCharacterDamage = 0;
 	log.roundTileDamage = 0;
 }
 
+bool hideDebugStrings = false;
+
 void Level::DebugCommands() {
 	if (!Utils::isDebuggerOn) return;
+
+	if (AEInputCheckTriggered(AEVK_T)) {
+		hideDebugStrings = !hideDebugStrings;
+	}
 
 	// Input R to change whose turn it is
 	if (AEInputCheckTriggered(AEVK_R)) {
@@ -847,8 +846,8 @@ void Level::DebugCommands() {
 		}
 	}
 
-	// Input E to skip enemy turn
-	if (AEInputCheckTriggered(AEVK_E)) {
+	// To skip enemy turn
+	if (AEInputCheckTriggered(AEVK_F)) {
 		disableEnemyTurn = !disableEnemyTurn;
 	}
 
@@ -931,64 +930,73 @@ void Level::DebugInfo() {
 	float mX = 0, mY = 0;
 	Utils::GetWorldMousePos(mX, mY);
 
-	std::string debug = "Shortcuts:\n[CTRL + R] Auto play " + std::string(autoPlayOn ? "ON" : "OFF")
-		+ "\n[E] Skipping enemy turn " + std::string(disableEnemyTurn ? "ON" : "OFF")
-		+ "\n[R] Skip to enemy turn\n\nLevel:\nLevel Status: " + std::to_string(static_cast<int>(status))
-		+ "\n\nTile Map\nIndex X: " + std::to_string(gridX) + " Y: " + std::to_string(gridY)
-		+ "\nTile: " + GetTileName(tile.Type());
-	// Display which character is currently at this tile type
-	if (tile.IsCharacter()) {
-		std::stringstream ss;
-		ss << FindCharacterObj(tile);
-		debug += " " + ss.str(); // display address of the character object
-	}
+	std::string debug = "Shortcuts:\n\n[T] Hide debug strings " + std::string(hideDebugStrings ? "ON" : "OFF")
+		+ "\n[CTRL + R] Auto play " + std::string(autoPlayOn ? "ON" : "OFF")
+		+ "\n[F] Skip enemy turn " + std::string(disableEnemyTurn ? "ON" : "OFF")
+		+ "\n[R] Skip to enemy turn"
+		+ "\n[G] Rebuild Tower" 
+		+ "\n[H] Destroy Tower"
+		+ "\n[R-CLICK] Destroy blocks\nor damage character units";
 
-	debug += "\nPos X: " + Utils::FormatFloat(tile.transform.pos.x, 2) + " Y: " + Utils::FormatFloat(tile.transform.pos.y, 2)
-		+ "\nHP: " + Utils::FormatFloat(tile.attribute.Health(), 2)
-		+ "\nDamage Multiplier: " + std::to_string(tile.attribute.DamageMultiplier());
+	if (hideDebugStrings) {
+		debug += "\n\nLevel:\nLevel Status: " + std::to_string(static_cast<int>(status))
+			+ "\n\nTile Map\nIndex X: " + std::to_string(gridX) + " Y: " + std::to_string(gridY)
+			+ "\nTile: " + GetTileName(tile.Type());
+		// Display which character is currently at this tile type
+		if (tile.IsCharacter()) {
+			std::stringstream ss;
+			ss << FindCharacterObj(tile);
+			debug += " " + ss.str(); // display address of the character object
+		}
 
-	if (tile.attribute.IsTickDamageActive()) {
-		debug += tile.attribute.TickDamageInfo();
-	}
+		debug += "\nPos X: " + Utils::FormatFloat(tile.transform.pos.x, 2) + " Y: " + Utils::FormatFloat(tile.transform.pos.y, 2)
+			+ "\nHP: " + Utils::FormatFloat(tile.attribute.Health(), 2)
+			+ "\nDamage Multiplier: " + std::to_string(tile.attribute.DamageMultiplier());
 
-	debug += "\n\nCamera " + std::to_string(CameraManager::camera.GetState())
-		+ "\nPos X : " + Utils::FormatFloat(x, 2) + " Y : " + Utils::FormatFloat(y, 2)
-		+ "\nCamera State: " + CameraManager::camera.PrintState() // Camera INFO
-		+ "\nZoom: " + Utils::FormatFloat(CameraManager::camera.GetZoom(), 2)
-		+ "\n" + CameraManager::camera.PrintVisibleTiles()
-		+ "\n\nMouse\nScreen Pos X: " + Utils::FormatFloat(mouseX, 2) + " Y: " + Utils::FormatFloat(mouseY, 2) // Mouse Info
-		+ "\nWorld Pos X: " + Utils::FormatFloat(mX, 2) + " Y: " + Utils::FormatFloat(mY, 2);
+		if (tile.attribute.IsTickDamageActive()) {
+			debug += tile.attribute.TickDamageInfo();
+		}
 
-	std::string info = "";
+		debug += "\n\nCamera " + std::to_string(CameraManager::camera.GetState())
+			+ "\nPos X : " + Utils::FormatFloat(x, 2) + " Y : " + Utils::FormatFloat(y, 2)
+			+ "\nCamera State: " + CameraManager::camera.PrintState() // Camera INFO
+			+ "\nZoom: " + Utils::FormatFloat(CameraManager::camera.GetZoom(), 2)
+			+ "\n" + CameraManager::camera.PrintVisibleTiles()
+			+ "\n\nMouse\nScreen Pos X: " + Utils::FormatFloat(mouseX, 2) + " Y: " + Utils::FormatFloat(mouseY, 2) // Mouse Info
+			+ "\nWorld Pos X: " + Utils::FormatFloat(mX, 2) + " Y: " + Utils::FormatFloat(mY, 2);
 
-	if (Utils::isDebuggerOn) {
-		// Display the character object information (All the stats, position , etc)
-		for (Character& enemy : enemies) {
-			if (CollisionManager::IsPointInGameObject(enemy)) {
-				enemy.GetCharacterInfo(info);
+		std::string info = "";
+
+		if (Utils::isDebuggerOn) {
+			// Display the character object information (All the stats, position , etc)
+			for (Character& enemy : enemies) {
+				if (CollisionManager::IsPointInGameObject(enemy)) {
+					enemy.GetCharacterInfo(info);
+				}
+			}
+
+			for (Character& characters : playerCharacters) {
+				if (CollisionManager::IsPointInGameObject(characters)) {
+					characters.GetCharacterInfo(info);
+				}
 			}
 		}
 
-		for (Character& characters : playerCharacters) {
-			if (CollisionManager::IsPointInGameObject(characters)) {
-				characters.GetCharacterInfo(info);
-			}
+		if (CollisionManager::IsPointInGameObject(playerShield)) {
+			playerShield.DebugInfo(debug);
 		}
-	}
 
-	if (CollisionManager::IsPointInGameObject(playerShield)) {
-		playerShield.DebugInfo(debug);
-	}
+		if (CollisionManager::IsPointInGameObject(enemyShield)) {
+			enemyShield.DebugInfo(debug);
+		}
 
-	if (CollisionManager::IsPointInGameObject(enemyShield)) {
-		enemyShield.DebugInfo(debug);
-	}
+		debug += info;
 
-	debug += info;
+		// Show cannon debugger info
+		cannonDebugPanel.Update(activeCannon->DebugInfo());
+		cannonDebugPanel.Draw();
+	}
 
 	debugPanel.Update(debug);
 	debugPanel.Draw();
-
-	cannonDebugPanel.Update(activeCannon->DebugInfo());
-	cannonDebugPanel.Draw();
 }

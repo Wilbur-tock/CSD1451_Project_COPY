@@ -339,7 +339,6 @@ namespace Settings {
         }
 
         Draw();
-
         backButton.Update();
 
         masterVolumeDownButton.Update();

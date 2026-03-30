@@ -34,6 +34,7 @@ namespace GameStateManager {
         return current >= GameState::MAP_EDITOR && current <= GameState::LEVEL_3;
     }
 
+    static void UpdateState();
     static void DebugCommands();
     static void DebugUI();
     static void SetAndPlayBGM();
@@ -82,116 +83,33 @@ namespace GameStateManager {
 
         AudioManager::Update();
 
-        // Handle quit immediately
-        if (next == GameState::QUIT || current == GameState::QUIT) {
-            current = next;
-            if (gsDraw != nullptr) gsDraw();
-            return;
-        }
-
-        // STATE TRANSITION (LOADING SCREEN)
+        // Loading and changing of state
         if (next != current) {
             Utils::isPaused = false;
             Utils::isSettingsOpen = false;
             Utils::isInstructionOn = false;
 
             if (!setNewState) {
-                Loading::Init();
+                if (next != GameState::QUIT) {
+                    Loading::Init();
+                }
                 setNewState = true;
             }
-
-            Loading::loadingTimer -= rawDt;
-            Loading::Render();
-
-            if (Loading::loadingTimer <= 0.0f) {
-                if (gsFree != nullptr) {
-                    gsFree();
+            else {
+                // Display loading screen
+                if (Loading::loadingTimer > 0.0f) {
+                    Loading::loadingTimer -= rawDt;
+                    Loading::Render();
                 }
-
-                previous = current;
-                current = next;
-                setNewState = false;
-
-                switch (current) {
-                case GameState::MAIN_MENU:
-                    gsIntialize = MainMenu::Initialize;
-                    gsUpdate = MainMenu::Update;
-                    gsDraw = MainMenu::Draw;
-                    gsFree = MainMenu::Free;
-                    break;
-
-                case GameState::LEVEL_SELECT:
-                    gsIntialize = LevelSelect::Initialize;
-                    gsUpdate = LevelSelect::Update;
-                    gsDraw = LevelSelect::Draw;
-                    gsFree = LevelSelect::Free;
-                    break;
-
-                case GameState::MAP_EDITOR:
-                    gsIntialize = MapEditor::Initialize;
-                    gsUpdate = MapEditor::Update;
-                    gsDraw = nullptr;
-                    gsFree = MapEditor::Exit;
-                    break;
-
-                case GameState::LEVEL_0:
-                case GameState::LEVEL_1:
-                case GameState::LEVEL_2:
-                case GameState::LEVEL_3:
-                    LevelManager::SelectLevel(static_cast<int>(current) - static_cast<int>(GameState::LEVEL_0));
-                    gsIntialize = LevelManager::InitializeLevel;
-                    gsUpdate = LevelManager::UpdateLevel;
-                    gsDraw = nullptr;
-                    gsFree = LevelManager::FreeLevel;
-                    break;
-
-                case GameState::CREDITS:
-                    gsIntialize = Credits::Initialize;
-                    gsUpdate = Credits::Update;
-                    gsDraw = Credits::Draw;
-                    gsFree = Credits::Free;
-                    break;
-
-                case GameState::SETTINGS:
-                    gsIntialize = Settings::Initialize;
-                    gsUpdate = Settings::Update;
-                    gsDraw = Settings::Draw;
-                    gsFree = Settings::Free;
-                    break;
-
-                case GameState::GUIDE:
-                    gsIntialize = Guide::Initialize;
-                    gsUpdate = Guide::Update;
-                    gsDraw = Guide::Draw;
-                    gsFree = Guide::Free;
-                    break;
-
-                case GameState::RESTART:
-                    next = previous;
-                    current = next;
-                    break;
-
-                case GameState::EXIT:
-                    next = GameState::MAIN_MENU;
-                    break;
-
-                default:
-                    break;
+                else {
+                    UpdateState();
                 }
-
-                if (gsIntialize != nullptr) {
-                    gsIntialize();
-                }
-
-                SetAndPlayBGM();
-
-                CameraManager::camera.Update(0.0f);
             }
 
             return;
         }
 
-        // PAUSE MENU
+        // Inputs
         if (IsGameplayState() && !Utils::isInstructionOn && !Utils::isResultScreenOn) {
             if (AEInputCheckTriggered(AEVK_ESCAPE)) {
                 AudioManager::PlaySFX(AudioManager::SFX::UIButton);
@@ -230,12 +148,6 @@ namespace GameStateManager {
             return;
         }
 
-        // Toggle instructions popup
-        if (AEInputCheckTriggered(AEVK_I)) {
-            AudioManager::PlaySFX(AudioManager::SFX::UIButton);
-            Utils::isInstructionOn = !Utils::isInstructionOn;
-        }
-
         if (Utils::isInstructionOn) {
             PhysicsManager::g_dt = 0.0f;
         }
@@ -272,6 +184,90 @@ namespace GameStateManager {
         ParticleManager::particleController.Shutdown();
 
         GraphicsManager::Unload();
+    }
+
+    static void UpdateState() {
+        // Free previous state
+        if (gsFree != nullptr) {
+            gsFree();
+        }
+
+        // Assigned new state
+        previous = current;
+        current = next;
+        setNewState = false;
+
+        switch (current) {
+        case GameState::MAIN_MENU:
+            gsIntialize = MainMenu::Initialize;
+            gsUpdate = MainMenu::Update;
+            gsDraw = MainMenu::Draw;
+            gsFree = MainMenu::Free;
+            break;
+
+        case GameState::LEVEL_SELECT:
+            gsIntialize = LevelSelect::Initialize;
+            gsUpdate = LevelSelect::Update;
+            gsDraw = LevelSelect::Draw;
+            gsFree = LevelSelect::Free;
+            break;
+
+        case GameState::MAP_EDITOR:
+            gsIntialize = MapEditor::Initialize;
+            gsUpdate = MapEditor::Update;
+            gsDraw = nullptr;
+            gsFree = MapEditor::Exit;
+            break;
+
+        case GameState::LEVEL_0:
+        case GameState::LEVEL_1:
+        case GameState::LEVEL_2:
+        case GameState::LEVEL_3:
+            LevelManager::SelectLevel(static_cast<int>(current) - static_cast<int>(GameState::LEVEL_0));
+            gsIntialize = LevelManager::InitializeLevel;
+            gsUpdate = LevelManager::UpdateLevel;
+            gsDraw = nullptr;
+            gsFree = LevelManager::FreeLevel;
+            break;
+
+        case GameState::CREDITS:
+            gsIntialize = Credits::Initialize;
+            gsUpdate = Credits::Update;
+            gsDraw = Credits::Draw;
+            gsFree = Credits::Free;
+            break;
+
+        case GameState::SETTINGS:
+            gsIntialize = Settings::Initialize;
+            gsUpdate = Settings::Update;
+            gsDraw = Settings::Draw;
+            gsFree = Settings::Free;
+            break;
+
+        case GameState::GUIDE:
+            gsIntialize = Guide::Initialize;
+            gsUpdate = Guide::Update;
+            gsDraw = Guide::Draw;
+            gsFree = Guide::Free;
+            break;
+
+        case GameState::RESTART:
+            next = previous;
+            current = next;
+            break;
+
+        case GameState::EXIT:
+            next = GameState::MAIN_MENU;
+            break;
+        }
+
+        if (gsIntialize != nullptr) {
+            gsIntialize();
+        }
+
+        SetAndPlayBGM();
+
+        CameraManager::camera.Update(0.0f);
     }
 
     static void DebugCommands() {
