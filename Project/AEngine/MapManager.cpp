@@ -106,7 +106,7 @@ namespace MapManager {
 		}
 	}
 
-	void Load() {
+	void LoadTexture() {
 		if (gTileTex[static_cast<int>(TileType::TILE_BLOCK_GROUND_0)]) return;	
 
 		gFallbackTex = AssetsManager::GetTexture("Assets/square.png");
@@ -161,50 +161,6 @@ namespace MapManager {
 		gTileTex[static_cast<int>(TileType::TILE_PLAYER_CHARACTER)] = gPlayerIdleTex;
 		gTileTex[static_cast<int>(TileType::TILE_ENEMY_MINION)] = gEnemy100Tex;
 		gTileTex[static_cast<int>(TileType::TILE_ENEMY_BOSS)] = gEnemyBossTex;
-
-		// Debug prints if missing
-		if (gFloorTopTex == gFallbackTex) {
-			std::cerr << "[MapManager] WARNING: missing floor top texture at "
-				<< FLOOR_TOP_PATH << std::endl;
-		}
-		if (gFloorFillTex == gFallbackTex) {
-			std::cerr << "[MapManager] WARNING: missing floor fill texture at "
-				<< FLOOR_FILL_PATH << std::endl;
-		}
-		if (gCannonBaseTopTex == gFallbackTex) {
-			std::cerr << "[MapManager] WARNING: missing cannon base top texture at "
-				<< CANNON_BASE_TOP_PATH << std::endl;
-		}
-		if (gCannonBaseTex == gFallbackTex) {
-			std::cerr << "[MapManager] WARNING: missing cannon base texture at "
-				<< CANNON_BASE_PATH << std::endl;
-		}
-		if (gTower1TopTex == gFallbackTex)
-			std::cerr << "[MapManager] WARNING: missing towerBlockTop1 at " 
-			<< TOWER_BLOCK_TOP_1_PATH << "\n";
-		if (gTower1BodyTex == gFallbackTex)
-			std::cerr << "[MapManager] WARNING: missing towerBlockBody1 at " 
-			<< TOWER_BLOCK_1_PATH << "\n";
-		if (gTower2TopTex == gFallbackTex)
-			std::cerr << "[MapManager] WARNING: missing towerBlockTop2 at " 
-			<< TOWER_BLOCK_TOP_2_PATH << "\n";
-		if (gTower2BodyTex == gFallbackTex)
-			std::cerr << "[MapManager] WARNING: missing towerBlockBody2 at " 
-			<< TOWER_BLOCK_2_PATH << "\n";
-		if (gCannonBaseTopTex == gFallbackTex)
-			std::cerr << "[MapManager] WARNING: missing cannonBaseTop at "
-			<< CANNON_BASE_TOP_PATH << "\n";
-		if (gCannonBaseTex == gFallbackTex)
-			std::cerr << "[MapManager] WARNING: missing cannonBase at "
-			<< CANNON_BASE_PATH << "\n";
-
-		// Debug prints if missing cracks
-		if (!gCracksLightTex)
-			std::cerr << "[MapManager] WARNING: missing lightCracks at " << CRACKS_LIGHT_PATH << "\n";
-		if (!gCracksMediumTex)
-			std::cerr << "[MapManager] WARNING: missing mediumCracks at " << CRACKS_MEDIUM_PATH << "\n";
-		if (!gCracksHeavyTex)
-			std::cerr << "[MapManager] WARNING: missing heavyCracks at " << CRACKS_HEAVY_PATH << "\n";
 	}
 
 	void Unload() {

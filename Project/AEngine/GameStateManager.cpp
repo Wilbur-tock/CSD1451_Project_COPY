@@ -55,7 +55,7 @@ namespace GameStateManager {
         GraphicsManager::Load();
 
         LevelManager::LoadAllLevels();
-        MapManager::Load();
+        MapManager::LoadTexture();
         MainMenu::Load();
         Settings::Load();
         AudioManager::Load();
@@ -65,18 +65,19 @@ namespace GameStateManager {
         Credits::Load();
         Guide::Load();
 
+        // Initialize objects after loading
+
         Loading::Init();
         PauseMenu::Init();
 
         CameraManager::camera.Init();
-        ParticleManager::particleController.Init(2048);
+        ParticleManager::particleController.Init();
 
         UIInstructionsOverlay::Initialize();
     }
 
     void Update() {
         float rawDt = static_cast<float>(AEFrameRateControllerGetFrameTime());
-
         PhysicsManager::g_dt = rawDt;
 
         AudioManager::Update();
@@ -239,13 +240,13 @@ namespace GameStateManager {
             PhysicsManager::g_dt = 0.0f;
         }
 
+        // Update game play loop
         if (gsUpdate && !Utils::isInstructionOn) {
             gsUpdate();
         }
 
         DebugCommands();
         DebugUI();
-
         UICursor::Draw();
 
         if (Utils::isInstructionOn) {
@@ -253,6 +254,7 @@ namespace GameStateManager {
             return;
         }
 
+        // Camera movment
         CameraManager::camera.Update(PhysicsManager::g_dt);
     }
 

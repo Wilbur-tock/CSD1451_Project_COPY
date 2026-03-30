@@ -14,7 +14,7 @@ namespace MapManager {
 	inline std::string MapFilePath() { return mapFilePath; }
 
 	// Load all the textures required for the map
-	void Load();
+	void LoadTexture();
 	void Unload();
 	// fileName - ONLY fileName NO fileName.txt DOES NOT WORK
 	// map - 2D vector of Tile type to store the data in

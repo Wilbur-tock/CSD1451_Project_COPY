@@ -225,8 +225,8 @@ namespace AbilitiesManager {
 			// out of the 3 card at least should have 1 offensive and defensive ability
 			int offensiveCount = 1;
 			int defensiveCount = 1;
-			// too many offensive ability cards would have more defensive options
-			OffensiveOrDefensive() == AbilityType::OFFENSIVE ? ++defensiveCount : ++offensiveCount;
+			// find which ever type has the lesser in its inventory
+			OffensiveOrDefensive() == AbilityType::OFFENSIVE ? ++offensiveCount : ++defensiveCount;
 
 			for (int i = 0; i < offensiveCount; ++i) {
 				abilitiesCards.push_back(*GetAbility(RandomAbilityId(offensiveAbilities)));
