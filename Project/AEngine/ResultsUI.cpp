@@ -15,12 +15,13 @@ All content © 2026 DigiPen Institute of Technology Singapore. All Rights Reserve
 
 #include <sstream>
 #include <iomanip>
+#include <vector>
 
 namespace ResultsUI {
 	// Results UI objects
 	UIManager::Panel resultOverlay, centerPanel;
 	Button resultRestartButton, resultNextLevelButton, resultMainMenuButton;
-	TextObject resultTitle, subtitle, summaryText;
+	TextObject resultTitle, subtitle;
 
 	static void OnResultRestart() {
 		GameStateManager::next = GameStateManager::GameState::RESTART;
@@ -58,10 +59,13 @@ namespace ResultsUI {
 		return static_cast<int>(ratio * 100.0f + 0.5f);
 	}
 
-	static std::string BuildResultSummaryText() {
+	static std::vector<std::string> BuildResultSummaryLines() {
+		std::vector<std::string> lines;
+
 		Level* currentLevel = LevelManager::CurrentLevel();
 		if (!currentLevel) {
-			return "No level data available.";
+			lines.push_back("No level data available.");
+			return lines;
 		}
 
 		GameTrackingManager::CombatStatsSnapshot const playerStats =
@@ -72,28 +76,37 @@ namespace ResultsUI {
 		DamageLog const& playerDamage = currentLevel->GetDamageLog(true);
 		DamageLog const& enemyDamage = currentLevel->GetDamageLog(false);
 
-		std::ostringstream oss;
+		lines.push_back("Rounds Played: " + std::to_string(currentLevel->Rounds()));
+		lines.push_back("");
+		lines.push_back("PLAYER vs ENEMY");
+		lines.push_back("Shots Fired   - You: " + std::to_string(playerStats.shotsFired) + " | Enemy: " + std::to_string(enemyStats.shotsFired));
+		lines.push_back("Hits          - You: " + std::to_string(playerStats.shotsHit) + " | Enemy: " + std::to_string(enemyStats.shotsHit));
+		lines.push_back("Misses        - You: " + std::to_string(playerStats.shotsMiss) + " | Enemy: " + std::to_string(enemyStats.shotsMiss));
+		lines.push_back("Accuracy      - You: " + std::to_string(GetAccuracyPercent(playerStats)) + "% | Enemy: " + std::to_string(GetAccuracyPercent(enemyStats)) + "%");
+		lines.push_back("Abilities Used- You: " + std::to_string(playerStats.totalAbilityUsed) + " | Enemy: " + std::to_string(enemyStats.totalAbilityUsed));
+		lines.push_back("Tile Damage   - You: " + std::to_string(playerDamage.totalTileDamage) + " | Enemy: " + std::to_string(enemyDamage.totalTileDamage));
+		lines.push_back("Char Damage   - You: " + std::to_string(playerDamage.totalCharacterDamage) + " | Enemy: " + std::to_string(enemyDamage.totalCharacterDamage));
 
-		auto AddRow = [&oss](std::string const& label, std::string const& playerValue, std::string const& enemyValue) {
-			oss << std::left << std::setw(18) << label
-				<< std::setw(16) << playerValue
-				<< enemyValue << '\n';
-			};
+		return lines;
+	}
 
-		oss << "Rounds Played: " << currentLevel->Rounds() << "\n\n";
-		oss << std::left << std::setw(18) << ""
-			<< std::setw(16) << "PLAYER"
-			<< "ENEMY\n";
+	static void DrawResultSummary() {
+		std::vector<std::string> lines = BuildResultSummaryLines();
 
-		AddRow("Shots Fired", std::to_string(playerStats.shotsFired), std::to_string(enemyStats.shotsFired));
-		AddRow("Hits", std::to_string(playerStats.shotsHit), std::to_string(enemyStats.shotsHit));
-		AddRow("Misses", std::to_string(playerStats.shotsMiss), std::to_string(enemyStats.shotsMiss));
-		AddRow("Accuracy", std::to_string(GetAccuracyPercent(playerStats)) + "%", std::to_string(GetAccuracyPercent(enemyStats)) + "%");
-		AddRow("Abilities Used", std::to_string(playerStats.totalAbilityUsed), std::to_string(enemyStats.totalAbilityUsed));
-		AddRow("Tile Damage", std::to_string(playerDamage.totalTileDamage), std::to_string(enemyDamage.totalTileDamage));
-		AddRow("Char Damage", std::to_string(playerDamage.totalCharacterDamage), std::to_string(enemyDamage.totalCharacterDamage));
+		float startX = -0.16f;
+		float startY = 0.15f;
+		float lineStep = 0.042f;
 
-		return oss.str();
+		for (size_t i = 0; i < lines.size(); ++i) {
+			AEGfxPrint(
+				AssetsManager::textFont,
+				lines[i].c_str(),
+				startX,
+				startY - static_cast<float>(i) * lineStep,
+				0.65f, 0.75f,
+				1.0f, 1.0f, 1.0f
+			);
+		}
 	}
 
 	void Intialize() {
@@ -172,12 +185,6 @@ namespace ResultsUI {
 		};
 		subtitle.SetPosition(centerPanel.GetTransform());
 		subtitle.SetOffsetPosition(0, 95.0f);
-
-		summaryText = TextObject{
-			"", 0.55f, Color{ 1,1,1, 0.95f }, { {0,0}, {0,0} }, Utils::AnchorMode::CENTER
-		};
-		summaryText.SetPosition(centerPanel.GetTransform());
-		summaryText.SetOffsetPosition(0, 15.0f);
 	}
 
 	void Update(LevelStatus status) {
@@ -244,8 +251,7 @@ namespace ResultsUI {
 		subtitle.TextContent(subStr);
 		subtitle.Draw();
 
-		summaryText.TextContent(BuildResultSummaryText());
-		summaryText.Draw();
+		DrawResultSummary();
 
 		// -- Draw buttons --
 		resultRestartButton.Update();

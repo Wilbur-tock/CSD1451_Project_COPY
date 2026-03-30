@@ -174,7 +174,7 @@ namespace LevelManager {
 
 	void InitializeLevel() {
 		if (selectedLevel) {
-			selectedLevel->Initalize();
+			selectedLevel->Initialize();
 		}
 	}
 
