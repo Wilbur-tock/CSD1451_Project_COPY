@@ -135,6 +135,7 @@ void Character::Draw() {
 	}
 
 	DrawUI();
+	DrawDebugInfo();
 }
 
 void Character::DrawUI() {
@@ -152,9 +153,18 @@ void Character::DrawUI() {
 		wsShieldBar.UpdatePos({ wsHPBar.GetTransform().pos.x, wsHPBar.GetTransform().pos.y + wsShieldBar.GetTransform().size.y + barGaps });
 		wsShieldBar.Draw(shield, maxShield, false);
 	}
+}
 
+void Character::DrawScreenOverlayUI() {
 	// Drawing stats if player mouse is hovering over the character
 	if (CollisionManager::IsPointInGameObject(*this)) {
+		float hp = static_cast<float>(attribute.Health());
+		float maxHp = static_cast<float>(attribute.MaxHealth());
+		float shield = static_cast<float>(attribute.Shield());
+		float maxShield = static_cast<float>(attribute.MaxShield());
+
+		bool drawShieldStats = attribute.IsShieldActive();
+
 		statsPanel.Draw();
 
 		iconBG.Draw();
@@ -171,8 +181,12 @@ void Character::DrawUI() {
 			statusText.Draw();
 		}
 	}
+}
 
-	DebugInfo();
+void Character::DrawDebugInfo() {
+	if (!Utils::isDebuggerOn) return;
+
+	DrawCollisionLine();
 }
 
 void Character::GetCharacterInfo(std::string& str) {
@@ -190,12 +204,6 @@ void Character::GetCharacterInfo(std::string& str) {
 		+ "\n\nStats:\nHP: " + std::to_string(attribute.Health()) + "/" + std::to_string(attribute.MaxHealth())
 		+ "\nDamage Multiplier: " + std::to_string(attribute.DamageMultiplier())
 		+ "\nShield: " + std::to_string(attribute.Shield()) + "/" + std::to_string(attribute.MaxShield());
-}
-
-void Character::DebugInfo() {
-	if (!Utils::isDebuggerOn) return;
-
-	DrawCollisionLine();
 }
 
 void Character::SetStats(int difficultyLevel) {

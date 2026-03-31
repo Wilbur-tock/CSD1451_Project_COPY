@@ -36,6 +36,8 @@ public:
 	void Update();
 	void Draw();
 	void DrawUI();
+	void DrawScreenOverlayUI();
+
 	void GetCharacterInfo(std::string &str);
 	void SetSquatAnimation(bool enabled); // Player only: toggles idle <-> squat animation
 

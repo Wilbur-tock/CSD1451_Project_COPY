@@ -629,11 +629,11 @@ namespace AbilitiesManager {
 		float startX = inventoryBGTrans.pos.x + borderPaddingX;
 		float startY = inventoryBGTrans.pos.y - borderPaddingY;
 
-		AEVec2 inventoryInfoPanelPos{ 300,150 };
+		AEVec2 inventoryInfoPanelPos{ 350,150 };
 
 		abilityTooltip = UIManager::PanelText{
 			UIManager::Panel{inventoryInfoPanelPos, PanelColor(), Utils::AnchorMode::BOTTOM_RIGHT},
-			TextObject{"", 0.6f, Color{0,0,0}, Transform{{0,0}, {inventoryInfoPanelPos.x - 10,inventoryInfoPanelPos.y - 10}} }
+			TextObject{"", 0.7f, Color{0,0,0}, Transform{{0,0}, {inventoryInfoPanelPos.x - 10,inventoryInfoPanelPos.y - 10}} }
 		};
 		//inventoryInfoPanel.AddOffsetPosition({ 0, -75.0f });
 		

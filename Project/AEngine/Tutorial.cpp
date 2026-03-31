@@ -16,7 +16,7 @@ namespace Tutorial {
 
 	void Initialize() {
 		panel = UIManager::PanelText{
-			UIManager::Panel{{500,150}, Color{1.0f,0.5f,0.5f}, Utils::AnchorMode::TOP_RIGHT},
+			UIManager::Panel{{500,150}, Color{0,0,0}, Utils::AnchorMode::TOP_RIGHT},
 			TextObject{"", 0.75f, Color{1,1,1}, {{0,0}, {450,150}}}
 		};
 
@@ -34,19 +34,19 @@ namespace Tutorial {
 		std::string newMsg = "";
 		switch (steps) {
 		case 1:
-			newMsg = "Before the start of the game, you will have the choice to choose 1 out of 3 abilities to add to your inventory.";
+			newMsg = "Welcome to Fortress Fight! Before the battle begins, choose one of three abilities to add to your inventory. Tip: These abilities provide a powerful advantage!";
 			break;
 		case 2:
-			newMsg = "You can choose any of your abilities to use in your inventory! Tip: If you use the default ability this round, for the next round you can choose a stats boost to help you next round";
+			newMsg = "Choose any ability from your inventory! Tip: If you use your default ability this round, you'll be able to pick a stat boost for the next round.";
 			break;
 		case 3:
-			newMsg = "After selecting your ability to use, you can use MOUSE SCROLL to zoom in and out of the map. se WASD to move the map around";
+			newMsg = "After selecting an ability, use the Mouse Wheel to zoom in or out. Use WASD to pan the map and find your target.";
 			break;
 		case 4:
-			newMsg = "You should use the trajectory to help you aim and to shoot hold LEFT MOUSE CLICK and relase to shoot. \nTip: if you are holding LEFT MOUSE CLICK and wants to cancel, you can by clicking RIGHT MOUSE CLICK";
+			newMsg = "Use the trajectory to help you aim. To shoot, hold Left-Click and release. If you want to cancel your shot while holding Left-Click, simply Right-Click.";
 			break;
 		case 5:
-			newMsg = "You and your opponenet will take turn shooting projectiiles at each other. In order to win, you have to kill all your opponent units or just the BOSS unit. Good luck!";
+			newMsg = "You and your opponent will take turns firing projectiles at each other. To win, eliminate all of your opponent's units or defeat their BOSS unit. Good luck!";
 			break;
 		case 6:
 			isActive = false;

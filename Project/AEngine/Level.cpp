@@ -36,6 +36,7 @@ UIManager::PanelText debugPanel, cannonDebugPanel;
 TextObject levelText, turnText, roundCountText;
 UIManager::Panel turnStatusPanel;
 
+// UI to display the total health and shield attribute that the player/enemy have remaining
 struct LevelStatsUI {
 	UIManager::Panel barBG;
 	UIManager::Bar hpBar, shieldBar;
@@ -428,6 +429,8 @@ void Level::Update() {
 		delayTimer -= PhysicsManager::g_dt;
 	}
 
+	Tutorial::Draw();
+
 	DebugInfo();
 
 	ParticleManager::particleController.Update(PhysicsManager::g_dt);
@@ -487,6 +490,15 @@ void Level::DrawUI() {
 		turnText.SetColor(Color{ 1.0f, 0, 0 });
 	}
 
+	for (Character& playerChar : playerCharacters) {
+		playerChar.DrawScreenOverlayUI();
+	}
+
+	// Update all enemy instance
+	for (Character& enemy : enemies) {
+		enemy.DrawScreenOverlayUI();
+	}
+
 	// UI to display whose turn it is
 	turnStatusPanel.Draw();
 	turnText.Draw();
@@ -519,8 +531,6 @@ void Level::DrawUI() {
 
 	// Always the last one to be drawn so that it will always appear infront
 	notificationPanel.Draw();
-
-	Tutorial::Draw();
 }
 
 void Level::Free() {
