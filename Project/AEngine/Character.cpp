@@ -135,7 +135,7 @@ void Character::Draw() {
 	}
 
 	DrawUI();
-	DrawDebugInfo();
+	DebugInfo();
 }
 
 void Character::DrawUI() {
@@ -183,7 +183,7 @@ void Character::DrawScreenOverlayUI() {
 	}
 }
 
-void Character::DrawDebugInfo() {
+void Character::DebugInfo() {
 	if (!Utils::isDebuggerOn) return;
 
 	DrawCollisionLine();
