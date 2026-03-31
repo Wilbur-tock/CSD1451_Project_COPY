@@ -939,7 +939,7 @@ void Level::DebugInfo() {
 	float mX = 0, mY = 0;
 	Utils::GetWorldMousePos(mX, mY);
 
-	std::string debug = "Shortcuts:\n\n[T] Hide debug strings " + std::string(hideDebugStrings ? "ON" : "OFF")
+	std::string debug = "Shortcuts:\n[T] Hide debug strings " + std::string(hideDebugStrings ? "ON" : "OFF")
 		+ "\n[CTRL + R] Auto play " + std::string(autoPlayOn ? "ON" : "OFF")
 		+ "\n[F] Skip enemy turn " + std::string(disableEnemyTurn ? "ON" : "OFF")
 		+ "\n[R] Skip to enemy turn"
@@ -949,7 +949,7 @@ void Level::DebugInfo() {
 
 	if (hideDebugStrings) {
 		debug += "\n\nLevel:\nLevel Status: " + std::to_string(static_cast<int>(status))
-			+ "\n\nTile Map\nIndex X: " + std::to_string(gridX) + " Y: " + std::to_string(gridY)
+			+ "\nTile Map\nIndex X: " + std::to_string(gridX) + " Y: " + std::to_string(gridY)
 			+ "\nTile: " + GetTileName(tile.Type());
 		// Display which character is currently at this tile type
 		if (tile.IsCharacter()) {

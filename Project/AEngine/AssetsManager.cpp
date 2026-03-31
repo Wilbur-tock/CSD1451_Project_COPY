@@ -14,7 +14,7 @@ namespace AssetsManager {
 
     // Common textures
     AEGfxTexture* squareTexture, *circleTexture;
-    s8 textFont, titleFont;
+    s8 textFont;
 
     // List of all the characters texture
     std::vector<AEGfxTexture*> playerCharacters;
@@ -36,8 +36,7 @@ namespace AssetsManager {
 
     void Load() {
         squareTexture = GetTexture("Assets/square.png");
-        textFont = AEGfxCreateFont("Assets/Font/liberation-mono.ttf", Config::FONT_SIZE);
-        titleFont = AEGfxCreateFont("Assets/Font/liberation-mono.ttf", Config::FONT_SIZE * 2);
+        textFont = AEGfxCreateFont("Assets/Font/CaviarDreams_Bold.ttf", Config::FONT_SIZE);
         circleTexture = AssetsManager::GetTexture("Assets/circle.png");
 
         // Load ALL Characters texture
@@ -89,6 +88,5 @@ namespace AssetsManager {
 
         // clear font
         AEGfxDestroyFont(textFont);
-        AEGfxDestroyFont(titleFont);
     }
 }

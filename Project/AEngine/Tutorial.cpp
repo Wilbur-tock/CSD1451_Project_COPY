@@ -16,7 +16,7 @@ namespace Tutorial {
 
 	void Initialize() {
 		panel = UIManager::PanelText{
-			UIManager::Panel{{500,150}, Color{1.0f,0.5f,0.5f}, Utils::AnchorMode::TOP_CENTER},
+			UIManager::Panel{{500,150}, Color{1.0f,0.5f,0.5f}, Utils::AnchorMode::TOP_RIGHT},
 			TextObject{"", 0.75f, Color{1,1,1}, {{0,0}, {450,150}}}
 		};
 

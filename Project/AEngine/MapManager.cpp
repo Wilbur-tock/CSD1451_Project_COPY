@@ -151,6 +151,10 @@ namespace MapManager {
 		// cannon base tile texture
 		gTileTex[static_cast<int>(TileType::TILE_PLAYER_CANNON)] = gCannonBaseTopTex;
 		gTileTex[static_cast<int>(TileType::TILE_ENEMY_CANNON)] = gCannonBaseTopTex;
+
+		gTileTex[static_cast<int>(TileType::TILE_PLAYER_CHARACTER)] = gFallbackTex;
+		gTileTex[static_cast<int>(TileType::TILE_ENEMY_MINION)] = gFallbackTex;
+		gTileTex[static_cast<int>(TileType::TILE_ENEMY_BOSS)] = gFallbackTex;
 	}
 
 	void Unload() {

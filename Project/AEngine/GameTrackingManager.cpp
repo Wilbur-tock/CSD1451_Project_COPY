@@ -29,24 +29,21 @@ namespace GameTrackingManager {
 			LevelEnd(currentLevelIdTracking);
 		}
 
+		// Save data into a file
 		if (needToUpdateLog) {
 			std::string filepath = "Assets/Data/gameLog.txt";
 
-			std::ofstream ofs(filepath, std::ios::app);
+			std::ofstream ofs{filepath};
 			if (ofs.is_open()) {
-				PrintHeader(ofs, "All game data");
-				PrintData(ofs, globalData);
+				WriteHeader(ofs, "All game data");
+				WriteData(ofs, globalData);
 
 				for (int i = 0; i < static_cast<int>(levelData.size()); ++i) {
-					PrintHeader(ofs, "Level " + std::to_string(i + 1) + " data");
-					PrintData(ofs, levelData[i]);
+					WriteHeader(ofs, "Level " + std::to_string(i) + " data");
+					WriteData(ofs, levelData[i]);
 				}
-
-				ofs.close();
 			}
 		}
-
-		needToUpdateLog = false;
 	}
 
 	void GameData::LevelStart(int levelId) {
@@ -83,6 +80,26 @@ namespace GameTrackingManager {
 			++globalStats.shotsMiss;
 			++levelStats.shotsMiss;
 		}
+
+		globalStats.shotsAccuracy = Utils::GetPercentage(globalStats.shotsHit, globalStats.shotsFired);
+		levelStats.shotsAccuracy = Utils::GetPercentage(levelStats.shotsHit, levelStats.shotsFired);
+	}
+
+	void GameData::AddDamage(bool isPlayer, bool isTiles, int damage) {
+		GameStats& globalStats = globalData.GetGameStats(isPlayer);
+		GameStats& levelStats = levelData[currentLevelIdTracking].GetGameStats(isPlayer);
+
+		globalStats.totalDamage += damage;
+		levelStats.totalDamage += damage;
+
+		if (isTiles) {
+			globalStats.tilesDamage += damage;
+			levelStats.tilesDamage += damage;
+		}
+		else {
+			globalStats.characterDamage += damage;
+			levelStats.characterDamage += damage;
+		}
 	}
 
 	void GameData::AddAbilityUsed(bool isPlayer, int typeId) {
@@ -108,32 +125,19 @@ namespace GameTrackingManager {
 		}
 	}
 
-	CombatStatsSnapshot GameData::GetLevelStats(int levelId, bool isPlayer) const {
-		CombatStatsSnapshot snapshot{};
-
-		if (levelId < 0 || levelId >= static_cast<int>(levelData.size())) {
-			return snapshot;
+	GameStats const& GameData::GetLevelStats(int levelId, bool isPlayer) {
+		if (levelId < 0 || levelId >= levelData.size()) {
+			levelId = 0;
 		}
 
-		GameStats const& stats = levelData[levelId].GetGameStats(isPlayer);
-
-		snapshot.shotsFired = stats.shotsFired;
-		snapshot.shotsHit = stats.shotsHit;
-		snapshot.shotsMiss = stats.shotsMiss;
-
-		snapshot.totalAbilityUsed = stats.totalAbilityUsed;
-		snapshot.offensiveAbilityUsed = stats.offensiveAbilityUsed;
-		snapshot.defensiveAbilityUsed = stats.defensiveAbilityUsed;
-		snapshot.statsAbilityUsed = stats.statsAbilityUsed;
-
-		return snapshot;
+		return levelData[levelId].GetGameStats(isPlayer);
 	}
 
-	CombatStatsSnapshot GameData::GetCurrentLevelStats(bool isPlayer) const {
-		return GetLevelStats(currentLevelIdTracking, isPlayer);
+	GameStats const& GameData::GetCurrentLevelStats(bool isPlayer) {
+		return levelData[currentLevelIdTracking].GetGameStats(isPlayer);
 	}
 
-	void GameData::PrintHeader(std::ofstream& ofs, std::string title) {
+	void GameData::WriteHeader(std::ofstream& ofs, std::string title) {
 		size_t stringSize = 75 - title.size();
 
 		std::string border(stringSize/2, '=');
@@ -142,7 +146,7 @@ namespace GameTrackingManager {
 		if (stringSize % 2 != 0) ofs << '=';
 	}
 
-	void GameData::PrintData(std::ofstream& ofs, GameSession gameSession) {
+	void GameData::WriteData(std::ofstream& ofs, GameSession gameSession) {
 		int mins = static_cast<int>(gameSession.sessionDuration) / 60;
 		int secs = static_cast<int>(gameSession.sessionDuration) % 60;
 
@@ -151,16 +155,20 @@ namespace GameTrackingManager {
 			<< std::left << std::setw(width) << "\nTotal Rounds Played: " << gameSession.rounds
 			<< std::endl;
 
-		PrintHeader(ofs, "Player Data");
-		PrintGameStats(ofs, gameSession.GetGameStats(true));
-		PrintHeader(ofs, "Enemy Data");
-		PrintGameStats(ofs, gameSession.GetGameStats(false));
+		WriteHeader(ofs, "Player Data");
+		WriteGameStats(ofs, gameSession.GetGameStats(true));
+		WriteHeader(ofs, "Enemy Data");
+		WriteGameStats(ofs, gameSession.GetGameStats(false));
 	}
 
-	void GameData::PrintGameStats(std::ofstream& ofs, GameStats stats) {
+	void GameData::WriteGameStats(std::ofstream& ofs, GameStats stats) {
 		ofs << std::left << std::setw(width) << "\nTotal Shots: " << stats.shotsFired
 			<< std::left << std::setw(width) << "\nHits: " << stats.shotsHit
-			<< std::left << std::setw(width) << "\nMiss: " << stats.shotsMiss <<'\n'
+			<< std::left << std::setw(width) << "\nMiss: " << stats.shotsMiss 
+			<< std::left << std::setw(width) << "\nAccuracy: " << stats.shotsAccuracy << "%\n"
+			<< std::left << std::setw(width) << "\nTotal Damage: " << stats.totalDamage
+			<< std::left << std::setw(width) << "\nTotal Tiles Damage: " << stats.tilesDamage
+			<< std::left << std::setw(width) << "\nTotal Character Damage: " << stats.characterDamage << '\n'
 			<< std::left << std::setw(width) << "\nTotal Ability Used: " << stats.totalAbilityUsed
 			<< std::left << std::setw(width) << "\nStats Ability Used: " << stats.statsAbilityUsed
 			<< std::left << std::setw(width) << "\nOffensive Ability Used: " << stats.offensiveAbilityUsed

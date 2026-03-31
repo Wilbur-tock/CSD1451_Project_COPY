@@ -21,9 +21,10 @@ public:
 	float Alpha() const { return a; }
 
 	void EditColorPercentage(float percentage);
+	Color const& EditAlpha(float newAlpha) { a = newAlpha; return *this; }
+
 	void SetColor(float _r, float _g, float _b, float _a = 1.0f);
 	void SetColor(Color const& _color);
-
 	void SetAlpha(float newAlpha) { a = newAlpha; }
 
 private:

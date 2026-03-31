@@ -21,13 +21,13 @@ TowerShield::TowerShield(AEVec2 _pos, AbilitiesManager::AbilityController* contr
 }
 
 void TowerShield::SetShieldOn(int shield, int _turnLifespan) {
-	isShieldOn = true;
+	isActive = true;
 	attribute.SetShield(shield);
 	lifespan = _turnLifespan;
 }
 
 void TowerShield::Draw() {
-	if (!isShieldOn) return;
+	if (!isActive) return;
 	GraphicsManager::DrawGameObject(*this);
 
 	if (Utils::isDebuggerOn) {
@@ -48,19 +48,20 @@ void TowerShield::TakeDamage(int damage, bool isShieldBuster) {
 	abilityController->GetAbilityModifiers("Tower Shield")->SetShield(attribute.Shield());
 	abilityController->CheckModifiers();
 
-	isShieldOn = attribute.IsShieldActive();
+	isActive = attribute.IsShieldActive();
 }
 
 void TowerShield::UpdateLifespan() {
-	if (!isShieldOn) return;
+	if (!isActive) return;
 	--lifespan;
 
 	if (lifespan <= 0) {
-		isShieldOn = false;
+		isActive = false;
 	}
 }
 
 void TowerShield::DebugInfo(std::string& str) {
+	if (!isActive) return;
 	str += "\n\nPlayer Shield:\nHP: " + std::to_string(attribute.Shield())
 		+ "\nLifespan: " + std::to_string(lifespan);
 }

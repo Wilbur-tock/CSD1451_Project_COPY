@@ -119,13 +119,13 @@ namespace ParticleManager {
             AEGfxVertexList* meshToDraw = (p.emitParams.shape == ParticleShape::CIRCLE)
                 ? meshCircle : meshSquare;
 
-            if (p.emitParams.texture) {
-                AEGfxSetRenderMode(AE_GFX_RM_TEXTURE);
-                AEGfxTextureSet(p.emitParams.texture, 0.f, 0.f);
-            }
-            else {
-                AEGfxSetRenderMode(AE_GFX_RM_COLOR);
-            }
+            //if (p.emitParams.texture) {
+            //    AEGfxSetRenderMode(AE_GFX_RM_TEXTURE);
+            //    AEGfxTextureSet(p.emitParams.texture, 0.f, 0.f);
+            //}
+            //else {
+            //    AEGfxSetRenderMode(AE_GFX_RM_COLOR);
+            //}
 
             AEGfxMeshDraw(meshToDraw, AE_GFX_MDM_TRIANGLES);
 

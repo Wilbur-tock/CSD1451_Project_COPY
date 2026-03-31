@@ -20,7 +20,7 @@ public:
 	TowerShield(AEVec2 _pos, AbilitiesManager::AbilityController* controller);
 
 	Transform const& GetTransform() const { return transform; }
-	bool IsShieldOn() const { return isShieldOn; }
+	bool IsShieldOn() const { return isActive; }
 	void SetShieldOn(int shield, int turnLifespan);
 
 	void Draw();
@@ -29,7 +29,7 @@ public:
 
 	void DebugInfo(std::string& str);
 private:
-	bool isShieldOn = false;
+	bool isActive = false;
 	int lifespan = 0; // number of turns the shield stays alive before disappearing
 	AbilitiesManager::AbilityController* abilityController = nullptr;
 };

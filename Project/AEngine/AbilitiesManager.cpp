@@ -603,13 +603,16 @@ namespace AbilitiesManager {
 	UIManager::Panel abilitySelectorBG;
 	Card abilitySelectorCards[Config::MAX_ABILITY_SELECTOR_COUNT];
 
+	Color statsColor{ 0.75f,0.75f,0 }, offensiveColor{0.75f,0,0}, defensiveColor{0,0,0.75f};
+	Color bgPanelColor{ 0.6196f, 0.6196f, 0.6196f };
+
 	void AbilityController::InitializeAllAbilityUI() {
-		inventoryBackground = UIManager::Panel{ {750.0f, 100.0f}, Color(0.647f, 0.165f, 0.165f, 1.0f), Utils::AnchorMode::BOTTOM_CENTER };
+		inventoryBackground = UIManager::Panel{ {750.0f, 100.0f}, bgPanelColor, Utils::AnchorMode::BOTTOM_CENTER};
 
 		Transform inventoryBGTrans = inventoryBackground.GetTransform();
 		float totalWidth = inventoryBGTrans.size.x;
 
-		// Values to edit
+		// Values to edit the button size
 		float space = 15.0f;
 		float borderPaddingX = 25.0f;
 		float borderPaddingY = 5.0f;
@@ -627,10 +630,9 @@ namespace AbilitiesManager {
 		float startY = inventoryBGTrans.pos.y - borderPaddingY;
 
 		AEVec2 inventoryInfoPanelPos{ 300,150 };
-		Color panelColor = PanelColor();
 
 		abilityTooltip = UIManager::PanelText{
-			UIManager::Panel{inventoryInfoPanelPos, panelColor, Utils::AnchorMode::BOTTOM_RIGHT},
+			UIManager::Panel{inventoryInfoPanelPos, PanelColor(), Utils::AnchorMode::BOTTOM_RIGHT},
 			TextObject{"", 0.6f, Color{0,0,0}, Transform{{0,0}, {inventoryInfoPanelPos.x - 10,inventoryInfoPanelPos.y - 10}} }
 		};
 		//inventoryInfoPanel.AddOffsetPosition({ 0, -75.0f });
@@ -655,7 +657,7 @@ namespace AbilitiesManager {
 		}
 
 		// Initialize Ability Selector
-		abilitySelectorBG = UIManager::Panel{ {1400.0f, 700.0f}, Color(0.6196f, 0.6196f, 0.6196f), Utils::AnchorMode::CENTER };
+		abilitySelectorBG = UIManager::Panel{ {1400.0f, 700.0f}, bgPanelColor.EditAlpha(0.8f), Utils::AnchorMode::CENTER };
 
 		AEVec2 cardSize{ CARD_WIDTH, CARD_HEIGHT }; // width and height
 		float gap = (1400.0f - (cardSize.x * abilitiesCards.size())) / (abilitiesCards.size() + 1);
@@ -677,8 +679,8 @@ namespace AbilitiesManager {
 
 			// Update onClick and texture every frame
 			card.SetIconTexture(ability.GetTexture());
-			card.SetBGColor(ability.GetType() == AbilityType::STATS ? Color{ 0.75f,0.75f,0 } : 
-				ability.GetType() == AbilityType::OFFENSIVE ? Color{ 0.9f,0,0 } : Color{ 0,0,0.9f });
+			card.SetBGColor(ability.GetType() == AbilityType::STATS ? statsColor : 
+				ability.GetType() == AbilityType::OFFENSIVE ? offensiveColor : defensiveColor);
 
 			Button& button = card.GetButton();
 			button.SetOnClick([this, ability]() {
@@ -712,10 +714,10 @@ namespace AbilitiesManager {
 				Ability* ability = GetAbility(inventoryIds[inventoryId]);
 
 				iconName = ability->GetName();
-				iconColor = ability->GetType() == AbilityType::OFFENSIVE ? Color(1, 0, 0) : Color(0, 0, 1);
+				iconColor = ability->GetType() == AbilityType::OFFENSIVE ? offensiveColor : defensiveColor;
 				// Highlight current ability
 				if (GetCurrentAbility().Id() == ability->Id() && currentInventoryId == i) {
-					iconColor = Color(0, 0, 0);
+					iconColor = Color{ 0, 0, 0 };
 				}
 				else {
 					// Can only select ability that is not current selected

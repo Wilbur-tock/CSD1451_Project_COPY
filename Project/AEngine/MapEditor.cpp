@@ -258,7 +258,7 @@ namespace MapEditor {
 		helpStr += "\n\n[T] Toggle Tile List ";
 		if (isShowingTileList) {
 			helpStr += "[SHOWING]\n[Q] Scroll UP\n[E] Scroll DOWN\nSelected Tile: "
-				+ GetTileName(static_cast<TileType>(tileId)) + " (" + std::to_string(tileId) + ")";
+				+ GetTileName(static_cast<TileType>(tileId));
 			// List out the type of tiles able to be drawn
 			for (int i = 0; i < static_cast<int>(TileType::TILE_COUNT) - 1; ++i) {
 				int id = i + 1;

@@ -791,7 +791,7 @@ namespace Guide {
         std::string GetGameGuideText() {
             return
                 "OBJECTIVE\n"
-                "Destroy the enemy cannon before your own side collapses.\n\n"
+                "Destroy the enemy character unit before your unit dies.\n\n"
                 "FLOW OF A TURN\n"
                 "1. Aim the cannon with the mouse.\n"
                 "2. Hold Left Mouse Button to charge your shot.\n"
@@ -803,11 +803,11 @@ namespace Guide {
                 "[OFFENSIVE] Attack-focused and damage-focused abilities.\n"
                 "[DEFENSIVE] Protective, support, and control abilities.\n"
                 "[UTILITY] Utility is shown as a ROLE inside the abilities table and detail panel.\n\n"
-                "SMART TIPS\n"
-                "Use terrain as cover instead of firing blindly.\n"
-                "Large-radius attacks are strongest against clustered blocks.\n"
-                "Protect your support structure so your cannon stays stable.\n"
-                "Think about the enemy's next angle before ending your turn.\n\n"
+                //"SMART TIPS\n"
+                //"Use terrain as cover instead of firing blindly.\n"
+                //"Large-radius attacks are strongest against clustered blocks.\n"
+                //"Protect your support structure so your cannon stays stable.\n"
+                //"Think about the enemy's next angle before ending your turn.\n\n"
                 "QUICK CONTROLS\n"
                 "Mouse  - Aim cannon\n"
                 "Hold LMB  - Charge shot\n"
@@ -1248,7 +1248,7 @@ namespace Guide {
                 "Pick the kind of help you want.\n"
                 "Game Guide explains the rules and controls.\n"
                 "Abilities Guide shows the real gameplay ability pool.",
-                0.72f,
+                0.75f,
                 Color(0.12f, 0.12f, 0.12f, 1.0f),
                 0.0f,
                 0.33f,
@@ -1257,7 +1257,7 @@ namespace Guide {
         else if (currentView == GuideView::GAME) {
             DrawCenteredMultilineText(
                 GetGameGuideText(),
-                0.56f,
+                0.7f,
                 Color(0.07f, 0.07f, 0.07f, 1.0f),
                 0.0f,
                 0.44f,

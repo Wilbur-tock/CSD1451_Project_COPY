@@ -78,6 +78,12 @@ namespace Utils {
 		if (val < min) val = max;
 		if (val > max) val = min;
 	}
+
+	template <typename T>
+	float GetPercentage(T value, T max) {
+		if (max == 0.0) return 0.0f;
+		return static_cast<float>(value / max);
+	}
 }
 
 #endif // !UTILS_HPP

@@ -99,7 +99,7 @@ namespace CameraManager
             else if (scrollDelta < 0)   ZoomOut(dt);
 
             // Has any input
-            if (movement.x > 0 || movement.y > 0 || scrollDelta > 0) {
+            if (movement.x > 0 || movement.y > 0) {
                 Tutorial::SetTutorialMsg(4);
             }
 

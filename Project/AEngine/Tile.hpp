@@ -42,8 +42,8 @@ enum class TileType {
 inline std::vector<std::string> tileNames = { 
 	"Air", "Grass", "Dirt", "Dirt with Stones", "Cannon Base Top", "Cannon Base",
 	"Block_1_TOP", "Block_1", "Block_2_TOP", "Block_2",
-	"Player Cannon", "Player Character",
-	"Enemy Cannon", "Enemy Minion", "Enemy Boss" 
+	"Player Cannon Position", "Player Character Position",
+	"Enemy Cannon Position", "Enemy Minion Position", "Enemy Boss Position" 
 };
 
 class Tile : public GameObject {

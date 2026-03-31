@@ -12,10 +12,16 @@ All content © 2026 DigiPen Institute of Technology Singapore. All Rights Reserve
 #include "pch.hpp"
 
 namespace GameTrackingManager {
-	struct CombatStatsSnapshot {
+	struct GameStats {
 		size_t shotsFired = 0;
 		size_t shotsHit = 0;
 		size_t shotsMiss = 0;
+
+		float shotsAccuracy = 0.0f;
+
+		size_t totalDamage = 0;
+		size_t tilesDamage = 0;
+		size_t characterDamage = 0;
 
 		size_t totalAbilityUsed = 0;
 		size_t offensiveAbilityUsed = 0;
@@ -23,32 +29,21 @@ namespace GameTrackingManager {
 		size_t statsAbilityUsed = 0;
 	};
 
-	class GameData {
+	// track each session overall and each levels data
+	class GameSession {
+	public:
+		GameStats& GetGameStats(bool isPlayer) { return isPlayer ? player : enemy; }
+		GameStats const& GetGameStats(bool isPlayer) const { return isPlayer ? player : enemy; }
+
+		int rounds = 0;
+		double sessionStart = 0;    // store start time
+		double sessionDuration = 0; // calculated at log write
 	private:
-		struct GameStats {
-			size_t shotsFired = 0;
-			size_t shotsHit = 0;
-			size_t shotsMiss = 0;
+		GameStats player;
+		GameStats enemy;
+	};
 
-			size_t totalAbilityUsed = 0;
-			size_t offensiveAbilityUsed = 0;
-			size_t defensiveAbilityUsed = 0;
-			size_t statsAbilityUsed = 0;
-		};
-
-		class GameSession {
-		public:
-			GameStats& GetGameStats(bool isPlayer) { return isPlayer ? player : enemy; }
-			GameStats const& GetGameStats(bool isPlayer) const { return isPlayer ? player : enemy; }
-
-			int rounds = 0;
-			double sessionStart = 0;    // store start time
-			double sessionDuration = 0; // calculated at log write
-		private:
-			GameStats player;
-			GameStats enemy;
-		};
-
+	class GameData {
 	public:
 		void GameStart();
 		void GameEnd();
@@ -58,15 +53,16 @@ namespace GameTrackingManager {
 
 		void AddShotFired(bool isPlayer);
 		void AddShots(bool isPlayer, bool isHit);
+		void AddDamage(bool isPlayer, bool isTiles, int damage);
 		void AddAbilityUsed(bool isPlayer, int typeId);
 
-		CombatStatsSnapshot GetLevelStats(int levelId, bool isPlayer) const;
-		CombatStatsSnapshot GetCurrentLevelStats(bool isPlayer) const;
+		GameStats const& GetLevelStats(int levelId, bool isPlayer);
+		GameStats const& GetCurrentLevelStats(bool isPlayer);
 
 	private:
-		void PrintHeader(std::ofstream& ofs, std::string title);
-		void PrintData(std::ofstream& ofs, GameSession gameData);
-		void PrintGameStats(std::ofstream& ofs, GameStats stats);
+		void WriteHeader(std::ofstream& ofs, std::string title);
+		void WriteData(std::ofstream& ofs, GameSession gameData);
+		void WriteGameStats(std::ofstream& ofs, GameStats stats);
 
 	private:
 		GameSession globalData;

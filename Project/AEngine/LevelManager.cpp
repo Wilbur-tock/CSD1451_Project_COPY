@@ -38,7 +38,7 @@ namespace LevelManager {
 				levelIndex <= highestUnlockedCampaignLevel;
 		}
 
-		void WriteLevelDataFile() {
+		void SaveLevelData() {
 			std::ofstream ofs{ LEVEL_DATA_PATH, std::ios::trunc };
 			if (!ofs.is_open()) {
 				std::cerr << "Can't open " << LEVEL_DATA_PATH << std::endl;
@@ -169,7 +169,7 @@ namespace LevelManager {
 			std::cerr << "No level data loaded. Progress was not saved.\n";
 			return;
 		}
-		WriteLevelDataFile();
+		SaveLevelData();
 	}
 
 	void InitializeLevel() {

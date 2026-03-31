@@ -162,7 +162,7 @@ namespace Settings {
     }
 
     void Load() {
-        bgTexture = AssetsManager::GetTexture("Assets/game_bg.png");
+        bgTexture = AssetsManager::GetTexture("Assets/level_sky.png");
         btnTexture = AssetsManager::GetTexture("Assets/buttonTexture.png");
     }
 

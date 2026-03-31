@@ -34,7 +34,7 @@ struct TerritoryTiles {
 	int territoryTileRadius = 15;
 };
 
-// Track how much damage was deal to the characters and tiles throughout out the whole level playthrough
+// Track how much damage was deal to the characters and tiles throughout out the whole level playthrough (Not in use)
 struct DamageLog {
 	int totalTileDamage = 0;
 	int totalCharacterDamage = 0;

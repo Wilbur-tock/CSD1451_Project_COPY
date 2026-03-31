@@ -96,9 +96,6 @@ namespace CannonManager {
 
             // Add limits so it can only turn facing upwards or downwards limits
             ClampAngle(cannonAngle);
-            // DrawTrajectory() is called in Draw() instead of here so the dots
-            // render after MapManager::DrawMap(), not before it. Calling it here
-            // meant the map painted over every dot on the same frame they were drawn.
         }
         else {
             EnemyAI();
@@ -107,15 +104,14 @@ namespace CannonManager {
         SelectProjectileType();
         ChargeShot();
         UpdateProjectile();
+
         DebugCommands();
     }
 
     void Cannon::Draw() {
-        // Render cannon barrel
+        // Draw cannon barrel
         AEMtx33 mat = GraphicsManager::CreateTransformMatrix(transform.pos.x, transform.pos.y, transform.size.x, transform.size.y, cannonAngle);
         GraphicsManager::DrawGameObject(texture, mat, textureColor);
-
-        //if (isPlayerControlled) DrawTrajectory();
 
         // Draw all active projectiles
         for (Projectile& projectile : activeProjectiles) {

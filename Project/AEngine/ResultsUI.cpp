@@ -52,13 +52,6 @@ namespace ResultsUI {
 		GameStateManager::next = GameStateManager::GameState::MAIN_MENU;
 	}
 
-	static int GetAccuracyPercent(GameTrackingManager::CombatStatsSnapshot const& stats) {
-		if (stats.shotsFired == 0) return 0;
-
-		float ratio = static_cast<float>(stats.shotsHit) / static_cast<float>(stats.shotsFired);
-		return static_cast<int>(ratio * 100.0f + 0.5f);
-	}
-
 	static std::vector<std::string> BuildResultSummaryLines() {
 		std::vector<std::string> lines;
 
@@ -68,13 +61,8 @@ namespace ResultsUI {
 			return lines;
 		}
 
-		GameTrackingManager::CombatStatsSnapshot const playerStats =
-			GameTrackingManager::gameData.GetCurrentLevelStats(true);
-		GameTrackingManager::CombatStatsSnapshot const enemyStats =
-			GameTrackingManager::gameData.GetCurrentLevelStats(false);
-
-		DamageLog const& playerDamage = currentLevel->GetDamageLog(true);
-		DamageLog const& enemyDamage = currentLevel->GetDamageLog(false);
+		GameTrackingManager::GameStats const playerStats = GameTrackingManager::gameData.GetCurrentLevelStats(true);
+		GameTrackingManager::GameStats const enemyStats = GameTrackingManager::gameData.GetCurrentLevelStats(false);
 
 		lines.push_back("Rounds Played: " + std::to_string(currentLevel->Rounds()));
 		lines.push_back("");
@@ -82,10 +70,10 @@ namespace ResultsUI {
 		lines.push_back("Shots Fired   - You: " + std::to_string(playerStats.shotsFired) + " | Enemy: " + std::to_string(enemyStats.shotsFired));
 		lines.push_back("Hits          - You: " + std::to_string(playerStats.shotsHit) + " | Enemy: " + std::to_string(enemyStats.shotsHit));
 		lines.push_back("Misses        - You: " + std::to_string(playerStats.shotsMiss) + " | Enemy: " + std::to_string(enemyStats.shotsMiss));
-		lines.push_back("Accuracy      - You: " + std::to_string(GetAccuracyPercent(playerStats)) + "% | Enemy: " + std::to_string(GetAccuracyPercent(enemyStats)) + "%");
+		lines.push_back("Accuracy      - You: " + Utils::FormatFloat(playerStats.shotsAccuracy, 2) + "% | Enemy: " + Utils::FormatFloat(enemyStats.shotsAccuracy,2) + "%");
 		lines.push_back("Abilities Used- You: " + std::to_string(playerStats.totalAbilityUsed) + " | Enemy: " + std::to_string(enemyStats.totalAbilityUsed));
-		lines.push_back("Tile Damage   - You: " + std::to_string(playerDamage.totalTileDamage) + " | Enemy: " + std::to_string(enemyDamage.totalTileDamage));
-		lines.push_back("Char Damage   - You: " + std::to_string(playerDamage.totalCharacterDamage) + " | Enemy: " + std::to_string(enemyDamage.totalCharacterDamage));
+		lines.push_back("Tile Damage   - You: " + std::to_string(playerStats.totalDamage) + " | Enemy: " + std::to_string(enemyStats.totalDamage));
+		lines.push_back("Char Damage   - You: " + std::to_string(playerStats.characterDamage) + " | Enemy: " + std::to_string(playerStats.characterDamage));
 
 		return lines;
 	}
