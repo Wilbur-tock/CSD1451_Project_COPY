@@ -2,7 +2,7 @@
 Authors: Bryan
 Description: Controls and play the audio
 
-All content © 2026 DigiPen Institute of Technology Singapore. All Rights Reserved
+All content © 2026 DigiPen Institute of Technology Singapore. All Rights Reserved
 */
 
 #ifndef AUDIO_MANAGER_HPP
@@ -36,7 +36,9 @@ namespace AudioManager {
     void PlayBGM(Track t);
     void StopBGM();
     void PlaySFX(SFX sfx);
-    void PlayAbilitySFX(const std::string& abilityName);
+
+    void PlayInstantAbilitySFX(const std::string& abilityName);
+    void PlayLaunchAbilitySFX(const std::string& abilityName);
 
     // Master volume
     void SetVolume(float v);

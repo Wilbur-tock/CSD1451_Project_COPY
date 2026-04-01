@@ -9,7 +9,7 @@ All content © 2026 DigiPen Institute of Technology Singapore. All Rights Reserve
 
 #include "CannonManager.hpp"
 
-#include "Utils.hpp"
+#include "Utils.hpp" 
 #include "MapManager.hpp"
 #include "GraphicsManager.hpp"
 #include "AssetsManager.hpp"
@@ -304,17 +304,22 @@ namespace CannonManager {
         // IMPORTANT: use a COPY here so we don't permanently modify the template projectile inside projectiles[].
         Projectile projectile = projectiles[selectedProjectileId];
 
-        // Use selected ability
+        // Capture fired ability BEFORE controller state may change
+        Ability const firedAbility = abilityController->GetCurrentAbility();
+
+        // Consume/apply the selected ability properly
         abilityController->UseAbility();
-        AbilityActivation(projectile); // abilities that affects the cannon before and during shooting
-        ApplyModifierEffects(projectile); // apply ability modifier effects such as gravity onto the projectile after projectile has been shot
+
+        AbilityActivation(projectile);      // abilities that affect the cannon/projectile before/during shooting
+        ApplyModifierEffects(projectile);   // apply modifier effects such as gravity onto the projectile
 
         projectile.Initialize(transform, static_cast<int>(activeProjectiles.size()), cannonAngle, shotPower);
 
-        // Add the these projectile to the active projectile list
+        // Add the projectile to the active projectile list
         activeProjectiles.push_back(projectile);
 
         AudioManager::PlaySFX(AudioManager::SFX::CannonFire);
+        AudioManager::PlayLaunchAbilitySFX(firedAbility.GetName());
 
         SetCamera(true); // Follow the projectile that is shot out of the cannon
         hasCannonShot = true;

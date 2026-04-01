@@ -312,31 +312,34 @@ namespace AbilitiesManager {
 		std::string abilityName = GetCurrentAbility().GetName();
 		Level* level = LevelManager::CurrentLevel();
 
-		AudioManager::PlayAbilitySFX(abilityName);
-
 		// Activate a ability effect here
 		if (abilityName == "Tower Shield") {
+			AudioManager::PlayInstantAbilitySFX(abilityName);
 			level->GetTowerShield(isPlayerControlled).SetShieldOn(
 				GetCurrentAbility().GetStats().shield,
 				GetCurrentAbility().GetStatus().rounds
 			);
-			//std::cout << "[AbilitiesManager] Activate Tower Shield ability!" << '\n';
 		}
 		else if (abilityName == "Rebuild") {
+			AudioManager::PlayInstantAbilitySFX(abilityName);
 			level->ToggleTerritoryTiles(isPlayerControlled, true);
 		}
 		else if (abilityName == "Extra Shot") {
+			AudioManager::PlayInstantAbilitySFX(abilityName);
 			level->SetExtraTurn();
 		}
 		else if (abilityName == "Skip Turn") {
+			AudioManager::PlayInstantAbilitySFX(abilityName);
 			level->SetSkipOpponentTurn();
 		}
 		else if (abilityName == "Invisibility") {
+			AudioManager::PlayInstantAbilitySFX(abilityName);
 			for (Character& character : LevelManager::CurrentLevel()->GetCharacters(isPlayerControlled)) {
 				character.attribute.SetInvisibility(ability.GetStatus().rounds);
 			}
 		}
 		else if (abilityName == "Cleanse") {
+			AudioManager::PlayInstantAbilitySFX(abilityName);
 			for (Character& character : LevelManager::CurrentLevel()->GetCharacters(isPlayerControlled)) {
 				character.attribute.CleanseNegativeEffects();
 			}
@@ -573,19 +576,21 @@ namespace AbilitiesManager {
 		statsAbility = ability;
 		std::string abilityName = ability.GetName();
 
-		AudioManager::PlayAbilitySFX(abilityName);
+		if (abilityName == "Max Heal" || abilityName == "Major Heal" || abilityName == "Minor Heal") {
+			AudioManager::PlayInstantAbilitySFX(abilityName);
+			std::cout << "[Abilities] UseStatsAbility called with: " << abilityName << "\n";
 
-		if (abilityName == "Invincibility" || abilityName == "Attack Boost") {
-			isStatsAbilityActive = true; // if stats ability active cannon will be apply with projectile stats boost
-		}
-		else if (abilityName == "Max Heal" || abilityName == "Major Heal" || abilityName == "Minor Heal") {
 			for (Character& character : LevelManager::CurrentLevel()->GetCharacters(isPlayerControlled)) {
 				character.attribute.Heal(static_cast<float>(ability.GetStats().hp / 100.0f));
 			}
 		}
+		else if (abilityName == "Invincibility" || abilityName == "Attack Boost" || abilityName == "Defense Boost") {
+			//keep only if the sound is a short "buff activate" cue
+			AudioManager::PlayInstantAbilitySFX(abilityName);
+			std::cout << "[Abilities] Playing instant SFX for: " << abilityName << "\n";
+			isStatsAbilityActive = true;
+		}
 
-		// Add if the ability has a modifier (ability that last for more than 1 turn) 
-		// the function will auto check if the ability is a modifier
 		UseAbilityWithModifier(ability);
 	}
 

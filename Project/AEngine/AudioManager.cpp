@@ -2,7 +2,7 @@
 Authors: Bryan
 Description: Controls and play the audio
 
-All content © 2026 DigiPen Institute of Technology Singapore. All Rights Reserved
+All content © 2026 DigiPen Institute of Technology Singapore. All Rights Reserved
 */
 
 #include "AudioManager.hpp"
@@ -58,51 +58,52 @@ namespace AudioManager {
     }
 
     // ---------------- Paths ----------------
-    static constexpr const char* BGM_MAINMENU       = "Assets/Audio/bgm_mainmenu.wav";
-    static constexpr const char* BGM_MAPEDITOR      = "Assets/Audio/bgm_mapeditor.wav";
-    static constexpr const char* BGM_LEVEL          = "Assets/Audio/bgm_level.wav";
-    static constexpr const char* BGM_CREDITS        = "Assets/Audio/bgm_credits.wav";
-    static constexpr const char* SFX_UI_CLICK       = "Assets/Audio/sfx_ui_click.wav";
-    static constexpr const char* SFX_CANNON_FIRE    = "Assets/Audio/sfx_default.wav";
-    static constexpr const char* SFX_IMPACT         = "Assets/Audio/sfx_impact.wav";
-    static constexpr const char* SFX_TURN_SWITCH    = "Assets/Audio/sfx_turn.wav";
+    static constexpr const char* BGM_MAINMENU = "Assets/Audio/bgm_mainmenu.wav";
+    static constexpr const char* BGM_MAPEDITOR = "Assets/Audio/bgm_mapeditor.wav";
+    static constexpr const char* BGM_LEVEL = "Assets/Audio/bgm_level.wav";
+    static constexpr const char* BGM_CREDITS = "Assets/Audio/bgm_credits.wav";
+
+    static constexpr const char* SFX_UI_CLICK = "Assets/Audio/sfx_ui_click.wav";
+    static constexpr const char* SFX_CANNON_FIRE = "Assets/Audio/sfx_default.wav";
+    static constexpr const char* SFX_IMPACT = "Assets/Audio/sfx_impact.wav";
+    static constexpr const char* SFX_TURN_SWITCH = "Assets/Audio/sfx_turn.wav";
 
     static std::vector<AbilitySfxEntry> gAbilitySfx = {
-    { "Default",       "Assets/Audio/sfx_default.wav", {} },
-    { "Attack Boost",  "Assets/Audio/sfx_ability_attack_boost.wav", {} },
-    { "Auto Shot",      "Assets/Audio/sfx_ability_auto_shot.wav", {} },
-    { "Bomb",          "Assets/Audio/sfx_ability_bomb.wav", {} },
-    { "Cleanse",       "Assets/Audio/sfx_ability_cleanse.wav", {} },
-    { "Defense Boost", "Assets/Audio/sfx_ability_defense_boost.wav", {} },
-    { "Drill",         "Assets/Audio/sfx_ability_drill.wav", {} },
-    { "Gravity",       "Assets/Audio/sfx_ability_gravity.wav", {} },
+        { "Default",       "Assets/Audio/sfx_default.wav", {} },
+        { "Attack Boost",  "Assets/Audio/sfx_ability_attack_boost.wav", {} },
+        { "Auto Shot",     "Assets/Audio/sfx_ability_auto_shot.wav", {} },
+        { "Bomb",          "Assets/Audio/sfx_ability_bomb.wav", {} },
+        { "Cleanse",       "Assets/Audio/sfx_ability_cleanse.wav", {} },
+        { "Defense Boost", "Assets/Audio/sfx_ability_defense_boost.wav", {} },
+        { "Drill",         "Assets/Audio/sfx_ability_drill.wav", {} },
+        { "Gravity",       "Assets/Audio/sfx_ability_gravity.wav", {} },
 
-    { "Minor Heal",    "Assets/Audio/sfx_ability_heal.wav", {} },
-    { "Major Heal",    "Assets/Audio/sfx_ability_heal.wav", {} },
-    { "Max Heal",      "Assets/Audio/sfx_ability_heal.wav", {} },
+        { "Minor Heal",    "Assets/Audio/sfx_ability_heal.wav", {} },
+        { "Major Heal",    "Assets/Audio/sfx_ability_heal.wav", {} },
+        { "Max Heal",      "Assets/Audio/sfx_ability_heal.wav", {} },
 
-    { "Invincibility", "Assets/Audio/sfx_ability_invincibility.wav", {} },
-    { "Invisibility",  "Assets/Audio/sfx_ability_invisibility.wav", {} },
-    { "Nuke",          "Assets/Audio/sfx_ability_nuke.wav", {} },
-    { "Penta Burst",   "Assets/Audio/sfx_ability_penta_burst.wav", {} },
-    { "Piercing",      "Assets/Audio/sfx_ability_piercing.wav", {} },
-    { "Poison",        "Assets/Audio/sfx_ability_poison.wav", {} },
-    { "Rebuild",       "Assets/Audio/sfx_ability_rebuild.wav", {} },
-    { "Shield Buster", "Assets/Audio/sfx_ability_shield_buster.wav", {} },
-    { "Skip Turn",     "Assets/Audio/sfx_ability_skip_turn.wav", {} },
-    { "Teleport",      "Assets/Audio/sfx_ability_teleport.wav", {} },
-    { "Tower Shield",  "Assets/Audio/sfx_ability_tower_shield.wav", {} },
+        { "Invincibility", "Assets/Audio/sfx_ability_invincibility.wav", {} },
+        { "Invisibility",  "Assets/Audio/sfx_ability_invisibility.wav", {} },
+        { "Nuke",          "Assets/Audio/sfx_ability_nuke.wav", {} },
+        { "Penta Burst",   "Assets/Audio/sfx_ability_penta_burst.wav", {} },
+        { "Piercing",      "Assets/Audio/sfx_ability_piercing.wav", {} },
+        { "Poison",        "Assets/Audio/sfx_ability_poison.wav", {} },
+        { "Rebuild",       "Assets/Audio/sfx_ability_rebuild.wav", {} },
+        { "Shield Buster", "Assets/Audio/sfx_ability_shield_buster.wav", {} },
+        { "Skip Turn",     "Assets/Audio/sfx_ability_skip_turn.wav", {} },
+        { "Teleport",      "Assets/Audio/sfx_ability_teleport.wav", {} },
+        { "Tower Shield",  "Assets/Audio/sfx_ability_tower_shield.wav", {} },
 
-    { "Small Wall",    "Assets/Audio/sfx_ability_wall.wav", {} },
-    { "Wall",          "Assets/Audio/sfx_ability_wall.wav", {} },
-    { "Bastion",       "Assets/Audio/sfx_ability_wall.wav", {} },
-    { "Wall Buster",   "Assets/Audio/sfx_ability_wall.wav", {} },
+        { "Small Wall",    "Assets/Audio/sfx_ability_wall.wav", {} },
+        { "Wall",          "Assets/Audio/sfx_ability_wall.wav", {} },
+        { "Bastion",       "Assets/Audio/sfx_ability_wall.wav", {} },
+        { "Wall Buster",   "Assets/Audio/sfx_ability_wall.wav", {} },
 
-    { "Air Drop",      "Assets/Audio/sfx_ability_air_drop.wav", {} },
+        { "Air Drop",      "Assets/Audio/sfx_ability_air_drop.wav", {} },
 
-    { "Cluster Shot",  "Assets/Audio/sfx_ability_penta_burst.wav", {} },
-    { "Extra Shot",    "Assets/Audio/sfx_ability_penta_burst.wav", {} },
-    { "Decay Shot",    "Assets/Audio/sfx_ability_gravity.wav", {} }
+        { "Cluster Shot",  "Assets/Audio/sfx_ability_penta_burst.wav", {} },
+        { "Extra Shot",    "Assets/Audio/sfx_ability_penta_burst.wav", {} },
+        { "Decay Shot",    "Assets/Audio/sfx_ability_gravity.wav", {} }
     };
 
     static bool IsValidAudio(AEAudio audio) {
@@ -158,6 +159,80 @@ namespace AudioManager {
         return AEAudio{};
     }
 
+    static bool IsInstantAbilitySfx(const std::string& abilityName) {
+        return abilityName == "Minor Heal" ||
+            abilityName == "Major Heal" ||
+            abilityName == "Max Heal" ||
+            abilityName == "Cleanse" ||
+            abilityName == "Rebuild" ||
+            abilityName == "Skip Turn" ||
+            abilityName == "Tower Shield" ||
+            abilityName == "Invisibility" ||
+            abilityName == "Invincibility" ||
+            abilityName == "Attack Boost" ||
+            abilityName == "Defense Boost" ||
+            abilityName == "Extra Shot";
+    }
+
+    static bool IsLaunchAbilitySfx(const std::string& abilityName) {
+        return abilityName == "Auto Shot" ||
+            abilityName == "Bomb" ||
+            abilityName == "Drill" ||
+            abilityName == "Gravity" ||
+            abilityName == "Nuke" ||
+            abilityName == "Penta Burst" ||
+            abilityName == "Piercing" ||
+            abilityName == "Poison" ||
+            abilityName == "Shield Buster" ||
+            abilityName == "Teleport" ||
+            abilityName == "Wall Buster" ||
+            abilityName == "Air Drop" ||
+            abilityName == "Cluster Shot" ||
+            abilityName == "Decay Shot";
+    }
+
+    static void PlayAbilitySfxInternal(const std::string& abilityName) {
+        if (!gIsInitialized) {
+            Load();
+        }
+
+        if (!gIsInitialized) {
+            return;
+        }
+
+        if (!IsValidGroup(gSfxGroup)) {
+            std::cerr << "[AudioManager] Cannot play ability SFX: invalid SFX group.\n";
+            return;
+        }
+
+        AEAudio audio = GetAbilitySfxAudio(abilityName);
+        if (!IsValidAudio(audio)) {
+            return;
+        }
+
+        AEAudioPlay(audio, gSfxGroup, 1.0f, 1.0f, 0);
+        ApplyVolumes();
+    }
+
+    void PlayInstantAbilitySFX(const std::string& abilityName) {
+        std::cout << "[Audio] PlayInstantAbilitySFX requested: " << abilityName << "\n";
+
+        if (!IsInstantAbilitySfx(abilityName)) {
+            std::cout << "[Audio] Not an instant ability SFX: " << abilityName << "\n";
+            return;
+        }
+
+        PlayAbilitySfxInternal(abilityName);
+    }
+
+    void PlayLaunchAbilitySFX(const std::string& abilityName) {
+        if (!IsLaunchAbilitySfx(abilityName)) {
+            return;
+        }
+
+        PlayAbilitySfxInternal(abilityName);
+    }
+
     void SaveSettings() {
         ClampStoredVolumes();
 
@@ -180,7 +255,6 @@ namespace AudioManager {
 
         std::ifstream ifs{ AUDIO_SETTINGS_PATH };
         if (!ifs.is_open()) {
-            // First run or missing file: keep defaults and create the file.
             SaveSettings();
             return;
         }
@@ -379,29 +453,6 @@ namespace AudioManager {
         AEAudio audio = GetSfxAudio(sfx);
         if (!IsValidAudio(audio)) {
             std::cerr << "[AudioManager] Cannot play SFX: sound not loaded.\n";
-            return;
-        }
-
-        AEAudioPlay(audio, gSfxGroup, 1.0f, 1.0f, 0);
-        ApplyVolumes();
-    }
-
-    void PlayAbilitySFX(const std::string& abilityName) {
-        if (!gIsInitialized) {
-            Load();
-        }
-
-        if (!gIsInitialized) {
-            return;
-        }
-
-        if (!IsValidGroup(gSfxGroup)) {
-            std::cerr << "[AudioManager] Cannot play ability SFX: invalid SFX group.\n";
-            return;
-        }
-
-        AEAudio audio = GetAbilitySfxAudio(abilityName);
-        if (!IsValidAudio(audio)) {
             return;
         }
 
