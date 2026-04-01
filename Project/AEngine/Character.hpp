@@ -58,7 +58,7 @@ public:
 
 private:
 	// Print out information about the character and draw collision lines
-	void DebugInfo();
+	void DrawDebugInfo();
 	void TextureUpdate(); // Select correct sprite based on HP / animation state
 
 private:
