@@ -36,6 +36,7 @@ namespace Guide {
         };
 
         enum class AbilityGroup {
+            STATS,
             OFFENSIVE,
             DEFENSIVE
         };
@@ -43,6 +44,8 @@ namespace Guide {
         enum class AbilityRole {
             ATTACK,
             PROTECTION,
+            BOOST,
+            RECOVERY,
             UTILITY
         };
 
@@ -89,7 +92,7 @@ namespace Guide {
         constexpr float LIST_WIDTH = 620.0f;
         constexpr float DETAIL_WIDTH = 540.0f;
         constexpr float PANEL_HEIGHT = 500.0f;
-        constexpr float LIST_CENTER_X = -380.0f;
+        constexpr float LIST_CENTER_X = -300.0f;
         constexpr float DETAIL_CENTER_X = 355.0f;
         constexpr float SECTION_HEIGHT = 42.0f;
         constexpr float ROW_HEIGHT = 44.0f;
@@ -145,6 +148,7 @@ namespace Guide {
 
         std::string GroupToString(AbilityGroup group) {
             switch (group) {
+            case AbilityGroup::STATS:     return "STATS";
             case AbilityGroup::OFFENSIVE: return "OFFENSIVE";
             case AbilityGroup::DEFENSIVE: return "DEFENSIVE";
             }
@@ -153,15 +157,18 @@ namespace Guide {
 
         std::string RoleToString(AbilityRole role) {
             switch (role) {
-            case AbilityRole::ATTACK: return "Attack";
+            case AbilityRole::ATTACK:     return "Attack";
             case AbilityRole::PROTECTION: return "Protection";
-            case AbilityRole::UTILITY: return "Utility";
+            case AbilityRole::BOOST:      return "Boost";
+            case AbilityRole::RECOVERY:   return "Recovery";
+            case AbilityRole::UTILITY:    return "Utility";
             }
             return "Unknown";
         }
 
         Color GroupHeaderColor(AbilityGroup group) {
             switch (group) {
+            case AbilityGroup::STATS:     return Color(0.63f, 0.46f, 0.87f, 1.0f);
             case AbilityGroup::OFFENSIVE: return Color(0.90f, 0.48f, 0.30f, 1.0f);
             case AbilityGroup::DEFENSIVE: return Color(0.28f, 0.58f, 0.88f, 1.0f);
             }
@@ -170,6 +177,7 @@ namespace Guide {
 
         Color GroupMutedColor(AbilityGroup group) {
             switch (group) {
+            case AbilityGroup::STATS:     return Color(0.92f, 0.88f, 0.98f, 1.0f);
             case AbilityGroup::OFFENSIVE: return Color(0.95f, 0.88f, 0.84f, 1.0f);
             case AbilityGroup::DEFENSIVE: return Color(0.85f, 0.91f, 0.97f, 1.0f);
             }
@@ -178,9 +186,11 @@ namespace Guide {
 
         Color RoleColor(AbilityRole role) {
             switch (role) {
-            case AbilityRole::ATTACK: return Color(0.85f, 0.28f, 0.20f, 1.0f);
+            case AbilityRole::ATTACK:     return Color(0.85f, 0.28f, 0.20f, 1.0f);
             case AbilityRole::PROTECTION: return Color(0.20f, 0.56f, 0.90f, 1.0f);
-            case AbilityRole::UTILITY: return Color(0.58f, 0.38f, 0.88f, 1.0f);
+            case AbilityRole::BOOST:      return Color(0.82f, 0.56f, 0.16f, 1.0f);
+            case AbilityRole::RECOVERY:   return Color(0.18f, 0.66f, 0.38f, 1.0f);
+            case AbilityRole::UTILITY:    return Color(0.58f, 0.38f, 0.88f, 1.0f);
             }
             return Color(0.40f, 0.40f, 0.40f, 1.0f);
         }
@@ -207,6 +217,9 @@ namespace Guide {
 
         AbilityGroup DetermineGroup(const nlohmann::json& ability) {
             const std::string forcedGroup = ToLower(ability.value("Guide_Group", ""));
+            if (forcedGroup == "stats") {
+                return AbilityGroup::STATS;
+            }
             if (forcedGroup == "offensive") {
                 return AbilityGroup::OFFENSIVE;
             }
@@ -214,9 +227,14 @@ namespace Guide {
                 return AbilityGroup::DEFENSIVE;
             }
 
-            return (ability.value("Type", 0) == 2)
-                ? AbilityGroup::OFFENSIVE
-                : AbilityGroup::DEFENSIVE;
+            const int type = ability.value("Type", 0);
+            if (type == 1) {
+                return AbilityGroup::STATS;
+            }
+            if (type == 2) {
+                return AbilityGroup::OFFENSIVE;
+            }
+            return AbilityGroup::DEFENSIVE;
         }
 
         AbilityRole DetermineRole(const nlohmann::json& ability, AbilityGroup group) {
@@ -227,12 +245,45 @@ namespace Guide {
             if (forcedRole == "protection" || forcedRole == "defense" || forcedRole == "defensive") {
                 return AbilityRole::PROTECTION;
             }
-            if (forcedRole == "utility") {
+            if (forcedRole == "boost" || forcedRole == "buff") {
+                return AbilityRole::BOOST;
+            }
+            if (forcedRole == "recovery" || forcedRole == "heal") {
+                return AbilityRole::RECOVERY;
+            }
+            if (forcedRole == "utility" || forcedRole == "support") {
                 return AbilityRole::UTILITY;
             }
 
             if (group == AbilityGroup::OFFENSIVE) {
                 return AbilityRole::ATTACK;
+            }
+
+            if (group == AbilityGroup::STATS) {
+                if (ability.contains("Base_Stats") && !ability["Base_Stats"].is_null()) {
+                    const auto& baseStats = ability["Base_Stats"];
+                    const double hp = GetBaseStatValue(baseStats, "HP", "Hp");
+                    const double atk = GetBaseStatValue(baseStats, "ATK", "Attack");
+                    const double shield = GetBaseStatValue(baseStats, "Shield");
+                    if (hp > 0.0) {
+                        return AbilityRole::RECOVERY;
+                    }
+                    if (atk != 0.0 || shield != 0.0) {
+                        return AbilityRole::BOOST;
+                    }
+                }
+
+                if (ability.contains("Projectile_Stats") && !ability["Projectile_Stats"].is_null()) {
+                    const auto& proj = ability["Projectile_Stats"];
+                    const double damage = proj.value("Base_Damage", 0.0);
+                    const double radius = proj.value("Radius", 0.0);
+                    const double amp = proj.value("Damage_Amp", 0.0);
+                    if (damage != 0.0 || radius > 0.0 || amp != 0.0) {
+                        return AbilityRole::BOOST;
+                    }
+                }
+
+                return AbilityRole::UTILITY;
             }
 
             if (ability.contains("Defensive_Stats") && !ability["Defensive_Stats"].is_null()) {
@@ -365,8 +416,9 @@ namespace Guide {
 
         int GroupOrder(AbilityGroup group) {
             switch (group) {
-            case AbilityGroup::OFFENSIVE: return 0;
-            case AbilityGroup::DEFENSIVE: return 1;
+            case AbilityGroup::STATS:     return 0;
+            case AbilityGroup::OFFENSIVE: return 1;
+            case AbilityGroup::DEFENSIVE: return 2;
             }
             return 99;
         }
@@ -375,6 +427,7 @@ namespace Guide {
             displayRows.clear();
 
             const AbilityGroup orderedGroups[] = {
+                AbilityGroup::STATS,
                 AbilityGroup::OFFENSIVE,
                 AbilityGroup::DEFENSIVE
             };
@@ -528,14 +581,20 @@ namespace Guide {
 
             std::ostringstream oss;
 
-            if (entry.role == AbilityRole::UTILITY) {
-                oss << "Utility ability";
+            if (entry.role == AbilityRole::ATTACK) {
+                oss << "Offensive attack ability";
             }
             else if (entry.role == AbilityRole::PROTECTION) {
                 oss << "Defensive / protection ability";
             }
+            else if (entry.role == AbilityRole::BOOST) {
+                oss << "Stat boost ability";
+            }
+            else if (entry.role == AbilityRole::RECOVERY) {
+                oss << "Recovery ability";
+            }
             else {
-                oss << "Offensive attack ability";
+                oss << "Utility ability";
             }
 
             if (ability.contains("Projectile_Stats") && !ability["Projectile_Stats"].is_null()) {
@@ -583,7 +642,55 @@ namespace Guide {
 
             bool durationAlreadyShown = false;
 
-            if (entry.role == AbilityRole::ATTACK) {
+            if (entry.group == AbilityGroup::STATS) {
+                if (ability.contains("Base_Stats") && !ability["Base_Stats"].is_null()) {
+                    const auto& baseStats = ability["Base_Stats"];
+
+                    const double hp = GetBaseStatValue(baseStats, "HP", "Hp");
+                    const double atk = GetBaseStatValue(baseStats, "ATK", "Attack");
+                    const double shield = GetBaseStatValue(baseStats, "Shield");
+
+                    if (hp > 0.0) {
+                        lines.push_back("Heal: " + FormatNumber(hp) + "%");
+                    }
+                    if (atk != 0.0) {
+                        lines.push_back("ATK Change: " + FormatNumber(atk));
+                    }
+                    if (shield != 0.0) {
+                        lines.push_back("Shield Change: " + FormatNumber(shield));
+                    }
+                }
+
+                if (ability.contains("Projectile_Stats") && !ability["Projectile_Stats"].is_null()) {
+                    const auto& proj = ability["Projectile_Stats"];
+
+                    const double damage = proj.value("Base_Damage", 0.0);
+                    const double radius = proj.value("Radius", 0.0);
+                    const double amp = proj.value("Damage_Amp", 0.0);
+
+                    if (damage != 0.0) {
+                        const std::string prefix = damage > 0.0 ? "+" : "";
+                        lines.push_back("Damage Change: " + prefix + FormatNumber(damage));
+                    }
+                    if (radius > 0.0) {
+                        lines.push_back("Radius: " + FormatNumber(radius));
+                    }
+                    if (amp != 0.0) {
+                        lines.push_back("Damage Amp: " + FormatNumber(amp));
+                    }
+
+                    const bool unlimitedCharges = proj.value("unlimited_charges", false);
+                    const int charges = proj.value("Charges", 0);
+
+                    if (unlimitedCharges) {
+                        lines.push_back("Charges: Unlimited");
+                    }
+                    else if (charges > 0) {
+                        lines.push_back("Charges: " + std::to_string(charges));
+                    }
+                }
+            }
+            else if (entry.role == AbilityRole::ATTACK) {
                 if (ability.contains("Projectile_Stats") && !ability["Projectile_Stats"].is_null()) {
                     const auto& proj = ability["Projectile_Stats"];
 
@@ -771,7 +878,7 @@ namespace Guide {
             case GuideView::GAME:
                 return "Core rules, controls, and practical tips";
             case GuideView::ABILITIES:
-                return "Offensive and Defensive abilities. Utility is shown under Role.";
+                return "Stats, Offensive, and Defensive abilities from the live gameplay pool.";
             }
             return "";
         }
@@ -993,7 +1100,7 @@ namespace Guide {
                 const int maxScroll = static_cast<int>(displayRows.size()) - VISIBLE_ABILITY_ROWS;
                 const float trackWidth = 16.0f;
                 const float trackHeight = 406.0f;
-                const float trackCenterX = LIST_CENTER_X + 330.0f;
+                const float trackCenterX = LIST_CENTER_X + (LIST_WIDTH * 0.5f) + 12.0f;
                 const float trackCenterY = -10.0f;
 
                 UIManager::Panel scrollTrack(
@@ -1067,7 +1174,7 @@ namespace Guide {
 
             DrawTextLeftPx(entry.displayName, DETAIL_CENTER_X - 35.0f, 214.0f, 0.62f, Color(0.05f, 0.07f, 0.10f, 1.0f));
             DrawTextLeftPx(GroupToString(entry.group), DETAIL_CENTER_X - 35.0f, 187.0f, 0.46f, GroupHeaderColor(entry.group));
-            DrawTextLeftPx("Role: " + RoleToString(entry.role), DETAIL_CENTER_X - 35.0f, 164.0f, 0.44f, RoleColor(entry.role));
+            DrawTextLeftPx("Role: " + RoleToString(entry.role), DETAIL_CENTER_X - 35.0f, 175.0f, 0.44f, RoleColor(entry.role));
 
             const float descriptionBoxHeight = 132.0f;
             const float descriptionBoxCenterY = 8.0f;
@@ -1087,7 +1194,7 @@ namespace Guide {
                 BuildAbilityDescription(entry),
                 leftX,
                 44.0f,
-                0.38f,
+                0.50f,
                 Color(0.12f, 0.12f, 0.12f, 1.0f),
                 55,
                 18.0f,
@@ -1117,11 +1224,11 @@ namespace Guide {
                 const std::string text = "- " + statLines[i];
 
                 if (i < 3) {
-                    DrawTextLeftPx(text, column1X, y1, 0.39f, Color(0.12f, 0.12f, 0.12f, 1.0f));
+                    DrawTextLeftPx(text, column1X, y1, 0.45f, Color(0.12f, 0.12f, 0.12f, 1.0f));
                     y1 -= 19.0f;
                 }
                 else {
-                    DrawTextLeftPx(text, column2X, y2, 0.39f, Color(0.12f, 0.12f, 0.12f, 1.0f));
+                    DrawTextLeftPx(text, column2X, y2, 0.45f, Color(0.12f, 0.12f, 0.12f, 1.0f));
                     y2 -= 19.0f;
                 }
             }
