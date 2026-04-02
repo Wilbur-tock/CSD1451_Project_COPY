@@ -27,6 +27,7 @@ namespace PauseMenu {
 
     // Button callbacks
     void OnResumeClicked();
+    void OnRestartClicked();
     void OnSettingsClicked();
     void OnBackToMenuClicked();
 

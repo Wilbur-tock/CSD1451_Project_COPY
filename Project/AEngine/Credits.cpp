@@ -34,19 +34,30 @@ namespace Credits {
 
         creditsText = { 
             "GAME CREDITS\n\n"
+
+            "WWW.DIGIPEN.EDU\n"
+            "All content @2026 DigiPen Institute of Technology Singapore.\nAll Rights Reserved\n\n"
+
             "=== Basement Dwellers ===\n\n"
+
             "Tech Lead\n"
             "Dayrius Goh\n\n"
+
             "Project Manager\n"
             "Justin Wong\n\n"
+
             "Audio Lead\n"
             "Bryan Lim\n\n"
+
             "Data Lead\n"
             "Wilbur Tock\n\n"
+
             "UI/UX Lead\n"
             "Ken Nixon\n\n\n"
 
+
             "Made with assets made by Kenney (www.kenney.nl)\n\n\n"
+
 
             //"Created by \n"
             //"DigiPen Institute of Technology Singapore\n"
@@ -68,16 +79,15 @@ namespace Credits {
             "All our playtesters\n"
             "and supporters\n\n\n"
 
+
             "=== Tools & Libraries ===\n\n"
 
             "Alpha Engine\n"
             "Created/distributed by Kenney (www.kenney.nl)\n"
             "Liberation Mono Font\n\n\n"
 
-            "Thank you for playing!\n\n"
 
-            "WWW.DIGIPEN.EDU\n"
-            "All content @2025 DigiPen Institute of Technology Singapore.\nAll Rights Reserved\n\n"
+            "Thank you for playing!\n\n"
 
             "Press M to return to menu",
         };
