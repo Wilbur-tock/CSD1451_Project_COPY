@@ -342,18 +342,20 @@ void Level::Initialize() {
 	playerShield = TowerShield{ MapManager::FindTile(playerTerritory.centerId)->transform.pos, &playerController };
 	enemyShield = TowerShield{ MapManager::FindTile(enemyTerritory.centerId)->transform.pos, &enemyController };
 
-	// Initialize Territory tiles
+	// Store Territory tiles data
 	SetOriginalTerritoryTiles(playerTerritory);
 	SetOriginalTerritoryTiles(enemyTerritory);
 
 	InitializeUI();
 
-	SwitchTurn(isPlayerStarting); // called last
+	SwitchTurn(isPlayerStarting); 
 
+	int tutorialLevel = 1;
 	if (levelId == 0) {
 		notificationPanel.Popup("Use Q and E to toggle through all the abilities", 10.0f);
 	}
-	else if (levelId == 1) {
+	// if level after tutorial level is unlocked there is no need to initialize tutorial again
+	else if (levelId == tutorialLevel && LevelManager::HighestUnlockedLevel() <= tutorialLevel) {
 		Tutorial::Initialize();
 	}
 
@@ -414,11 +416,12 @@ void Level::Update() {
 
 	// UI
 	UpdateUI();
-	DrawUI();
-
 	// Need to be below Draw to ensure that the Ability Selector UI is shows up infront of the level
 	prevIsAbilitySelectorOn = AbilitiesManager::playerAbilityController.IsSelectingAbility();
 	AbilitiesManager::playerAbilityController.UpdateAbilitySelector();
+
+	DrawUI();
+
 
 	// Timer to prevent accidently shooting after selecting an ability
 	if (AbilitiesManager::playerAbilityController.IsSelectingAbility() != prevIsAbilitySelectorOn) {

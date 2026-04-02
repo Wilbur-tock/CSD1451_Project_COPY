@@ -55,7 +55,7 @@ void TextObject::Draw() {
 		font = AssetsManager::textFont;
 	}
 
-	// Initial setup
+	// Print string line by line based on whatever or not there is a newline
 	f32 charW, charH;
 	AEGfxGetPrintSize(font, "A", textScale, &charW, &charH);
 
@@ -156,10 +156,25 @@ void TextObject::SetAnchorPosition(Transform const& parentTransform) {
 }
 
 void TextObject::SetTextAnchorPosition() {
-	// Get the normalized text width and height
-	f32 textW, textH;
-	AEGfxGetPrintSize(font, TextContent().c_str(), textScale, &textW, &textH);
+	//// Get the normalized text width and height
+	//f32 textW, textH;
+	//AEGfxGetPrintSize(font, TextContent().c_str(), textScale, &textW, &textH);
 
+	// Find the largest text width by comparing each newline
+	f32 textW = 0.0f, textH = 0.0f;
+	std::string line;
+	std::stringstream ss(TextContent());
+
+	// Tokenize the string line by line
+	while (std::getline(ss, line, '\n')) {
+		f32 currentLineW, currentLineH;
+		AEGfxGetPrintSize(font, line.c_str(), textScale, &currentLineW, &currentLineH);
+
+		textW = currentLineW > textW ? currentLineW : textW;
+		textH += currentLineH;
+	}
+
+	// Get the parent position and half width and height of the parent object
 	float x = parent.pos.x, y = parent.pos.y, borderGap = 0.01f;
 	float halfW = parent.size.x * 0.5f, halfH = parent.size.y * 0.5f;
 

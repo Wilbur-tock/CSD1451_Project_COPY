@@ -21,7 +21,7 @@ namespace ResultsUI {
 	// Results UI objects
 	UIManager::Panel resultOverlay, centerPanel;
 	Button resultRestartButton, resultNextLevelButton, resultMainMenuButton;
-	TextObject resultTitle, subtitle;
+	TextObject resultTitle, subtitle, statsLabelText, statsValuesText;
 
 	static void OnResultRestart() {
 		GameStateManager::next = GameStateManager::GameState::RESTART;
@@ -50,51 +50,6 @@ namespace ResultsUI {
 
 	static void OnResultMainMenu() {
 		GameStateManager::next = GameStateManager::GameState::MAIN_MENU;
-	}
-
-	static std::vector<std::string> BuildResultSummaryLines() {
-		std::vector<std::string> lines;
-
-		Level* currentLevel = LevelManager::CurrentLevel();
-		if (!currentLevel) {
-			lines.push_back("No level data available.");
-			return lines;
-		}
-
-		GameTrackingManager::GameStats const playerStats = GameTrackingManager::gameData.GetCurrentLevelStats(true);
-		GameTrackingManager::GameStats const enemyStats = GameTrackingManager::gameData.GetCurrentLevelStats(false);
-
-		lines.push_back("Rounds Played: " + std::to_string(currentLevel->Rounds()));
-		lines.push_back("");
-		lines.push_back("PLAYER vs ENEMY");
-		lines.push_back("Shots Fired   - You: " + std::to_string(playerStats.shotsFired) + " | Enemy: " + std::to_string(enemyStats.shotsFired));
-		lines.push_back("Hits          - You: " + std::to_string(playerStats.shotsHit) + " | Enemy: " + std::to_string(enemyStats.shotsHit));
-		lines.push_back("Misses        - You: " + std::to_string(playerStats.shotsMiss) + " | Enemy: " + std::to_string(enemyStats.shotsMiss));
-		lines.push_back("Accuracy      - You: " + Utils::FormatFloat(playerStats.shotsAccuracy, 2) + "% | Enemy: " + Utils::FormatFloat(enemyStats.shotsAccuracy,2) + "%");
-		lines.push_back("Abilities Used- You: " + std::to_string(playerStats.totalAbilityUsed) + " | Enemy: " + std::to_string(enemyStats.totalAbilityUsed));
-		lines.push_back("Tile Damage   - You: " + std::to_string(playerStats.totalDamage) + " | Enemy: " + std::to_string(enemyStats.totalDamage));
-		lines.push_back("Char Damage   - You: " + std::to_string(playerStats.characterDamage) + " | Enemy: " + std::to_string(playerStats.characterDamage));
-
-		return lines;
-	}
-
-	static void DrawResultSummary() {
-		std::vector<std::string> lines = BuildResultSummaryLines();
-
-		float startX = -0.16f;
-		float startY = 0.15f;
-		float lineStep = 0.042f;
-
-		for (size_t i = 0; i < lines.size(); ++i) {
-			AEGfxPrint(
-				AssetsManager::textFont,
-				lines[i].c_str(),
-				startX,
-				startY - static_cast<float>(i) * lineStep,
-				0.65f, 0.75f,
-				1.0f, 1.0f, 1.0f
-			);
-		}
 	}
 
 	void Intialize() {
@@ -173,11 +128,22 @@ namespace ResultsUI {
 		};
 		subtitle.SetPosition(centerPanel.GetTransform());
 		subtitle.SetOffsetPosition(0, 95.0f);
+
+		statsLabelText = TextObject{
+			"", 0.7f, Color{ 1,1,1, 0.9f }, { {0,0}, {0,0} }, Utils::AnchorMode::CENTER
+		};
+		statsLabelText.SetPosition(centerPanel.GetTransform());
+		statsLabelText.SetOffsetPosition(250, 50.0f);
+
+		statsValuesText = TextObject{
+			"", 0.7f, Color{ 1,1,1, 0.9f }, { {0,0}, {0,0} }, Utils::AnchorMode::CENTER
+		};
+		statsValuesText.SetPosition(centerPanel.GetTransform());
+		statsValuesText.SetOffsetPosition(150.0f, 50.0f);
 	}
 
 	void Update(LevelStatus status) {
-		const bool isShowingResults =
-			(status == LevelStatus::PLAYER_WON || status == LevelStatus::ENEMY_WON);
+		bool const isShowingResults = (status == LevelStatus::PLAYER_WON || status == LevelStatus::ENEMY_WON);
 
 		Utils::isResultScreenOn = isShowingResults;
 
@@ -186,17 +152,6 @@ namespace ResultsUI {
 		}
 
 		Draw(status);
-
-		// Debug Commands for results UI
-		if (AEInputCheckTriggered(AEVK_N)) {
-			AudioManager::PlaySFX(AudioManager::SFX::UIButton);
-			OnResultNextLevel();
-		}
-
-		if (AEInputCheckTriggered(AEVK_R)) {
-			AudioManager::PlaySFX(AudioManager::SFX::UIButton);
-			OnResultRestart();
-		}
 	}
 
 	void Draw(LevelStatus status) {
@@ -239,7 +194,19 @@ namespace ResultsUI {
 		subtitle.TextContent(subStr);
 		subtitle.Draw();
 
-		DrawResultSummary();
+		GameTrackingManager::GameStats const& playerStats = GameTrackingManager::gameData.GetCurrentLevelStats(true);
+
+		statsLabelText.TextContent("Your Stats\nShots Fired:\nShots Hit:\nShots Miss\nShots Accuracy:\n\nTotal Damage:\nCharacters Damage:\nTiles Damage:");
+		statsLabelText.Draw();
+
+		statsValuesText.TextContent('\n' + std::to_string(playerStats.shotsFired)
+			+ '\n' + std::to_string(playerStats.shotsHit)
+			+ '\n' + std::to_string(playerStats.shotsMiss)
+			+ '\n' + Utils::FormatFloat(playerStats.shotsAccuracy,2) + '%'
+			+ "\n\n" + std::to_string(playerStats.totalDamage)
+			+ '\n' + std::to_string(playerStats.characterDamage)
+			+ '\n' + std::to_string(playerStats.tilesDamage));
+		statsValuesText.Draw();
 
 		// -- Draw buttons --
 		resultRestartButton.Update();

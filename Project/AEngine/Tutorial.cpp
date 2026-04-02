@@ -37,7 +37,7 @@ namespace Tutorial {
 			newMsg = "Welcome to Fortress Fight! Before the battle begins, choose one of three abilities to add to your inventory. Tip: These abilities provide a powerful advantage!";
 			break;
 		case 2:
-			newMsg = "Choose any ability from your inventory! Tip: If you use your default ability this round, you'll be able to pick a stat boost for the next round.";
+			newMsg = "Choose any ability from your inventory! Red indicates offensive ability, while Blue indicates defensive ones. Tip: If you use your default ability this round, you'll be able to pick a stat boost for the next round.";
 			break;
 		case 3:
 			newMsg = "After selecting an ability, use the Mouse Wheel to zoom in or out. Use WASD to pan the map and find your target.";
@@ -46,7 +46,7 @@ namespace Tutorial {
 			newMsg = "Use the trajectory to help you aim. To shoot, hold Left-Click and release. If you want to cancel your shot while holding Left-Click, simply Right-Click.";
 			break;
 		case 5:
-			newMsg = "You and your opponent will take turns firing projectiles at each other. To win, eliminate all of your opponent's units or defeat their BOSS unit. Good luck!";
+			newMsg = "You and your opponent will take turns firing projectiles at each other. To win, eliminate all of your opponent's units and defeat their BOSS unit. Good luck!";
 			break;
 		case 6:
 			isActive = false;

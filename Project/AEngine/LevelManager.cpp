@@ -10,49 +10,47 @@ All content © 2026 DigiPen Institute of Technology Singapore. All Rights Reserve
 #include "GameTrackingManager.hpp"
 
 namespace LevelManager {
-	namespace {
-		constexpr char const* LEVEL_DATA_PATH = "Assets/Data/levelData.txt";
+	constexpr char const* LEVEL_DATA_PATH = "Assets/Data/levelData.txt";
 
-		Level* selectedLevel = nullptr;
-		std::vector<Level> levelDatas;
+	Level* selectedLevel = nullptr;
+	std::vector<Level> levelDatas;
 
-		// Campaign progression only.
-		// Sandbox is handled separately and is always unlocked.
-		int highestUnlockedCampaignLevel = Config::FIRST_CAMPAIGN_LEVEL_INDEX;
+	// Campaign progression only.
+	// Sandbox is handled separately and is always unlocked.
+	int highestUnlockedCampaignLevel = Config::FIRST_CAMPAIGN_LEVEL_INDEX;
 
-		bool IsSandboxLevel(int levelIndex) {
-			return levelIndex == Config::SANDBOX_LEVEL_INDEX;
+	bool IsSandboxLevel(int levelIndex) {
+		return levelIndex == Config::SANDBOX_LEVEL_INDEX;
+	}
+
+	bool IsCampaignLevel(int levelIndex) {
+		return levelIndex >= Config::FIRST_CAMPAIGN_LEVEL_INDEX &&
+			levelIndex < Config::TOTAL_LEVEL_COUNT;
+	}
+
+	bool ComputeUnlockedState(int levelIndex) {
+		if (IsSandboxLevel(levelIndex)) {
+			return true;
 		}
 
-		bool IsCampaignLevel(int levelIndex) {
-			return levelIndex >= Config::FIRST_CAMPAIGN_LEVEL_INDEX &&
-				levelIndex < Config::TOTAL_LEVEL_COUNT;
+		return IsCampaignLevel(levelIndex) &&
+			levelIndex <= highestUnlockedCampaignLevel;
+	}
+
+	void SaveLevelData() {
+		std::ofstream ofs{ LEVEL_DATA_PATH };
+		if (!ofs.is_open()) {
+			std::cerr << "Can't open " << LEVEL_DATA_PATH << std::endl;
+			return;
 		}
 
-		bool ComputeUnlockedState(int levelIndex) {
-			if (IsSandboxLevel(levelIndex)) {
-				return true;
-			}
+		for (int i = 0; i < static_cast<int>(levelDatas.size()); ++i) {
+			Level const& levelData = levelDatas[i];
 
-			return IsCampaignLevel(levelIndex) &&
-				levelIndex <= highestUnlockedCampaignLevel;
-		}
-
-		void SaveLevelData() {
-			std::ofstream ofs{ LEVEL_DATA_PATH, std::ios::trunc };
-			if (!ofs.is_open()) {
-				std::cerr << "Can't open " << LEVEL_DATA_PATH << std::endl;
-				return;
-			}
-
-			for (int i = 0; i < static_cast<int>(levelDatas.size()); ++i) {
-				Level const& levelData = levelDatas[i];
-
-				ofs << "Level" << i
-					<< ":\nDifficulty: " << static_cast<int>(levelData.Difficulty())
-					<< "\nIsUnlocked: " << static_cast<int>(ComputeUnlockedState(i))
-					<< "\n\n";
-			}
+			ofs << "Level" << i
+				<< ":\nDifficulty: " << static_cast<int>(levelData.Difficulty())
+				<< "\nIsUnlocked: " << static_cast<int>(ComputeUnlockedState(i))
+				<< "\n\n";
 		}
 	}
 
