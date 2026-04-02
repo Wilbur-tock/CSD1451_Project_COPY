@@ -1,0 +1,56 @@
+# GAME CREDITS
+
+! WWW.DIGIPEN.EDU
+All content (C) 2026 DigiPen Institute of Technology Singapore.
+All Rights Reserved
+
+
+## === Basement Dwellers ===
+
+> Tech Lead
+Dayrius Goh
+
+> Project Manager
+Justin Wong
+
+> Audio Lead
+Bryan Lim
+
+> Data Lead
+Wilbur Tock
+
+> UI/UX Lead
+Ken Nixon
+
+
+Made with assets by Kenney (www.kenney.nl)
+
+
+## === Special Thanks ===
+
+> Faculty and Advisors
+Prof Gerald, Prof Tommy, Prof Soroor
+
+> President
+Claude Comair
+
+> Executives
+Claude Comair, CHU Jason Yeu Tat,
+Michael GATS, TAN Chek Ming,
+Prasanna Kumar GHALI, Mandy WONG, Johnny DEEK
+
+All our playtesters
+and supporters
+
+
+## === Tools & Libraries ===
+
+Alpha Engine
+Assets by Kenney (www.kenney.nl)
+Liberation Mono Font
+Caviar Dreams Bold Font
+
+
+# Thank you for playing!
+
+> Press M to return to menu

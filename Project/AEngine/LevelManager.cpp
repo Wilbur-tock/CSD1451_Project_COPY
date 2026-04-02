@@ -2,7 +2,7 @@
 Authors: Dayrius, Bryan
 Description: Manage all level data in the game
 
-All content © 2026 DigiPen Institute of Technology Singapore. All Rights Reserved
+All content © 2026 DigiPen Institute of Technology Singapore. All Rights Reserved
 */
 
 #include "LevelManager.hpp"
@@ -14,6 +14,11 @@ namespace LevelManager {
 
 	Level* selectedLevel = nullptr;
 	std::vector<Level> levelDatas;
+
+	// Per-level win and loss counters.
+	// Parallel to levelDatas; index matches level id.
+	std::vector<int> levelWins;
+	std::vector<int> levelLosses;
 
 	// Campaign progression only.
 	// Sandbox is handled separately and is always unlocked.
@@ -47,9 +52,14 @@ namespace LevelManager {
 		for (int i = 0; i < static_cast<int>(levelDatas.size()); ++i) {
 			Level const& levelData = levelDatas[i];
 
+			int wins = (i < static_cast<int>(levelWins.size())) ? levelWins[i] : 0;
+			int losses = (i < static_cast<int>(levelLosses.size())) ? levelLosses[i] : 0;
+
 			ofs << "Level" << i
 				<< ":\nDifficulty: " << static_cast<int>(levelData.Difficulty())
 				<< "\nIsUnlocked: " << static_cast<int>(ComputeUnlockedState(i))
+				<< "\nWins: " << wins
+				<< "\nLosses: " << losses
 				<< "\n\n";
 		}
 	}
@@ -62,6 +72,10 @@ namespace LevelManager {
 		// Reset progression baseline:
 		// Sandbox is always unlocked, and the first campaign level is always unlocked.
 		highestUnlockedCampaignLevel = Config::FIRST_CAMPAIGN_LEVEL_INDEX;
+
+		// Reset win/loss counters; they will be overwritten from file if it exists.
+		levelWins.assign(Config::TOTAL_LEVEL_COUNT, 0);
+		levelLosses.assign(Config::TOTAL_LEVEL_COUNT, 0);
 
 		// Load all the data levels and add into the vector
 		for (int i = 0; i < Config::TOTAL_LEVEL_COUNT; ++i) {
@@ -82,9 +96,13 @@ namespace LevelManager {
 				std::string label = "";
 				int diff = 0;
 				bool isUnlocked = false;
+				int  wins = 0;
+				int  losses = 0;
 
 				ifs >> label >> diff
-					>> label >> isUnlocked;
+					>> label >> isUnlocked
+					>> label >> wins
+					>> label >> losses;
 
 				levelDatas[id].Difficulty(diff);
 
@@ -93,6 +111,9 @@ namespace LevelManager {
 				if (IsCampaignLevel(id) && isUnlocked) {
 					highestUnlockedCampaignLevel = (highestUnlockedCampaignLevel > id) ? highestUnlockedCampaignLevel : id;
 				}
+
+				levelWins[id] = wins;
+				levelLosses[id] = losses;
 
 				++id;
 			}
@@ -154,6 +175,28 @@ namespace LevelManager {
 
 		// This automatically ignores invalid/final-next cases.
 		UnlockLevel(nextLevelIndex);
+	}
+
+	void RecordWin(int levelIndex) {
+		if (!IsValidLevelIndex(levelIndex)) return;
+		++levelWins[levelIndex];
+		SaveProgress(); // Persist immediately so the count survives a crash/quit.
+	}
+
+	void RecordLoss(int levelIndex) {
+		if (!IsValidLevelIndex(levelIndex)) return;
+		++levelLosses[levelIndex];
+		SaveProgress();
+	}
+
+	int GetWins(int levelIndex) {
+		if (!IsValidLevelIndex(levelIndex)) return 0;
+		return levelWins[levelIndex];
+	}
+
+	int GetLosses(int levelIndex) {
+		if (!IsValidLevelIndex(levelIndex)) return 0;
+		return levelLosses[levelIndex];
 	}
 
 	void ResetProgress() {

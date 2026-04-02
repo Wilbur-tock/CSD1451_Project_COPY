@@ -1,7 +1,7 @@
 /*
 Authors: Dayrius, Nixon
 Description: Stores information about each gameplay level (enemies and player units, tiles blocks, etc)
-and manage the transition between player and enemy turns, manage shooting and using of abilities. 
+and manage the transition between player and enemy turns, manage shooting and using of abilities.
 Drawing of the game tiles, map, background and all UI in the level.
 
 All content © 2026 DigiPen Institute of Technology Singapore. All Rights Reserved
@@ -92,12 +92,12 @@ public:
 	Character* FindPlayerCharacterObj(int characterId);
 	Character* RandomCharacterObj(bool isPlayerObj);
 
-	Character* EnemyBoss() { 
+	Character* EnemyBoss() {
 		if (bossId < 0 || bossId >= static_cast<int>(enemies.size())) return nullptr;
 		return &enemies[bossId];
 	}
 
-	void SetInventoryHoveringUI(bool isHovering) {  isHoveringOverInventoryUI = isPlayerTurn ? isHovering : false; }
+	void SetInventoryHoveringUI(bool isHovering) { isHoveringOverInventoryUI = isPlayerTurn ? isHovering : false; }
 	void SetExtraTurn() { hasExtraShot = true; }
 	void SetSkipOpponentTurn() { skipOpponentTurn = true; }
 
@@ -105,7 +105,7 @@ public:
 	void ToggleTerritoryTiles(bool isPlayer, bool isBuilding);
 
 	void AddDecayTiles(TileIndex const& vectorTileId) { decayingTiles.push_back(vectorTileId); }
-	void AddPoisonCharacters(bool isPlayerCharacter, int vectorCharacterId) {  poisonCharacters.push_back({ isPlayerCharacter, vectorCharacterId }); }
+	void AddPoisonCharacters(bool isPlayerCharacter, int vectorCharacterId) { poisonCharacters.push_back({ isPlayerCharacter, vectorCharacterId }); }
 
 	void RecordDamageLog(int damageToAdd, bool isCharacter);
 
@@ -177,11 +177,15 @@ private:
 	TowerShield playerShield, enemyShield;
 
 	std::vector<TileIndex> decayingTiles; // vector ids of activeLevelMap of which tiles having the decaying effect
-	std::vector<std::pair<bool,int>> poisonCharacters; // vector ids of all the characters that are poison, bool isPlayerCharacter, int vectorId
+	std::vector<std::pair<bool, int>> poisonCharacters; // vector ids of all the characters that are poison, bool isPlayerCharacter, int vectorId
 
 	DamageLog playerDamageLog, enemyDamageLog;
-	
+
 	bool hasProcessedVictory = false;
+	// Mirrors hasProcessedVictory for the loss case.
+	// Ensures RecordLoss is called exactly once per match, not every frame
+	// while the ENEMY_WON status is set.
+	bool hasProcessedLoss = false;
 
 	// Sky base texture drawn behind the tile map each frame.
 	// PLACEHOLDER: provide Assets/level_sky.png (1600x900 static sky image).

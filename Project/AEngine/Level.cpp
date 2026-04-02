@@ -172,7 +172,7 @@ void Level::InitializeUI() {
 }
 
 Level::Level(int _leveId)
-	: levelId{ _leveId }, levelName{ levelId == 0 ? "Sandbox" : "Level " + std::to_string(levelId)},
+	: levelId{ _leveId }, levelName{ levelId == 0 ? "Sandbox" : "Level " + std::to_string(levelId) },
 	levelFileName{ "level" + std::to_string(levelId) } {
 }
 
@@ -348,7 +348,7 @@ void Level::Initialize() {
 
 	InitializeUI();
 
-	SwitchTurn(isPlayerStarting); 
+	SwitchTurn(isPlayerStarting);
 
 	int tutorialLevel = 1;
 	if (levelId == 0) {
@@ -756,11 +756,23 @@ void Level::UpdateLevelStatus() {
 	// Unlock the next level once, only when victory happens
 	if (status == LevelStatus::PLAYER_WON && !hasProcessedVictory) {
 		LevelManager::UnlockNextLevel(levelId);
+		// RecordWin calls SaveProgress internally, so the count persists immediately.
+		LevelManager::RecordWin(levelId);
 		hasProcessedVictory = true;
 	}
 
 	if (status != LevelStatus::PLAYER_WON) {
 		hasProcessedVictory = false;
+	}
+
+	// Mirror pattern for loss: record exactly once when ENEMY_WON is first detected.
+	if (status == LevelStatus::ENEMY_WON && !hasProcessedLoss) {
+		LevelManager::RecordLoss(levelId);
+		hasProcessedLoss = true;
+	}
+
+	if (status != LevelStatus::ENEMY_WON) {
+		hasProcessedLoss = false;
 	}
 }
 
@@ -956,7 +968,7 @@ void Level::DebugInfo() {
 		+ "\n[CTRL + R] Auto play " + std::string(autoPlayOn ? "ON" : "OFF")
 		+ "\n[F] Skip enemy turn " + std::string(disableEnemyTurn ? "ON" : "OFF")
 		+ "\n[R] Skip to enemy turn"
-		+ "\n[G] Rebuild Tower" 
+		+ "\n[G] Rebuild Tower"
 		+ "\n[H] Destroy Tower"
 		+ "\n[R-CLICK] Destroy blocks\nor damage character units";
 

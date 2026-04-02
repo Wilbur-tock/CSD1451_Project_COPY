@@ -2,7 +2,7 @@
 Authors: Nixon
 Description: Manage and draw the level game over results UI
 
-All content (C) 2026 DigiPen Institute of Technology Singapore. All Rights Reserved.
+All content © 2026 DigiPen Institute of Technology Singapore. All Rights Reserved
 */
 
 #include "ResultsUI.hpp"
@@ -13,6 +13,7 @@ All content (C) 2026 DigiPen Institute of Technology Singapore. All Rights Reser
 #include "AudioManager.hpp"
 #include "GameStateManager.hpp"
 #include "GameTrackingManager.hpp"
+#include "LevelManager.hpp"
 
 #include <sstream>
 #include <iomanip>
@@ -92,16 +93,23 @@ namespace ResultsUI {
         GameTrackingManager::GameStats const playerStats = GameTrackingManager::gameData.GetCurrentLevelStats(true);
         GameTrackingManager::GameStats const enemyStats = GameTrackingManager::gameData.GetCurrentLevelStats(false);
 
+        // Win/loss record for this level (includes the match just completed because
+        // LevelManager::RecordWin/RecordLoss fires before the results screen draws).
+        int wins = LevelManager::GetWins(currentLevel->Id());
+        int losses = LevelManager::GetLosses(currentLevel->Id());
+        lines.push_back("Record        - Wins: " + std::to_string(wins) + " | Losses: " + std::to_string(losses));
+        lines.push_back("");
+
         lines.push_back("Rounds Played: " + std::to_string(currentLevel->Rounds()));
         lines.push_back("");
         lines.push_back("PLAYER vs ENEMY");
-        lines.push_back("Shots Fired   - You: " + std::to_string(playerStats.shotsFired) + " | Enemy: " + std::to_string(enemyStats.shotsFired));
-        lines.push_back("Hits          - You: " + std::to_string(playerStats.shotsHit) + " | Enemy: " + std::to_string(enemyStats.shotsHit));
-        lines.push_back("Misses        - You: " + std::to_string(playerStats.shotsMiss) + " | Enemy: " + std::to_string(enemyStats.shotsMiss));
-        lines.push_back("Accuracy      - You: " + Utils::FormatFloat(playerStats.shotsAccuracy, 2) + "% | Enemy: " + Utils::FormatFloat(enemyStats.shotsAccuracy, 2) + "%");
-        lines.push_back("Abilities Used- You: " + std::to_string(playerStats.totalAbilityUsed) + " | Enemy: " + std::to_string(enemyStats.totalAbilityUsed));
+        lines.push_back("Shots Fired     - You: " + std::to_string(playerStats.shotsFired) + " | Enemy: " + std::to_string(enemyStats.shotsFired));
+        lines.push_back("Hits                - You: " + std::to_string(playerStats.shotsHit) + " | Enemy: " + std::to_string(enemyStats.shotsHit));
+        lines.push_back("Misses            - You: " + std::to_string(playerStats.shotsMiss) + " | Enemy: " + std::to_string(enemyStats.shotsMiss));
+        lines.push_back("Accuracy       - You: " + Utils::FormatFloat(playerStats.shotsAccuracy, 2) + "% | Enemy: " + Utils::FormatFloat(enemyStats.shotsAccuracy, 2) + "%");
+        lines.push_back("Abilities Used  - You: " + std::to_string(playerStats.totalAbilityUsed) + " | Enemy: " + std::to_string(enemyStats.totalAbilityUsed));
         lines.push_back("Tile Damage   - You: " + std::to_string(playerStats.totalDamage) + " | Enemy: " + std::to_string(enemyStats.totalDamage));
-        lines.push_back("Char Damage   - You: " + std::to_string(playerStats.characterDamage) + " | Enemy: " + std::to_string(playerStats.characterDamage));
+        lines.push_back("Char Damage - You: " + std::to_string(playerStats.characterDamage) + " | Enemy: " + std::to_string(playerStats.characterDamage));
 
         return lines;
     }
@@ -110,7 +118,7 @@ namespace ResultsUI {
         std::vector<std::string> lines = BuildResultSummaryLines();
 
         float startX = -0.16f;
-        float startY = 0.15f;
+        float startY = 0.25f;
         float lineStep = 0.042f;
 
         for (size_t i = 0; i < lines.size(); ++i) {
@@ -188,7 +196,7 @@ namespace ResultsUI {
 
         // Slightly wider panel to fit 3 buttons
         centerPanel = UIManager::Panel{
-            { 920.0f, 430.0f },
+            { 920.0f, 530.0f },
             Color{ 1,1,1 },
             Utils::AnchorMode::CENTER
         };
@@ -197,13 +205,13 @@ namespace ResultsUI {
             "", 2.0f, Color{ 1,1,1 }, { {0,0}, {0,0} }, Utils::AnchorMode::CENTER
         };
         resultTitle.SetPosition(centerPanel.GetTransform());
-        resultTitle.SetOffsetPosition(0, 140.0f);
+        resultTitle.SetOffsetPosition(0, 200.0f);
 
         subtitle = TextObject{
             "", 0.7f, Color{ 1,1,1, 0.9f }, { {0,0}, {0,0} }, Utils::AnchorMode::CENTER
         };
         subtitle.SetPosition(centerPanel.GetTransform());
-        subtitle.SetOffsetPosition(0, 95.0f);
+        subtitle.SetOffsetPosition(0, 150.0f);
     }
 
     // -----------------------------------------------------------------------
