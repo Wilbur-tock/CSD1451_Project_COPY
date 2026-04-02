@@ -58,10 +58,10 @@ namespace AudioManager {
     }
 
     // ---------------- Paths ----------------
-    static constexpr const char* BGM_MAINMENU = "Assets/Audio/bgm_mainmenu.wav";
-    static constexpr const char* BGM_MAPEDITOR = "Assets/Audio/bgm_mapeditor.wav";
-    static constexpr const char* BGM_LEVEL = "Assets/Audio/bgm_level.wav";
-    static constexpr const char* BGM_CREDITS = "Assets/Audio/bgm_credits.wav";
+    static constexpr const char* BGM_MAINMENU = "Assets/Audio/bgm.wav";
+    static constexpr const char* BGM_MAPEDITOR = "Assets/Audio/bgm.wav";
+    static constexpr const char* BGM_LEVEL = "Assets/Audio/bgm.wav";
+    static constexpr const char* BGM_CREDITS = "Assets/Audio/bgm.wav";
 
     static constexpr const char* SFX_UI_CLICK = "Assets/Audio/sfx_ui_click.wav";
     static constexpr const char* SFX_CANNON_FIRE = "Assets/Audio/sfx_default.wav";
