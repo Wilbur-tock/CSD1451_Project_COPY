@@ -254,7 +254,6 @@ namespace LevelSelect {
 
         backButton.Update();
         resetProgressButton.Update();
-        UICursor::Draw();
     }
 
     void Free() {
