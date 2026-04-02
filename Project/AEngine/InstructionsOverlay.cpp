@@ -129,7 +129,7 @@ namespace UIInstructionsOverlay {
         else if (current == GameState::LEVEL_SELECT) {
             msg +=
                 "\nLEVEL SELECT\n"
-                "Press [1-" + std::to_string(Config::TOTAL_LEVEL_COUNT) + "] to open the matching unlocked button\n"
+                "Press [0-3] to open the matching unlocked level\n"
                 "[ESC] / [BACK]: Return to Main Menu\n";
         }
         else if (current == GameState::GUIDE) {

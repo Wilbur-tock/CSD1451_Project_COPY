@@ -25,10 +25,7 @@ namespace AudioManager {
     static AEAudioGroup gSfxGroup{};
 
     // ---------------- BGM ----------------
-    static AEAudio gBgmMainMenu{};
-    static AEAudio gBgmMapEditor{};
-    static AEAudio gBgmLevel{};
-    static AEAudio gBgmCredits{};
+    static AEAudio gBgm{};
 
     // ---------------- SFX ----------------
     static AEAudio gSfxUIButton{};
@@ -58,10 +55,7 @@ namespace AudioManager {
     }
 
     // ---------------- Paths ----------------
-    static constexpr const char* BGM_MAINMENU = "Assets/Audio/bgm.wav";
-    static constexpr const char* BGM_MAPEDITOR = "Assets/Audio/bgm.wav";
-    static constexpr const char* BGM_LEVEL = "Assets/Audio/bgm.wav";
-    static constexpr const char* BGM_CREDITS = "Assets/Audio/bgm.wav";
+    static constexpr const char* BGM = "Assets/Audio/bgm.wav";
 
     static constexpr const char* SFX_UI_CLICK = "Assets/Audio/sfx_ui_click.wav";
     static constexpr const char* SFX_CANNON_FIRE = "Assets/Audio/sfx_default.wav";
@@ -83,7 +77,7 @@ namespace AudioManager {
         { "Max Heal",      "Assets/Audio/sfx_ability_heal.wav", {} },
 
         { "Invincibility", "Assets/Audio/sfx_ability_invincibility.wav", {} },
-        { "Invisibility",  "Assets/Audio/sfx_ability_invisibility.wav", {} },
+        { "God Mode",  "Assets/Audio/sfx_ability_god_mode.wav", {} },
         { "Nuke",          "Assets/Audio/sfx_ability_nuke.wav", {} },
         { "Penta Burst",   "Assets/Audio/sfx_ability_penta_burst.wav", {} },
         { "Piercing",      "Assets/Audio/sfx_ability_piercing.wav", {} },
@@ -132,14 +126,15 @@ namespace AudioManager {
 
     static AEAudio GetTrackAudio(Track t) {
         switch (t) {
-        case Track::MainMenu:  return gBgmMainMenu;
-        case Track::MapEditor: return gBgmMapEditor;
-        case Track::Level:     return gBgmLevel;
-        case Track::Credits:   return gBgmCredits;
-        default:               return AEAudio{};
+        case Track::MainMenu:
+        case Track::MapEditor:
+        case Track::Level:
+        case Track::Credits:
+            return gBgm;
+        default:
+            return AEAudio{};
         }
     }
-
     static AEAudio GetSfxAudio(SFX sfx) {
         switch (sfx) {
         case SFX::UIButton:   return gSfxUIButton;
@@ -168,7 +163,7 @@ namespace AudioManager {
             abilityName == "Skip Turn" ||
             abilityName == "Tower Shield" ||
             abilityName == "Invisibility" ||
-            abilityName == "Invincibility" ||
+            abilityName == "God Mode" ||
             abilityName == "Attack Boost" ||
             abilityName == "Defense Boost" ||
             abilityName == "Extra Shot";
@@ -215,10 +210,7 @@ namespace AudioManager {
     }
 
     void PlayInstantAbilitySFX(const std::string& abilityName) {
-        std::cout << "[Audio] PlayInstantAbilitySFX requested: " << abilityName << "\n";
-
         if (!IsInstantAbilitySfx(abilityName)) {
-            std::cout << "[Audio] Not an instant ability SFX: " << abilityName << "\n";
             return;
         }
 
@@ -300,15 +292,8 @@ namespace AudioManager {
             std::cerr << "[AudioManager] Failed to create SFX group.\n";
         }
 
-        gBgmMainMenu = AEAudioLoadMusic(BGM_MAINMENU);
-        gBgmMapEditor = AEAudioLoadMusic(BGM_MAPEDITOR);
-        gBgmLevel = AEAudioLoadMusic(BGM_LEVEL);
-        gBgmCredits = AEAudioLoadMusic(BGM_CREDITS);
-
-        WarnIfInvalidAudio(BGM_MAINMENU, gBgmMainMenu);
-        WarnIfInvalidAudio(BGM_MAPEDITOR, gBgmMapEditor);
-        WarnIfInvalidAudio(BGM_LEVEL, gBgmLevel);
-        WarnIfInvalidAudio(BGM_CREDITS, gBgmCredits);
+        gBgm = AEAudioLoadMusic(BGM);
+        WarnIfInvalidAudio(BGM, gBgm);
 
         gSfxUIButton = AEAudioLoadSound(SFX_UI_CLICK);
         gSfxCannonFire = AEAudioLoadSound(SFX_CANNON_FIRE);
@@ -355,10 +340,7 @@ namespace AudioManager {
             AEAudioStopGroup(gSfxGroup);
         }
 
-        if (IsValidAudio(gBgmMainMenu))  AEAudioUnloadAudio(gBgmMainMenu);
-        if (IsValidAudio(gBgmMapEditor)) AEAudioUnloadAudio(gBgmMapEditor);
-        if (IsValidAudio(gBgmLevel))     AEAudioUnloadAudio(gBgmLevel);
-        if (IsValidAudio(gBgmCredits))   AEAudioUnloadAudio(gBgmCredits);
+        if (IsValidAudio(gBgm)) AEAudioUnloadAudio(gBgm);
 
         if (IsValidAudio(gSfxUIButton))   AEAudioUnloadAudio(gSfxUIButton);
         if (IsValidAudio(gSfxCannonFire)) AEAudioUnloadAudio(gSfxCannonFire);
@@ -378,10 +360,7 @@ namespace AudioManager {
         gBgmGroup = AEAudioGroup{};
         gSfxGroup = AEAudioGroup{};
 
-        gBgmMainMenu = AEAudio{};
-        gBgmMapEditor = AEAudio{};
-        gBgmLevel = AEAudio{};
-        gBgmCredits = AEAudio{};
+        gBgm = AEAudio{};
 
         gSfxUIButton = AEAudio{};
         gSfxCannonFire = AEAudio{};

@@ -359,7 +359,7 @@ namespace Settings {
         sfxVolumeDownButton.Update();
         sfxVolumeUpButton.Update();
 
-        UICursor::Draw();
+
         CameraManager::camera.SetPosition(savedCamPos);
     }
 

@@ -1431,8 +1431,6 @@ namespace Guide {
             gameGuideButton.Update();
             abilitiesGuideButton.Update();
         }
-
-        UICursor::Draw();
     }
 
     void Free() {}
