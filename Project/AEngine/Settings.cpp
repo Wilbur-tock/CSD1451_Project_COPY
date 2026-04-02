@@ -36,6 +36,7 @@ namespace Settings {
 
     AEGfxTexture* bgTexture = nullptr;
     AEGfxTexture* btnTexture = nullptr;
+    AEGfxTexture* btnTexture2 = nullptr;
 
     TextObject titleText;
     TextObject hintText;
@@ -141,8 +142,8 @@ namespace Settings {
         int pct = static_cast<int>(value * 100.0f + 0.5f);
         std::string pctStr = std::to_string(pct) + "%";
 
-        float pctX = SLIDER_LEFT_X + SLIDER_W + 70.0f;
-        float pctY = sliderY + 25.0f;
+        float pctX = SLIDER_LEFT_X + SLIDER_W - 220.0f;
+        float pctY = sliderY + 30.0f;
         Utils::NormalizeCoordinates(pctX, pctY);
 
         TextObject pctText = TextObject{
@@ -164,6 +165,7 @@ namespace Settings {
     void Load() {
         bgTexture = AssetsManager::GetTexture("Assets/level_sky.png");
         btnTexture = AssetsManager::GetTexture("Assets/buttonTexture.png");
+        btnTexture2 = AssetsManager::GetTexture("Assets/buttonTexture2.png");
     }
 
     void Initialize() {
@@ -177,7 +179,7 @@ namespace Settings {
         float btnW = 220.0f, btnH = 70.0f;
         AEVec2 backPos = { -btnW / 2.0f, -250.0f };
         backButton = Button(
-            TextObject{ "< BACK" },
+            TextObject{ "BACK" },
             Utils::AnchorMode::CENTER,
             backPos,
             { btnW, btnH },
@@ -197,7 +199,7 @@ namespace Settings {
             { leftButtonX, MASTER_Y + 8.0f },
             { smallBtnW, smallBtnH },
             Color(0.7f, 0.3f, 0.3f, 1.0f),
-            btnTexture,
+            btnTexture2,
             nullptr,
             OnMasterVolumeDownClicked
         );
@@ -208,7 +210,7 @@ namespace Settings {
             { rightButtonX, MASTER_Y + 8.0f },
             { smallBtnW, smallBtnH },
             Color(0.3f, 0.7f, 0.3f, 1.0f),
-            btnTexture,
+            btnTexture2,
             nullptr,
             OnMasterVolumeUpClicked
         );
@@ -219,7 +221,7 @@ namespace Settings {
             { leftButtonX, BGM_Y + 8.0f },
             { smallBtnW, smallBtnH },
             Color(0.7f, 0.3f, 0.3f, 1.0f),
-            btnTexture,
+            btnTexture2,
             nullptr,
             OnBGMVolumeDownClicked
         );
@@ -230,7 +232,7 @@ namespace Settings {
             { rightButtonX, BGM_Y + 8.0f },
             { smallBtnW, smallBtnH },
             Color(0.3f, 0.7f, 0.3f, 1.0f),
-            btnTexture,
+            btnTexture2,
             nullptr,
             OnBGMVolumeUpClicked
         );
@@ -241,7 +243,7 @@ namespace Settings {
             { leftButtonX, SFX_Y + 8.0f },
             { smallBtnW, smallBtnH },
             Color(0.7f, 0.3f, 0.3f, 1.0f),
-            btnTexture,
+            btnTexture2,
             nullptr,
             OnSFXVolumeDownClicked
         );
@@ -252,7 +254,7 @@ namespace Settings {
             { rightButtonX, SFX_Y + 8.0f },
             { smallBtnW, smallBtnH },
             Color(0.3f, 0.7f, 0.3f, 1.0f),
-            btnTexture,
+            btnTexture2,
             nullptr,
             OnSFXVolumeUpClicked
         );

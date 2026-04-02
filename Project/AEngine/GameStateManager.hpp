@@ -14,6 +14,7 @@ All content © 2026 DigiPen Institute of Technology Singapore. All Rights Reserve
 namespace GameStateManager {
 	enum class GameState {
 		INITIALIZE,
+		SPLASH,      // DigiPen logo shown once on first launch
 		MAIN_MENU,
 		LEVEL_SELECT,
 		MAP_EDITOR,

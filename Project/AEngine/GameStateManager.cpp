@@ -28,6 +28,8 @@ All content © 2026 DigiPen Institute of Technology Singapore. All Rights Reser
 #include "LevelSelect.hpp"
 #include "GameTrackingManager.hpp"
 #include "ParticlesManager.hpp"
+#include "ConfirmDialog.hpp"
+#include "Splash.hpp"
 
 namespace GameStateManager {
     // State variables
@@ -53,7 +55,7 @@ namespace GameStateManager {
         srand(static_cast<unsigned int>(time(NULL)));
 
         current = previous = GameState::INITIALIZE;
-        next = GameState::MAIN_MENU;
+        next = GameState::SPLASH; // show DigiPen logo before entering the main menu
 
         gsLoad = gsIntialize = gsUpdate = gsDraw = gsFree = gsUnload = nullptr;
         setNewState = false;
@@ -75,7 +77,11 @@ namespace GameStateManager {
 
         // Initialize objects after loading
 
-        Loading::Init();
+        // Pass 0.0f so the timer starts at zero -- if the default duration were
+        // used here, loadingTimer would be 0.9 when the first frame runs and
+        // the loading screen would appear in front of the splash screen even
+        // though the transition code skips calling Loading::Init() for SPLASH.
+        Loading::Init(0.0f);
         PauseMenu::Init();
 
         CameraManager::camera.Init();
@@ -97,7 +103,9 @@ namespace GameStateManager {
             Utils::isInstructionOn = false;
 
             if (!setNewState) {
-                if (next != GameState::QUIT) {
+                // Skip the loading screen only when transitioning TO the splash
+                if (next != GameState::QUIT
+                    && next != GameState::SPLASH) {
                     Loading::Init();
                 }
                 setNewState = true;
@@ -121,6 +129,11 @@ namespace GameStateManager {
             if (AEInputCheckTriggered(AEVK_ESCAPE)) {
                 AudioManager::PlaySFX(AudioManager::SFX::UIButton);
                 Utils::isPaused = !Utils::isPaused;
+
+                // If ESC just closed the pause menu, dismiss any open confirmation dialog
+                if (!Utils::isPaused) {
+                    ConfirmDialog::Close();
+                }
             }
         }
 
@@ -205,6 +218,13 @@ namespace GameStateManager {
         setNewState = false;
 
         switch (current) {
+        case GameState::SPLASH:
+            gsIntialize = Splash::Initialize;
+            gsUpdate = Splash::Update;
+            gsDraw = Splash::Draw;
+            gsFree = Splash::Free;
+            break;
+
         case GameState::MAIN_MENU:
             gsIntialize = MainMenu::Initialize;
             gsUpdate = MainMenu::Update;

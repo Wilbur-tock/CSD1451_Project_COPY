@@ -117,6 +117,7 @@ xcopy "$(SolutionDir)Extern\AlphaEngine\lib\fmod.dll" "$(OutDir)" /s /r /y /q</C
     <ClCompile Include="Collider.cpp" />
     <ClCompile Include="CollisionManager.cpp" />
     <ClCompile Include="Color.cpp" />
+    <ClCompile Include="ConfirmDialog.cpp" />
     <ClCompile Include="Credits.cpp" />
     <ClCompile Include="Character.cpp" />
     <ClCompile Include="EffectsManager.cpp" />
@@ -132,6 +133,7 @@ xcopy "$(SolutionDir)Extern\AlphaEngine\lib\fmod.dll" "$(OutDir)" /s /r /y /q</C
     <ClCompile Include="GameTrackingManager.cpp" />
     <ClCompile Include="ResultsUI.cpp" />
     <ClCompile Include="Settings.cpp" />
+    <ClCompile Include="Splash.cpp" />
     <ClCompile Include="TileIndex.cpp" />
     <ClCompile Include="Level.cpp" />
     <ClCompile Include="LevelManager.cpp" />
@@ -168,6 +170,7 @@ xcopy "$(SolutionDir)Extern\AlphaEngine\lib\fmod.dll" "$(OutDir)" /s /r /y /q</C
     <ClInclude Include="CollisionManager.hpp" />
     <ClInclude Include="Color.hpp" />
     <ClInclude Include="Config.hpp" />
+    <ClInclude Include="ConfirmDialog.hpp" />
     <ClInclude Include="Credits.hpp" />
     <ClInclude Include="Character.hpp" />
     <ClInclude Include="EffectsManager.hpp" />
@@ -185,6 +188,7 @@ xcopy "$(SolutionDir)Extern\AlphaEngine\lib\fmod.dll" "$(OutDir)" /s /r /y /q</C
     <ClInclude Include="PauseMenu.hpp" />
     <ClInclude Include="ResultsUI.hpp" />
     <ClInclude Include="Settings.hpp" />
+    <ClInclude Include="Splash.hpp" />
     <ClInclude Include="TileIndex.hpp" />
     <ClInclude Include="Level.hpp" />
     <ClInclude Include="LevelManager.hpp" />
