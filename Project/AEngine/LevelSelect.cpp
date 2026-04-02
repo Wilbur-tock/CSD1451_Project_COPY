@@ -40,6 +40,7 @@ namespace LevelSelect {
         constexpr float kLevelButtonSize = 170.0f;
         constexpr float kLevelButtonGap = 50.0f;
         constexpr float kLevelButtonRowCenterY = 40.0f;
+        constexpr int kLastSelectableLevelHotkey = 3;
 
         AEVec2 GetLevelButtonTopLeft(int buttonIndex, int totalButtons, float buttonSize, float gap, float rowCenterY) {
             const float groupWidth = (totalButtons * buttonSize) + ((totalButtons - 1) * gap);
