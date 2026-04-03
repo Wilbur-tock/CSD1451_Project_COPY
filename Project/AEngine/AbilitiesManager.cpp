@@ -577,20 +577,16 @@ namespace AbilitiesManager {
 		std::string abilityName = ability.GetName();
 
 		if (abilityName == "Max Heal" || abilityName == "Major Heal" || abilityName == "Minor Heal") {
-			AudioManager::PlayInstantAbilitySFX(abilityName);
-			std::cout << "[Abilities] UseStatsAbility called with: " << abilityName << "\n";
-
 			for (Character& character : LevelManager::CurrentLevel()->GetCharacters(isPlayerControlled)) {
 				character.attribute.Heal(static_cast<float>(ability.GetStats().hp / 100.0f));
 			}
 		}
 		else if (abilityName == "Invincibility" || abilityName == "Attack Boost" || abilityName == "Defense Boost") {
-			//keep only if the sound is a short "buff activate" cue
-			AudioManager::PlayInstantAbilitySFX(abilityName);
-			std::cout << "[Abilities] Playing instant SFX for: " << abilityName << "\n";
 			isStatsAbilityActive = true;
 		}
 
+		//keep only if the sound is a short "buff activate" cue
+		AudioManager::PlayInstantAbilitySFX(abilityName);
 		UseAbilityWithModifier(ability);
 	}
 

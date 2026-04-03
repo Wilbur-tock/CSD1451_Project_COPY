@@ -11,10 +11,7 @@ All content © 2026 DigiPen Institute of Technology Singapore. All Rights Reserve
 #include "GameStateManager.hpp"
 #include "CameraManager.hpp"
 #include "UIManager.hpp"
-#include "Config.hpp"
 #include "Color.hpp"
-#include "AEEngine.h"
-#include <fstream>
 
 namespace Splash {
 

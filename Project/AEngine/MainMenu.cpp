@@ -186,7 +186,7 @@ namespace MainMenu {
         gameTitle.Draw();
 
         // Draw subtitle / instructions
-        instructions.Draw();
+        //instructions.Draw();
     }
 
     void Update() {

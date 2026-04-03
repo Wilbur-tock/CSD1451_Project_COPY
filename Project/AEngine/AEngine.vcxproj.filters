@@ -258,10 +258,10 @@
     <ClCompile Include="TowerShield.cpp">
       <Filter>Source Files\Components</Filter>
     </ClCompile>
-    <ClCompile Include="ConfirmDialog.cpp">
-      <Filter>Source Files\Game States</Filter>
-    </ClCompile>
     <ClCompile Include="Splash.cpp">
+      <Filter>Source Files\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="ConfirmDialog.cpp">
       <Filter>Source Files\UI</Filter>
     </ClCompile>
   </ItemGroup>
@@ -413,10 +413,10 @@
     <ClInclude Include="Tutorial.hpp">
       <Filter>Header Files\Others</Filter>
     </ClInclude>
-    <ClInclude Include="ConfirmDialog.hpp">
-      <Filter>Header Files\Game States</Filter>
-    </ClInclude>
     <ClInclude Include="Splash.hpp">
+      <Filter>Header Files\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="ConfirmDialog.hpp">
       <Filter>Header Files\UI</Filter>
     </ClInclude>
   </ItemGroup>

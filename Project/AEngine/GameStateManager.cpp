@@ -103,9 +103,8 @@ namespace GameStateManager {
             Utils::isInstructionOn = false;
 
             if (!setNewState) {
-                // Skip the loading screen only when transitioning TO the splash
-                if (next != GameState::QUIT
-                    && next != GameState::SPLASH) {
+                // Skip the loading screen for certain stats
+                if (next != GameState::QUIT && next != GameState::SPLASH) {
                     Loading::Init();
                 }
                 setNewState = true;

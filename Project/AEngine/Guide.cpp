@@ -906,10 +906,11 @@ namespace Guide {
                 "4. Let the projectile fully finish resolving.\n"
                 "5. The turn then passes to the other side.\n"
                 "6. Pick ability cards when they appear.\n\n"
-                "ABILITY GROUPS\n"
+                "ABILITY\n"
                 "[OFFENSIVE] Attack-focused and damage-focused abilities.\n"
                 "[DEFENSIVE] Protective, support, and control abilities.\n"
-                "[UTILITY] Utility is shown as a ROLE inside the abilities table and detail panel.\n\n"
+                "[STATS] Boost to deal more damage or defend better.\n"
+                //"[UTILITY] Utility is shown as a ROLE inside the abilities table and detail panel.\n\n"
                 //"SMART TIPS\n"
                 //"Use terrain as cover instead of firing blindly.\n"
                 //"Large-radius attacks are strongest against clustered blocks.\n"
@@ -1273,8 +1274,8 @@ namespace Guide {
             nullptr,
             OnBackClicked);
 
-        const float menuButtonWidth = 300.0f;
-        const float menuButtonHeight = 110.0f;
+        const float menuButtonWidth = 250.0f;
+        const float menuButtonHeight = 100.0f;
         const float menuButtonGap = 70.0f;
 
         // These are the visual centers we actually want on screen.
@@ -1293,7 +1294,7 @@ namespace Guide {
         const float rightButtonPosX = rightVisualCenterX - (menuButtonWidth * 0.5f);
 
         gameGuideButton = Button(
-            TextObject("GAME GUIDE"),
+            TextObject("GAME GUIDE", 0.75f),
             Utils::AnchorMode::CENTER,
             { leftButtonPosX, buttonPosY },
             { menuButtonWidth, menuButtonHeight },
@@ -1303,7 +1304,7 @@ namespace Guide {
             OnGameGuideClicked);
 
         abilitiesGuideButton = Button(
-            TextObject("ABILITIES GUIDE"),
+            TextObject("ABILITIES GUIDE", 0.75f),
             Utils::AnchorMode::CENTER,
             { rightButtonPosX, buttonPosY },
             { menuButtonWidth, menuButtonHeight },
