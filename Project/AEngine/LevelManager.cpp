@@ -80,6 +80,7 @@ namespace LevelManager {
 			std::cerr << "Can't open " << LEVEL_DATA_PATH << std::endl;
 		}
 		else {
+			// Read each level data
 			int id = 0;
 			std::string levelName = "";
 
@@ -97,9 +98,7 @@ namespace LevelManager {
 
 				levelDatas[id].Difficulty(diff);
 
-				// Sandbox does not participate in progression tracking.
-				// Only campaign levels update the saved progression state.
-				if (IsCampaignLevel(id) && isUnlocked) {
+				if (isUnlocked && IsCampaignLevel(id)) {
 					highestUnlockedCampaignLevel = (highestUnlockedCampaignLevel > id) ? highestUnlockedCampaignLevel : id;
 				}
 
