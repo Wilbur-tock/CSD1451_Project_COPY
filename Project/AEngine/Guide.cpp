@@ -155,6 +155,15 @@ namespace Guide {
             return "UNKNOWN";
         }
 
+        std::string GroupToDisplayString(AbilityGroup group) {
+            switch (group) {
+            case AbilityGroup::STATS:     return "Stats";
+            case AbilityGroup::OFFENSIVE: return "Offensive";
+            case AbilityGroup::DEFENSIVE: return "Defensive";
+            }
+            return "Unknown";
+        }
+
         std::string RoleToString(AbilityRole role) {
             switch (role) {
             case AbilityRole::ATTACK:     return "Attack";
@@ -890,7 +899,7 @@ namespace Guide {
             case GuideView::GAME:
                 return "[BACK] Return to Guide Menu   |   [2] Open Abilities Guide";
             case GuideView::ABILITIES:
-                return "Click an ability row to inspect   |   [W/S or Up/Down or Mouse Wheel] Scroll   |   [BACK] Return to Guide Menu";
+                return "Click an ability row to inspect   |   [Mouse Wheel] Scroll   |   [BACK] Return to Guide Menu";
             }
             return "";
         }
@@ -1173,14 +1182,29 @@ namespace Guide {
                     Color(1.0f, 1.0f, 1.0f, 1.0f));
             }
 
-            DrawTextLeftPx(entry.displayName, DETAIL_CENTER_X - 35.0f, 214.0f, 0.62f, Color(0.05f, 0.07f, 0.10f, 1.0f));
-            DrawTextLeftPx(GroupToString(entry.group), DETAIL_CENTER_X - 35.0f, 187.0f, 0.46f, GroupHeaderColor(entry.group));
-            DrawTextLeftPx("Role: " + RoleToString(entry.role), DETAIL_CENTER_X - 35.0f, 175.0f, 0.44f, RoleColor(entry.role));
+            DrawTextLeftPx(
+                entry.displayName,
+                DETAIL_CENTER_X - 35.0f,
+                214.0f,
+                0.70f,
+                Color(0.05f, 0.07f, 0.10f, 1.0f));
 
-            const float descriptionBoxHeight = 132.0f;
-            const float descriptionBoxCenterY = 8.0f;
-            const float statsBoxHeight = 122.0f;
-            const float statsBoxCenterY = -170.0f;
+            DrawTextLeftPx(
+                "Type: " + GroupToDisplayString(entry.group),
+                DETAIL_CENTER_X - 35.0f,
+                187.0f,
+                0.70f,
+                GroupHeaderColor(entry.group));
+
+            DrawTextLeftPx(
+                "Tier: " + std::to_string(entry.raw.value("Tier", 0)),
+                DETAIL_CENTER_X - 35.0f,
+                169.0f,
+                0.70f,
+                Color(0.30f, 0.30f, 0.30f, 1.0f));
+
+            const float descriptionBoxHeight = 305.0f;
+            const float descriptionBoxCenterY = -78.5f;
 
             UIManager::Panel descriptionBox(
                 { DETAIL_WIDTH - 34.0f, descriptionBoxHeight },
@@ -1189,54 +1213,23 @@ namespace Guide {
             descriptionBox.AddOffsetPosition({ DETAIL_CENTER_X, descriptionBoxCenterY });
             descriptionBox.Draw();
 
-            DrawTextLeftPx("DESCRIPTION", leftX, 80.0f, 0.5f, Color(0.05f, 0.07f, 0.10f, 1.0f));
+            DrawTextLeftPx(
+                "DESCRIPTION",
+                leftX,
+                80.0f,
+                0.65f,
+                Color(0.05f, 0.07f, 0.10f, 1.0f));
 
             DrawWrappedTextLeftPxLimited(
                 BuildAbilityDescription(entry),
                 leftX,
                 44.0f,
-                0.50f,
+                0.60f,
                 Color(0.12f, 0.12f, 0.12f, 1.0f),
                 55,
                 18.0f,
-                4
+                12
             );
-
-            DrawTextLeftPx("KEY STATS", leftX, -92.0f, 0.50f, Color(0.05f, 0.07f, 0.10f, 1.0f));
-
-            UIManager::Panel statsBox(
-                { DETAIL_WIDTH - 34.0f, statsBoxHeight },
-                Color(0.94f, 0.95f, 0.97f, 1.0f),
-                Utils::AnchorMode::CENTER);
-            statsBox.AddOffsetPosition({ DETAIL_CENTER_X, statsBoxCenterY });
-            statsBox.Draw();
-
-            std::vector<std::string> statLines = BuildStatLines(entry);
-
-            const float column1X = leftX;
-            const float column2X = leftX + 220.0f;
-            float y1 = -122.0f;
-            float y2 = -122.0f;
-
-            int maxTotalLines = 6;
-            int visibleLines = std::min<int>(static_cast<int>(statLines.size()), maxTotalLines);
-
-            for (int i = 0; i < visibleLines; ++i) {
-                const std::string text = "- " + statLines[i];
-
-                if (i < 3) {
-                    DrawTextLeftPx(text, column1X, y1, 0.45f, Color(0.12f, 0.12f, 0.12f, 1.0f));
-                    y1 -= 19.0f;
-                }
-                else {
-                    DrawTextLeftPx(text, column2X, y2, 0.45f, Color(0.12f, 0.12f, 0.12f, 1.0f));
-                    y2 -= 19.0f;
-                }
-            }
-
-            if (static_cast<int>(statLines.size()) > maxTotalLines) {
-                DrawTextLeftPx("...", column2X, y2, 0.39f, Color(0.12f, 0.12f, 0.12f, 1.0f));
-            }
         }
     }
 
@@ -1402,13 +1395,6 @@ namespace Guide {
             }
         }
         else if (currentView == GuideView::ABILITIES) {
-            if (AEInputCheckTriggered(AEVK_W) || AEInputCheckTriggered(AEVK_UP)) {
-                ScrollAbilityList(-1);
-            }
-            if (AEInputCheckTriggered(AEVK_S) || AEInputCheckTriggered(AEVK_DOWN)) {
-                ScrollAbilityList(+1);
-            }
-
             s32 wheelDelta = 0;
             AEInputMouseWheelDelta(&wheelDelta);
             if (wheelDelta > 0) {
