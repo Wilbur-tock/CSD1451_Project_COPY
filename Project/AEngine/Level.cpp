@@ -414,14 +414,12 @@ void Level::Update() {
 		enemy.Update();
 	}
 
-	// UI
-	UpdateUI();
 	// Need to be below Draw to ensure that the Ability Selector UI is shows up infront of the level
 	prevIsAbilitySelectorOn = AbilitiesManager::playerAbilityController.IsSelectingAbility();
-	AbilitiesManager::playerAbilityController.UpdateAbilitySelector();
 
+	// UI
+	UpdateUI();
 	DrawUI();
-
 
 	// Timer to prevent accidently shooting after selecting an ability
 	if (AbilitiesManager::playerAbilityController.IsSelectingAbility() != prevIsAbilitySelectorOn) {
@@ -531,6 +529,9 @@ void Level::DrawUI() {
 	activeCannon->DrawUI();
 	activeCannon->AbilityController()->DrawAbilityInventoryUI();
 	activeCannon->DebugInfo();
+
+	// Draw ability selector UI if its on
+	AbilitiesManager::playerAbilityController.UpdateAbilitySelector();
 
 	// Always the last one to be drawn so that it will always appear infront
 	notificationPanel.Draw();
