@@ -46,6 +46,7 @@ and supporters
 ## === Tools & Libraries ===
 
 Alpha Engine
+nlohmann::JSON
 Assets by Kenney (www.kenney.nl)
 Liberation Mono Font
 Caviar Dreams Bold Font

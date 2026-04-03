@@ -101,7 +101,7 @@ namespace GameStateManager {
 
             if (!setNewState) {
                 // Skip the loading screen for certain stats
-                if (next != GameState::QUIT && next != GameState::SPLASH) {
+                if (next != GameState::QUIT && next != GameState::SPLASH && next != GameState::MAIN_MENU) {
                     Loading::Init();
                 }
                 setNewState = true;

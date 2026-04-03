@@ -125,8 +125,8 @@ private:
 	int previousAbilityCharges = 0;
 	std::string name = "";
 	std::string description = "";
-	AbilityType type;
-	Tier tier;
+	AbilityType type = AbilityType::STATS;
+	Tier tier = Tier::BRONZE;
 	AEGfxTexture* texture = nullptr;
 
 	// 0.0 - 1.0f chance to be choosen by ability selector

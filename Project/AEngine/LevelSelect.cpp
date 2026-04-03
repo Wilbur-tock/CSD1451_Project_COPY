@@ -35,7 +35,8 @@ namespace LevelSelect {
         TextObject hintText;
 
         AEGfxTexture* bgTexture = nullptr;
-        AEGfxTexture* buttonTexture = nullptr;
+        AEGfxTexture* rectButtonTexture = nullptr;
+        AEGfxTexture* squareButtonTexture = nullptr;
 
         constexpr float kLevelButtonSize = 170.0f;
         constexpr float kLevelButtonGap = 50.0f;
@@ -86,7 +87,7 @@ namespace LevelSelect {
                 topLeftPos,
                 { buttonSize, buttonSize },
                 buttonColor,
-                AssetsManager::squareTexture
+                squareButtonTexture
             );
         }
 
@@ -119,7 +120,8 @@ namespace LevelSelect {
 
     void Load() {
         bgTexture = AssetsManager::GetTexture("Assets/game_bg.png");
-        buttonTexture = AssetsManager::GetTexture("Assets/buttonTexture.png");
+        rectButtonTexture = AssetsManager::GetTexture("Assets/buttonTexture.png");
+        squareButtonTexture = AssetsManager::GetTexture("Assets/buttonTexture2.png");
 
         // Load shared animated background assets (clouds + cannonball projectiles)
         BgAnimation::Load();
@@ -138,12 +140,12 @@ namespace LevelSelect {
         RefreshLevelButtons();
 
         backButton = Button(
-            TextObject{ "< BACK", 0.85f, Color{ 1,1,1 } },
+            TextObject{ "BACK", 0.85f, Color{ 1,1,1 } },
             Utils::AnchorMode::CENTER,
-            { -370.0f, -250.0f },
+            { -150.0f, -250.0f },
             { 300.0f, 75.0f },
             Color(0.70f, 0.22f, 0.18f, 1.0f),
-            buttonTexture,
+            rectButtonTexture,
             nullptr,
             []() {
                 AudioManager::PlaySFX(AudioManager::SFX::UIButton);
@@ -157,7 +159,7 @@ namespace LevelSelect {
             { 60.0f, -250.0f },
             { 300.0f, 75.0f },
             Color(0.90f, 0.58f, 0.18f, 1.0f),
-            buttonTexture,
+            rectButtonTexture,
             nullptr,
             []() {
                 AudioManager::PlaySFX(AudioManager::SFX::UIButton);
@@ -254,7 +256,7 @@ namespace LevelSelect {
         }
 
         backButton.Update();
-        resetProgressButton.Update();
+        //resetProgressButton.Update();
     }
 
     void Free() {
