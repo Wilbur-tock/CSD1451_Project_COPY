@@ -756,7 +756,6 @@ void Level::UpdateLevelStatus() {
 	// Unlock the next level once, only when victory happens
 	if (status == LevelStatus::PLAYER_WON && !hasProcessedVictory) {
 		LevelManager::UnlockNextLevel(levelId);
-		// RecordWin calls SaveProgress internally, so the count persists immediately.
 		LevelManager::RecordWin(levelId);
 		hasProcessedVictory = true;
 	}

@@ -33,15 +33,6 @@ namespace LevelManager {
 			levelIndex < Config::TOTAL_LEVEL_COUNT;
 	}
 
-	bool ComputeUnlockedState(int levelIndex) {
-		if (IsSandboxLevel(levelIndex)) {
-			return true;
-		}
-
-		return IsCampaignLevel(levelIndex) &&
-			levelIndex <= highestUnlockedCampaignLevel;
-	}
-
 	void SaveLevelData() {
 		std::ofstream ofs{ LEVEL_DATA_PATH };
 		if (!ofs.is_open()) {
@@ -57,7 +48,7 @@ namespace LevelManager {
 
 			ofs << "Level" << i
 				<< ":\nDifficulty: " << static_cast<int>(levelData.Difficulty())
-				<< "\nIsUnlocked: " << static_cast<int>(ComputeUnlockedState(i))
+				<< "\nIsUnlocked: " << static_cast<int>(i <= highestUnlockedCampaignLevel)
 				<< "\nWins: " << wins
 				<< "\nLosses: " << losses
 				<< "\n\n";
@@ -153,8 +144,7 @@ namespace LevelManager {
 			return true;
 		}
 
-		return IsCampaignLevel(levelIndex) &&
-			levelIndex <= highestUnlockedCampaignLevel;
+		return IsCampaignLevel(levelIndex) && levelIndex <= highestUnlockedCampaignLevel;
 	}
 
 	int HighestUnlockedLevel() {
@@ -171,7 +161,7 @@ namespace LevelManager {
 	}
 
 	void UnlockNextLevel(int completedLevelIndex) {
-		const int nextLevelIndex = completedLevelIndex + 1;
+		int const nextLevelIndex = completedLevelIndex + 1;
 
 		// This automatically ignores invalid/final-next cases.
 		UnlockLevel(nextLevelIndex);
