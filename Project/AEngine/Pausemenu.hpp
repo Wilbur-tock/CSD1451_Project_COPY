@@ -15,7 +15,7 @@ All content © 2026 DigiPen Institute of Technology Singapore. All Rights Reserve
 namespace PauseMenu {
 
     // Initialize buttons and text objects (call once after assets are loaded)
-    void Init();
+    void Initialize();
 
     // Draw the pause overlay and handle input.
     // Returns true while the menu is still active (game should stay paused).

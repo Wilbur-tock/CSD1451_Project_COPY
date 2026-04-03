@@ -77,12 +77,9 @@ namespace GameStateManager {
 
         // Initialize objects after loading
 
-        // Pass 0.0f so the timer starts at zero -- if the default duration were
-        // used here, loadingTimer would be 0.9 when the first frame runs and
-        // the loading screen would appear in front of the splash screen even
-        // though the transition code skips calling Loading::Init() for SPLASH.
         Loading::Init(0.0f);
-        PauseMenu::Init();
+        PauseMenu::Initialize();
+        Settings::Initialize();
 
         CameraManager::camera.Init();
         ParticleManager::particleController.Init();
@@ -136,48 +133,37 @@ namespace GameStateManager {
             }
         }
 
+        // Draw current state
+        if (gsDraw) {
+            gsDraw();
+        }
+
         if (Utils::isPaused) {
             PhysicsManager::g_dt = 0.0f;
-
-            if (gsDraw != nullptr) {
-                gsDraw();
-            }
 
             if (Utils::isSettingsOpen) {
                 Settings::Update();
             }
             else {
                 PauseMenu::Update();
-                UICursor::Draw();
             }
-
-            return;
         }
 
-        // UNPAUSE COOLDOWN
+        // UNPAUSE COOLDOWN to add delay
         if (Utils::unpauseCooldown > 0.0f) {
             Utils::unpauseCooldown -= rawDt;
-            PhysicsManager::g_dt = 0.0f;
-
-            if (gsDraw != nullptr) {
-                gsDraw();
-            }
-
-            UICursor::Draw();
-            return;
         }
 
-        if (Utils::isInstructionOn) {
-            PhysicsManager::g_dt = 0.0f;
-        }
+        bool canUpdate = !Utils::isPaused && !Utils::isInstructionOn && Utils::unpauseCooldown <= 0.0f;
 
-        // Update game play loop
-        if (gsUpdate && !Utils::isInstructionOn) {
+        // Update current state update game loop
+        if (gsUpdate && canUpdate) {
             gsUpdate();
         }
 
         DebugCommands();
         DebugUI();
+
         UICursor::Draw();
 
         if (Utils::isInstructionOn) {
@@ -292,8 +278,6 @@ namespace GameStateManager {
         }
 
         SetAndPlayBGM();
-
-        CameraManager::camera.Update(0.0f);
     }
 
     static void DebugCommands() {

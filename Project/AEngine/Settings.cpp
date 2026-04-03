@@ -98,7 +98,7 @@ namespace Settings {
         labelText.Draw();
 
         // Slider track
-        GraphicsManager::DrawWorldUI(
+        GraphicsManager::DrawScreenOverlay(
             nullptr,
             GraphicsManager::CreateTransformMatrix(
                 SLIDER_LEFT_X, sliderY,
@@ -109,7 +109,7 @@ namespace Settings {
         // Slider fill
         float fillW = value * SLIDER_W;
         if (fillW > 1.0f) {
-            GraphicsManager::DrawWorldUI(
+            GraphicsManager::DrawScreenOverlay(
                 nullptr,
                 GraphicsManager::CreateTransformMatrix(
                     SLIDER_LEFT_X, sliderY,
@@ -121,7 +121,7 @@ namespace Settings {
         // Knob
         float knobX = VolumeToKnobX(value);
         float knobSz = 44.0f;
-        GraphicsManager::DrawWorldUI(
+        GraphicsManager::DrawScreenOverlay(
             nullptr,
             GraphicsManager::CreateTransformMatrix(
                 knobX - knobSz / 2.0f, sliderY + 7.0f,
@@ -130,7 +130,7 @@ namespace Settings {
         );
 
         float innerSz = 22.0f;
-        GraphicsManager::DrawWorldUI(
+        GraphicsManager::DrawScreenOverlay(
             nullptr,
             GraphicsManager::CreateTransformMatrix(
                 knobX - innerSz / 2.0f, sliderY,
@@ -276,7 +276,7 @@ namespace Settings {
 
     void Draw() {
         if (bgTexture) {
-            GraphicsManager::DrawWorldUI(
+            GraphicsManager::DrawScreenOverlay(
                 bgTexture,
                 GraphicsManager::CreateTransformMatrix(
                     -Config::SCREEN_WIDTH / 2.0f, Config::SCREEN_HEIGHT / 2.0f,
@@ -296,14 +296,21 @@ namespace Settings {
         DrawSliderRow("SFX", SFX_Y, currentSfxVolume);
     }
 
+    AEVec2 savedCamPos{ 0,0 };
+    bool hasSetCamPos = false;
+
     void Update() {
-        AEVec2 savedCamPos = CameraManager::camera.GetPosition();
-        CameraManager::camera.SetPosition({ 0.0f, 0.0f });
+        if (!hasSetCamPos) {
+            savedCamPos = CameraManager::camera.GetPosition();
+            std::cout << savedCamPos.x << ' ' << savedCamPos.y << '\n';
+            hasSetCamPos = true;
+
+            CameraManager::camera.SetPosition({ 0.0f, 0.0f });
+        }
 
         if (AEInputCheckTriggered(AEVK_ESCAPE) || AEInputCheckTriggered(AEVK_BACK)) {
             AudioManager::PlaySFX(AudioManager::SFX::UIButton);
             OnBackClicked();
-            CameraManager::camera.SetPosition(savedCamPos);
             return;
         }
 
@@ -358,9 +365,6 @@ namespace Settings {
 
         sfxVolumeDownButton.Update();
         sfxVolumeUpButton.Update();
-
-
-        CameraManager::camera.SetPosition(savedCamPos);
     }
 
     void Free() {
@@ -370,6 +374,11 @@ namespace Settings {
     void Unload() {}
 
     void OnBackClicked() {
+        if (hasSetCamPos) {
+            CameraManager::camera.SetPosition(savedCamPos);
+            hasSetCamPos = false;
+        }
+
         currentDragTarget = DragTarget::None;
         AudioManager::SaveSettings();
 

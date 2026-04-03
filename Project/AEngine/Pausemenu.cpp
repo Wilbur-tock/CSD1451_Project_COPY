@@ -34,7 +34,7 @@ namespace PauseMenu {
     static AEGfxTexture* btnTexture = nullptr;
 
     // -----------------------------------------------------------------------
-    void Init() {
+    void Initialize() {
         if (isInitialized) return; // If Init() has already run, do nothing and return immediately.
         // Without this, every call to Init() would reconstruct all buttons
         // and reset their state.
@@ -42,7 +42,7 @@ namespace PauseMenu {
         btnTexture = AssetsManager::GetTexture("Assets/buttonTexture.png"); // Fetch from cache
         // (loaded by MainMenu::Load)
 
-// Button dimensions
+        // Button dimensions
         float btnW = 300.0f; // Width of every button in world units
         float btnH = 70.0f;  // Height of every button in world units
         float spacing = 90.0f;  // Vertical distance between button top-left corners

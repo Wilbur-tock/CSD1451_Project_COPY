@@ -158,7 +158,7 @@ namespace ConfirmDialog {
         UIManager::Panel dimOverlay{
             { static_cast<float>(Config::SCREEN_WIDTH),
               static_cast<float>(Config::SCREEN_HEIGHT) },
-            Color(0.0f, 0.0f, 0.0f, 0.70f),
+            Color(0.0f, 0.0f, 0.0f, 0.90f),
             Utils::AnchorMode::CENTER
         };
         dimOverlay.Draw();

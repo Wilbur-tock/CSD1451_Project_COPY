@@ -1265,7 +1265,7 @@ namespace Guide {
         contentPanel.AddOffsetPosition({ 0.0f, 5.0f });
 
         backButton = Button(
-            TextObject("< BACK"),
+            TextObject("BACK"),
             Utils::AnchorMode::CENTER,
             { -680.0f, -300.0f },
             { 220.0f, 70.0f },
