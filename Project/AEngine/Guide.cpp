@@ -1217,14 +1217,14 @@ namespace Guide {
                 "DESCRIPTION",
                 leftX,
                 80.0f,
-                0.65f,
+                0.80f,
                 Color(0.05f, 0.07f, 0.10f, 1.0f));
 
             DrawWrappedTextLeftPxLimited(
                 BuildAbilityDescription(entry),
                 leftX,
                 44.0f,
-                0.60f,
+                0.55f,
                 Color(0.12f, 0.12f, 0.12f, 1.0f),
                 55,
                 18.0f,
