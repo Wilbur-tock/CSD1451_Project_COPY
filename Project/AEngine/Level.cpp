@@ -914,12 +914,15 @@ void Level::DebugCommands() {
 
 	// Input MOUSE RIGHT CLICK to remove tile blocks or damage characters during in game
 	Tile& tile = *(MapManager::FindTile({ gridX, gridY }));
-	if (CollisionManager::IsPointInGameObject(tile)) {
-		if (AEInputCheckCurr(AEVK_RBUTTON)) {
-			int damage = 50;
-			if (tile.IsDestructible()) {
-				tile.TakeDamage(damage);
-			}
+	if (CollisionManager::IsPointInGameObject(tile) && tile.IsDestructible()) {
+		int damage = tile.IsCharacter() ? 10 : 50;
+
+		if (AEInputCheckCurr(AEVK_RBUTTON) && tile.IsBlocks()) {
+			tile.TakeDamage(damage);
+		}
+
+		if (AEInputCheckTriggered(AEVK_RBUTTON) && tile.IsCharacter()) {
+			tile.TakeDamage(damage);
 		}
 	}
 

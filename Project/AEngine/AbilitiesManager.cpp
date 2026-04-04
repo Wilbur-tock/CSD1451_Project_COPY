@@ -594,7 +594,7 @@ namespace AbilitiesManager {
 				character.attribute.Heal(static_cast<float>(ability.GetStats().hp / 100.0f));
 			}
 		}
-		else if (abilityName == "Invisibility" || abilityName == "Attack Boost" || abilityName == "Defense Boost") {
+		else if (abilityName == "Invincibility" || abilityName == "Attack Boost" || abilityName == "Defense Boost") {
 			isStatsAbilityActive = true;
 		}
 

@@ -153,11 +153,11 @@ namespace MapEditor {
 		}
 	}
 
-	static void SaveNewFile(std::string filePath) {
-		std::ofstream output{ filePath };
+	static void SaveNewFile(std::string fileName) {
+		std::ofstream output{ fileName };
 
 		if (!output.is_open()) {
-			std::cerr << "Error: Could not open file at " << filePath << std::endl;
+			std::cerr << "Error: Could not open file at " << fileName << std::endl;
 			return;
 		}
 
@@ -243,9 +243,9 @@ namespace MapEditor {
 			"Current File: " + loadPath +
 			"\nSave File: " + savePath +
 			"\n\nShortcuts:"
-			"\n[CTRL+NUMBER] Level level file (1-3)"
+			"\n[CTRL+NUMBER] Open level file (1-3)"
+			"\n[CTRL + F] Save file"
 			"\n[M] Back to MAIN MENU"
-			"\n[CTRL + S] Save file"
 			"\n[R] Reset Map"
 			"\n[LEFT CLICK] Place Tile"
 			"\n[RIGHT CLICK] Erase Tile";
@@ -309,7 +309,7 @@ namespace MapEditor {
 				std::string str = "You must have at least " + std::to_string(constraint.requiredCount)
 					+ ' ' + GetTileName(constraint.type) + " in your map!";
 				std::cout << "[Error] " + str << '\n';
-				constraintsPopup.Popup(str);
+				constraintsPopup.Popup(str, 3.0f);
 				return false;
 			}
 		}
@@ -379,9 +379,8 @@ namespace MapEditor {
 				}
 			}
 
-			// Input CTRL + S
 			// Save file on both BIN folder and my project folder if debugger is on
-			if (AEInputCheckTriggered(AEVK_S)) {
+			if (AEInputCheckTriggered(AEVK_F)) {
 				Save();
 			}
 		}
@@ -391,8 +390,12 @@ namespace MapEditor {
 		helpText = { "",  Utils::debuggerInfo.first * 0.9f, Utils::debuggerInfo.second,{-1.0f,.99f} };
 		debugText = { "",  Utils::debuggerInfo.first * 0.8f, Utils::debuggerInfo.second, { 0.5f, 0.99f} };
 
-		constraintsPopup = UIManager::PopupPanel{ false, UIManager::Panel{{500,250}}, TextObject{"", 0.5f, Color{1.0f,0.0f,0.0f}} };
-		constraintsPopup.AddOffsetPosition({ 0,150 });
+		constraintsPopup = UIManager::PopupPanel{ 
+			true, 
+			UIManager::Panel{{500,100}, PanelColor()},
+			TextObject{"", 0.5f, Color{0.9f,0.0f,0.0f}},
+		};
+		constraintsPopup.AddOffsetPosition({ 0,250 });
 
 		mapLabelPanel = UIManager::Panel{ { 250, 50 }, { 1,1,1 }, Utils::AnchorMode::TOP_CENTER };
 

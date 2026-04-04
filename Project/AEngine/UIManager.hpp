@@ -77,7 +77,7 @@ namespace UIManager {
 		Button closeButton;
 
 		PopupPanel() = default;
-		PopupPanel(bool _hasTimer, Panel _panel, TextObject _textObj, Button _closeButton = Button{{0,0}, {50,50}, Color{0,0,0}, nullptr});
+		PopupPanel(bool _hasTimer, Panel _panel, TextObject _textObj, Button _closeButton = Button{ {0,0}, {50,50}, Color{0,0,0}, nullptr });
 
 		bool IsHovered() const { return isHovered; }
 		bool IsActive() const { return isActive; }

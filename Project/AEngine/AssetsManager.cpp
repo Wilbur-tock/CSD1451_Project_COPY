@@ -78,9 +78,6 @@ namespace AssetsManager {
         }
         return newTex;
     }
-    s8 GetTitleFont() {
-        return titleFont;
-    }
 
     void Unload() {
         //Unload all textures inside texture cache

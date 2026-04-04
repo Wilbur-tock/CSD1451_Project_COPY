@@ -20,7 +20,6 @@ namespace AssetsManager {
 
 	// Type: 0 - player, 1 - enemy, 2 - boss
 	std::vector<AEGfxTexture*> const& GetCharacterTexture(int type);
-	s8 GetTitleFont();
 
 	void Load();
 

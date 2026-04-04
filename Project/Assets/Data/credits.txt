@@ -41,7 +41,7 @@ Alpha Engine
 nlohmann::JSON
 Assets by Kenney (www.kenney.nl)
 Liberation Mono Font
-Caviar Dreams Bold Font
+ShortStack Regular Font
 
 
 # Thank you for playing!
