@@ -2,7 +2,7 @@
 Authors: Nixon
 Description: Display credits information
 
-All content © 2026 DigiPen Institute of Technology Singapore. All Rights Reserved
+All content © 2026 DigiPen Institute of Technology Singapore. All Rights Reserved
 */
 
 #include "Credits.hpp"
@@ -14,11 +14,10 @@ All content © 2026 DigiPen Institute of Technology Singapore. All Rights Reserve
 
 namespace Credits {
 
-    // =========================================================================
-    // File path
-    // =========================================================================
-
     constexpr char const* CREDITS_FILE_PATH = "Assets/Data/credits.txt";
+
+    // Path to the DigiPen logo shown at the very start of the credits scroll.
+    constexpr char const* DIGIPEN_LOGO_PATH = "Assets/DigiPen_Logo.png";
 
     // =========================================================================
     // Entry type system
@@ -36,7 +35,6 @@ namespace Credits {
     //   1. Add an enum value here.
     //   2. Add a prefix check in ParseLine().
     //   3. Add a StyleFor() entry.
-    //   That is all -- no other code needs to change.
     // =========================================================================
 
     enum class EntryType { TITLE, SECTION, ROLE, HIGHLIGHT, BODY, SPACER };
@@ -55,52 +53,33 @@ namespace Credits {
     };
 
     // StyleFor: the single place that controls how every type looks.
-    // Change a number here and every line of that type updates automatically.
     static EntryStyle StyleFor(EntryType type) {
         switch (type) {
         case EntryType::TITLE:
-            // Large, centred-ish, pure white -- grabs attention at the top.
             return { 1.1f,  1.0f, 1.0f, 1.0f,  -0.18f, 0.10f };
 
         case EntryType::SECTION:
-            // Gold accent, slightly smaller than title -- marks major groups.
             return { 0.85f, 1.0f, 0.85f, 0.2f, -0.28f, 0.08f };
 
         case EntryType::ROLE:
-            // Dimmed grey, indented right relative to body -- sits above a name.
             return { 0.60f, 0.65f, 0.65f, 0.65f, -0.18f, 0.05f };
 
         case EntryType::HIGHLIGHT:
-            // Cyan tint -- draws the eye to important notes or announcements.
             return { 0.70f, 0.4f, 0.9f, 1.0f,  -0.28f, 0.06f };
 
         case EntryType::SPACER:
-            // No text drawn; lineHeight controls the gap size.
             return { 0.0f,  0.0f, 0.0f, 0.0f,  0.0f,   0.04f };
 
         case EntryType::BODY:
         default:
-            // Plain white at normal scale -- the baseline for names and prose.
             return { 0.70f, 1.0f, 1.0f, 1.0f,  -0.28f, 0.055f };
         }
     }
 
-    // =========================================================================
-    // Parser
-    //
-    // ParseLine reads the prefix of a raw string and returns a CreditEntry with
-    // the prefix stripped from the text. Blank lines become SPACER entries.
-    //
-    // The prefix table lives here. Adding a new marker is one new else-if.
-    // =========================================================================
-
     static CreditEntry ParseLine(std::string const& raw) {
-        // Blank line -> spacer (no text needed)
         if (raw.empty()) {
             return { EntryType::SPACER, "" };
         }
-
-        // ## before # so the longer prefix is checked first
         if (raw.size() > 3 && raw[0] == '#' && raw[1] == '#' && raw[2] == ' ') {
             return { EntryType::SECTION, raw.substr(3) };
         }
@@ -113,28 +92,23 @@ namespace Credits {
         if (raw.size() > 2 && raw[0] == '!' && raw[1] == ' ') {
             return { EntryType::HIGHLIGHT, raw.substr(2) };
         }
-
         return { EntryType::BODY, raw };
     }
 
-    // =========================================================================
-    // State
-    // =========================================================================
-
     AEGfxTexture* bgTexture = nullptr;
+    AEGfxTexture* logoTexture = nullptr;
+
     TextObject    hintText;
 
     float scrollOffset = 0.0f;
     float scrollSpeed = 0.3f;
-    float totalHeight = 0.0f; // sum of all line heights; computed once in Load()
+    float totalHeight = 0.0f;
 
-    // Parsed entries are populated in Load() so the file is read only once per
-    // session, not every time the Credits state is entered.
+    // Increase for more breathing between the logo image and the first line
+    constexpr float LOGO_BLOCK_HEIGHT = 0.55f;
+
     std::vector<CreditEntry> entries;
 
-    // =========================================================================
-    // Load
-    // =========================================================================
 
     void Load() {
         entries.clear();
@@ -148,7 +122,7 @@ namespace Credits {
             entries.push_back({ EntryType::SPACER,  "" });
             entries.push_back({ EntryType::BODY,    "(credits.txt not found)" });
             entries.push_back({ EntryType::SPACER,  "" });
-            entries.push_back({ EntryType::BODY,    "Press M to return to menu" });
+            entries.push_back({ EntryType::BODY,    "Press ESC to return to menu" });
         }
         else {
             std::string raw;
@@ -157,32 +131,28 @@ namespace Credits {
             }
         }
 
-        // Pre-compute total scroll height so Update() knows when the credits
-        // have fully scrolled past and can return to the main menu automatically.
+        // Include LOGO_BLOCK_HEIGHT in totalHeight so the auto-return trigger
+        // in Update() fires only after the logo AND all text have scrolled off.
+        totalHeight = LOGO_BLOCK_HEIGHT;
         for (CreditEntry const& e : entries) {
             totalHeight += StyleFor(e.type).lineHeight;
         }
+
+        // Load logo through AssetsManager cache -- lifetime managed by AssetsManager.
+        logoTexture = AssetsManager::GetTexture(DIGIPEN_LOGO_PATH);
     }
 
-    // =========================================================================
-    // Initialize
-    // =========================================================================
-
     void Initialize() {
-        // Start below the bottom of the screen so credits scroll in from below.
+        // Start below the bottom of the screen so everything scrolls in from below.
         scrollOffset = -1.0f;
 
         hintText = {
-            "M - Return to Menu  |  SPACE - Skip",
+            "ESC - Return to Menu  |  SPACE - Skip",
             0.7f,
             Color(0.6f, 0.6f, 0.6f, 1.0f),
             { { -0.98f, -0.93f }, { 0.0f, 0.0f } },
         };
     }
-
-    // =========================================================================
-    // Update
-    // =========================================================================
 
     void Update() {
         scrollOffset += scrollSpeed * static_cast<float>(AEFrameRateControllerGetFrameTime());
@@ -191,14 +161,11 @@ namespace Credits {
             GameStateManager::next = GameStateManager::GameState::MAIN_MENU;
         }
 
-        // SPACE skips forward by a large chunk so the player can jump to the end.
         if (AEInputCheckTriggered(AEVK_SPACE)) {
             scrollOffset += 1.0f;
         }
 
-        // Once all entries have scrolled past the top of the screen, return to
-        // the main menu. The +1.0f gives a small pause at the very end before
-        // the transition fires, so the last line has time to clear the screen.
+        // Auto-return once everything (logo + all text) has scrolled off screen.
         if (scrollOffset > totalHeight + 1.0f) {
             GameStateManager::next = GameStateManager::GameState::MAIN_MENU;
         }
@@ -206,11 +173,10 @@ namespace Credits {
         Draw();
     }
 
-    // =========================================================================
-    // Draw
-    // =========================================================================
-
     void Draw() {
+        // ------------------------------------------------------------------
+        // Background
+        // ------------------------------------------------------------------
         if (bgTexture != nullptr) {
             GraphicsManager::DrawWorldUI(
                 bgTexture,
@@ -223,19 +189,70 @@ namespace Credits {
             );
         }
         else {
-            AEGfxSetBackgroundColor(0.05f, 0.05f, 0.1f);
+            AEGfxSetBackgroundColor(0.0f, 0.0f, 0.0f);
         }
 
-        // Walk the entry list, drawing each line at its current scrolled Y.
-        // currentY starts at scrollOffset (the global scroll position) and
-        // steps downward by each entry's lineHeight as we go.
-        float currentY = scrollOffset;
+        // ------------------------------------------------------------------
+        // DigiPen logo -- first item in the scroll stream
+        //
+        // Coordinate mapping:
+        //   AEGfxPrint places text using normalized Y: -1 = bottom, +1 = top.
+        //   DrawWorldUI uses world-space pixel Y, centered at the origin:
+        //     worldY = normalizedY * (SCREEN_HEIGHT / 2)  =  normalizedY * 450
+        //
+        // The logo is treated as a virtual entry at normalized Y = scrollOffset
+        // (the very first position in the stream, same anchor as the first text
+        // line would have before LOGO_BLOCK_HEIGHT pushes text down).
+        // Converting to world Y lets DrawWorldUI place it correctly.
+        //
+        // DrawWorldUI uses a top-left corner origin, so we subtract half the
+        // logo height from the center world Y to visually centre the image on
+        // the scroll anchor point.
+        // ------------------------------------------------------------------
+
+        if (logoTexture != nullptr) {
+            // Display at 60% of screen width, preserving 1280:540 source ratio.
+            float logoW = Config::SCREEN_WIDTH * 0.60f;      // 960 px
+            float logoH = logoW * (540.0f / 1280.0f);        // ~405 px
+
+            float halfScreen = Config::SCREEN_HEIGHT * 0.5f; // 450 px
+
+            // The logo's center in world Y tracks scrollOffset directly.
+            float logoCenterWorldY = scrollOffset * halfScreen;
+
+            // Top-left Y for DrawWorldUI (world space, positive = up).
+            float logoTopY = logoCenterWorldY + (logoH * 0.5f);
+
+            // Cull when fully off screen to avoid unnecessary draw calls.
+            bool logoOnScreen = (logoTopY > -halfScreen - logoH) &&
+                (logoTopY < halfScreen + logoH);
+
+            if (logoOnScreen) {
+                float logoLeftX = -(logoW * 0.5f); // horizontally centered
+
+                GraphicsManager::DrawWorldUI(
+                    logoTexture,
+                    GraphicsManager::CreateTransformMatrix(
+                        logoLeftX, logoTopY,
+                        logoW, logoH
+                    ),
+                    Color(1.0f, 1.0f, 1.0f, 1.0f)
+                );
+            }
+        }
+
+        // ------------------------------------------------------------------
+        // Scrolling text entries
+        //
+        // Text begins LOGO_BLOCK_HEIGHT normalized units below the logo anchor
+        // so the first line follows the logo naturally as both scroll upward.
+        // ------------------------------------------------------------------
+
+        float currentY = scrollOffset - LOGO_BLOCK_HEIGHT;
 
         for (CreditEntry const& entry : entries) {
             EntryStyle style = StyleFor(entry.type);
 
-            // Only bother calling AEGfxPrint for entries that actually have text
-            // and are somewhere near the visible screen range (-1..1 in Y).
             bool onScreen = (currentY > -1.2f && currentY < 1.2f);
             if (entry.type != EntryType::SPACER && onScreen) {
                 AEGfxPrint(
@@ -245,27 +262,22 @@ namespace Credits {
                     currentY,
                     style.textScale,
                     style.r, style.g, style.b,
-                    1.0f  // alpha -- AEGfxPrint requires all 9 arguments
+                    1.0f
                 );
             }
 
             currentY -= style.lineHeight;
         }
-
         hintText.Draw();
     }
-
-    // =========================================================================
-    // Free / Unload
-    // =========================================================================
 
     void Free() {
         scrollOffset = 0.0f;
     }
 
     void Unload() {
-        // entries and totalHeight are kept alive across revisits to Credits so
-        // the file does not need to be re-read. The memory cost is negligible.
+        // Textures are owned by AssetsManager::textureCache; do not free here.
+        logoTexture = nullptr;
     }
 
 } // namespace Credits

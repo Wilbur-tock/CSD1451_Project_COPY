@@ -1,10 +1,5 @@
 # GAME CREDITS
 
-! WWW.DIGIPEN.EDU
-All content (C) 2026 DigiPen Institute of Technology Singapore.
-All Rights Reserved
-
-
 ## === Basement Dwellers ===
 
 > Tech Lead
