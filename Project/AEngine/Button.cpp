@@ -1,5 +1,5 @@
 /*
-Authors: Dayrius
+Authors: Dayrius, Justin
 Description: Manage the button functions and drawing,
 checking for hovering and clicking of buttons.
 

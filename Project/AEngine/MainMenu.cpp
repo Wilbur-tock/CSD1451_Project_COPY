@@ -147,6 +147,7 @@ namespace MainMenu {
             Color(0.0f, 0.0f, 0.0f, 1.0f),
             { 0.05f, 0.8f },
         };
+        gameTitle.SetFont(AssetsManager::GetTitleFont());
 
         // Keyboard shortcut hint at the bottom of the screen
         instructions = {

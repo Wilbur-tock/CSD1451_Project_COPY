@@ -29,6 +29,7 @@ namespace Config {
 
 	// Use font size to load font
 	int constexpr FONT_SIZE = 24;
+	int constexpr FONT_SIZE_TITLE = 60;
 	// Use font scale to adjust the size of the text when it is being drawn
 	float constexpr FONT_SCALE = 1.0f;
 

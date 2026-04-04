@@ -16,10 +16,11 @@ namespace AssetsManager {
 	extern std::map<std::string, AEGfxTexture*> textureCache;
 
 	extern AEGfxTexture* squareTexture, *circleTexture;
-	extern s8 textFont;
+	extern s8 textFont, titleFont;
 
 	// Type: 0 - player, 1 - enemy, 2 - boss
 	std::vector<AEGfxTexture*> const& GetCharacterTexture(int type);
+	s8 GetTitleFont();
 
 	void Load();
 
