@@ -31,6 +31,10 @@ namespace CannonManager {
 		AbilitiesManager::AbilityController* AbilityController() { return abilityController; }
 
 		void SetTarget(Character* _target) { target = _target; }
+		bool HasCannonShot() const { return hasCannonShot; }
+
+		bool AutoShotOn() const { return autoShotOn; }
+		void ToggleAutoShot() { autoShotOn = !autoShotOn; }
 
 		// Member Functions
 
@@ -82,13 +86,19 @@ namespace CannonManager {
 		void SetCamera(bool isFollowingProjectile);
 		void DrawTrajectory();
 
+		void AutoShot();
+
 		void DebugCommands();
 	private:
-		bool isPlayerControlled = true, isShootingRight = true;
-		bool canCannonShoot = true; // can cannon shoot using left click
-		bool hasCannonShot = false; // return true if projectile has been shot out of the cannon
+		bool isPlayerControlled = true;
 		bool isHoldingLeftClick = false; // player is holding left mouse click
 		bool canPlayerShoot = true; // can player shoot used for checking if player press right click to cancel his shot
+		bool isShootingRight = true;
+
+		bool autoShotOn = false; // if it turn on every shot will be calculated to hit the target
+		bool canCannonShoot = true; // can cannon shoot
+		bool hasCannonShot = false; // return true if projectile has been shot out of the cannon
+
 		bool allProjectileDestroyed = false; // projectile has been shot out and destroyed
 		bool resetCamWhenShooting = false; // When player press left mouse click, reset camera to position the cannon and unable to move the camera or not
 

@@ -58,14 +58,14 @@
 
     {
         "Name": "Penta Burst",
-        "Description": "This projectile tears through obstacles and maintains damage for up to 5 consecutive impacts with a increased radius of 3 tiles",
+        "Description": "This projectile can damage up to 5 consecutive impacts. However, its damage is reduced with every impact",
         "Type": 2,
         "Tier": 2,
         "Texture": "Icon_PentaBurst",
         "Projectile_Stats": {
             "ProjectileID": 3,
             "Damage_Multiplier": 1,
-            "Base_Damage": 50,
+            "Base_Damage": 25,
             "Radius": 2,
             "Charges": 5,
             "unlimited_charges": false

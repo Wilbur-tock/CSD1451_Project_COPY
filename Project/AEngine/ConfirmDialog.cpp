@@ -29,6 +29,7 @@ namespace ConfirmDialog {
         std::string    currentSubMessage; // secondary smaller line (may be empty)
 
         // Buttons
+        UIManager::Panel dimOverlay, dialogBox;
         Button yesButton;
         Button noButton;
 
@@ -111,6 +112,18 @@ namespace ConfirmDialog {
                 OnYesClicked
             );
 
+            dimOverlay = UIManager::Panel{
+                { static_cast<float>(Config::SCREEN_WIDTH), static_cast<float>(Config::SCREEN_HEIGHT) },
+                Color(0.0f, 0.0f, 0.0f, 0.90f),
+                Utils::AnchorMode::CENTER
+            };
+
+            dialogBox = UIManager::Panel{
+                { 500.0f, 180.0f },
+                Color(0.10f, 0.10f, 0.16f, 0.96f),
+                Utils::AnchorMode::CENTER
+            };
+
             isInitialized = true;
         }
 
@@ -150,29 +163,7 @@ namespace ConfirmDialog {
     void Update() {
         if (!isOpen) return;
 
-        // -----------------------------------------------------------------------
-        // Layer 1: full-screen dim overlay so the background is still readable
-        // but visually de-emphasised. Using 70% opacity (slightly darker than
-        // PauseMenu's 60%) to make the small dialog panel stand out clearly.
-        // -----------------------------------------------------------------------
-        UIManager::Panel dimOverlay{
-            { static_cast<float>(Config::SCREEN_WIDTH),
-              static_cast<float>(Config::SCREEN_HEIGHT) },
-            Color(0.0f, 0.0f, 0.0f, 0.90f),
-            Utils::AnchorMode::CENTER
-        };
         dimOverlay.Draw();
-
-        // -----------------------------------------------------------------------
-        // Layer 2: dialog box -- a dark, slightly translucent panel centered on
-        // the screen. Width 400 and height 180 comfortably fits two text lines
-        // and two side-by-side buttons.
-        // -----------------------------------------------------------------------
-        UIManager::Panel dialogBox{
-            { 400.0f, 180.0f },
-            Color(0.10f, 0.10f, 0.16f, 0.96f),
-            Utils::AnchorMode::CENTER
-        };
         dialogBox.Draw();
 
         // -----------------------------------------------------------------------
@@ -181,7 +172,7 @@ namespace ConfirmDialog {
         // "danger" signal.
         // -----------------------------------------------------------------------
         UIManager::Panel accentBar{
-            { 400.0f, 6.0f },
+            { 500.0f, 6.0f },
             Color(0.8f, 0.2f, 0.2f, 1.0f),
             Utils::AnchorMode::CENTER
         };
@@ -205,17 +196,18 @@ namespace ConfirmDialog {
             AssetsManager::textFont,
             "ARE YOU SURE?",
             -0.10f, 0.10f,  // normalized position: near top-center of dialog
-            0.75f, 0.75f,    // scale
-            0.9f, 0.9f, 0.9f //  light grey -- secondary information
+            0.75f, 
+            0.75f, 0.9f, 0.9f, 0.9f //  light grey -- secondary information
         );
 
+        float msgScale = 0.5f;
         if (!currentMessage.empty()) {
             AEGfxPrint(
                 AssetsManager::textFont,
                 currentMessage.c_str(),
                 -0.20f, 0.03f,  // one line below the title
-                0.65f, 0.65f,
-                1.0f, 0.9f, 0.5f // warm yellow -- draws the eye to the statement   
+                msgScale,
+                0.5f, 1.0f, 0.9f, 0.5f
             );
         }
 
@@ -224,8 +216,8 @@ namespace ConfirmDialog {
                 AssetsManager::textFont,
                 currentSubMessage.c_str(),
                 -0.20f, -0.03f, // another line below
-                0.60f, 0.60f,
-                0.7f, 0.7f, 0.7f // dimmer grey -- tertiary information
+                msgScale,
+                0.60f, 0.7f, 0.7f, 0.7f
             );
         }
 

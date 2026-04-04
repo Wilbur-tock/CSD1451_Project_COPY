@@ -24,7 +24,7 @@ enum class ProjectileMode {
 	BOMB			= 1,
 	NUKE			= 2,
 	PENTA_BURST		= 3,
-	AUTO_AIM		= 4,
+	AUTO_SHOT		= 4,
 	WALL			= 5,
 	SHIELD_BUSTER	= 6,
 	PIERCING		= 7,
@@ -62,7 +62,7 @@ public:
 		case ProjectileMode::BOMB:				return "BOMB";
 		case ProjectileMode::NUKE:				return "NUKE";
 		case ProjectileMode::PENTA_BURST:		return "PENTA_BURST";
-		case ProjectileMode::AUTO_AIM:			return "AUTO_AIM";;
+		case ProjectileMode::AUTO_SHOT:			return "AUTO_AIM";;
 		case ProjectileMode::WALL:				return "WALL";
 		case ProjectileMode::SHIELD_BUSTER:		return "SHIELD_BUSTER";
 		case ProjectileMode::PIERCING:			return "PIERCING";

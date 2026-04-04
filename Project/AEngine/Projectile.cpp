@@ -48,7 +48,7 @@ void Projectile::AbilityActivation(bool isPlayer, Ability const& ability) {
         }
     }
 
-    switch (Mode()) {
+    switch (mode) {
     case ProjectileMode::BOMB:
         if (!hasCollided && leftClick) {
             isAbilityTriggered = true;
@@ -274,7 +274,7 @@ void Projectile::Update(bool isPlayerShot, float dt) {
     }
 
     if (hasHitShield) {
-        if (Mode() == ProjectileMode::SHIELD_BUSTER) {
+        if (mode == ProjectileMode::SHIELD_BUSTER) {
             shield.TakeDamage(0, true);
             PlayModeEffect();
         }
@@ -304,10 +304,16 @@ void Projectile::Update(bool isPlayerShot, float dt) {
 
             // Checking collision of the projectile with the tile blocks that is collidable
             if (hasTileCollision) {
-                // Damage tile first, incase of destroying the blocks and bouncing back if damageTile is not called first
                 DamageTile(x, y);
 
-                if (!canAlwaysBypassBlocks) {
+                // can by pass blocks that is already destroy or not
+                bool cannotIgnoredCollision = true;
+                if (mode == ProjectileMode::PENTA_BURST) {
+                    cannotIgnoredCollision = !tile.IsEmpty();
+                }
+
+                // Trigger collision if tile is not empty or projectile can always bypass any blocks
+                if (cannotIgnoredCollision && !canAlwaysBypassBlocks) {
                     if (!hasCollided) {
                         FirstTimeCollision();
                     }
@@ -456,6 +462,11 @@ void Projectile::DamageTile(int tileX, int tileY) {
     // Consume 1 attack charge if projectile has damaged a tile 
     if (hasDamageAnyTile) {
         ConsumeAttackCharge();
+
+        // Reduce damage for penta burst
+        if (mode == ProjectileMode::PENTA_BURST) {
+            attribute.Damage(attribute.Damage() - 5);
+        }
     }
 }
 

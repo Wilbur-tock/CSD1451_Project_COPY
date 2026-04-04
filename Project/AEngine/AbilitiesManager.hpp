@@ -43,6 +43,8 @@ namespace AbilitiesManager {
 		bool IsStatsAbilityActive() const { return isStatsAbilityActive; }
 		Ability const& StatsAbility() const { return statsAbility; }
 
+		void CanSelectInventory(bool canSelect) { canSelectInventory = canSelect; }
+
 		void SetTestingMode(bool _testingMode) { testingMode = _testingMode; }
 
 	private:
@@ -96,6 +98,7 @@ namespace AbilitiesManager {
 		// Use the currently select ability if it has unlimited or any charges remaining
 		// return true and the selected ability can be use, otherwise false
 		void UseAbility();
+		void RemoveUseAbility();
 		// Add ability charges from the based on selection
 		void AddAbility(int abilityId, int chargesToAdd = 1);
 		void RemoveAbility(Ability& ability);
@@ -155,10 +158,12 @@ namespace AbilitiesManager {
 		std::vector<int> inventoryIds; 
 		std::vector<int> inventoryTypeCount; // To keep track of how many of each ability type there is in the inventory
 		int currentInventoryId = 0;
+		int usedInventoryId = 0;
 
 		bool isSelectingAbility = false;
 		bool isAbilityTriggered = false;
 		bool isPlayerControlled = true;
+		bool canSelectInventory = true; // can select an ability from the inventory UI
 
 		bool hasEnemySelectedAbility = false; // has enemy selected their ability
 

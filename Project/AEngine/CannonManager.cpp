@@ -85,8 +85,6 @@ namespace CannonManager {
     }
 
     void Cannon::Update() {
-        if (!canCannonShoot) return;
-
         if (isPlayerControlled) {
             float worldMouseX = 0, worldMouseY = 0;
             Utils::GetWorldMousePos(worldMouseX, worldMouseY);
@@ -122,12 +120,11 @@ namespace CannonManager {
     }
 
     void Cannon::DrawUI() {
-        // Check if cannon has been shot or cannot shoot set is holding left click to be false and return
-        if (hasCannonShot || !canCannonShoot) { return; }
+        if (hasCannonShot) { return; }
 
         // Render UI for player only
         if (isPlayerControlled) {
-            if (isHoldingLeftClick) {
+            if (canCannonShoot && isHoldingLeftClick) {
                 // Only draw power bar in the SCREEN SPACE for player cannon
                 screenOverlayShotBar.Draw(chargingPower, Config::CANNON_MAX_POWER);
             }
@@ -305,13 +302,17 @@ namespace CannonManager {
         Projectile projectile = projectiles[selectedProjectileId];
 
         // Capture fired ability BEFORE controller state may change
-        Ability const firedAbility = abilityController->GetCurrentAbility();
+        Ability const& firedAbility = abilityController->GetCurrentAbility();
 
-        // Consume/apply the selected ability properly
+        // Consume/apply the selected ability
         abilityController->UseAbility();
 
         AbilityActivation(projectile);      // abilities that affect the cannon/projectile before/during shooting
         ApplyModifierEffects(projectile);   // apply modifier effects such as gravity onto the projectile
+
+        if (autoShotOn) {
+            AutoShot();
+        }
 
         projectile.Initialize(transform, static_cast<int>(activeProjectiles.size()), cannonAngle, shotPower);
 
@@ -331,9 +332,14 @@ namespace CannonManager {
     }
 
     void Cannon::UpdateProjectile() {
-        if (hasCannonShot) {
-            allProjectileDestroyed = activeProjectiles.empty(); // check if all projectiles has been destroyed when cannon has been shot
+        if (hasCannonShot && !allProjectileDestroyed) {
+            // check if all projectiles has been destroyed when cannon has been shot end of this cannon turn
+            allProjectileDestroyed = activeProjectiles.empty(); 
+            if (allProjectileDestroyed) {
+                abilityController->RemoveUseAbility();
+            }
         }
+
         if (activeProjectiles.empty()) return;
 
         for (Projectile& projectile : activeProjectiles) {
@@ -396,14 +402,8 @@ namespace CannonManager {
         }
 
         switch (projectile.Mode()) {
-        case ProjectileMode::AUTO_AIM:
-            // Find new target if target is not alive
-            if (!IsTargetAlive()) {
-                SetTarget(LevelManager::CurrentLevel()->RandomCharacterObj(!isPlayerControlled)); // Randomly find a enemy target
-            }
-
-            // Calculate perfect shot angle and power
-            PhysicsManager::PerfectShotCalculation(transform, target->transform, cannonAngle, shotPower);
+        case ProjectileMode::AUTO_SHOT:
+            AutoShot();
             abilityController->IsAbilityTriggered(true);
             break;
         case ProjectileMode::CLUSTER_SHOT:
@@ -517,6 +517,16 @@ namespace CannonManager {
         }
     }
 
+    void Cannon::AutoShot() {
+        // Find new target if target is not alive
+        if (!IsTargetAlive()) {
+            SetTarget(LevelManager::CurrentLevel()->RandomCharacterObj(!isPlayerControlled)); // Randomly find a enemy target
+        }
+
+        // Calculate perfect shot angle and power
+        PhysicsManager::PerfectShotCalculation(transform, target->transform, cannonAngle, shotPower);
+    }
+
     void Cannon::DebugCommands() {
         if (!Utils::isDebuggerOn) return;
 
@@ -575,13 +585,7 @@ namespace CannonManager {
             + "\n\nAbilities Inventory Count: " + std::to_string(abilityController->InventoryCount())
             + "\nCurrent Inventory Id: " + std::to_string(abilityController->CurrentInventoryId());
 
-        for (int abilityId : abilityController->InventoryIds()) {
-            Ability const& ability = *abilityController->GetAbility(abilityId);
-            debugStr += "\nAbility: " + ability.GetName() + " Charges: " + std::to_string(ability.AbilityCharges());
-        }
-
         debugStr += "\n\nAbility Modifiers:";
-
         for (Ability const& ability : abilityController->GetAbilityModifiers()) {
             debugStr += "\nAbility: " + ability.GetName() + " Turns: " + std::to_string(ability.GetStatus().rounds);
         }

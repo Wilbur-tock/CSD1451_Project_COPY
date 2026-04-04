@@ -34,14 +34,14 @@ namespace EffectsManager {
     }
 
     void EffectsController::PlayTileBreak(AEVec2 position, AEGfxTexture* texture) {
-        std::cout << "[EffectsManager] PlayTileBreak texture ptr: " << texture << "\n";
+        //std::cout << "[EffectsManager] PlayTileBreak texture ptr: " << texture << "\n";
         EmitParams params{
             position,   8.f,
             60.f,       180.f,
             0.f,        2.f * PI,
             -1.5f,      1.5f,
-            Color(1.f, 1.f, 1.f, 1.f),     
-            Color(1.f, 1.f, 1.f, 0.f),
+            Color(0.9f, 0.9f, 0.9f, 1.f),     
+            Color(0.9f, 0.9f, 0.9f, 0.f),
             12.f,       4.f,
             0.6f,       1.2f,
             18,

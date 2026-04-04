@@ -491,13 +491,15 @@ void Level::DrawUI() {
 		turnText.SetColor(Color{ 1.0f, 0, 0 });
 	}
 
-	for (Character& playerChar : playerCharacters) {
-		playerChar.DrawScreenOverlayUI();
-	}
+	// Show stats of the character units if player is not selecting any abilities
+	if (!playerCannon.AbilityController()->IsSelectingAbility()) {
+		for (Character& playerChar : playerCharacters) {
+			playerChar.DrawScreenOverlayUI();
+		}
 
-	// Update all enemy instance
-	for (Character& enemy : enemies) {
-		enemy.DrawScreenOverlayUI();
+		for (Character& enemy : enemies) {
+			enemy.DrawScreenOverlayUI();
+		}
 	}
 
 	// UI to display whose turn it is
@@ -527,7 +529,10 @@ void Level::DrawUI() {
 
 	// Draw active cannon UI
 	activeCannon->DrawUI();
+
+	activeCannon->AbilityController()->CanSelectInventory(activeCannon->HasCannonShot());
 	activeCannon->AbilityController()->DrawAbilityInventoryUI();
+
 	activeCannon->DebugInfo();
 
 	// Draw ability selector UI if its on
@@ -630,6 +635,9 @@ void Level::SwitchTurn(bool _isPlayerTurn) {
 			isNewRound = true;
 		}
 	}
+
+	// Reset previous cannon
+	activeCannon->ResetCannon();
 
 	// Switching active cannon
 	if (isPlayerTurn) {
@@ -896,6 +904,11 @@ void Level::DebugCommands() {
 		ToggleTerritoryTiles(true, false);
 	}
 
+	// AUTO Shot
+	if (AEInputCheckTriggered(AEVK_C)) {
+		activeCannon->ToggleAutoShot();
+	}
+
 	int gridX = 0, gridY = 0;
 	Utils::GetMouseGridIndex(gridX, gridY);
 
@@ -903,15 +916,9 @@ void Level::DebugCommands() {
 	Tile& tile = *(MapManager::FindTile({ gridX, gridY }));
 	if (CollisionManager::IsPointInGameObject(tile)) {
 		if (AEInputCheckCurr(AEVK_RBUTTON)) {
-			if (tile.IsBlocks()) {
-				tile.Type(TileType::TILE_EMPTY);
-			}
-		}
-
-		if (AEInputCheckTriggered(AEVK_RBUTTON)) {
-			// Damage characters
-			if (tile.IsCharacter()) {
-				tile.TakeDamage(10);
+			int damage = 50;
+			if (tile.IsDestructible()) {
+				tile.TakeDamage(damage);
 			}
 		}
 	}
@@ -966,10 +973,9 @@ void Level::DebugInfo() {
 
 	std::string debug = "Shortcuts:\n[T] Hide debug strings " + std::string(hideDebugStrings ? "ON" : "OFF")
 		+ "\n[CTRL + R] Auto play " + std::string(autoPlayOn ? "ON" : "OFF")
+		+ "\n[C] Auto Shot " + std::string(playerCannon.AutoShotOn() ? "ON" : "OFF")
 		+ "\n[F] Skip enemy turn " + std::string(disableEnemyTurn ? "ON" : "OFF")
 		+ "\n[R] Skip to enemy turn"
-		+ "\n[G] Rebuild Tower"
-		+ "\n[H] Destroy Tower"
 		+ "\n[R-CLICK] Destroy blocks\nor damage character units";
 
 	if (hideDebugStrings) {

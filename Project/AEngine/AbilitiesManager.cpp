@@ -433,13 +433,20 @@ namespace AbilitiesManager {
 		AbilityEffects();
 		GameTrackingManager::gameData.AddAbilityUsed(isPlayerControlled, static_cast<int>(GetCurrentAbility().GetType()));
 
-		if (!testingMode) {
-			// Minus ability charges from current ability and remove from inventory
-			RemoveAbility(SetCurrentAbility());
-		}
+		usedInventoryId = currentInventoryId;
 
 		std::cout << "[AbilitiesManager] Ability used: " + GetCurrentAbility().GetName()
 			+ " Charges Remaining: " + std::to_string(GetCurrentAbility().AbilityCharges()) << '\n';
+	}
+
+	void AbilityController::RemoveUseAbility() {
+		Ability* ability = GetAbility(inventoryIds[usedInventoryId]);
+		// can't remove the default ability from the inventory)
+		if (!testingMode && ability->Id() != 0) {
+			currentInventoryId = usedInventoryId;
+			// Minus ability charges from current ability and remove from inventory
+			RemoveAbility(*ability);
+		}
 	}
 
 	// Add ability charges from the based on selection
@@ -528,6 +535,12 @@ namespace AbilitiesManager {
 			abilityId += addValue;
 			Utils::Wrap(abilityId, 0, static_cast<int>(allAbilities.size()-1));
 
+			if(!isPlayerControlled){
+				if (GetAbility(abilityId)->GetType() == AbilityType::STATS) {
+					abilityId = 0;
+				}
+			}
+
 			// always use the last index if trying to use an ability not inside the inventory
 			currentInventoryId = Config::MAX_INVENTORY_COUNT - 1;
 			if (currentInventoryId < inventoryIds.size()) { // last slot is not empty
@@ -604,7 +617,7 @@ namespace AbilitiesManager {
 	UIManager::Panel abilitySelectorBG;
 	Card abilitySelectorCards[Config::MAX_ABILITY_SELECTOR_COUNT];
 
-	Color statsColor{ 0.75f,0.75f,0 }, offensiveColor{0.75f,0,0}, defensiveColor{0,0,0.75f};
+	Color statsColor{ 0.5f,0.5f,0 }, offensiveColor{0.75f,0,0}, defensiveColor{0,0,0.75f};
 	Color bgPanelColor{ 0.6196f, 0.6196f, 0.6196f };
 
 	void AbilityController::InitializeAllAbilityUI() {
@@ -634,7 +647,7 @@ namespace AbilitiesManager {
 
 		abilityTooltip = UIManager::PanelText{
 			UIManager::Panel{inventoryInfoPanelPos, PanelColor(), Utils::AnchorMode::BOTTOM_RIGHT},
-			TextObject{"", 0.7f, Color{0,0,0}, Transform{{0,0}, {inventoryInfoPanelPos.x - 10,inventoryInfoPanelPos.y - 10}} }
+			TextObject{"", 0.65f, Color{0,0,0}, Transform{{0,0}, {inventoryInfoPanelPos.x - 10,inventoryInfoPanelPos.y - 10}} }
 		};
 		//inventoryInfoPanel.AddOffsetPosition({ 0, -75.0f });
 		
@@ -746,7 +759,7 @@ namespace AbilitiesManager {
 			btn.SetColor(iconColor);
 			btn.GetTextObject().TextContent(iconName);
 			// Only check for inputs if it player controlled
-			if (isPlayerControlled && !isSelectingAbility) {
+			if (isPlayerControlled && !isSelectingAbility && !canSelectInventory) {
 				btn.Update();
 			}
 			btn.Draw();
