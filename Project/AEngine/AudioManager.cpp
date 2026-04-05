@@ -55,49 +55,49 @@ namespace AudioManager {
     }
 
     // ---------------- Paths ----------------
-    static constexpr const char* BGM = "Assets/Audio/bgm.wav";
+    static constexpr const char* BGM = "Assets/Audio/bgm.mp3";
 
-    static constexpr const char* SFX_UI_CLICK = "Assets/Audio/sfx_ui_click.wav";
-    static constexpr const char* SFX_CANNON_FIRE = "Assets/Audio/sfx_default.wav";
-    static constexpr const char* SFX_IMPACT = "Assets/Audio/sfx_impact.wav";
-    static constexpr const char* SFX_TURN_SWITCH = "Assets/Audio/sfx_turn.wav";
+    static constexpr const char* SFX_UI_CLICK = "Assets/Audio/sfx_ui_click.mp3";
+    static constexpr const char* SFX_CANNON_FIRE = "Assets/Audio/sfx_default.mp3";
+    static constexpr const char* SFX_IMPACT = "Assets/Audio/sfx_impact.mp3";
+    static constexpr const char* SFX_TURN_SWITCH = "Assets/Audio/sfx_turn.mp3";
 
     static std::vector<AbilitySfxEntry> gAbilitySfx = {
-        { "Default",       "Assets/Audio/sfx_default.wav", {} },
-        { "Attack Boost",  "Assets/Audio/sfx_ability_attack_boost.wav", {} },
-        { "Auto Shot",     "Assets/Audio/sfx_ability_auto_shot.wav", {} },
-        { "Bomb",          "Assets/Audio/sfx_ability_bomb.wav", {} },
-        { "Cleanse",       "Assets/Audio/sfx_ability_cleanse.wav", {} },
-        { "Defense Boost", "Assets/Audio/sfx_ability_defense_boost.wav", {} },
-        { "Drill",         "Assets/Audio/sfx_ability_drill.wav", {} },
-        { "Gravity",       "Assets/Audio/sfx_ability_gravity.wav", {} },
+        { "Default",       "Assets/Audio/sfx_default.mp3", {} },
+        { "Attack Boost",  "Assets/Audio/sfx_ability_attack_boost.mp3", {} },
+        { "Auto Shot",     "Assets/Audio/sfx_ability_auto_shot.mp3", {} },
+        { "Bomb",          "Assets/Audio/sfx_ability_bomb.mp3", {} },
+        { "Cleanse",       "Assets/Audio/sfx_ability_cleanse.mp3", {} },
+        { "Defense Boost", "Assets/Audio/sfx_ability_defense_boost.mp3", {} },
+        { "Drill",         "Assets/Audio/sfx_ability_drill.mp3", {} },
+        { "Gravity",       "Assets/Audio/sfx_ability_gravity.mp3", {} },
 
-        { "Minor Heal",    "Assets/Audio/sfx_ability_heal.wav", {} },
-        { "Major Heal",    "Assets/Audio/sfx_ability_heal.wav", {} },
-        { "Max Heal",      "Assets/Audio/sfx_ability_heal.wav", {} },
+        { "Minor Heal",    "Assets/Audio/sfx_ability_heal.mp3", {} },
+        { "Major Heal",    "Assets/Audio/sfx_ability_heal.mp3", {} },
+        { "Max Heal",      "Assets/Audio/sfx_ability_heal.mp3", {} },
 
-        { "Invincibility", "Assets/Audio/sfx_ability_invincibility.wav", {} },
-        { "God Mode",  "Assets/Audio/sfx_ability_god_mode.wav", {} },
-        { "Nuke",          "Assets/Audio/sfx_ability_nuke.wav", {} },
-        { "Penta Burst",   "Assets/Audio/sfx_ability_penta_burst.wav", {} },
-        { "Piercing",      "Assets/Audio/sfx_ability_piercing.wav", {} },
-        { "Poison",        "Assets/Audio/sfx_ability_poison.wav", {} },
-        { "Rebuild",       "Assets/Audio/sfx_ability_rebuild.wav", {} },
-        { "Shield Buster", "Assets/Audio/sfx_ability_shield_buster.wav", {} },
-        { "Skip Turn",     "Assets/Audio/sfx_ability_skip_turn.wav", {} },
-        { "Teleport",      "Assets/Audio/sfx_ability_teleport.wav", {} },
-        { "Tower Shield",  "Assets/Audio/sfx_ability_tower_shield.wav", {} },
+        { "Invincibility", "Assets/Audio/sfx_ability_invincibility.mp3", {} },
+        { "God Mode",  "Assets/Audio/sfx_ability_god_mode.mp3", {} },
+        { "Nuke",          "Assets/Audio/sfx_ability_nuke.mp3", {} },
+        { "Penta Burst",   "Assets/Audio/sfx_ability_penta_burst.mp3", {} },
+        { "Piercing",      "Assets/Audio/sfx_ability_piercing.mp3", {} },
+        { "Poison",        "Assets/Audio/sfx_ability_poison.mp3", {} },
+        { "Rebuild",       "Assets/Audio/sfx_ability_rebuild.mp3", {} },
+        { "Shield Buster", "Assets/Audio/sfx_ability_shield_buster.mp3", {} },
+        { "Skip Turn",     "Assets/Audio/sfx_ability_skip_turn.mp3", {} },
+        { "Teleport",      "Assets/Audio/sfx_ability_teleport.mp3", {} },
+        { "Tower Shield",  "Assets/Audio/sfx_ability_tower_shield.mp3", {} },
 
-        { "Small Wall",    "Assets/Audio/sfx_ability_wall.wav", {} },
-        { "Wall",          "Assets/Audio/sfx_ability_wall.wav", {} },
-        { "Bastion",       "Assets/Audio/sfx_ability_wall.wav", {} },
-        { "Wall Buster",   "Assets/Audio/sfx_ability_wall.wav", {} },
+        { "Small Wall",    "Assets/Audio/sfx_ability_wall.mp3", {} },
+        { "Wall",          "Assets/Audio/sfx_ability_wall.mp3", {} },
+        { "Bastion",       "Assets/Audio/sfx_ability_wall.mp3", {} },
+        { "Wall Buster",   "Assets/Audio/sfx_ability_wall.mp3", {} },
 
-        { "Air Drop",      "Assets/Audio/sfx_ability_air_drop.wav", {} },
+        { "Air Drop",      "Assets/Audio/sfx_ability_air_drop.mp3", {} },
 
-        { "Cluster Shot",  "Assets/Audio/sfx_ability_penta_burst.wav", {} },
-        { "Extra Shot",    "Assets/Audio/sfx_ability_penta_burst.wav", {} },
-        { "Decay Shot",    "Assets/Audio/sfx_ability_gravity.wav", {} }
+        { "Cluster Shot",  "Assets/Audio/sfx_ability_penta_burst.mp3", {} },
+        { "Extra Shot",    "Assets/Audio/sfx_ability_penta_burst.mp3", {} },
+        { "Decay Shot",    "Assets/Audio/sfx_ability_gravity.mp3", {} }
     };
 
     static bool IsValidAudio(AEAudio audio) {
